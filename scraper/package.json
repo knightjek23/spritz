@@ -1,0 +1,32 @@
+{
+  "name": "spritz-scraper",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Bootstrap DB scraper for Spritz. Runs locally / on a private VPS. NEVER deploy to Vercel or push public.",
+  "type": "module",
+  "scripts": {
+    "discover": "tsx src/scrape-fragrantica.ts discover",
+    "discover:debug": "tsx src/scrape-fragrantica.ts discover:debug",
+    "scrape": "tsx src/scrape-fragrantica.ts scrape",
+    "scrape:dry": "tsx src/scrape-fragrantica.ts scrape --dry-run",
+    "probe:vue": "tsx src/probe-vue.ts",
+    "parse": "tsx src/parser.ts",
+    "parse:one": "tsx src/parser.ts --one",
+    "vectorize": "tsx src/note-vector.ts",
+    "upload": "tsx src/upload-to-supabase.ts",
+    "compute-dupes": "tsx src/compute-dupe-pairs.ts",
+    "mirror:images": "tsx src/mirror-images.ts",
+    "all": "npm run discover && npm run scrape && npm run parse && npm run vectorize && npm run upload && npm run compute-dupes"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "cheerio": "^1.0.0",
+    "dotenv": "^16.4.5",
+    "playwright": "^1.47.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.0",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.2"
+  }
+}

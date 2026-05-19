@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Spritz — Design System</title>
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Roboto:wght@100;300;400;500&display=swap");
+
+  /* Tokens — match the live Tailwind config exactly */
+  :root {
+    --cream: #F4EFE6;
+    --paper: #E8E1D4;
+    --emerald: #1F3F2E;
+    --ink: #1A1A1A;
+    --slate: #6B6960;
+    --mist: #A8A49A;
+    --periwinkle: #5A85C5;
+    --brass: #C9A961;
+    --burgundy: #8B3A3A;
+
+    --font-display: "Playfair Display", Georgia, serif;
+    --font-sans: "Roboto", system-ui, sans-serif;
+  }
+
+  @page { size: Letter; margin: 0; }
+
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--cream);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    width: 8.5in;
+    height: 11in;
+    padding: 0.7in 0.8in;
+    box-sizing: border-box;
+    page-break-after: always;
+    position: relative;
+    overflow: hidden;
+  }
+  .page:last-child { page-break-after: auto; }
+
+  /* Header band — emerald with cream wordmark, periwinkle stripe */
+  .running-header {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    background: var(--emerald);
+    color: var(--cream);
+    padding: 18px 0.8in 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .running-header .wordmark {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: -0.005em;
+    text-transform: lowercase;
+  }
+  .running-header .crumb {
+    font-family: var(--font-sans);
+    font-weight: 300;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--cream);
+    opacity: 0.85;
+  }
+  .accent-stripe {
+    position: absolute;
+    top: 65px; left: 0; right: 0;
+    height: 2px;
+    background: var(--periwinkle);
+  }
+
+  .body-block { margin-top: 110px; }
+
+  /* Typography */
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    color: var(--ink);
+    margin: 0;
+    font-weight: 400;
+    letter-spacing: -0.005em;
+  }
+  h1 { font-size: 56px; line-height: 1.05; letter-spacing: -0.01em; }
+  h2 { font-size: 30px; line-height: 1.15; margin-bottom: 16px; }
+  h3 { font-size: 22px; line-height: 1.2; margin-bottom: 12px; }
+  h4 { font-size: 16px; line-height: 1.25; margin-bottom: 8px; }
+  p { font-family: var(--font-sans); font-weight: 300; line-height: 1.55; margin: 0 0 12px; font-size: 13px; }
+  .lead { font-size: 16px; line-height: 1.55; color: var(--slate); font-weight: 300; }
+
+  .meta-label {
+    font-family: var(--font-sans);
+    font-weight: 300;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--slate);
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .section { margin-bottom: 28px; }
+  .section-title {
+    font-family: var(--font-sans);
+    font-weight: 300;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--slate);
+    margin-bottom: 16px;
+  }
+  hr { border: 0; border-top: 1px solid rgba(26,26,26,0.1); margin: 24px 0; }
+
+  /* Cover */
+  .cover {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: var(--cream);
+  }
+  .cover-mast {
+    background: var(--emerald);
+    color: var(--cream);
+    padding: 0.7in 0.8in 0.5in;
+  }
+  .cover-mast-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    text-transform: lowercase;
+  }
+  .cover-stripe { height: 4px; background: var(--periwinkle); }
+  .cover-body { flex: 1; padding: 0.5in 0.8in 0.7in; display: flex; flex-direction: column; justify-content: space-between; }
+  .cover-title {
+    font-family: var(--font-display);
+    font-size: 110px;
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+  }
+  .cover-subtitle {
+    font-family: var(--font-sans);
+    font-weight: 300;
+    font-size: 22px;
+    color: var(--slate);
+    margin-top: 24px;
+    max-width: 5.5in;
+    line-height: 1.4;
+  }
+  .cover-pill {
+    display: inline-block;
+    padding: 8px 16px;
+    background: var(--brass);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-weight: 300;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    border-radius: 999px;
+  }
+  .cover-meta {
+    font-family: var(--font-sans);
+    font-weight: 300;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--slate);
+  }
+
+  /* Color swatches */
+  .swatch-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .swatch {
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(26,26,26,0.06);
+  }
+  .swatch-color { height: 64px; }
+  .swatch-meta { padding: 12px 14px; background: var(--paper); }
+  .swatch-name { font-family: var(--font-display); font-size: 18px; font-weight: 500; color: var(--ink); }
+  .swatch-token {
+    font-family: var(--font-sans); font-weight: 300;
+    font-size: 10px; color: var(--slate);
+    margin-top: 2px; text-transform: uppercase; letter-spacing: 0.18em;
+  }
+  .swatch-hex {
+    font-family: var(--font-sans); font-weight: 400;
+    font-size: 11px; color: var(--ink); margin-top: 4px;
+  }
+  .swatch-use {
+    font-family: var(--font-sans); font-weight: 300;
+    font-size: 11px; color: var(--slate); margin-top: 6px; line-height: 1.4;
+  }
+
+  /* Type spec */
+  .type-spec {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 16px 24px;
+    align-items: baseline;
+    padding: 18px 0;
+    border-bottom: 1px solid rgba(26,26,26,0.08);
+  }
+  .type-spec:last-child { border-bottom: 0; }
+  .type-spec-label {
+    font-family: var(--font-sans); font-weight: 300;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--slate);
+  }
+  .type-spec-sample { color: var(--ink); }
+  .type-meta {
+    font-family: var(--font-sans); font-weight: 300;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em;
+    color: var(--slate); margin-top: 6px;
+  }
+
+  /* Component examples */
+  .example {
+    background: var(--paper);
+    border: 1px solid rgba(26,26,26,0.06);
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 14px;
+  }
+  .example-label {
+    font-family: var(--font-sans); font-weight: 300;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em;
+    color: var(--slate); margin-bottom: 12px;
+  }
+
+  /* Buttons */
+  .btn { display: inline-block; padding: 12px 20px; border-radius: 12px; font-family: var(--font-sans); font-weight: 400; font-size: 14px; }
+  .btn-primary { background: var(--emerald); color: var(--cream); }
+  .btn-secondary { border: 1px solid rgba(26,26,26,0.18); color: var(--ink); }
+  .btn-saved { background: var(--brass); color: var(--ink); }
+  .btn-ink { background: var(--ink); color: var(--cream); }
+  .button-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
+
+  /* Chips */
+  .chip {
+    display: inline-block; padding: 6px 14px; background: var(--paper); color: var(--ink);
+    border-radius: 999px; font-size: 13px; font-weight: 300; margin-right: 6px; margin-bottom: 6px;
+  }
+  .chip-note {
+    display: inline-block; padding: 6px 14px; background: rgba(26,26,26,0.05); color: var(--ink);
+    border-radius: 999px; font-size: 13px; font-weight: 300; margin-right: 6px; margin-bottom: 6px;
+  }
+  .chip-active {
+    display: inline-block; padding: 6px 14px; background: var(--ink); color: var(--cream);
+    border-radius: 999px; font-size: 13px; font-weight: 300; margin-right: 6px; margin-bottom: 6px;
+  }
+  .chip-brass {
+    display: inline-block; padding: 4px 12px; background: rgba(201,169,97,0.4); color: var(--ink);
+    border-radius: 999px; font-size: 11px; font-weight: 300; text-transform: capitalize;
+    margin-right: 4px; margin-bottom: 4px;
+  }
+
+  /* Score bar */
+  .score { display: inline-block; width: 200px; }
+  .score-bar { height: 6px; background: rgba(26,26,26,0.1); border-radius: 999px; overflow: hidden; margin: 8px 0; }
+  .score-fill { height: 100%; background: var(--emerald); }
+  .score-value { font-size: 13px; font-weight: 300; }
+
+  /* Bottle hero — glassmorphism */
+  .hero-card {
+    border-radius: 24px;
+    background: rgba(244,239,230,0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(26,26,26,0.05);
+    padding: 32px 24px;
+    text-align: center;
+    height: 200px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .hero-card::before {
+    content: ""; position: absolute; inset: -20px;
+    background: linear-gradient(135deg, rgba(31,63,46,0.1), rgba(201,169,97,0.1), rgba(232,225,212,0.5));
+    filter: blur(24px); z-index: -1;
+  }
+  .hero-bottle {
+    width: 80px; height: 110px; border-radius: 8px;
+    background: linear-gradient(180deg, #4a3826 0%, #2c1f12 60%, #2c1f12 100%);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15); position: relative;
+  }
+  .hero-bottle::before {
+    content: ""; position: absolute; top: 8px; left: 8px; right: 8px; height: 28px;
+    background: rgba(232,225,212,0.85); border-radius: 3px;
+  }
+
+  /* Two/three-col */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+  /* Don'ts / Dos */
+  .dont, .do {
+    border-left: 3px solid;
+    padding: 10px 16px;
+    margin-bottom: 12px;
+    border-radius: 0 10px 10px 0;
+  }
+  .dont { border-color: var(--burgundy); background: rgba(139,58,58,0.05); }
+  .do { border-color: var(--emerald); background: rgba(31,63,46,0.05); }
+  .dont-title, .do-title { font-weight: 500; font-size: 13px; color: var(--ink); margin-bottom: 4px; }
+  .dont-body, .do-body { font-size: 12px; color: var(--slate); line-height: 1.5; font-weight: 300; }
+
+  /* Spacing scale */
+  .spacing-row { display: flex; align-items: center; gap: 16px; padding: 8px 0; border-bottom: 1px solid rgba(26,26,26,0.06); }
+  .spacing-bar { background: var(--emerald); height: 12px; border-radius: 2px; }
+  .spacing-token { font-family: var(--font-sans); font-weight: 300; font-size: 11px; color: var(--slate); width: 60px; text-transform: uppercase; letter-spacing: 0.18em; }
+  .spacing-px { font-family: var(--font-sans); font-weight: 300; font-size: 11px; color: var(--ink); }
+
+  /* Anatomy */
+  .anatomy {
+    background: var(--paper);
+    border: 1px solid rgba(26,26,26,0.06);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .anatomy-row {
+    display: grid;
+    grid-template-columns: 24px 1fr 1.5fr;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(26,26,26,0.06);
+    font-size: 12px;
+  }
+  .anatomy-row:last-child { border-bottom: 0; }
+  .anatomy-num {
+    width: 22px; height: 22px; border-radius: 100%; background: var(--emerald); color: var(--cream);
+    font-family: var(--font-sans); font-weight: 400; font-size: 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .anatomy-name { font-weight: 500; color: var(--ink); font-family: var(--font-display); font-size: 14px; }
+  .anatomy-note { color: var(--slate); font-weight: 300; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ COVER ═══════════════ -->
+<section class="page cover" style="padding: 0;">
+  <div class="cover-mast">
+    <div class="cover-mast-row">spritz</div>
+  </div>
+  <div class="cover-stripe"></div>
+  <div class="cover-body">
+    <div>
+      <div class="cover-pill">v1 · May 2026</div>
+      <div class="cover-title" style="margin-top: 32px;">Design<br>System</div>
+      <div class="cover-subtitle">The visual language for a fragrance encyclopedia. Tokens, type, components, and the rules that hold them together.</div>
+    </div>
+    <div class="cover-meta" style="display: flex; justify-content: space-between;">
+      <div>Spritz · v1</div>
+      <div>Internal Reference</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ BRAND ═══════════════ -->
+<section class="page">
+  <div class="running-header">
+    <span class="wordmark">spritz</span>
+    <span class="crumb">01 · Brand</span>
+  </div>
+  <div class="accent-stripe"></div>
+
+  <div class="body-block">
+    <div class="section-title">Brand</div>
+    <h2>Know what you're wearing.</h2>
+    <p class="lead">Spritz is a mobile-first fragrance encyclopedia. Scan a bottle, get the full story — notes, perfumer, longevity, how to wear it. Built for the FragTok and r/fragrance audience tired of tab-juggling between Fragrantica, Reddit, and YouTube.</p>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-title">Voice</div>
+    <h3>Confident, knowledgeable, never snobby.</h3>
+    <p>Spritz writes like a friend who happens to know everything about fragrance — not a Sephora associate, not a perfume blogger doing brand work. The reader is curious and intelligent. They don't need to be sold to or talked down to.</p>
+  </div>
+
+  <div class="three-col">
+    <div class="example">
+      <div class="example-label">In</div>
+      <div style="font-size: 12px; line-height: 1.5; font-weight: 300;">Specific over evocative. Sensory comparisons that tell the reader something.</div>
+    </div>
+    <div class="example">
+      <div class="example-label">In</div>
+      <div style="font-size: 12px; line-height: 1.5; font-weight: 300;">Tell the truth. Cult favorites can be flawed; mass-market hits can be good.</div>
+    </div>
+    <div class="example">
+      <div class="example-label">In</div>
+      <div style="font-size: 12px; line-height: 1.5; font-weight: 300;">Length matches purpose. 30 words for notes. 100 for houses. Never padded.</div>
+    </div>
+  </div>
+
+  <div class="three-col" style="margin-top: 12px;">
+    <div class="dont">
+      <div class="dont-title">Banned vocabulary</div>
+      <div class="dont-body">exquisite, luxurious, captivating, enchanting, sophisticated, elegant, mysterious, intoxicating, sensual, alluring, timeless, symphony, masterpiece, evocative, journey</div>
+    </div>
+    <div class="dont">
+      <div class="dont-title">No em dashes in copy</div>
+      <div class="dont-body">Use commas, periods, or break the sentence. Em dashes signal AI-generation in 2026.</div>
+    </div>
+    <div class="dont">
+      <div class="dont-title">No purple prose</div>
+      <div class="dont-body">"Smells like crushed mint stems" beats "a symphony of green freshness."</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ COLOR FOUNDATION ═══════════════ -->
+<section class="page">
+  <div class="running-header">
+    <span class="wordmark">spritz</span>
+    <span class="crumb">02 · Color · Foundation</span>
+  </div>
+  <div class="accent-stripe"></div>
+
+  <div class="body-block">
+    <div class="section-title">Color · Foundation</div>
+    <h2>Cream base, emerald primary, restrained accents.</h2>
+    <p class="lead">A boutique-editorial palette: warm cream foundation, deep emerald as the brand color, a periwinkle accent stripe used sparingly. We never use stark white.</p>
+  </div>
+
+  <hr>
+
+  <div class="section-title">Foundation</div>
+  <div class="swatch-grid">
+    <div class="swatch">
+      <div class="swatch-color" style="background: #F4EFE6;"></div>
+      <div class="swatch-meta">
+        <div class="swatch-name">Cream</div>
+        <div class="swatch-token">--cream</div>
+        <div class="swatch-hex">#F4EFE6</div>
+        <div class="swatch-use">Base canvas. Page backgrounds. Replaces stark white.</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #E8E1D4;"></div>
+      <div class="swatch-meta">
+        <div class="swatch-name">Warm Paper</div>
+        <div class="swatch-token">--paper</div>
+        <div class="swatch-hex">#E8E1D4</div>
+        <div class="swatch-use">Surface elevation. Cards, family chips, elevated containers.</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #1A1A1A;"></div>
+      <div class="swatch-meta">
+        <div class="swatch-name">Ink</div>
+        <div class="swatch-token">--ink</div>
+        <div class="swatch-hex">#1A1A1A</div>
+        <div class="swatch-use">Primary text. High-contrast buttons. Active states.</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #6B6960;"></div>
+      <div class="swatch-meta">
+        <div class="swatch-name">Slate</div>
+        <div class="swatch-token">--slate</div>
+        <div class="swatch-hex">#6B6960</div>
+        <div class="swatch-use">Secondary text. Metadata. Caption-level information.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ COLOR ACCENTS ═══════════════ -->
+<section class="page">
+  <div class="running-header">
+    <span class="wordmark">spritz</span>
+    <span class="crumb">02 · Color · Accents</span>
+  </div>
+  <div class="accent-stripe"></div>
+
+  <div class="body-block">
+    <div class="section-title">Color · Accents + Status</div>
+    <h2>Emerald primary. Brass for warmth. Burgundy for warning.</h2>
+    <p class="lead">Emerald is the primary action color and the brand identity. Brass is reserved for confirmations and highlight moments. Periwinkle is the accent stripe between header bands and content. Burgundy is semantic — error states only.</p>
+  </div>
+
+  <hr>
+
+  <div class="section-title">Accents</div>
+  <div class="swatch-grid">
+    <div class="swatch">
+      <div class="swatch-color" style="background: #1F3F2E;"></div>
+      <div class="swatch-meta">
+        <div class="swatch-name">Emerald</div>
+        <div class="swatch-token">--emerald</div>
+        <div class="swatch-hex">#1F3F2E</div>
+        <div class="swatch-use">Primary CTAs. Brand wordmark. Header bands. Score-bar fill. Success states.</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #C9A961;"></div>
+      <div class="swatch-meta">
+        <div class="swatch-name">Brass</div>
+        <div class="swatch-token">--brass</div>
+        <div class="swatch-hex">#C9A961</div>
+        <div class="swatch-use">Saved-state confirmations. Annual-plan highlight. Occasion chips. Pro upsell.</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #5A85C5;"></div>
+      <div class="swatch-meta">
+        <div class="swatch-name">Periwinkle</div>
+        <div class="swatch-token">--periwinkle</div>
+        <div class="swatch-hex">#5A85C5</div>
+        <div class="swatch-use">Accent stripe between header bands and content. Sparing use only.</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #8B3A3A;"></div>
+      <div class="swatch-meta">
+        <div class="swatch-name">Burgundy</div>
+        <div class="swatch-token">--burgundy</div>
+        <div class="swatch-hex">#8B3A3A</div>
+        <div class="swatch-use">Error states. Destructive confirmations. Never decorative.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ TYPOGRAPHY ═══════════════ -->
+<section class="page">
+  <div class="running-header">
+    <span class="wordmark">spritz</span>
+    <span class="crumb">03 · Typography</span>
+  </div>
+  <div class="accent-stripe"></div>
+
+  <div class="body-block">
+    <div class="section-title">Typography</div>
+    <h2>Two families, clear hierarchy.</h2>
+    <p class="lead">Playfair Display for hero and section headings. Roboto for everything else, in Light + Extra Light weights. The "Mono" category is a style pattern (small uppercase tracked metadata), not a separate font.</p>
+  </div>
+
+  <hr>
+
+  <div class="type-spec">
+    <div class="type-spec-label">H1 / Hero</div>
+    <div>
+      <div style="font-family: var(--font-display); font-size: 56px; font-weight: 400; line-height: 1.05; letter-spacing: -0.01em;">Tobacco Vanille</div>
+      <div class="type-meta">Playfair Display 400 · 56px / 1.05 · -0.01em</div>
+    </div>
+  </div>
+
+  <div class="type-spec">
+    <div class="type-spec-label">H2 / Section</div>
+    <div>
+      <div style="font-family: var(--font-display); font-size: 30px; font-weight: 400; line-height: 1.15;">Notes</div>
+      <div class="type-meta">Playfair Display 400 · 30px / 1.15</div>
+    </div>
+  </div>
+
+  <div class="type-spec">
+    <div class="type-spec-label">Body</div>
+    <div>
+      <div style="font-family: var(--font-sans); font-size: 16px; line-height: 1.55; font-weight: 300;">A cold-weather evening fragrance. Wear it sparingly — one spray, not three.</div>
+      <div class="type-meta">Roboto Light 300 · 16px / 1.55</div>
+    </div>
+  </div>
+
+  <div class="type-spec">
+    <div class="type-spec-label">Small</div>
+    <div>
+      <div style="font-family: var(--font-sans); font-size: 13px; line-height: 1.5; color: var(--slate); font-weight: 100;">Built around a literal pipe-tobacco accord softened with vanilla.</div>
+      <div class="type-meta">Roboto Extra Light 100 · 13px · slate color</div>
+    </div>
+  </div>
+
+  <div class="type-spec">
+    <div class="type-spec-label">Mono · Metadata</div>
+    <div>
+      <div style="font-family: var(--font-sans); font-weight: 300; font-size: 11px; text-transform: uppercase; letter-spacing: 0.22em; color: var(--slate);">TOM FORD · 2007 · UNISEX</div>
+      <div class="type-meta">Roboto Light 300 · 11px · uppercase · 0.22em tracking</div>
+    </div>
+  </div>
+
+  <div class="type-spec">
+    <div class="type-spec-label">Mono · Match</div>
+    <div>
+      <div style="font-family: var(--font-sans); font-weight: 100; font-size: 14px; color: var(--ink);">87% match</div>
+      <div class="type-meta">Roboto Extra Light 100 · 14px · for similarity scores</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SPACING & RADIUS ═══════════════ -->
+<section class="page">
+  <div class="running-header">
+    <span class="wordmark">spritz</span>
+    <span class="crumb">04 · Spacing</span>
+  </div>
+  <div class="accent-stripe"></div>
+
+  <div class="body-block">
+    <div class="section-title">Spacing &amp; radius</div>
+    <h2>Tailwind defaults, mobile-first.</h2>
+    <p class="lead">Container width caps at 28rem (448px) on mobile — the app is designed phone-first. Section gap is 40px (mb-10). Inner padding is 24px (px-6). Radius is generous — 16px for cards, 24px for hero panels.</p>
+  </div>
+
+  <hr>
+
+  <div class="section-title">Spacing scale</div>
+  <div class="spacing-row"><span class="spacing-token">2</span><div class="spacing-bar" style="width: 8px;"></div><span class="spacing-px">8px · gap between chips</span></div>
+  <div class="spacing-row"><span class="spacing-token">3</span><div class="spacing-bar" style="width: 12px;"></div><span class="spacing-px">12px · padding inside chips, button vertical padding</span></div>
+  <div class="spacing-row"><span class="spacing-token">4</span><div class="spacing-bar" style="width: 16px;"></div><span class="spacing-px">16px · default vertical rhythm</span></div>
+  <div class="spacing-row"><span class="spacing-token">6</span><div class="spacing-bar" style="width: 24px;"></div><span class="spacing-px">24px · page horizontal padding (px-6)</span></div>
+  <div class="spacing-row"><span class="spacing-token">8</span><div class="spacing-bar" style="width: 32px;"></div><span class="spacing-px">32px · between unrelated sections (mb-8)</span></div>
+  <div class="spacing-row"><span class="spacing-token">10</span><div class="spacing-bar" style="width: 40px;"></div><span class="spacing-px">40px · default section gap (mb-10)</span></div>
+
+  <hr style="margin-top: 28px;">
+
+  <div class="section-title">Radius</div>
+  <div class="three-col">
+    <div class="example" style="text-align: center; padding: 14px;">
+      <div style="width: 48px; height: 32px; background: var(--emerald); border-radius: 8px; margin: 0 auto 8px;"></div>
+      <div class="meta-label">8px · small</div>
+    </div>
+    <div class="example" style="text-align: center; padding: 14px;">
+      <div style="width: 48px; height: 32px; background: var(--emerald); border-radius: 12px; margin: 0 auto 8px;"></div>
+      <div class="meta-label">12px · button</div>
+    </div>
+    <div class="example" style="text-align: center; padding: 14px;">
+      <div style="width: 48px; height: 32px; background: var(--emerald); border-radius: 16px; margin: 0 auto 8px;"></div>
+      <div class="meta-label">16px · card</div>
+    </div>
+    <div class="example" style="text-align: center; padding: 14px;">
+      <div style="width: 48px; height: 32px; background: var(--emerald); border-radius: 24px; margin: 0 auto 8px;"></div>
+      <div class="meta-label">24px · hero panel</div>
+    </div>
+    <div class="example" style="text-align: center; padding: 14px;">
+      <div style="width: 56px; height: 16px; background: var(--emerald); border-radius: 999px; margin: 0 auto 8px;"></div>
+      <div class="meta-label">999px · pill / chip</div>
+    </div>
+    <div class="example" style="text-align: center; padding: 14px;">
+      <div style="width: 28px; height: 28px; background: var(--emerald); border-radius: 100%; margin: 0 auto 8px;"></div>
+      <div class="meta-label">100% · brand dot</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ COMPONENTS · BUTTONS ═══════════════ -->
+<section class="page">
+  <div class="running-header">
+    <span class="wordmark">spritz</span>
+    <span class="crumb">05 · Components · Buttons</span>
+  </div>
+  <div class="accent-stripe"></div>
+
+  <div class="body-block">
+    <div class="section-title">Components · Buttons</div>
+    <h2>One primary, one secondary, one confirmed.</h2>
+    <p class="lead">Emerald for primary actions. Outline for secondary. Brass for "saved" confirmation. Ink for high-stakes (Pro upgrade, sign-up).</p>
+  </div>
+
+  <hr>
+
+  <div class="example">
+    <div class="example-label">Primary CTA · Buy / Generate / Sign in</div>
+    <div class="button-row">
+      <span class="btn btn-primary">Scan a bottle</span>
+      <span class="btn btn-primary">Buy this fragrance</span>
+      <span class="btn btn-primary">Generate dupes with AI</span>
+    </div>
+  </div>
+
+  <div class="example">
+    <div class="example-label">Secondary · Save / Tried / Wishlist · Default state</div>
+    <div class="button-row">
+      <span class="btn btn-secondary">Own</span>
+      <span class="btn btn-secondary">Tried</span>
+      <span class="btn btn-secondary">Wishlist</span>
+    </div>
+  </div>
+
+  <div class="example">
+    <div class="example-label">Saved confirmation · Brass</div>
+    <div class="button-row">
+      <span class="btn btn-saved">✓ Own</span>
+      <span class="btn btn-saved">✓ Tried</span>
+    </div>
+  </div>
+
+  <div class="example">
+    <div class="example-label">Ink · Pro upgrade, monthly checkout</div>
+    <div class="button-row">
+      <span class="btn btn-ink">Upgrade</span>
+      <span class="btn btn-ink">Sign up</span>
+    </div>
+  </div>
+
+  <p class="lead" style="margin-top: 16px; font-size: 13px;">Padding 12×20px. Radius 12px. Roboto 400. Disabled state: opacity 0.6. Hover: 90% opacity on background.</p>
+</section>
+
+<!-- ═══════════════ COMPONENTS · CHIPS ═══════════════ -->
+<section class="page">
+  <div class="running-header">
+    <span class="wordmark">spritz</span>
+    <span class="crumb">05 · Components · Chips</span>
+  </div>
+  <div class="accent-stripe"></div>
+
+  <div class="body-block">
+    <div class="section-title">Components · Chips &amp; tags</div>
+    <h2>Pills carry small data.</h2>
+    <p class="lead">Family accords, note pyramid items, occasion tags, similarity badges. All pills are radius 999px. Three weights — paper, note, active.</p>
+  </div>
+
+  <hr>
+
+  <div class="example">
+    <div class="example-label">Family accords · paper background</div>
+    <div>
+      <span class="chip">vanilla</span>
+      <span class="chip">sweet</span>
+      <span class="chip">tobacco</span>
+      <span class="chip">warm spicy</span>
+      <span class="chip">fruity</span>
+      <span class="chip">woody</span>
+    </div>
+  </div>
+
+  <div class="example">
+    <div class="example-label">Note chips · subtle, tap-to-expand</div>
+    <div>
+      <span class="chip-note">Tobacco Leaf</span>
+      <span class="chip-note">Spicy Notes</span>
+      <span class="chip-note">Vanilla</span>
+      <span class="chip-note">Cacao</span>
+      <span class="chip-note">Tonka Bean</span>
+    </div>
+  </div>
+
+  <div class="example">
+    <div class="example-label">Active filter chip · ink-on-cream</div>
+    <div>
+      <span class="chip-active">All</span>
+      <span class="chip-note">Budget</span>
+      <span class="chip-note">Mid</span>
+      <span class="chip-note">Designer</span>
+      <span class="chip-note">Niche</span>
+    </div>
+  </div>
+
+  <div class="example">
+    <div class="example-label">Occasion chips · brass accent</div>
+    <div>
+      <span class="chip-brass">evening</span>
+      <span class="chip-brass">cold weather</span>
+      <span class="chip-brass">intimate settings</span>
+    </div>
+  </div>
+
+  <div class="example">
+    <div class="example-label">Score / metadata bar</div>
+    <div class="score">
+      <div class="meta-label">Longevity</div>
+      <div class="score-bar"><div class="score-fill" style="width: 78%;"></div></div>
+      <div class="score-value"><strong style="font-weight: 400;">7.8</strong> <span style="color: var(--slate);">/ 10 (hours)</span></div>
+      <div class="meta-label" style="margin-top: 4px;">consensus</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ COMPONENTS · BOTTLE HERO ═══════════════ -->
+<section class="page">
+  <div class="running-header">
+    <span class="wordmark">spritz</span>
+    <span class="crumb">05 · Components · Hero</span>
+  </div>
+  <div class="accent-stripe"></div>
+
+  <div class="body-block">
+    <div class="section-title">Components · Bottle Hero</div>
+    <h2>Glassmorphism, used once.</h2>
+    <p class="lead">The only place we use a frosted-glass effect is the bottle image card on the detail page. Everywhere else: clean cream surfaces, no glass.</p>
+  </div>
+
+  <hr>
+
+  <div class="hero-card">
+    <div class="hero-bottle"></div>
+  </div>
+
+  <div class="anatomy">
+    <div class="anatomy-row">
+      <div class="anatomy-num">1</div>
+      <div><div class="anatomy-name">Backdrop wash</div></div>
+      <div class="anatomy-note">Soft 24px-blurred gradient (emerald/10, brass/10, paper/40) behind the card. Provides depth the glass refracts against.</div>
+    </div>
+    <div class="anatomy-row">
+      <div class="anatomy-num">2</div>
+      <div><div class="anatomy-name">Frosted card</div></div>
+      <div class="anatomy-note">bg-cream/40 + backdrop-blur-xl + 1px ink/5 border. Radius 24px. Padding 32px vertical.</div>
+    </div>
+    <div class="anatomy-row">
+      <div class="anatomy-num">3</div>
+      <div><div class="anatomy-name">Bottle image</div></div>
+      <div class="anatomy-note">200×267px. mix-blend-multiply removes the white background of Fragrantica's product shots.</div>
+    </div>
+  </div>
+
+  <div class="dont">
+    <div class="dont-title">Don't replicate this elsewhere</div>
+    <div class="dont-body">No glass on cards, modals, nav, or other sections. Glass is the bottle's moment. Repeat it everywhere and the page loses focus.</div>
+  </div>
+</section>
+
+<!-- ═══════════════ DETAIL PAGE ANATOMY ═══════════════ -->
+<section class="page">
+  <div class="running-header">
+    <span class="wordmark">spritz</span>
+    <span class="crumb">06 · Patterns · Detail</span>
+  </div>
+  <div class="accent-stripe"></div>
+
+  <div class="body-block">
+    <div class="section-title">Patterns · Detail page architecture</div>
+    <h2>Encyclopedia first, dupes last.</h2>
+    <p class="lead">The detail page leads with what the bottle IS, not what to buy instead. Action row sits below the title; family + notes are the visual hero; dupes and similar fragrances live below the fold.</p>
+  </div>
+
+  <hr>
+
+  <div class="anatomy">
+    <div class="anatomy-row">
+      <div class="anatomy-num">1</div>
+      <div><div class="anatomy-name">Bottle Hero (glass card)</div></div>
+      <div class="anatomy-note">Sets the visual register. The single permitted glassmorphism use.</div>
+    </div>
+    <div class="anatomy-row">
+      <div class="anatomy-num">2</div>
+      <div><div class="anatomy-name">Title block</div></div>
+      <div class="anatomy-note">House · year · gender (mono small caps) → Name (Playfair Display 56px).</div>
+    </div>
+    <div class="anatomy-row">
+      <div class="anatomy-num">3</div>
+      <div><div class="anatomy-name">Action row</div></div>
+      <div class="anatomy-note">3 Save buttons (Own/Tried/Wishlist) + Buy CTA. Save flips to brass when active.</div>
+    </div>
+    <div class="anatomy-row">
+      <div class="anatomy-num">4</div>
+      <div><div class="anatomy-name">Family</div></div>
+      <div class="anatomy-note">Paper-background chips. Accord categories — separate concept from notes.</div>
+    </div>
+    <div class="anatomy-row">
+      <div class="anatomy-num">5</div>
+      <div><div class="anatomy-name">Notes pyramid</div></div>
+      <div class="anatomy-note">Top / Heart / Base layers. Tap-to-expand flavor descriptions for any note in editorial dictionary.</div>
+    </div>
+    <div class="anatomy-row">
+      <div class="anatomy-num">6</div>
+      <div><div class="anatomy-name">Encyclopedia content</div></div>
+      <div class="anatomy-note">Perfumer credit, house history, "How to wear it," editorial commentary (italic emerald-bordered quote).</div>
+    </div>
+    <div class="anatomy-row">
+      <div class="anatomy-num">7</div>
+      <div><div class="anatomy-name">Known dupes</div></div>
+      <div class="anatomy-note">Curated editorial + AI-generated (Pro). Source-badged at the bottom of each card.</div>
+    </div>
+    <div class="anatomy-row">
+      <div class="anatomy-num">8</div>
+      <div><div class="anatomy-name">Similar fragrances</div></div>
+      <div class="anatomy-note">Algorithmic note-vector similarity. Collapsed by default, opt-in.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ DON'TS ═══════════════ -->
+<section class="page">
+  <div class="running-header">
+    <span class="wordmark">spritz</span>
+    <span class="crumb">07 · Anti-patterns</span>
+  </div>
+  <div class="accent-stripe"></div>
+
+  <div class="body-block">
+    <div class="section-title">Anti-patterns</div>
+    <h2>Things we don't do.</h2>
+    <p class="lead">Most design errors are restraint failures. These are the lines this system holds.</p>
+  </div>
+
+  <hr>
+
+  <div class="dont">
+    <div class="dont-title">Stark white (#FFFFFF)</div>
+    <div class="dont-body">Always Cream (#F4EFE6) for backgrounds. Stark white is harsh on phones and explicitly out of style in 2026.</div>
+  </div>
+
+  <div class="dont">
+    <div class="dont-title">Geometric sans-serifs (Poppins, Montserrat)</div>
+    <div class="dont-body">Roboto is the chosen sans. Don't substitute. Don't add a third font without a strong reason.</div>
+  </div>
+
+  <div class="dont">
+    <div class="dont-title">Glass effects beyond the bottle hero</div>
+    <div class="dont-body">One glass element per page maximum. Apply elsewhere and you signal "trendy" rather than "intentional."</div>
+  </div>
+
+  <div class="dont">
+    <div class="dont-title">Em dashes in user-facing copy</div>
+    <div class="dont-body">Use commas, periods, or break the sentence. Em dashes signal AI-generation in 2026 user perception.</div>
+  </div>
+
+  <div class="dont">
+    <div class="dont-title">Rainbow gradients</div>
+    <div class="dont-body">If you need ambient depth, use the bottle-hero backdrop pattern (emerald/10 + brass/10 + paper/40). Never harsh multi-color blends.</div>
+  </div>
+
+  <div class="dont">
+    <div class="dont-title">Banned vocabulary in copy</div>
+    <div class="dont-body">exquisite, luxurious, captivating, enchanting, sophisticated, elegant, mysterious, intoxicating, sensual, alluring, timeless, symphony, masterpiece, evocative, journey. Replace with specifics.</div>
+  </div>
+
+  <hr>
+
+  <div class="do">
+    <div class="do-title">When in doubt, do less</div>
+    <div class="do-body">Spritz's brand is "encyclopedia, beautifully presented." Restraint reads as confidence. Most design decisions get better when you remove rather than add.</div>
+  </div>
+</section>
+
+<!-- ═══════════════ COLOPHON ═══════════════ -->
+<section class="page">
+  <div class="running-header">
+    <span class="wordmark">spritz</span>
+    <span class="crumb">· Colophon</span>
+  </div>
+  <div class="accent-stripe"></div>
+
+  <div class="body-block">
+    <div class="section-title">Colophon</div>
+    <h2>This document.</h2>
+    <p class="lead">Spritz Design System v2, May 2026. Boutique-editorial direction (Playfair Display + Roboto + emerald/cream/brass) replaces the prior Consumer/Startup combo. Living document — update when the visual system changes.</p>
+  </div>
+
+  <hr>
+
+  <div class="two-col">
+    <div>
+      <div class="meta-label">Type</div>
+      <p style="margin-bottom: 18px;">Display: Playfair Display (Claus Eggers Sørensen, OFL).<br>Body: Roboto Light + Extra Light (Christian Robertson, Apache 2.0).<br>Loaded via next/font/google. No CDN dependency.</p>
+
+      <div class="meta-label">Inspiration</div>
+      <p>Boutique-editorial direction (Hermès, Diptyque visual language). Figma typography page reference (May 2026).</p>
+    </div>
+    <div>
+      <div class="meta-label">Sources</div>
+      <p style="margin-bottom: 18px;">PRD: <span style="font-family: var(--font-sans); font-weight: 400; font-size: 11px;">Spritz_PRD_v1.md</span><br>Tokens: <span style="font-family: var(--font-sans); font-weight: 400; font-size: 11px;">tailwind.config.ts</span><br>Live components: <span style="font-family: var(--font-sans); font-weight: 400; font-size: 11px;">app/, components/</span></p>
+
+      <div class="meta-label">Contact</div>
+      <p>Owner: Josh<br>Updates: edit this HTML, re-render PDF.</p>
+    </div>
+  </div>
+
+  <div style="margin-top: 60px; padding-top: 24px; border-top: 1px solid rgba(26,26,26,0.08); display: flex; justify-content: space-between; align-items: center;">
+    <div class="cover-pill">v2 · May 2026</div>
+    <div style="font-family: var(--font-display); font-size: 32px; font-weight: 400;">spritz</div>
+  </div>
+</section>
+
+</body>
+</html>

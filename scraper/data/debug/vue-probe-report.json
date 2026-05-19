@@ -1,0 +1,19 @@
+{
+  "url": "https://www.fragrantica.com/perfume/Tom-Ford/Tobacco-Vanille-1825.html",
+  "vue_rendered": false,
+  "checks": [
+    {
+      "tag": "longevity-rating-new",
+      "exists": false
+    },
+    {
+      "tag": "sillage-rating-new",
+      "exists": false
+    },
+    {
+      "tag": "seasons-rating-new",
+      "exists": false
+    }
+  ],
+  "html_size": 3289778
+}

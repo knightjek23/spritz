@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Playfair Display + Roboto are loaded via next/font/google in app/layout.tsx
+   (they inject --font-playfair and --font-roboto CSS variables onto <html>). */
+
+:root {
+  color-scheme: light;
+  /* 2026 boutique-editorial tokens — semantic, mirrors Tailwind theme */
+  --bg-base: #F4EFE6;        /* Cream — replaces Cloud Dancer */
+  --bg-surface: #E8E1D4;     /* Warm paper */
+  --text-primary: #1A1A1A;   /* Ink */
+  --text-secondary: #6B6960; /* Slate */
+  --accent-primary: #1F3F2E; /* Emerald */
+  --accent-secondary: #C9A961; /* Brass */
+  --accent-line: #5A85C5;    /* Periwinkle accent stripe */
+  --status-error: #8B3A3A;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: theme(fontFamily.sans);
+  font-weight: 300; /* Roboto Light is the default body weight per the Figma spec */
+}
+
+h1, h2, h3, h4 {
+  font-family: theme(fontFamily.display);
+  letter-spacing: -0.01em;
+  font-weight: 400; /* Playfair Display Regular for headings */
+  color: var(--text-primary);
+}
+
+/* Selection styling — uses emerald */
+::selection {
+  background: var(--accent-primary);
+  color: var(--bg-base);
+}
+
+/* Periwinkle accent stripe — divider between header bands and content,
+   matches the Figma typography page treatment. */
+.accent-stripe {
+  height: 2px;
+  background: var(--accent-line);
+  width: 100%;
+}

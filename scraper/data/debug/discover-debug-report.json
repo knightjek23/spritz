@@ -1,0 +1,47 @@
+{
+  "timestamp": "2026-04-28T05:01:46.415Z",
+  "configured": {
+    "url": "https://www.fragrantica.com/search/",
+    "button_text": "Show more results",
+    "result_selector": "a[href*=\"/perfume/\"]",
+    "click_wait_ms": 4000
+  },
+  "navigation_error": null,
+  "final_url_after_redirects": "https://www.fragrantica.com/search/",
+  "page_title": "Perfumes Search",
+  "html_length": 327439,
+  "diagnostics": {
+    "total_anchors_on_page": 233,
+    "result_selector_matches": 69,
+    "regex_validated_fragrance_urls": 69,
+    "first_5_fragrance_urls": [
+      "https://www.fragrantica.com/perfume/Lattafa-Perfumes/Khamrah-75805.html",
+      "https://www.fragrantica.com/perfume/French-Avenue/Liquid-Brun-94713.html",
+      "https://www.fragrantica.com/perfume/Giorgio-Armani/Emporio-Armani-Stronger-With-You-Intensely-52802.html",
+      "https://www.fragrantica.com/perfume/Lattafa-Perfumes/Khamrah-Qahwa-88175.html",
+      "https://www.fragrantica.com/perfume/Jean-Paul-Gaultier/Le-Male-Elixir-81642.html"
+    ],
+    "button_locator_trials": {
+      "getByRole": 1,
+      "has_text": 1,
+      "text_regex": 1,
+      "total_buttons_on_page": 51
+    }
+  },
+  "click_test": {
+    "clicked": true,
+    "urls_before_click": 69,
+    "urls_after_click": 99,
+    "grew_by": 30,
+    "error": null
+  },
+  "flags": {
+    "looks_like_cloudflare_block": false,
+    "page_seems_too_small": false
+  },
+  "saved_files": {
+    "raw_html": "C:\\Users\\knigh\\OneDrive\\Documents\\Fragrance APP\\scraper\\data\\debug\\search-initial.html",
+    "screenshot_initial": "C:\\Users\\knigh\\OneDrive\\Documents\\Fragrance APP\\scraper\\data\\debug\\search-initial.png",
+    "screenshot_after_click": "C:\\Users\\knigh\\OneDrive\\Documents\\Fragrance APP\\scraper\\data\\debug\\search-after-click.png"
+  }
+}

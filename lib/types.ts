@@ -1,0 +1,123 @@
+// Shared TypeScript types for the app.
+// Mirrors the SQL schema in supabase/migrations/0001_initial_schema.sql.
+
+export type Gender = "masculine" | "feminine" | "unisex";
+export type PriceTier = "budget" | "mid" | "designer" | "niche";
+export type CollectionStatus = "own" | "tried" | "wishlist";
+export type Plan = "free" | "pro";
+export type Retailer = "scentbird" | "fragrancenet" | "nordstrom";
+export type VisionProvider = "gpt4o" | "google";
+
+export interface Note {
+  name: string;
+  weight: number; // 0–1, normalized vote weight
+}
+
+export interface WearGuidance {
+  occasions?: string[];
+  how_to_wear?: string;
+  layering_notes?: string;
+}
+
+export interface DupeRecommendation {
+  house: string;
+  name: string;
+  similarity?: "very close" | "close" | "inspired by";
+  note?: string;
+  price_tier?: PriceTier;
+  // Provenance: hand-written editorial vs AI-generated. Lets the UI render
+  // a clear badge so users know which is which.
+  source?: "editorial" | "ai";
+  // AI-generated dupes carry a 0–1 confidence the model assigned to itself.
+  confidence?: number;
+  // ISO timestamp of generation (mostly for AI-generated; editorial dupes don't need it).
+  generated_at?: string;
+}
+
+export interface Fragrance {
+  id: string;
+  name: string;
+  house: string;
+  family: string[];
+  gender: Gender | null;
+  year: number | null;
+  top_notes: Note[];
+  mid_notes: Note[];
+  base_notes: Note[];
+  longevity_score: number | null;
+  longevity_confidence: number | null;
+  sillage_score: number | null;
+  sillage_confidence: number | null;
+  season_tags: string[];
+  time_tags: string[];
+  similar_ids: string[];
+  // Encyclopedia content (the new core per PRD §1)
+  perfumer: string | null;
+  house_history: string | null;
+  wear_guidance: WearGuidance;
+  notes_descriptions: Record<string, string>;
+  bottle_image_url: string | null;
+  editorial_notes: string | null;
+  dupes: DupeRecommendation[];
+  // Internal use only — never rendered directly
+  avg_retail_price: number | null;
+  price_tier: PriceTier | null;
+  popularity_rank: number | null;
+}
+
+export interface User {
+  id: string;
+  clerk_user_id: string;
+  email: string | null;
+  plan: Plan;
+  stripe_customer_id: string | null;
+  created_at: string;
+}
+
+export interface CollectionItem {
+  id: string;
+  user_id: string;
+  fragrance_id: string;
+  status: CollectionStatus;
+  note: string | null;
+  added_at: string;
+}
+
+export interface ScanEvent {
+  id: string;
+  user_id: string | null;
+  ip_hash: string;
+  image_url: string | null;
+  detected_brand: string | null;
+  detected_name: string | null;
+  matched_fragrance_id: string | null;
+  confidence: number | null;
+  vision_provider: VisionProvider;
+  latency_ms: number;
+  created_at: string;
+}
+
+export interface DupePair {
+  fragrance_a: string;
+  fragrance_b: string;
+  score: number;
+  shared_notes: Array<{ name: string; weight_a: number; weight_b: number }>;
+}
+
+// API response shapes
+export interface ScanResult {
+  matched: Fragrance | null;
+  candidates: Array<{ fragrance: Fragrance; confidence: number }>;
+  confidence: number;
+  detected_brand: string | null;
+  detected_name: string | null;
+  scan_event_id: string;
+}
+
+export interface DupeResult {
+  fragrance: Fragrance;
+  similarity: number;       // 0–1
+  similarity_pct: number;   // 0–100, rounded
+  price_delta: number | null;
+  shared_notes: string[];   // top 3 by combined weight
+}

@@ -1,0 +1,23 @@
+{
+  "name": "spritz-editorial",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Original editorial content for Spritz — note flavor descriptions, house profiles, fragrance editorials. Authored by hand, ingested into Supabase via npm run ingest.",
+  "type": "module",
+  "scripts": {
+    "ingest": "tsx src/ingest.ts",
+    "ingest:dry": "tsx src/ingest.ts --dry-run",
+    "validate": "tsx src/validate.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "dotenv": "^16.4.5",
+    "gray-matter": "^4.0.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.0",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.2"
+  }
+}

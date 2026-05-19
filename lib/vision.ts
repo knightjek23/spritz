@@ -1,0 +1,80 @@
+// Vision adapter — Layer 1 of the scan architecture (PRD §7).
+// Reads brand + fragrance name from a bottle image.
+// GPT-4o is the primary; Google Vision is the cost fallback.
+// Q1 (Day 3 spike) decides the default.
+
+import OpenAI from "openai";
+import type { VisionProvider } from "./types";
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY ?? "" });
+
+export interface VisionRead {
+  brand: string | null;
+  name: string | null;
+  confidence: number; // 0–1
+  provider: VisionProvider;
+  raw_text?: string;
+}
+
+const READ_PROMPT = `You are reading a perfume / cologne bottle label.
+Return STRICT JSON with this shape: {"brand": string | null, "name": string | null, "confidence": number}.
+- "brand" is the fashion/perfume house (e.g., "Tom Ford", "Dior", "Creed").
+- "name" is the fragrance name (e.g., "Sauvage", "Aventus", "Tobacco Vanille").
+- "confidence" is your subjective confidence in the read, 0.0 to 1.0.
+- If the image is not a bottle, or you cannot read either field, set them to null and confidence to 0.
+- Return ONLY the JSON. No prose.`;
+
+export async function readBottleWithGPT4o(
+  imageBase64: string,
+): Promise<VisionRead> {
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+      {
+        role: "user",
+        content: [
+          { type: "text", text: READ_PROMPT },
+          {
+            type: "image_url",
+            image_url: { url: `data:image/jpeg;base64,${imageBase64}` },
+          },
+        ],
+      },
+    ],
+    response_format: { type: "json_object" },
+    max_tokens: 200,
+  });
+
+  const content = response.choices[0]?.message?.content ?? "{}";
+  try {
+    const parsed = JSON.parse(content);
+    return {
+      brand: parsed.brand ?? null,
+      name: parsed.name ?? null,
+      confidence: typeof parsed.confidence === "number" ? parsed.confidence : 0,
+      provider: "gpt4o",
+    };
+  } catch {
+    return { brand: null, name: null, confidence: 0, provider: "gpt4o" };
+  }
+}
+
+// Google Vision adapter — TODO during Day 3 spike.
+// Cheaper per call (~$0.0015 vs ~$0.01) but raw OCR text rather than structured.
+// We'd post-process with a smaller LLM or rule-based brand/name extraction.
+export async function readBottleWithGoogleVision(
+  _imageBase64: string,
+): Promise<VisionRead> {
+  throw new Error(
+    "readBottleWithGoogleVision: not implemented — Day 3 spike (Q1)",
+  );
+}
+
+// Top-level dispatch. Default = GPT-4o until spike resolves Q1.
+export async function readBottle(
+  imageBase64: string,
+  provider: VisionProvider = "gpt4o",
+): Promise<VisionRead> {
+  if (provider === "gpt4o") return readBottleWithGPT4o(imageBase64);
+  return readBottleWithGoogleVision(imageBase64);
+}
