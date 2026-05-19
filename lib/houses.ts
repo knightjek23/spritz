@@ -13,6 +13,12 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
+import { houseSlug } from "./slugs";
+
+// Re-export for back-compat with server-side callers. Client components
+// should import from "@/lib/slugs" instead, since this module pulls in
+// fs/path Node built-ins that Webpack can't bundle for the browser.
+export { houseSlug };
 
 const HOUSES_DIR = path.join(process.cwd(), "editorial", "houses");
 
@@ -31,15 +37,6 @@ export interface HouseEditorial {
   website?: string;
   /** Body — house history, style description. */
   body: string;
-}
-
-export function houseSlug(name: string): string {
-  return name
-    .trim()
-    .toLowerCase()
-    .replace(/['']/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
 }
 
 export async function loadHouse(slug: string): Promise<HouseEditorial | null> {

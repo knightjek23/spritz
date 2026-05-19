@@ -11,6 +11,12 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
+import { noteSlug } from "./slugs";
+
+// Re-export so existing server-side imports `from "@/lib/notes"` keep working.
+// Client components should import directly from "@/lib/slugs" instead, since
+// importing from this module pulls in the fs/path Node built-ins.
+export { noteSlug };
 
 // editorial/ sits at the repo root, sibling of app/ and lib/.
 const NOTES_DIR = path.join(process.cwd(), "editorial", "notes");
@@ -26,15 +32,6 @@ export interface NoteEditorial {
   body: string;
   /** URL slug (the filename minus .md). */
   slug: string;
-}
-
-export function noteSlug(name: string): string {
-  return name
-    .trim()
-    .toLowerCase()
-    .replace(/['']/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
 }
 
 /**

@@ -15,7 +15,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { Fragrance, Note } from "@/lib/types";
-import { noteSlug } from "@/lib/notes";
+// Import from lib/slugs (zero deps) NOT lib/notes (pulls in node:fs/promises
+// and breaks the client bundle build).
+import { noteSlug } from "@/lib/slugs";
 
 export function NotesPyramid({ fragrance }: { fragrance: Fragrance }) {
   // notes_descriptions is a jsonb { [normalized_name]: "flavor description" }
