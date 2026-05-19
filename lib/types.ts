@@ -112,6 +112,17 @@ export interface ScanResult {
   detected_brand: string | null;
   detected_name: string | null;
   scan_event_id: string;
+  /**
+   * How the match was reached:
+   *   "text"   — auto-matched on OCR text similarity alone (fast path).
+   *   "visual" — OCR was ambiguous; GPT-4o picked from candidates by
+   *              comparing the user photo against catalog bottle images.
+   *   "none"   — no match.
+   * Optional for back-compat with older clients; the route always sets it.
+   */
+  match_method?: "text" | "visual" | "none";
+  /** When match_method === "visual", a short human-readable reason. */
+  visual_reason?: string;
 }
 
 export interface DupeResult {
