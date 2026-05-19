@@ -89,10 +89,10 @@ export function CameraCapture({ onCapture, busy = false }: Props) {
         audio: false,
       });
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
+      // Don't attempt to attach the stream to the video element here —
+      // the element doesn't render until state === "live"/"captured"/etc,
+      // so videoRef.current is still null at this moment. The useEffect
+      // below watches `state` and attaches once the element mounts.
       setState("live");
     } catch (err) {
       const name = err instanceof DOMException ? err.name : "Unknown";
@@ -107,9 +107,37 @@ export function CameraCapture({ onCapture, busy = false }: Props) {
     }
   }
 
+  // Attach the live stream to the video element AFTER it mounts.
+  //
+  // This effect fires when `state` transitions into one of the viewport
+  // states (which is the first render where the <video> element exists
+  // in the DOM and videoRef.current is non-null). Without this, the
+  // assignment in startCamera() ran when videoRef.current was still
+  // null, the if-check silently skipped, and the video element rendered
+  // black — that was the original bug.
+  useEffect(() => {
+    if (state !== "live" && state !== "captured" && state !== "processing") return;
+    const video = videoRef.current;
+    const stream = streamRef.current;
+    if (!video || !stream) return;
+    if (video.srcObject === stream) return; // already attached
+    video.srcObject = stream;
+    // play() can reject on iOS if not invoked from a user gesture — but
+    // startCamera() WAS invoked from a tap, so the gesture token carries
+    // through. If it still rejects we swallow it; the user can tap the
+    // capture button which itself counts as a gesture for re-arming.
+    video.play().catch(() => {});
+  }, [state]);
+
   function capture() {
     const video = videoRef.current;
     if (!video) return;
+    // The video element may have mounted but the stream hasn't produced
+    // a first frame yet (videoWidth/Height are 0 until then). Drawing
+    // before that produces an empty data URL that renders as the "?"
+    // broken-image placeholder. Silently no-op — the user will tap
+    // again naturally if nothing happens.
+    if (!video.videoWidth || !video.videoHeight) return;
     const canvas = canvasRef.current ?? document.createElement("canvas");
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -117,6 +145,8 @@ export function CameraCapture({ onCapture, busy = false }: Props) {
     if (!ctx) return;
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+    // Empty canvas serializes to a tiny "data:," — refuse to advance.
+    if (!dataUrl || dataUrl.length < 1000) return;
     setCapturedDataUrl(dataUrl);
     setState("captured");
     // Pause the stream visually but keep it open — retake reuses it
