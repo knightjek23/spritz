@@ -9,6 +9,11 @@ import { stripe, STRIPE_PRICES } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
+// Force dynamic rendering — this route depends on env vars (Stripe key,
+// Clerk session) that aren't available during static analysis. Without
+// this, Next 14's build step can pull the module into "Collecting page
+// data" and trigger Stripe initialization.
+export const dynamic = "force-dynamic";
 
 const Body = z.object({ plan: z.enum(["monthly", "annual"]) });
 

@@ -19,6 +19,10 @@ import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
+// Force dynamic — same reason as /api/stripe/checkout: Next's build step
+// can otherwise pull this module into page-data collection and try to
+// instantiate Stripe before env vars are available.
+export const dynamic = "force-dynamic";
 
 export async function POST() {
   const { userId } = auth();
