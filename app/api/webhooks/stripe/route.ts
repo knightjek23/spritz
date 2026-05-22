@@ -23,6 +23,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type Stripe from "stripe";
 
 export const runtime = "nodejs";
+// Force dynamic — webhook handler must never be statically analyzed.
+export const dynamic = "force-dynamic";
 
 const ENDPOINT_SECRET = process.env.STRIPE_WEBHOOK_SECRET ?? "";
 
