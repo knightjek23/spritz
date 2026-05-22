@@ -37,7 +37,7 @@ const EMPTY_COPY: Record<
   },
   tried: {
     heading: "Track what you've sampled",
-    body: "Mark fragrances you've tried but don't own — useful when you're deciding which one to buy next.",
+    body: "Mark fragrances you've tried but don't own. Useful when you're deciding which one to buy next.",
     ctaHref: "/search",
     ctaLabel: "Find a fragrance",
   },

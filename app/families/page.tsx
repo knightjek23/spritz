@@ -15,7 +15,7 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "Families · Spritz",
   description:
-    "Browse fragrances by family — citrus, floral, woody, oriental, gourmand, leather, and beyond. The shape of the bottle in one word.",
+    "Browse fragrances by family: citrus, floral, woody, oriental, gourmand, leather, and beyond. The shape of the bottle in one word.",
 };
 
 interface DisplayFamily {
@@ -100,7 +100,7 @@ export default async function FamiliesIndexPage() {
                 )}
               </div>
               <span className="font-mono text-xs text-slate shrink-0">
-                {f.count > 0 ? f.count : "—"}
+                {f.count > 0 ? f.count : "0"}
               </span>
             </Link>
           </li>

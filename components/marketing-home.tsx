@@ -22,7 +22,7 @@ export function MarketingHome() {
       </h1>
 
       <p className="text-slate text-lg mb-12 max-w-xs">
-        Point your camera at any bottle. Get the full story — notes, perfumer,
+        Point your camera at any bottle. Get the full story: notes, perfumer,
         longevity, how to wear it.
       </p>
 

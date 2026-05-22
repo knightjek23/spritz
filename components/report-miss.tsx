@@ -78,7 +78,7 @@ export function ReportMiss({ scanEventId, detectedBrand, detectedName }: Props) 
         onClick={() => setOpen(true)}
         className="w-full text-center text-sm text-slate hover:text-ink underline underline-offset-2 py-2 transition"
       >
-        We missed this — tell us about it
+        We missed this. Tell us about it.
       </button>
     );
   }

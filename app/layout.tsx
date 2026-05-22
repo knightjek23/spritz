@@ -21,7 +21,7 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "Spritz — know what you're wearing",
+  title: "Spritz: know what you're wearing",
   description: "Scan a bottle. See its full profile, perfumer, and how to wear it.",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, title: "Spritz", statusBarStyle: "black-translucent" },
@@ -35,16 +35,16 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   openGraph: {
-    title: "Spritz — know what you're wearing",
+    title: "Spritz: know what you're wearing",
     description:
-      "The fragrance encyclopedia. Scan any bottle to read its full story — notes, perfumer, longevity, how to wear it.",
+      "The fragrance encyclopedia. Scan any bottle to read its full story: notes, perfumer, longevity, how to wear it.",
     siteName: "Spritz",
     type: "website",
     images: [{ url: "/icon-512.png", width: 512, height: 512, alt: "Spritz" }],
   },
   twitter: {
     card: "summary",
-    title: "Spritz — know what you're wearing",
+    title: "Spritz: know what you're wearing",
     description: "The fragrance encyclopedia, in your pocket.",
     images: ["/icon-512.png"],
   },

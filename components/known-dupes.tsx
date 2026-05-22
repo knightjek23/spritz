@@ -69,7 +69,7 @@ export function KnownDupes({
       <section className="mb-10">
         <h2 className="font-display text-2xl mb-2">Known dupes</h2>
         <p className="text-sm text-slate mb-4">
-          Fragrances the community references as similar — usually at a lower price point.
+          Fragrances the community references as similar, usually at a lower price point.
           Not exact replicas; close-enough scent profiles for a fraction of the cost.
         </p>
         <ul className="space-y-3">

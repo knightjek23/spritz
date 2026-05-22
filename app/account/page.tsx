@@ -30,7 +30,7 @@ export default async function AccountPage() {
   if (!userId) redirect("/sign-in");
 
   const clerkUser = await currentUser();
-  const email = clerkUser?.emailAddresses[0]?.emailAddress ?? "—";
+  const email = clerkUser?.emailAddresses[0]?.emailAddress ?? "Not set";
 
   const supabase = createAdminClient();
 
@@ -106,7 +106,7 @@ export default async function AccountPage() {
                 <ManageSubscriptionButton />
               ) : (
                 <p className="text-sm text-slate italic">
-                  Subscription managed externally — contact support to make changes.
+                  Subscription managed externally. Contact support to make changes.
                 </p>
               )}
             </>

@@ -256,7 +256,7 @@ function ScoreBar({
             <span className="text-slate"> / 10{unit ? ` (${unit})` : ""}</span>
           </>
         ) : (
-          <span className="text-slate">—</span>
+          <span className="text-slate">Not measured</span>
         )}
       </p>
       {confidenceLabel && (

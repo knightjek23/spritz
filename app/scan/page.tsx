@@ -91,7 +91,7 @@ export default function ScanPage() {
             Couldn&apos;t scan: {error}.
           </p>
           <p className="text-sm text-ink">
-            Lighting and angle matter — try a flatter shot of the label, then{" "}
+            Lighting and angle matter. Try a flatter shot of the label, then{" "}
             <button
               type="button"
               onClick={() => setError(null)}

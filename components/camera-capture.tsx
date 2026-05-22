@@ -201,7 +201,7 @@ export function CameraCapture({ onCapture, busy = false }: Props) {
           Use your camera
         </div>
         <p className="text-sm text-cream/70 mb-6 max-w-[240px]">
-          We&apos;ll ask for camera access — only used while you&apos;re here,
+          We&apos;ll ask for camera access. Only used while you&apos;re here,
           never sent anywhere except as part of the scan.
         </p>
         <button

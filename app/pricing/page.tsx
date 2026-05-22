@@ -57,27 +57,27 @@ const FEATURE_MATRIX: Array<{ label: string; free: string; pro: string }> = [
   },
   {
     label: "AI-generated dupes on demand",
-    free: "—",
+    free: "Not included",
     pro: "Unlimited",
   },
   {
     label: "Perfumer credits + house history",
-    free: "—",
+    free: "Not included",
     pro: "Every fragrance",
   },
   {
     label: "Note flavor profiles",
-    free: "—",
+    free: "Not included",
     pro: "All notes, expanded",
   },
   {
     label: "Wishlist sale alerts",
-    free: "—",
+    free: "Not included",
     pro: "Included",
   },
   {
     label: "Priority scan queue",
-    free: "—",
+    free: "Not included",
     pro: "Included",
   },
 ];
@@ -85,7 +85,7 @@ const FEATURE_MATRIX: Array<{ label: string; free: string; pro: string }> = [
 const FAQ: Array<{ q: string; a: string }> = [
   {
     q: "Can I cancel anytime?",
-    a: "Yes. Cancel from any device and you keep Pro access until the end of your current billing period. After that you drop back to Free — your collection stays intact, just capped at 25 items going forward.",
+    a: "Yes. Cancel from any device and you keep Pro access until the end of your current billing period. After that you drop back to Free. Your collection stays intact, just capped at 25 items going forward.",
   },
   {
     q: "What's a dupe, exactly?",
@@ -93,7 +93,7 @@ const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: "Is there a free trial?",
-    a: "Not formally — the Free plan IS the trial. You can scan unlimited bottles, see notes, save up to 25 fragrances, and get curated dupes without paying anything. Pro unlocks the deeper editorial layer and on-demand AI dupes when you're ready.",
+    a: "Not formally. The Free plan IS the trial. You can scan unlimited bottles, see notes, save up to 25 fragrances, and get curated dupes without paying anything. Pro unlocks the deeper editorial layer and on-demand AI dupes when you're ready.",
   },
   {
     q: "Do you sell my data?",
@@ -208,7 +208,7 @@ export default function PricingPage() {
         )}
 
         <p className="mt-3 text-center font-mono text-xs uppercase tracking-widest text-slate">
-          {isSignedIn ? "Secure checkout via Stripe" : "Sign up first — takes 30 seconds"}
+          {isSignedIn ? "Secure checkout via Stripe" : "Sign up first. Takes 30 seconds."}
         </p>
       </div>
 

@@ -129,7 +129,7 @@ export async function disambiguateByImage(
   // value GPT will return for match_index, which is also the candidate's
   // position in the image array we send below.
   const candidateList = candidates
-    .map((c, i) => `${i}. ${c.brand} — ${c.name}`)
+    .map((c, i) => `${i}. ${c.brand}: ${c.name}`)
     .join("\n");
 
   const prompt = DISAMBIGUATE_PROMPT.replace("{{LIST}}", candidateList);

@@ -123,7 +123,7 @@ export default async function HousesIndexPage() {
                       </div>
                     </div>
                     <span className="font-mono text-xs text-slate shrink-0">
-                      {h.count > 0 ? `${h.count}` : "—"}
+                      {h.count > 0 ? `${h.count}` : "0"}
                     </span>
                   </Link>
                 </li>
@@ -137,7 +137,7 @@ export default async function HousesIndexPage() {
         <section className="mb-10">
           <h2 className="font-display text-2xl mb-1">Also in the catalog</h2>
           <p className="text-sm text-slate mb-4">
-            Houses with fragrances in our database — editorial coming.
+            Houses with fragrances in our database. Editorial coming.
           </p>
           <ul className="flex flex-wrap gap-2">
             {catalogOnly.slice(0, 60).map((h) => (
@@ -156,7 +156,7 @@ export default async function HousesIndexPage() {
           </ul>
           {catalogOnly.length > 60 && (
             <p className="mt-4 text-xs font-mono uppercase tracking-widest text-slate">
-              + {catalogOnly.length - 60} more — refine via search
+              + {catalogOnly.length - 60} more. Refine via search.
             </p>
           )}
         </section>
