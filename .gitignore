@@ -49,3 +49,7 @@ supabase/.temp
 # IDE
 .vscode/
 .idea/
+
+# screenshots: regenerated locally, never committed
+/screenshots/
+/.auth/

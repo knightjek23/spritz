@@ -10,7 +10,9 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "db:migrate": "npx supabase db push",
-    "db:reset": "npx supabase db reset"
+    "db:reset": "npx supabase db reset",
+    "screenshots:auth": "node scripts/screenshots/auth.mjs",
+    "screenshots": "node scripts/screenshots/capture.mjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^5.7.0",
@@ -31,6 +33,7 @@
     "autoprefixer": "^10.4.20",
     "eslint": "^8.57.1",
     "eslint-config-next": "14.2.33",
+    "playwright": "^1.60.0",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.13",
     "typescript": "^5.6.2"

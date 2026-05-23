@@ -6,7 +6,7 @@ year: 2015
 perfumer: Francis Kurkdjian
 how_to_wear:
   occasions: [evening, going out, cooler weather]
-  how_to_wear: Surprisingly versatile for something this distinctive. Use sparingly — it projects hard.
+  how_to_wear: Surprisingly versatile for something this distinctive. Use sparingly. It projects hard.
   layering_notes: Built to be its own statement. Layering tends to clash with the saffron-jasmine accord.
 dupes:
   - house: Maison Alhambra
@@ -18,12 +18,12 @@ dupes:
     name: Yara
     similarity: close
     price_tier: budget
-    note: Sweeter and more candied than BR540 — closer to the "burnt cotton candy" caricature than to the actual original. Good if you wanted BR540 to be louder and gourmandier.
+    note: Sweeter and more candied than BR540, closer to the "burnt cotton candy" caricature than to the actual original. Good if you wanted BR540 to be louder and gourmandier.
   - house: Armaf
     name: Ventana Diamond
     similarity: close
     price_tier: budget
-    note: Solid BR540 reference — saffron and amber prominent, slightly drier finish.
+    note: Solid BR540 reference: saffron and amber prominent, slightly drier finish.
 ---
 
-Baccarat Rouge 540 was originally a limited collaboration between Kurkdjian and the Baccarat crystal house for the brand's 250th anniversary; it became permanent when demand made the limited run untenable. The fragrance is built around a saffron-jasmine-amber accord that smells faintly of warm sugar, woodsmoke, and metal — instantly recognizable and almost impossible to mistake for anything else. It defined a decade of niche perfumery; the clones are now a category of their own. The polarizing quality is real: people either find it transcendent or describe it as "burnt cotton candy."
+Baccarat Rouge 540 was originally a limited collaboration between Kurkdjian and the Baccarat crystal house for the brand's 250th anniversary; it became permanent when demand made the limited run untenable. The fragrance is built around a saffron-jasmine-amber accord that smells faintly of warm sugar, woodsmoke, and metal. Instantly recognizable and almost impossible to mistake for anything else. It defined a decade of niche perfumery; the clones are now a category of their own. The polarizing quality is real: people either find it transcendent or describe it as "burnt cotton candy."
