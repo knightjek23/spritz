@@ -1,22 +1,28 @@
 "use client";
 
-// Scan flow. Day 1 scaffold: file-input camera capture so the page works
-// on iOS Safari and Chrome Android out of the box. Day 6 will polish to
-// a full-bleed getUserMedia camera with corner-bracket guides.
+// /scan — full-screen camera takeover.
 //
-// Signed-out behavior: scanning still works (catalog reads are public),
-// but we surface a soft prompt that signing in saves the scan history
-// and lets the user add the match to a collection.
+// In the default state, this page mounts the CameraCapture component
+// which renders a fixed-position, full-bleed camera UI (matching the
+// Figma design). The h1/subtitle that used to live above the camera are
+// gone: the camera IS the page.
 //
-// No-match flow: we tell the user what was read, offer a search fallback,
-// and offer a "still can't find it" path that lets them stash the OCR
-// result so we can backfill the catalog later (via the unmatched_scans
-// summary view).
+// On a successful scan:
+//   - Match           → router.push(`/fragrance/${id}`) inside onCapture,
+//                       and CameraCapture is unmounted as the page navigates.
+//   - Disambiguation  → `result` is set with candidates; CameraCapture
+//                       unmounts and we show the picker beneath the page's
+//                       (now-visible) cream surface.
+//   - No match        → same picker UI, but the copy and the catalog-gap
+//                       report ("we missed this") take over.
+//
+// CameraCapture stays mounted only while !result, so the live camera
+// indicator is properly torn down the moment a scan resolves.
 
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { SignedIn, SignedOut } from "@clerk/nextjs";
+import { SignedOut } from "@clerk/nextjs";
 import { ReportMiss } from "@/components/report-miss";
 import { CameraCapture } from "@/components/camera-capture";
 import type { ScanResult } from "@/lib/types";
@@ -29,7 +35,7 @@ export default function ScanPage() {
 
   // Single capture handler — CameraCapture passes raw base64 (already
   // stripped of the data: prefix), so we just POST and dispatch on the
-  // ScanResult. Identical contract to the previous file-input flow.
+  // ScanResult shape.
   async function onCapture(base64: string) {
     setBusy(true);
     setError(null);
@@ -49,10 +55,14 @@ export default function ScanPage() {
 
       const r = data as ScanResult;
       if (r.matched) {
+        // Direct hand-off to the encyclopedia page. CameraCapture is
+        // unmounted as the navigation completes.
         router.push(`/fragrance/${r.matched.id}`);
         return;
       }
-      setResult(r); // disambiguation picker
+      // Miss → set result so the no-match panel renders and the camera
+      // unmounts cleanly.
+      setResult(r);
     } catch (e) {
       setError(String(e));
     } finally {
@@ -60,136 +70,138 @@ export default function ScanPage() {
     }
   }
 
-  return (
-    <div className="mx-auto max-w-md px-6 py-12">
-      <h1 className="font-display text-3xl mb-2">Scan a bottle</h1>
-      <p className="text-slate text-sm mb-6">
-        Point at the label. We&apos;ll read the brand and name in a second or two.
-      </p>
-
-      {/* Live camera viewport with bracket guides + tap-to-capture.
-          CameraCapture handles permission flow, fallback to file input,
-          and the captured/retake/confirm cycle internally. */}
-      <CameraCapture onCapture={onCapture} busy={busy} />
-
-      {/* Soft sign-in nudge — only shown to signed-out users, only before
-          they've scanned anything. Non-blocking. */}
-      <SignedOut>
-        {!busy && !result && !error && (
-          <p className="mt-6 text-sm text-slate text-center">
-            <Link href="/sign-up" className="text-emerald underline underline-offset-2">
-              Sign up free
-            </Link>{" "}
-            to save scans, track what you own, and build a wishlist.
-          </p>
-        )}
-      </SignedOut>
-
-      {error && (
-        <div className="mt-6 p-4 rounded-xl border border-burgundy/30 bg-burgundy/5">
-          <p className="text-burgundy text-sm mb-1">
-            Couldn&apos;t scan: {error}.
-          </p>
-          <p className="text-sm text-ink">
-            Lighting and angle matter. Try a flatter shot of the label, then{" "}
-            <button
-              type="button"
-              onClick={() => setError(null)}
-              className="text-emerald underline underline-offset-2"
-            >
-              try again
-            </button>{" "}
-            or{" "}
-            <Link href="/search" className="text-emerald underline underline-offset-2">
-              search by name
-            </Link>
-            .
-          </p>
-        </div>
-      )}
-
-      {result && !result.matched && (
-        <div className="mt-8">
-          <p className="text-sm text-ink mb-3">
-            We read{" "}
-            <span className="font-medium">
-              &ldquo;{result.detected_brand} {result.detected_name}&rdquo;
-            </span>
-            . Pick the closest match:
-          </p>
-          <ul className="space-y-2">
-            {result.candidates.map((c) => (
-              <li key={c.fragrance.id}>
-                <Link
-                  href={`/fragrance/${c.fragrance.id}`}
-                  className="block px-4 py-3 rounded-xl border border-ink/15 hover:bg-ink/5"
+  // ============== Camera mode ==============
+  // While there's no result, the camera owns the whole screen. The error
+  // banner is overlaid as a sticky-bottom strip so the user can see it
+  // without leaving the camera surface.
+  if (!result) {
+    return (
+      <>
+        <CameraCapture onCapture={onCapture} busy={busy} />
+        {error && (
+          <div className="fixed left-0 right-0 bottom-28 mx-auto max-w-sm z-[60] px-4">
+            <div className="p-4 rounded-xl border border-burgundy/40 bg-cream shadow-lg">
+              <p className="text-burgundy text-sm mb-1">
+                Couldn&apos;t scan: {error}.
+              </p>
+              <p className="text-sm text-ink">
+                Lighting and angle matter. Try a flatter shot, then{" "}
+                <button
+                  type="button"
+                  onClick={() => setError(null)}
+                  className="text-emerald underline underline-offset-2"
                 >
-                  <div className="font-medium">{c.fragrance.name}</div>
-                  <div className="text-xs text-slate">
-                    {c.fragrance.house} · {Math.round(c.confidence * 100)}% match
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
-
-          {/* Either we found zero candidates, OR none of the ones we found
-              looked right — give the user a graceful out either way. */}
-          <div className="mt-6 pt-6 border-t border-ink/10">
-            <p className="text-sm text-ink mb-1 font-medium">
-              {result.candidates.length === 0
-                ? "Nothing close in our catalog yet."
-                : "Not the one?"}
-            </p>
-            <p className="text-sm text-slate mb-4 leading-relaxed">
-              We log every miss and use them to prioritize what to add next.
-              In the meantime, you can search by name in case the OCR misread
-              something.
-            </p>
-            <div className="flex flex-col gap-2">
-              <Link
-                href={`/search?q=${encodeURIComponent(
-                  `${result.detected_brand ?? ""} ${result.detected_name ?? ""}`.trim(),
-                )}`}
-                className="text-center px-4 py-3 rounded-xl bg-emerald text-cream font-medium hover:bg-emerald/90 transition"
-              >
-                Search the catalog
-              </Link>
-              <SignedIn>
+                  try again
+                </button>{" "}
+                or{" "}
                 <Link
-                  href="/scan"
-                  className="text-center px-4 py-3 rounded-xl border border-ink/15 text-ink font-medium hover:bg-ink/5 transition"
-                  onClick={() => {
-                    setResult(null);
-                    setError(null);
-                  }}
+                  href="/search"
+                  className="text-emerald underline underline-offset-2"
                 >
-                  Try another bottle
+                  search by name
                 </Link>
-              </SignedIn>
-              <SignedOut>
-                <Link
-                  href="/sign-up"
-                  className="text-center text-xs text-slate hover:text-ink transition py-2"
-                >
-                  Sign up to save your scan history
-                </Link>
-              </SignedOut>
-            </div>
-
-            {/* Catalog gap report. Sits below the primary actions so it
-                doesn't compete, but it's the highest-signal input we get
-                for what to scrape/write editorial for next. */}
-            <div className="mt-6">
-              <ReportMiss
-                scanEventId={result.scan_event_id}
-                detectedBrand={result.detected_brand}
-                detectedName={result.detected_name}
-              />
+                .
+              </p>
             </div>
           </div>
-        </div>
+        )}
+      </>
+    );
+  }
+
+  // ============== Disambiguation / miss panel ==============
+  // Shown when the scan returned candidates but none auto-matched, OR
+  // when no candidates came back at all. The camera is unmounted at this
+  // point — this is a normal scrollable page.
+  return (
+    <div className="mx-auto max-w-md px-6 py-12">
+      <header className="mb-6">
+        <p className="font-mono text-xs uppercase tracking-widest text-slate mb-2">
+          Scan result
+        </p>
+        <h1 className="font-display text-3xl">
+          {result.candidates.length > 0 ? "Pick the closest match" : "We didn’t catch that"}
+        </h1>
+      </header>
+
+      <p className="text-sm text-ink mb-4">
+        We read{" "}
+        <span className="font-medium">
+          &ldquo;{result.detected_brand} {result.detected_name}&rdquo;
+        </span>
+        .
+      </p>
+
+      {result.candidates.length > 0 && (
+        <ul className="space-y-2 mb-6">
+          {result.candidates.map((c) => (
+            <li key={c.fragrance.id}>
+              <Link
+                href={`/fragrance/${c.fragrance.id}`}
+                className="block px-4 py-3 rounded-xl border border-ink/15 hover:bg-ink/5"
+              >
+                <div className="font-medium">{c.fragrance.name}</div>
+                <div className="text-xs text-slate">
+                  {c.fragrance.house} · {Math.round(c.confidence * 100)}% match
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
       )}
+
+      {/* Either zero candidates, or none of the ones we found looked right.
+          Either way, give the user a graceful out. */}
+      <div className="pt-6 border-t border-ink/10">
+        <p className="text-sm text-ink mb-1 font-medium">
+          {result.candidates.length === 0
+            ? "Nothing close in our catalog yet."
+            : "Not the one?"}
+        </p>
+        <p className="text-sm text-slate mb-4 leading-relaxed">
+          We log every miss and use them to prioritize what to add next. In
+          the meantime, you can search by name in case the OCR misread
+          something.
+        </p>
+        <div className="flex flex-col gap-2">
+          <Link
+            href={`/search?q=${encodeURIComponent(
+              `${result.detected_brand ?? ""} ${result.detected_name ?? ""}`.trim(),
+            )}`}
+            className="text-center px-4 py-3 rounded-xl bg-emerald text-cream font-medium hover:bg-emerald/90 transition"
+          >
+            Search the catalog
+          </Link>
+          <button
+            type="button"
+            onClick={() => {
+              setResult(null);
+              setError(null);
+            }}
+            className="text-center px-4 py-3 rounded-xl border border-ink/15 text-ink font-medium hover:bg-ink/5 transition"
+          >
+            Try another bottle
+          </button>
+          <SignedOut>
+            <Link
+              href="/sign-up"
+              className="text-center text-xs text-slate hover:text-ink transition py-2"
+            >
+              Sign up to save your scan history
+            </Link>
+          </SignedOut>
+        </div>
+
+        {/* Catalog gap report — highest-signal input for what to scrape /
+            write editorial for next. */}
+        <div className="mt-6">
+          <ReportMiss
+            scanEventId={result.scan_event_id}
+            detectedBrand={result.detected_brand}
+            detectedName={result.detected_name}
+          />
+        </div>
+      </div>
     </div>
   );
 }

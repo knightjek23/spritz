@@ -1,27 +1,34 @@
 "use client";
 
-// CameraCapture — getUserMedia viewport with corner bracket guides,
-// tap-to-capture, retake/use confirmation. Falls back gracefully to a
-// file input on browsers that block or don't support the camera API
-// (typically older iOS / desktop privacy-mode).
+// CameraCapture — full-screen native-camera-style scan UI.
+//
+// Layout matches the Figma design (node 23:1879):
+//   - Top bar: X close (left) + flash toggle (right). Cream background.
+//   - Middle: cream viewport. In intro state, glass card overlays with
+//     "Use your camera" prompt + Enable camera + OR UPLOAD A PHOTO. In
+//     live state, the video stream fills the middle. In captured /
+//     processing, the frozen frame fills the middle.
+//   - Bottom tray: gallery thumbnail (left, opens file picker) + emerald
+//     shutter (center) + camera switch (right). Cream background.
 //
 // State machine:
-//   intro      — pre-permission landing. Shows the value prop + "Use
-//                camera" button. Avoids triggering the browser permission
-//                prompt before the user has any context.
-//   starting   — getUserMedia request in flight
-//   live       — stream attached, viewport active, capture button armed
-//   captured   — frame frozen on canvas, "Use this / Retake" decision
-//   processing — onCapture callback running (scan in progress)
-//   error      — getUserMedia failed (denial, no device, etc.)
-//   fallback   — file input only. Browsers without mediaDevices API land
-//                here on mount.
+//   intro      — pre-permission. Glass card prompts the user. Tapping the
+//                shutter OR the Enable camera button starts the camera.
+//   starting   — getUserMedia request in flight (brief, usually <1s).
+//   live       — stream attached, viewport active, shutter armed.
+//   captured   — frame frozen on canvas (visible during processing).
+//   processing — onCapture callback running. Parent routes to result.
+//   error      — getUserMedia failed (denial, no device). Glass card
+//                shows the message + fallback path (upload).
+//   fallback   — no mediaDevices API. Glass card prompts upload only.
 //
-// Parent contract: pass an `onCapture(base64)` callback. The base64 is
-// stripped of the `data:image/jpeg;base64,` prefix to match what the
-// /api/scan endpoint expects.
+// Parent contract: pass `onCapture(base64)`. The base64 is stripped of
+// the `data:image/jpeg;base64,` prefix to match /api/scan's expected
+// shape. Tap-to-scan is immediate: capture → process → parent navigates,
+// no intermediate Use this / Retake step.
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type State =
   | "intro"
@@ -32,24 +39,38 @@ type State =
   | "error"
   | "fallback";
 
+type FacingMode = "environment" | "user";
+
 interface Props {
-  /** Called with raw base64 (no data: prefix) once the user confirms a capture. */
+  /** Called with raw base64 (no data: prefix) once a frame is captured. */
   onCapture: (base64: string) => Promise<void> | void;
-  /** When true, the component shows a processing overlay instead of the capture UI. */
+  /** When true, shows a processing overlay regardless of internal state. */
   busy?: boolean;
 }
 
+// `torch` isn't in the lib.dom.d.ts shape for MediaTrackCapabilities /
+// MediaTrackConstraintSet, but it's a real (widely shipped) constraint
+// on Chromium-based mobile browsers. We narrow with a cast at each use
+// site to avoid polluting global types.
+type TorchCapabilities = MediaTrackCapabilities & { torch?: boolean };
+type TorchConstraint = MediaTrackConstraintSet & { torch?: boolean };
+
 export function CameraCapture({ onCapture, busy = false }: Props) {
+  const router = useRouter();
   const [state, setState] = useState<State>("intro");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [capturedDataUrl, setCapturedDataUrl] = useState<string | null>(null);
+  const [facingMode, setFacingMode] = useState<FacingMode>("environment");
+  const [flashOn, setFlashOn] = useState(false);
+  const [flashSupported, setFlashSupported] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Detect API support once on mount. Server-rendered first paint will
-  // always show "intro" — the support check happens after hydration.
+  // Detect API support once on mount. SSR-friendly: first paint is always
+  // "intro"; the fallback flip happens after hydration.
   useEffect(() => {
     if (
       typeof navigator === "undefined" ||
@@ -59,9 +80,8 @@ export function CameraCapture({ onCapture, busy = false }: Props) {
     }
   }, []);
 
-  // Clean up the media stream on unmount or when we leave live/captured
-  // state. Forgetting this leaks the camera indicator and keeps the LED
-  // on between scans.
+  // Stop the camera on unmount. Forgetting this leaks the device LED and
+  // browser indicator between scans.
   useEffect(() => {
     return () => {
       streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -74,31 +94,54 @@ export function CameraCapture({ onCapture, busy = false }: Props) {
     streamRef.current = null;
   }, []);
 
-  async function startCamera() {
-    setState("starting");
-    setErrorMessage(null);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
+  // Internal: spin up getUserMedia with the current facingMode. Used by
+  // both startCamera() and switchCamera() so the constraint shape stays
+  // in one place.
+  const requestStream = useCallback(
+    async (mode: FacingMode): Promise<MediaStream> => {
+      return navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: { ideal: "environment" },
-          // 1280x720 is plenty for OCR; requesting higher inflates the
-          // base64 payload without improving GPT-4o accuracy meaningfully.
+          facingMode: { ideal: mode },
+          // 1280x720 is plenty for OCR; higher inflates the base64 payload
+          // without measurably improving GPT-4o accuracy.
           width: { ideal: 1280 },
           height: { ideal: 720 },
         },
         audio: false,
       });
+    },
+    [],
+  );
+
+  // Check whether the active track exposes a torch capability. We only
+  // surface the flash toggle if it does — most desktop webcams and some
+  // mobile browsers don't expose it.
+  const detectFlashSupport = useCallback((stream: MediaStream) => {
+    const track = stream.getVideoTracks()[0];
+    if (!track || typeof track.getCapabilities !== "function") {
+      setFlashSupported(false);
+      return;
+    }
+    const caps = track.getCapabilities() as TorchCapabilities;
+    setFlashSupported(Boolean(caps.torch));
+  }, []);
+
+  async function startCamera() {
+    setState("starting");
+    setErrorMessage(null);
+    try {
+      const stream = await requestStream(facingMode);
       streamRef.current = stream;
-      // Don't attempt to attach the stream to the video element here —
-      // the element doesn't render until state === "live"/"captured"/etc,
-      // so videoRef.current is still null at this moment. The useEffect
+      detectFlashSupport(stream);
+      // Don't attach the stream here — the <video> element only renders
+      // when state advances to "live"/"captured"/"processing". The effect
       // below watches `state` and attaches once the element mounts.
       setState("live");
     } catch (err) {
       const name = err instanceof DOMException ? err.name : "Unknown";
       setErrorMessage(
         name === "NotAllowedError"
-          ? "Camera permission was denied. You can still upload a photo below."
+          ? "Camera permission was denied. You can still upload a photo."
           : name === "NotFoundError"
           ? "No camera found on this device. Upload a photo instead."
           : "Couldn't start the camera. Upload a photo instead.",
@@ -107,36 +150,24 @@ export function CameraCapture({ onCapture, busy = false }: Props) {
     }
   }
 
-  // Attach the live stream to the video element AFTER it mounts.
-  //
-  // This effect fires when `state` transitions into one of the viewport
-  // states (which is the first render where the <video> element exists
-  // in the DOM and videoRef.current is non-null). Without this, the
-  // assignment in startCamera() ran when videoRef.current was still
-  // null, the if-check silently skipped, and the video element rendered
-  // black — that was the original bug.
+  // Attach the live stream to the video element AFTER it mounts. The old
+  // bug (silent black viewport) was caused by attaching before the video
+  // element existed in the DOM; this effect fires the moment it does.
   useEffect(() => {
     if (state !== "live" && state !== "captured" && state !== "processing") return;
     const video = videoRef.current;
     const stream = streamRef.current;
     if (!video || !stream) return;
-    if (video.srcObject === stream) return; // already attached
+    if (video.srcObject === stream) return;
     video.srcObject = stream;
-    // play() can reject on iOS if not invoked from a user gesture — but
-    // startCamera() WAS invoked from a tap, so the gesture token carries
-    // through. If it still rejects we swallow it; the user can tap the
-    // capture button which itself counts as a gesture for re-arming.
-    video.play().catch(() => {});
+    video.play().catch(() => {
+      /* play() can reject on iOS without a fresh gesture — non-fatal */
+    });
   }, [state]);
 
   function capture() {
     const video = videoRef.current;
     if (!video) return;
-    // The video element may have mounted but the stream hasn't produced
-    // a first frame yet (videoWidth/Height are 0 until then). Drawing
-    // before that produces an empty data URL that renders as the "?"
-    // broken-image placeholder. Silently no-op — the user will tap
-    // again naturally if nothing happens.
     if (!video.videoWidth || !video.videoHeight) return;
     const canvas = canvasRef.current ?? document.createElement("canvas");
     canvas.width = video.videoWidth;
@@ -145,101 +176,145 @@ export function CameraCapture({ onCapture, busy = false }: Props) {
     if (!ctx) return;
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
-    // Empty canvas serializes to a tiny "data:," — refuse to advance.
     if (!dataUrl || dataUrl.length < 1000) return;
     setCapturedDataUrl(dataUrl);
-    setState("captured");
-    // Pause the stream visually but keep it open — retake reuses it
-    // without re-prompting for permission.
-    video.pause();
-  }
-
-  function retake() {
-    setCapturedDataUrl(null);
-    setState("live");
-    videoRef.current?.play().catch(() => {});
-  }
-
-  async function confirm() {
-    if (!capturedDataUrl) return;
     setState("processing");
-    const base64 = capturedDataUrl.split(",")[1] ?? capturedDataUrl;
-    try {
-      await onCapture(base64);
-      // Parent navigates on success. If we get here, parent didn't —
-      // reset to live so the user can try another shot.
-      retake();
-    } catch {
-      // Parent should display its own error; we just reset.
-      retake();
-    }
+    video.pause();
+    const base64 = dataUrl.split(",")[1] ?? dataUrl;
+    void Promise.resolve(onCapture(base64)).catch(() => {
+      // Parent surfaces its own error; reset so the user can try again.
+      setState("live");
+      setCapturedDataUrl(null);
+      videoRef.current?.play().catch(() => {});
+    });
   }
 
-  function handleFileFallback(file: File) {
+  function handleFile(file: File) {
     const reader = new FileReader();
     reader.onload = async () => {
       const result = String(reader.result);
       const base64 = result.split(",")[1] ?? result;
+      setCapturedDataUrl(result);
       setState("processing");
       try {
         await onCapture(base64);
-      } finally {
-        // Parent navigates on success; reset our local state regardless.
-        setState((s) => (s === "processing" ? "fallback" : s));
+        // Parent navigates on match. On miss, parent unmounts this
+        // component; either way nothing more to do.
+      } catch {
+        setState("intro");
+        setCapturedDataUrl(null);
       }
     };
     reader.readAsDataURL(file);
   }
 
-  // ---- Rendering branches ----
+  function openGallery() {
+    fileInputRef.current?.click();
+  }
 
-  // Intro — pre-permission. Show context, let user opt in.
-  if (state === "intro") {
-    return (
-      <div className="rounded-3xl overflow-hidden border border-ink/10 bg-ink/90 text-cream p-8 text-center aspect-[3/4] flex flex-col justify-center items-center">
-        <div className="font-display text-2xl leading-tight mb-3">
-          Use your camera
-        </div>
-        <p className="text-sm text-cream/70 mb-6 max-w-[240px]">
-          We&apos;ll ask for camera access. Only used while you&apos;re here,
-          never sent anywhere except as part of the scan.
-        </p>
+  async function toggleFlash() {
+    const track = streamRef.current?.getVideoTracks()[0];
+    if (!track) return;
+    const next = !flashOn;
+    try {
+      await track.applyConstraints({
+        advanced: [{ torch: next } as TorchConstraint],
+      });
+      setFlashOn(next);
+    } catch {
+      // Some browsers advertise torch capability but reject applyConstraints
+      // — silently hide the affordance going forward.
+      setFlashSupported(false);
+    }
+  }
+
+  async function switchCamera() {
+    const next: FacingMode = facingMode === "environment" ? "user" : "environment";
+    // Stop the current stream before requesting a new one — keeps the
+    // device's camera indicator from flickering between two open streams.
+    stopStream();
+    setFlashOn(false);
+    setFacingMode(next);
+    try {
+      const stream = await requestStream(next);
+      streamRef.current = stream;
+      detectFlashSupport(stream);
+      // Force a re-attach by toggling state out and back — videoRef is
+      // already mounted, so we just need the attach effect to fire again.
+      const video = videoRef.current;
+      if (video) {
+        video.srcObject = stream;
+        video.play().catch(() => {});
+      }
+    } catch {
+      setErrorMessage("Couldn't switch cameras on this device.");
+      setState("error");
+    }
+  }
+
+  function close() {
+    stopStream();
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/");
+    }
+  }
+
+  // ---- Render ----
+
+  // Shutter behavior depends on state: in intro it starts the camera, in
+  // live it captures. Other states render the shutter as a visual element
+  // (intentionally inactive — capture is mid-flight).
+  const shutterAction =
+    state === "intro" ? startCamera : state === "live" ? capture : undefined;
+  const shutterDisabled = !shutterAction || state === "starting";
+
+  return (
+    <div className="fixed inset-0 z-50 bg-cream flex flex-col">
+      {/* Top bar — solid cream, X left, flash right. Flash only when live + supported. */}
+      <header className="flex items-center justify-between px-6 py-2 bg-cream shrink-0">
         <button
           type="button"
-          onClick={startCamera}
-          className="px-6 py-3 rounded-xl bg-emerald text-cream font-medium hover:bg-emerald/90 transition"
+          onClick={close}
+          aria-label="Close scanner"
+          className="w-8 h-8 flex items-center justify-center text-ink hover:text-emerald transition"
         >
-          Enable camera
+          <CloseIcon />
         </button>
-        <FileFallbackLink onFile={handleFileFallback} label="Or upload a photo" />
-      </div>
-    );
-  }
 
-  if (state === "starting") {
-    return (
-      <div className="rounded-3xl overflow-hidden bg-ink/90 text-cream aspect-[3/4] flex items-center justify-center">
-        <p className="text-sm text-cream/70 animate-pulse">Starting camera…</p>
-      </div>
-    );
-  }
+        {state === "live" && flashSupported ? (
+          <button
+            type="button"
+            onClick={toggleFlash}
+            aria-label={flashOn ? "Turn flash off" : "Turn flash on"}
+            aria-pressed={flashOn}
+            className="w-6 h-6 flex items-center justify-center text-ink hover:text-emerald transition"
+          >
+            {flashOn ? <FlashOnIcon /> : <FlashOffIcon />}
+          </button>
+        ) : (
+          /* Reserve the space so the X stays anchored left */
+          <span aria-hidden className="w-6 h-6" />
+        )}
+      </header>
 
-  // Live + captured share the same viewport scaffold so the corner
-  // brackets stay registered to the same pixels during the freeze.
-  if (state === "live" || state === "captured" || state === "processing") {
-    return (
-      <div className="relative rounded-3xl overflow-hidden bg-ink aspect-[3/4]">
-        {/* Video stream — kept mounted in `captured` state so retake is instant.
-            object-cover fills the 3:4 frame without letterboxing. */}
-        <video
-          ref={videoRef}
-          playsInline
-          muted
-          autoPlay
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        {/* Frozen capture overlay — shown only when captured */}
-        {state !== "live" && capturedDataUrl && (
+      {/* Middle viewport — fills the space between top bar and bottom tray. */}
+      <div className="flex-1 relative overflow-hidden bg-cream">
+        {/* Live video — kept mounted across live/captured/processing so the
+            same DOM node is reused and the stream doesn't tear. */}
+        {(state === "live" || state === "captured" || state === "processing") && (
+          <video
+            ref={videoRef}
+            playsInline
+            muted
+            autoPlay
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        )}
+
+        {/* Frozen capture — overlays the video during captured/processing. */}
+        {(state === "captured" || state === "processing") && capturedDataUrl && (
           <img
             src={capturedDataUrl}
             alt=""
@@ -247,161 +322,259 @@ export function CameraCapture({ onCapture, busy = false }: Props) {
           />
         )}
 
-        {/* Bracket guides + hint — live state only */}
-        {state === "live" && (
-          <>
-            <BracketOverlay />
-            <p className="absolute top-6 left-0 right-0 text-center text-cream/85 text-sm font-mono uppercase tracking-widest">
-              Frame the label
+        {/* Glass card — intro state. Centered on the cream viewport. */}
+        {state === "intro" && (
+          <GlassCard>
+            <h1 className="font-display text-2xl text-ink leading-tight text-center">
+              Use your camera
+            </h1>
+            <p className="text-[13px] font-light text-ink/80 text-center leading-snug">
+              We&apos;ll ask for camera access. Only used while you&apos;re here,
+              never sent anywhere except as part of the scan.
             </p>
-          </>
+            <button
+              type="button"
+              onClick={startCamera}
+              className="px-8 py-3 rounded-md bg-emerald text-cream text-base font-light hover:bg-emerald/90 transition"
+            >
+              Enable camera
+            </button>
+            <button
+              type="button"
+              onClick={openGallery}
+              className="text-[13px] font-light uppercase tracking-wider text-ink hover:text-emerald transition"
+            >
+              Or upload a photo
+            </button>
+          </GlassCard>
         )}
 
-        {/* Processing overlay — semi-opaque on top of the frozen capture */}
+        {/* Starting — brief flash of state during getUserMedia. */}
+        {state === "starting" && (
+          <GlassCard>
+            <p className="text-sm font-light text-ink/70 animate-pulse">
+              Starting camera…
+            </p>
+          </GlassCard>
+        )}
+
+        {/* Processing — overlays the frozen capture with a status message. */}
         {(state === "processing" || busy) && (
-          <div className="absolute inset-0 bg-ink/70 flex items-center justify-center backdrop-blur-sm">
-            <p className="text-cream font-display text-xl animate-pulse">
+          <div className="absolute inset-0 bg-ink/60 flex items-center justify-center backdrop-blur-sm">
+            <p className="text-cream font-display text-2xl animate-pulse">
               Reading the label…
             </p>
           </div>
         )}
 
-        {/* Action bar — pinned to the bottom of the viewport. Capture
-            button in live state, Use/Retake in captured state. */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 flex items-center justify-center gap-4">
-          {state === "live" && (
+        {/* Error — covers the viewport with a glass card explaining the
+            failure and offering upload as a fallback. */}
+        {state === "error" && (
+          <GlassCard>
+            <h1 className="font-display text-2xl text-ink leading-tight text-center">
+              Camera blocked
+            </h1>
+            <p className="text-[13px] font-light text-ink/80 text-center leading-snug max-w-[260px]">
+              {errorMessage}
+            </p>
             <button
               type="button"
-              onClick={capture}
-              aria-label="Capture"
-              className="w-16 h-16 rounded-full bg-cream border-4 border-cream/40 active:scale-95 transition shadow-lg"
-            />
-          )}
-          {state === "captured" && (
-            <>
-              <button
-                type="button"
-                onClick={retake}
-                className="flex-1 max-w-[140px] py-3 rounded-xl border border-cream/30 text-cream font-medium hover:bg-cream/10 transition"
-              >
-                Retake
-              </button>
-              <button
-                type="button"
-                onClick={confirm}
-                className="flex-1 max-w-[140px] py-3 rounded-xl bg-emerald text-cream font-medium hover:bg-emerald/90 transition"
-              >
-                Use this
-              </button>
-            </>
-          )}
+              onClick={startCamera}
+              className="px-6 py-2.5 rounded-md border border-ink/20 text-ink text-sm font-light hover:bg-ink/5 transition"
+            >
+              Try the camera again
+            </button>
+            <button
+              type="button"
+              onClick={openGallery}
+              className="text-[13px] font-light uppercase tracking-wider text-ink hover:text-emerald transition"
+            >
+              Or upload a photo
+            </button>
+          </GlassCard>
+        )}
+
+        {/* Fallback — no media API. Upload-only glass card. */}
+        {state === "fallback" && (
+          <GlassCard>
+            <h1 className="font-display text-2xl text-ink leading-tight text-center">
+              Upload a photo
+            </h1>
+            <p className="text-[13px] font-light text-ink/80 text-center leading-snug max-w-[260px]">
+              Your browser doesn&apos;t support live camera capture. Pick a
+              photo from your library instead.
+            </p>
+            <button
+              type="button"
+              onClick={openGallery}
+              className="px-8 py-3 rounded-md bg-emerald text-cream text-base font-light hover:bg-emerald/90 transition"
+            >
+              Choose a photo
+            </button>
+          </GlassCard>
+        )}
+      </div>
+
+      {/* Bottom tray — gallery / shutter / switch. Hidden in error +
+          fallback since the live camera affordances don't apply. */}
+      {state !== "error" && state !== "fallback" && (
+        <div className="flex items-center justify-center gap-14 px-14 py-4 bg-cream shrink-0">
+          <button
+            type="button"
+            onClick={openGallery}
+            aria-label="Upload from gallery"
+            className="w-12 h-12 rounded-full overflow-hidden bg-ink/5 border border-ink/10 flex items-center justify-center text-ink hover:bg-ink/10 transition"
+          >
+            <GalleryIcon />
+          </button>
+
+          <button
+            type="button"
+            onClick={shutterAction}
+            disabled={shutterDisabled}
+            aria-label={state === "live" ? "Capture" : "Enable camera"}
+            className="w-[72px] h-[72px] rounded-full bg-emerald ring-4 ring-cream ring-offset-2 ring-offset-ink/5 active:scale-95 transition disabled:opacity-50"
+          />
+
+          <button
+            type="button"
+            onClick={state === "live" ? switchCamera : undefined}
+            disabled={state !== "live"}
+            aria-label="Switch camera"
+            className="w-8 h-8 flex items-center justify-center text-ink hover:text-emerald transition disabled:opacity-40"
+          >
+            <SwitchCameraIcon />
+          </button>
         </div>
+      )}
 
-        {/* Hidden canvas for the capture compositing step */}
-        <canvas ref={canvasRef} className="hidden" aria-hidden />
-      </div>
-    );
-  }
-
-  // Error — camera failed. Show the message + file fallback inline.
-  if (state === "error") {
-    stopStream();
-    return (
-      <div className="rounded-3xl border border-burgundy/30 bg-burgundy/5 p-8 text-center aspect-[3/4] flex flex-col justify-center items-center">
-        <p className="font-display text-xl text-ink mb-2">Camera blocked</p>
-        <p className="text-sm text-slate mb-6 max-w-[260px] leading-relaxed">
-          {errorMessage}
-        </p>
-        <button
-          type="button"
-          onClick={startCamera}
-          className="px-6 py-3 rounded-xl border border-ink/15 text-ink font-medium hover:bg-ink/5 transition mb-3"
-        >
-          Try the camera again
-        </button>
-        <FileFallbackLink onFile={handleFileFallback} label="Upload a photo" inline />
-      </div>
-    );
-  }
-
-  // Fallback — no media API available. Pure file input.
-  return (
-    <label className="block rounded-3xl border border-ink/10 bg-ink/90 text-cream aspect-[3/4] flex flex-col items-center justify-center cursor-pointer p-8 text-center">
+      {/* Hidden file input — single source of truth for gallery picks.
+          Both the "OR UPLOAD A PHOTO" link and the gallery thumbnail
+          trigger it via ref. */}
       <input
+        ref={fileInputRef}
         type="file"
         accept="image/*"
-        capture="environment"
         className="hidden"
-        disabled={busy}
         onChange={(e) => {
           const f = e.target.files?.[0];
-          if (f) handleFileFallback(f);
+          // Clear so selecting the same file again still fires onChange.
+          e.target.value = "";
+          if (f) handleFile(f);
         }}
       />
-      <div className="font-display text-2xl mb-3">
-        {busy ? "Reading the label…" : "Tap to upload"}
-      </div>
-      <p className="text-sm text-cream/70 max-w-[240px]">
-        Your browser doesn&apos;t support live camera capture. Pick a photo
-        instead.
-      </p>
-    </label>
+
+      {/* Hidden canvas for the capture compositing step */}
+      <canvas ref={canvasRef} className="hidden" aria-hidden />
+    </div>
   );
 }
 
-// Bracket corners — four 22px L-shapes registered to the inner 70% of the
-// viewport. SVG strokes so they scale crisply at any DPI.
-function BracketOverlay() {
+// ---- Helpers ----
+
+// Centered glass card used by intro, starting, error, and fallback
+// states. The backdrop-blur lifts it off the cream background even though
+// there's no contrasting video underneath (intent: matches the design's
+// "floating panel" feel regardless of what's behind it).
+function GlassCard({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center px-6">
+      <div className="bg-cream/40 backdrop-blur-xl rounded px-2 py-4 flex flex-col items-center gap-3 max-w-[280px]">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ---- Icons (inline SVG to avoid adding a dependency) ----
+
+function CloseIcon() {
   return (
     <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="w-6 h-6"
       aria-hidden
-      viewBox="0 0 100 100"
-      preserveAspectRatio="none"
-      className="absolute inset-0 w-full h-full pointer-events-none"
     >
-      {/* Each bracket is an L drawn from a corner of the safe rectangle.
-          x/y coords are percent of the viewport. */}
-      <g stroke="#F4EFE6" strokeWidth="0.6" fill="none" strokeLinecap="round">
-        {/* Top-left */}
-        <path d="M 12 22 L 12 12 L 22 12" />
-        {/* Top-right */}
-        <path d="M 78 12 L 88 12 L 88 22" />
-        {/* Bottom-left */}
-        <path d="M 12 78 L 12 88 L 22 88" />
-        {/* Bottom-right */}
-        <path d="M 78 88 L 88 88 L 88 78" />
-      </g>
+      <line x1="6" y1="6" x2="18" y2="18" />
+      <line x1="18" y1="6" x2="6" y2="18" />
     </svg>
   );
 }
 
-// Inline file-input link used in the intro and error states. Keeps the
-// fallback affordance reachable without leaving the viewport.
-function FileFallbackLink({
-  onFile,
-  label,
-  inline = false,
-}: {
-  onFile: (f: File) => void;
-  label: string;
-  inline?: boolean;
-}) {
+function FlashOffIcon() {
   return (
-    <label
-      className={`${
-        inline ? "text-slate hover:text-ink" : "text-cream/70 hover:text-cream mt-4"
-      } text-xs font-mono uppercase tracking-widest underline underline-offset-4 cursor-pointer transition`}
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="w-6 h-6"
+      aria-hidden
     >
-      <input
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) onFile(f);
-        }}
-      />
-      {label}
-    </label>
+      <path d="M13 2L7 14h5l-2 8" opacity="0.55" />
+      <line x1="3" y1="3" x2="21" y2="21" />
+    </svg>
+  );
+}
+
+function FlashOnIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+      className="w-6 h-6"
+      aria-hidden
+    >
+      <path d="M13 2L7 14h5l-2 8 8-12h-5l2-8z" />
+    </svg>
+  );
+}
+
+function GalleryIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="w-6 h-6"
+      aria-hidden
+    >
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <circle cx="9" cy="10" r="1.3" />
+      <path d="M21 17l-5-5-6 6-3-3-4 4" />
+    </svg>
+  );
+}
+
+function SwitchCameraIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="w-7 h-7"
+      aria-hidden
+    >
+      <path d="M3 9V7a2 2 0 0 1 2-2h2.5l1.5-2h6l1.5 2H19a2 2 0 0 1 2 2v2" />
+      <path d="M21 15v2a2 2 0 0 1-2 2h-2.5l-1.5 2h-6l-1.5-2H5a2 2 0 0 1-2-2v-2" />
+      <path d="M16 11l3 3-3 3" />
+      <path d="M8 13l-3-3 3-3" />
+    </svg>
   );
 }
