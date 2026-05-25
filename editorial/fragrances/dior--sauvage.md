@@ -18,7 +18,7 @@ dupes:
     name: Fakhar Black
     similarity: very close
     price_tier: budget
-    note: Among the closest Sauvage Elixir clones — the same dense ambroxan-spice-licorice opening, performs as hard.
+    note: Among the closest Sauvage Elixir clones, with the same dense ambroxan-spice-licorice opening. Performs as hard.
   - house: Armaf
     name: Ventana Blue
     similarity: close
@@ -26,4 +26,4 @@ dupes:
     note: Original Sauvage EDT-leaning clone. Bright bergamot and ambroxan accord, slightly thinner than the Dior.
 ---
 
-Sauvage is the best-selling masculine fragrance in the world by a margin nobody else is close to. François Demachy built it around an enormous overdose of Ambroxan — the synthetic ambergris molecule — wrapped in bergamot and pepper. The result is loud, clean, slightly sweet, and almost universally agreeable. Fragrance enthusiasts spent a decade complaining that Sauvage is too simple to be interesting; meanwhile Dior has reportedly sold a bottle every three seconds on average. Both observations are correct.
+Sauvage is the best-selling masculine fragrance in the world by a margin nobody else is close to. François Demachy built it around an enormous overdose of Ambroxan (the synthetic ambergris molecule) wrapped in bergamot and pepper. The result is loud, clean, slightly sweet, and almost universally agreeable. Fragrance enthusiasts spent a decade complaining that Sauvage is too simple to be interesting; meanwhile Dior has reportedly sold a bottle every three seconds on average. Both observations are correct.

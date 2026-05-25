@@ -10,4 +10,4 @@ how_to_wear:
   layering_notes: Self-contained.
 ---
 
-Sì is Christine Nagel's modern chypre — blackcurrant and rose over a vanilla-patchouli base — built to feel grown-up without being heavy. The structure is recognizably old-world chypre (the Mitsouko / Coromandel lineage) but rendered in a way that reads contemporary. Nagel went on to take the Hermès in-house perfumer job after this, and Sì is part of why. The various flankers (Intense, Passione, Fiori) are mostly less interesting than the original. If you only smell one, the standard EDP is the one.
+Sì is Christine Nagel's modern chypre (blackcurrant and rose over a vanilla-patchouli base) built to feel grown-up without being heavy. The structure is recognizably old-world chypre (the Mitsouko / Coromandel lineage) but rendered in a way that reads contemporary. Nagel went on to take the Hermès in-house perfumer job after this, and Sì is part of why. The various flankers (Intense, Passione, Fiori) are mostly less interesting than the original. If you only smell one, the standard EDP is the one.

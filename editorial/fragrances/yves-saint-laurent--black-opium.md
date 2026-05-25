@@ -13,7 +13,7 @@ dupes:
     name: Asad Pour Femme
     similarity: close
     price_tier: budget
-    note: Strong Black Opium reference — coffee-vanilla-pink-pepper accord lands close to the original. Performance is comparable; sweetness slightly amped up.
+    note: Strong Black Opium reference. Coffee-vanilla-pink-pepper accord lands close to the original. Performance is comparable; sweetness slightly amped up.
   - house: Maison Alhambra
     name: Infinitive Black
     similarity: close
@@ -23,7 +23,7 @@ dupes:
     name: Club de Nuit Sillage
     similarity: inspired by
     price_tier: budget
-    note: Black Opium-adjacent rather than direct dupe — shares the dark sweet-coffee territory. Worth knowing as an alternative angle.
+    note: Black Opium-adjacent rather than direct dupe. Shares the dark sweet-coffee territory. Worth knowing as an alternative angle.
 ---
 
-Black Opium has nothing to do with the original Opium except the name and the bottle silhouette — it's a coffee-vanilla gourmand built for the post-Angel generation that grew up on sweet fragrances. The pink pepper opening lasts about eight minutes; the rest is coffee, white flowers, and an enormous vanilla base. A four-perfumer team usually means a high-stakes commercial brief, and Black Opium delivered: it became one of the best-selling feminine fragrances of its decade. Polarizing among enthusiasts (too sweet, too monolithic) and beloved by everyone else.
+Black Opium has nothing to do with the original Opium except the name and the bottle silhouette. It's a coffee-vanilla gourmand built for the post-Angel generation that grew up on sweet fragrances. The pink pepper opening lasts about eight minutes; the rest is coffee, white flowers, and an enormous vanilla base. A four-perfumer team usually means a high-stakes commercial brief, and Black Opium delivered: it became one of the best-selling feminine fragrances of its decade. Polarizing among enthusiasts (too sweet, too monolithic) and beloved by everyone else.
