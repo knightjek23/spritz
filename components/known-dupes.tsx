@@ -34,7 +34,13 @@ export function KnownDupes({
   fragranceId: string;
   initialDupes: DupeRecommendation[] | null | undefined;
 }) {
-  const { isSignedIn, user } = useUser();
+  // isLoaded gates the Pro-only branch so SSR and the first client render
+  // produce identical output. Without it, the server renders the upsell
+  // (Clerk has no user yet) and the client briefly renders the AI button
+  // (Clerk knows the user), which React reports as a hydration mismatch
+  // and can unmount the entire section. Treating "not loaded yet" as the
+  // safe-default upsell path keeps the markup stable.
+  const { isLoaded, isSignedIn, user } = useUser();
   const isPro = user?.publicMetadata?.plan === "pro"; // optimistic — server is authoritative
   const [dupes, setDupes] = useState<DupeRecommendation[]>(initialDupes ?? []);
   const [generating, setGenerating] = useState(false);
@@ -130,8 +136,11 @@ export function KnownDupes({
     );
   }
 
-  // State: no dupes, signed-in Pro user
-  if (isSignedIn && isPro) {
+  // State: no dupes, signed-in Pro user. Gated on isLoaded so this branch
+  // never wins during the initial render — prevents the hydration flash
+  // (and the unmount that can follow it) when Clerk resolves a beat after
+  // first paint.
+  if (isLoaded && isSignedIn && isPro) {
     return (
       <section className="mb-10">
         <h2 className="font-display text-2xl mb-2">Known dupes</h2>
