@@ -9,8 +9,7 @@
 // avoids a flash of the wrong plan card on initial paint.
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
+import { useClerk, useUser } from "@clerk/nextjs";
 
 type Plan = "monthly" | "annual";
 
@@ -106,8 +105,8 @@ const FAQ: Array<{ q: string; a: string }> = [
 ];
 
 export default function PricingPage() {
-  const router = useRouter();
-  const { isSignedIn, user } = useUser();
+  const { isLoaded, isSignedIn, user } = useUser();
+  const clerk = useClerk();
   const [selected, setSelected] = useState<Plan>("annual");
   const [busy, setBusy] = useState(false);
 
@@ -116,19 +115,34 @@ export default function PricingPage() {
   const isAlreadyPro = user?.publicMetadata?.plan === "pro";
 
   async function upgrade(plan: Plan) {
+    if (!isLoaded) return; // wait for Clerk; prevents hydration races
     if (!isSignedIn) {
-      router.push("/sign-up");
+      // Modal sign-up — keeps the user on /pricing so they can complete
+      // the upgrade right after signing up. Session 01 root cause: the
+      // silent redirect to /sign-up dropped the upgrade intent on the
+      // floor and the user couldn't figure out where they were.
+      clerk.openSignUp({
+        redirectUrl: typeof window !== "undefined" ? window.location.href : "/pricing",
+      });
       return;
     }
     setBusy(true);
-    const res = await fetch("/api/stripe/checkout", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ plan }),
-    });
-    const { url } = await res.json();
-    if (url) window.location.href = url;
-    setBusy(false);
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ plan }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        // Surface a clearer error so the button doesn't just hang.
+        console.error("[pricing] checkout returned no url:", data);
+      }
+    } finally {
+      setBusy(false);
+    }
   }
 
   const plan = PLANS[selected];

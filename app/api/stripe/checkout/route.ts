@@ -7,6 +7,7 @@ import { z } from "zod";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { stripe, STRIPE_PRICES } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { ensureAppUser } from "@/lib/users";
 
 export const runtime = "nodejs";
 // Force dynamic rendering — this route depends on env vars (Stripe key,
@@ -28,27 +29,27 @@ export async function POST(req: Request) {
   const clerkUser = await currentUser();
   const email = clerkUser?.emailAddresses[0]?.emailAddress;
 
+  // ensureAppUser backfills the users row if the Clerk webhook missed it.
+  // Previously a freshly-signed-up user trying to upgrade would 404 here
+  // with no recovery path — Session 01 "can't unlock Pro" symptom.
+  const appUser = await ensureAppUser(userId);
+  if (!appUser) {
+    return NextResponse.json({ error: "user_provision_failed" }, { status: 500 });
+  }
+
   // Look up or create Stripe customer
   const supabase = createAdminClient();
-  const { data: appUser } = await supabase
-    .from("users")
-    .select("id, stripe_customer_id")
-    .eq("clerk_user_id", userId)
-    .maybeSingle();
-
-  let customerId = appUser?.stripe_customer_id ?? null;
+  let customerId = appUser.stripe_customer_id ?? null;
   if (!customerId) {
     const customer = await stripe.customers.create({
       email: email ?? undefined,
       metadata: { clerk_user_id: userId },
     });
     customerId = customer.id;
-    if (appUser) {
-      await supabase
-        .from("users")
-        .update({ stripe_customer_id: customerId })
-        .eq("id", appUser.id);
-    }
+    await supabase
+      .from("users")
+      .update({ stripe_customer_id: customerId })
+      .eq("id", appUser.id);
   }
 
   const priceId =

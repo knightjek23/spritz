@@ -8,6 +8,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { ensureAppUser } from "@/lib/users";
 
 export const runtime = "nodejs";
 
@@ -19,20 +20,19 @@ const PostBody = z.object({
   note: z.string().max(500).optional(),
 });
 
-async function getAppUser(clerkUserId: string) {
-  const supabase = createAdminClient();
-  const { data } = await supabase
-    .from("users")
-    .select("id, plan")
-    .eq("clerk_user_id", clerkUserId)
-    .maybeSingle();
-  return data;
-}
-
 export async function GET(req: Request) {
   const { userId } = auth();
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  const user = await getAppUser(userId);
+
+  // Read-only lookup. If the users row doesn't exist yet, return an
+  // empty collection rather than backfilling — GET shouldn't have side
+  // effects, and the first POST will provision the row.
+  const supabase0 = createAdminClient();
+  const { data: user } = await supabase0
+    .from("users")
+    .select("id, plan")
+    .eq("clerk_user_id", userId)
+    .maybeSingle();
   if (!user) return NextResponse.json({ items: [] });
 
   const url = new URL(req.url);
@@ -63,8 +63,12 @@ export async function POST(req: Request) {
   const parsed = PostBody.safeParse(json);
   if (!parsed.success) return NextResponse.json({ error: "invalid_body" }, { status: 400 });
 
-  const user = await getAppUser(userId);
-  if (!user) return NextResponse.json({ error: "user_not_found" }, { status: 404 });
+  // ensureAppUser backfills the users row if the Clerk webhook missed it.
+  // Previously this 404'd silently and the SaveButton stuck on "Try again"
+  // (Session 01 bug). Now the first save for a freshly-signed-up user
+  // creates the row on the spot.
+  const user = await ensureAppUser(userId);
+  if (!user) return NextResponse.json({ error: "user_provision_failed" }, { status: 500 });
 
   const supabase = createAdminClient();
 
@@ -111,8 +115,12 @@ export async function DELETE(req: Request) {
   const id = url.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "missing_id" }, { status: 400 });
 
-  const user = await getAppUser(userId);
-  if (!user) return NextResponse.json({ error: "user_not_found" }, { status: 404 });
+  // ensureAppUser backfills the users row if the Clerk webhook missed it.
+  // Previously this 404'd silently and the SaveButton stuck on "Try again"
+  // (Session 01 bug). Now the first save for a freshly-signed-up user
+  // creates the row on the spot.
+  const user = await ensureAppUser(userId);
+  if (!user) return NextResponse.json({ error: "user_provision_failed" }, { status: 500 });
 
   const supabase = createAdminClient();
   const { error } = await supabase

@@ -111,6 +111,13 @@ export default async function FragrancePage({ params }: { params: { id: string }
         <NotesPyramid fragrance={f} />
       </section>
 
+      {/* Known dupes — promoted up the page per Session 01 feedback. Sits
+          right after Notes so the natural reading order is "what's in it"
+          → "what's a cheaper version of this". The Pro upsell case still
+          renders here for free users but is now the second visible
+          content block, not buried after editorial. */}
+      <KnownDupes fragranceId={f.id} initialDupes={f.dupes} />
+
       {/* Longevity + sillage — only render when we actually have data */}
       {hasPerformanceData && (
         <section className="grid grid-cols-2 gap-6 mb-10">
@@ -209,9 +216,6 @@ export default async function FragrancePage({ params }: { params: { id: string }
           <p className="text-ink leading-relaxed italic">{f.editorial_notes}</p>
         </section>
       )}
-
-      {/* Known dupes — curated editorial + AI-generated (Pro feature) */}
-      <KnownDupes fragranceId={f.id} initialDupes={f.dupes} />
 
       {/* Similar fragrances — collapsed, opt-in, algorithmic note-vector similarity */}
       <section className="mt-12 pt-8 border-t border-ink/10">
