@@ -13,6 +13,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Recommendations } from "@/lib/recommendations";
 import { houseSlug } from "@/lib/houses";
+import { TrendingSection } from "./trending-section";
 
 export function ForYouFeed({ data }: { data: Recommendations }) {
   return (
@@ -55,6 +56,12 @@ export function ForYouFeed({ data }: { data: Recommendations }) {
           My shelf
         </Link>
       </div>
+
+      {/* Trending this week — same surface as the marketing home but
+          embedded inside the personalized feed. Sits above similars so
+          the user gets a "what's hot" pulse before drilling into their
+          own recs. Self-hides when there's no scan data. */}
+      <TrendingSection variant="compact" />
 
       {/* Section 1: similar fragrances */}
       {data.similar.length > 0 ? (

@@ -14,6 +14,7 @@
 // statically for crawlers and first-load anonymous users.
 
 import Link from "next/link";
+import { TrendingSection } from "./trending-section";
 
 export function MarketingHome() {
   return (
@@ -69,6 +70,13 @@ export function MarketingHome() {
       <p className="mt-10 text-xs font-mono uppercase tracking-widest text-slate">
         Free to use · no card needed
       </p>
+
+      {/* Trending this week — surfaces what people are actually scanning.
+          Renders nothing if scan_events is empty (early-stage catalog) or
+          the RPC errors, so this is safe to leave in. */}
+      <div className="w-full text-left mt-4">
+        <TrendingSection />
+      </div>
     </div>
   );
 }

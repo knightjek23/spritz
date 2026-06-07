@@ -9,8 +9,8 @@ import { SimilarSection } from "@/components/similar-section";
 import { SaveButton } from "@/components/save-button";
 import { NotesPyramid } from "@/components/notes-pyramid";
 import { KnownDupes } from "@/components/known-dupes";
+import { FamilyPills } from "@/components/family-pills";
 import { houseSlug } from "@/lib/houses";
-import { familySlug } from "@/lib/families";
 import type { Fragrance } from "@/lib/types";
 
 export const revalidate = 60;
@@ -86,22 +86,15 @@ export default async function FragrancePage({ params }: { params: { id: string }
         </Link>
       </section>
 
-      {/* Family / accords — own section, clearly labeled. Not the same as notes.
-          Chips link into /family/[slug] for browse-by-family discovery. */}
+      {/* Family / accords — own section, clearly labeled. Not the same as
+          notes. Pills tap to open a bottom sheet with the family's
+          definition (per Session 01: "make families have pop-up
+          descriptions"). The CTA inside the sheet routes to
+          /family/[slug] for users who want the full browse view. */}
       {f.family.length > 0 && (
         <section className="mb-10">
           <h2 className="font-display text-2xl mb-4">Family</h2>
-          <div className="flex flex-wrap gap-2">
-            {f.family.map((fam) => (
-              <Link
-                key={fam}
-                href={`/family/${familySlug(fam)}`}
-                className="px-3 py-1.5 bg-paper hover:bg-brass/40 text-ink text-sm rounded-full capitalize transition"
-              >
-                {fam}
-              </Link>
-            ))}
-          </div>
+          <FamilyPills families={f.family} />
         </section>
       )}
 
