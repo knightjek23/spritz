@@ -75,6 +75,104 @@ export function familySlug(family: string): string {
 }
 
 /**
+ * JS mirror of the SQL normalize_family() function from migration 0009.
+ * Maps raw Fragrantica accord strings ("warm spicy", "powdery",
+ * "vanilla") to the canonical family slug used by /family/[slug] and
+ * FAMILY_BLURB. Keep in sync with the SQL function — if you add or
+ * change a mapping here, update normalize_family() in migration 0009
+ * (or add a follow-up migration) so client links and server queries
+ * agree on the same taxonomy.
+ *
+ * Why this exists: family pills on the fragrance detail page render the
+ * raw accord string from fragrances.family[], but the user-facing
+ * /family/[slug] route only knows canonical slugs. Without this
+ * normalizer, tapping "Warm Spicy" 404s.
+ */
+const FAMILY_NORMALIZE: Record<string, string> = {
+  // Exact family slug matches (passthrough)
+  citrus: "citrus",
+  floral: "floral",
+  fruity: "fruity",
+  green: "green",
+  aromatic: "aromatic",
+  spicy: "spicy",
+  woody: "woody",
+  oriental: "oriental",
+  amber: "amber",
+  leather: "leather",
+  musky: "musky",
+  gourmand: "gourmand",
+  aquatic: "aquatic",
+  ozonic: "ozonic",
+  synthetic: "synthetic",
+  chypre: "chypre",
+  fougere: "fougere",
+
+  // Floral variants
+  "white floral": "floral",
+  "soft floral": "floral",
+  "yellow floral": "floral",
+  powdery: "floral",
+  rose: "floral",
+  iris: "floral",
+  violet: "floral",
+
+  // Spicy variants
+  "warm spicy": "spicy",
+  "fresh spicy": "spicy",
+
+  // Woody variants
+  "woody floral": "woody",
+  "dry woody": "woody",
+
+  // Aromatic / herbal
+  lavender: "aromatic",
+  rosemary: "aromatic",
+  sage: "aromatic",
+  mint: "aromatic",
+  herbal: "aromatic",
+
+  // Gourmand / sweet edibles
+  sweet: "gourmand",
+  vanilla: "gourmand",
+  almond: "gourmand",
+  honey: "gourmand",
+  coconut: "gourmand",
+  chocolate: "gourmand",
+  caramel: "gourmand",
+  coffee: "gourmand",
+
+  // Oriental / amber-adjacent / resinous
+  balsamic: "oriental",
+  resinous: "oriental",
+  incense: "oriental",
+
+  // Green / earthy
+  earthy: "green",
+  mossy: "green",
+  fresh: "green",
+
+  // Aquatic / marine
+  marine: "aquatic",
+
+  // Leather / animalic / smoky
+  animalic: "leather",
+  smoky: "leather",
+  tobacco: "leather",
+
+  // Musky
+  "soft musky": "musky",
+
+  // Synthetic
+  "white musk": "synthetic",
+};
+
+export function normalizeFamily(accord: string): string {
+  const key = accord.trim().toLowerCase();
+  return FAMILY_NORMALIZE[key] ?? "other";
+}
+
+/**
  * Friendly title-case for display. Just capitalize the first letter; the
  * rest stay lowercase. Avoids "Oud" becoming "OUD" or weirder cases.
  */

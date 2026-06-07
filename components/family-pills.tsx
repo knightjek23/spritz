@@ -21,7 +21,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { FAMILY_BLURB, familyName, familySlug } from "@/lib/families";
+import { FAMILY_BLURB, familyName, normalizeFamily } from "@/lib/families";
 
 interface Props {
   /** Raw family strings from fragrances.family[]. May be accords or canonical slugs. */
@@ -75,13 +75,18 @@ function FamilySheet({
   family: string;
   onClose: () => void;
 }) {
-  const slug = familySlug(family);
-  // Use the curated blurb when the raw family string maps to a known
-  // slug. For accord-style strings like "warm spicy" that normalize to
-  // a family (e.g. spicy), prefer the normalized slug's blurb. Falls
-  // through to no description if neither matches.
-  const blurb = FAMILY_BLURB[slug] ?? FAMILY_BLURB[family.toLowerCase()] ?? null;
-  const displayName = familyName(slug) || family;
+  // Normalize the raw accord ("warm spicy", "powdery", "vanilla") into
+  // a canonical family slug ("spicy", "floral", "gourmand"). Same
+  // mapping the SQL normalize_family function uses server-side — keeps
+  // the link target valid and the blurb lookup hitting FAMILY_BLURB.
+  const slug = normalizeFamily(family);
+  const blurb = FAMILY_BLURB[slug] ?? null;
+  // Display the original accord string when it's distinct from the
+  // canonical family — e.g. tapping "Warm Spicy" should still show
+  // "Warm Spicy" as the sheet title, with the spicy blurb beneath.
+  const canonicalDisplay = familyName(slug);
+  const rawDisplay = family.charAt(0).toUpperCase() + family.slice(1).toLowerCase();
+  const displayName = rawDisplay;
 
   return (
     <div
@@ -154,7 +159,7 @@ function FamilySheet({
           onClick={onClose}
           className="block w-full text-center bg-emerald text-cream py-3 rounded-xl font-medium hover:bg-emerald/90 transition"
         >
-          Browse all {displayName.toLowerCase()} fragrances
+          Browse all {canonicalDisplay.toLowerCase()} fragrances
         </Link>
       </div>
     </div>
