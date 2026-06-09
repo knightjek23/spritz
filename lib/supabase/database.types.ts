@@ -267,6 +267,23 @@ export type Database = {
         Args: { p_limit?: number };
         Returns: Array<{ family: string; fragrance_count: number }>;
       };
+      normalize_family: {
+        Args: { p_accord: string };
+        Returns: string;
+      };
+      list_trending_fragrances: {
+        Args: { p_limit?: number; p_days?: number };
+        Returns: Array<{
+          id: string;
+          name: string;
+          house: string;
+          family: string[];
+          gender: "masculine" | "feminine" | "unisex" | null;
+          year: number | null;
+          bottle_image_url: string | null;
+          scan_count: number;
+        }>;
+      };
     };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };
