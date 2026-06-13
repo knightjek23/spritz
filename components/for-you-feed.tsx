@@ -20,6 +20,7 @@ import Image from "next/image";
 import type { Recommendations } from "@/lib/recommendations";
 import { houseSlug } from "@/lib/houses";
 import { TrendingSection } from "./trending-section";
+import { TrendingFeeds } from "./trending-feeds";
 
 export function ForYouFeed({ data }: { data: Recommendations }) {
   return (
@@ -145,6 +146,7 @@ export function ForYouFeed({ data }: { data: Recommendations }) {
             personalized recs because it's hierarchically less relevant
             to a signed-in user with their own shelf to work from.
             Self-hides if no scan data. */}
+      <TrendingFeeds variant="compact" />
       <TrendingSection variant="compact" />
 
       {/* 5. Save you money — curated/AI dupes for the user's collection. */}

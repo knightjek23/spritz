@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-06-08T12:00:00+00:00",
+  "period": {
+    "start": "2026-06-08",
+    "end": "2026-06-14"
+  },
+  "source": "retailer_bestsellers",
+  "entries": [
+    {
+      "rank": 1,
+      "name": "Baccarat Rouge 540",
+      "house": "Maison Francis Kurkdjian"
+    },
+    {
+      "rank": 2,
+      "name": "Coco Mademoiselle",
+      "house": "Chanel"
+    },
+    {
+      "rank": 3,
+      "name": "J'adore",
+      "house": "Dior"
+    },
+    {
+      "rank": 4,
+      "name": "Born In Roma Donna",
+      "house": "Valentino"
+    },
+    {
+      "rank": 5,
+      "name": "Libre",
+      "house": "YSL"
+    },
+    {
+      "rank": 6,
+      "name": "Rare",
+      "house": "Rare Beauty"
+    },
+    {
+      "rank": 7,
+      "name": "L'Interdit",
+      "house": "Givenchy"
+    },
+    {
+      "rank": 8,
+      "name": "Aqua Allegoria",
+      "house": "Guerlain"
+    }
+  ]
+}

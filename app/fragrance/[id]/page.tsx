@@ -90,11 +90,13 @@ export default async function FragrancePage({ params }: { params: { id: string }
           notes. Pills tap to open a bottom sheet with the family's
           definition (per Session 01: "make families have pop-up
           descriptions"). The CTA inside the sheet routes to
-          /family/[slug] for users who want the full browse view. */}
-      {f.family.length > 0 && (
+          /family/[slug] for users who want the full browse view.
+          Defensive `?? []` because the DB column can be null on rows
+          where the scraper didn't extract accords. */}
+      {(f.family ?? []).length > 0 && (
         <section className="mb-10">
           <h2 className="font-display text-2xl mb-4">Family</h2>
-          <FamilyPills families={f.family} />
+          <FamilyPills families={f.family ?? []} />
         </section>
       )}
 

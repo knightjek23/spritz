@@ -15,6 +15,7 @@
 
 import Link from "next/link";
 import { TrendingSection } from "./trending-section";
+import { TrendingFeeds } from "./trending-feeds";
 
 export function MarketingHome() {
   return (
@@ -74,7 +75,11 @@ export function MarketingHome() {
       {/* Trending this week — surfaces what people are actually scanning.
           Renders nothing if scan_events is empty (early-stage catalog) or
           the RPC errors, so this is safe to leave in. */}
+      {/* Culture-side trending (external scraper feed) above the scan-based
+          pulse. This one has data from day one; <TrendingSection /> fills in
+          as real scan volume accrues. Both self-hide when empty. */}
       <div className="w-full text-left mt-4">
+        <TrendingFeeds />
         <TrendingSection />
       </div>
     </div>
