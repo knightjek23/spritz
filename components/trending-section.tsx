@@ -39,15 +39,28 @@ export async function TrendingSection({
   /** "default" for marketing home (full-width section), "compact" for For You feed */
   variant?: "default" | "compact";
 }) {
-  const supabase = createAdminClient();
-  const { data, error } = await supabase
-    .rpc("list_trending_fragrances", { p_limit: limit, p_days: days })
-    .returns<TrendingRow[]>();
+  // Belt-and-suspenders: wrap the whole RPC + downstream render in
+  // try/catch so a missing migration, a malformed row, or a thrown
+  // Supabase error can never bubble up and crash the parent page.
+  // The trending surface is decorative — if it breaks, the page should
+  // render without it, not 500.
+  let data: TrendingRow[] = [];
+  try {
+    const supabase = createAdminClient();
+    const { data: rows, error } = await supabase
+      .rpc("list_trending_fragrances", { p_limit: limit, p_days: days })
+      .returns<TrendingRow[]>();
+    if (error) {
+      console.warn("[trending] RPC error (likely migration 0010 not deployed):", error.message);
+      return null;
+    }
+    data = Array.isArray(rows) ? rows : [];
+  } catch (err) {
+    console.warn("[trending] threw:", err instanceof Error ? err.message : String(err));
+    return null;
+  }
 
-  // If the RPC errors (e.g. not yet deployed) or returns no rows (catalog
-  // is fresh / no scans this week), render nothing. Better than an empty
-  // "Trending" header above silence.
-  if (error || !data || data.length === 0) return null;
+  if (data.length === 0) return null;
 
   return (
     <section
