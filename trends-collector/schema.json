@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://josh.app/schemas/fragrance-popularity.weekly.v1.json",
+  "title": "Weekly Fragrance Popularity Snapshot",
+  "description": "The integration contract between the collector and any consuming app. One file per ISO week. This schema is versioned; bump schema_version on any breaking change.",
+  "type": "object",
+  "required": ["schema_version", "week", "generated_at", "sources_used", "fragrances"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Semantic-ish version of THIS contract. Consumers should check this."
+    },
+    "week": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-W[0-9]{2}$",
+      "description": "ISO week the snapshot covers, e.g. 2026-W24."
+    },
+    "week_start": {
+      "type": "string",
+      "format": "date",
+      "description": "Monday of the ISO week (YYYY-MM-DD)."
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp the snapshot was produced."
+    },
+    "sources_used": {
+      "type": "array",
+      "description": "Which source modules successfully contributed. Lets the consumer know if a week is degraded (e.g. one source was down).",
+      "items": {
+        "type": "string",
+        "enum": ["google_trends", "retailer_bestsellers", "reddit", "fragrantica"]
+      }
+    },
+    "fragrances": {
+      "type": "array",
+      "description": "Ranked list, rank 1 = most popular this week.",
+      "items": {
+        "type": "object",
+        "required": ["rank", "id", "name", "score"],
+        "properties": {
+          "rank": { "type": "integer", "minimum": 1 },
+          "id": {
+            "type": "string",
+            "description": "Stable slug for joining to your app's catalog, e.g. 'chanel-coco-mademoiselle'. Keep this stable across weeks."
+          },
+          "name": { "type": "string" },
+          "brand": { "type": ["string", "null"] },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Blended 0-100 popularity score, normalized across the sources that ran this week."
+          },
+          "rank_change": {
+            "type": ["integer", "null"],
+            "description": "Positions gained (+) or lost (-) vs last week. null = new entry or no prior week."
+          },
+          "is_new_entry": { "type": "boolean" },
+          "signals": {
+            "type": "object",
+            "description": "Per-source raw contributions, for transparency/debugging. Keys match sources_used.",
+            "properties": {
+              "google_trends": { "type": ["number", "null"], "description": "Search-interest index 0-100." },
+              "retailer_bestsellers": { "type": ["integer", "null"], "description": "Best (lowest) bestseller rank seen across retailers." },
+              "reddit": { "type": ["number", "null"], "description": "Weighted mention/upvote volume." },
+              "fragrantica": { "type": ["number", "null"], "description": "Community popularity metric." }
+            },
+            "additionalProperties": true
+          }
+        }
+      }
+    }
+  }
+}

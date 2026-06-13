@@ -1,0 +1,6 @@
+pytrends==4.9.2
+praw==7.7.1
+requests==2.32.3
+beautifulsoup4==4.12.3
+lxml==5.3.0
+PyYAML==6.0.2

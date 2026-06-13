@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-06-08T12:00:00+00:00",
+  "period": {
+    "start": "2026-06-08",
+    "end": "2026-06-14"
+  },
+  "source": "multi",
+  "entries": [
+    {
+      "rank": 1,
+      "name": "Baccarat Rouge 540",
+      "house": "Maison Francis Kurkdjian",
+      "mentions": 2200
+    },
+    {
+      "rank": 2,
+      "name": "Khamrah",
+      "house": "Lattafa"
+    },
+    {
+      "rank": 3,
+      "name": "Black Opium",
+      "house": "YSL",
+      "mentions": 4200
+    },
+    {
+      "rank": 4,
+      "name": "Vanilla 28",
+      "house": "Kayali"
+    },
+    {
+      "rank": 5,
+      "name": "Bianco Latte",
+      "house": "Giardini di Toscana"
+    },
+    {
+      "rank": 6,
+      "name": "Black Orchid",
+      "house": "Tom Ford",
+      "mentions": 3000
+    },
+    {
+      "rank": 7,
+      "name": "Yara",
+      "house": "Lattafa"
+    },
+    {
+      "rank": 8,
+      "name": "Coco Mademoiselle",
+      "house": "Chanel",
+      "mentions": 1800
+    },
+    {
+      "rank": 9,
+      "name": "Eclaire",
+      "house": "Kayali"
+    },
+    {
+      "rank": 10,
+      "name": "Good Girl",
+      "house": "Carolina Herrera",
+      "mentions": 2500
+    },
+    {
+      "rank": 11,
+      "name": "J'adore",
+      "house": "Dior"
+    },
+    {
+      "rank": 12,
+      "name": "Born In Roma Donna",
+      "house": "Valentino"
+    },
+    {
+      "rank": 13,
+      "name": "Libre",
+      "house": "YSL"
+    },
+    {
+      "rank": 14,
+      "name": "Rare",
+      "house": "Rare Beauty"
+    },
+    {
+      "rank": 15,
+      "name": "L'Interdit",
+      "house": "Givenchy"
+    },
+    {
+      "rank": 16,
+      "name": "Aqua Allegoria",
+      "house": "Guerlain"
+    }
+  ]
+}

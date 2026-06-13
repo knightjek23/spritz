@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-06-08T12:00:00+00:00",
+  "period": {
+    "start": "2026-06-08",
+    "end": "2026-06-14"
+  },
+  "source": "google_trends",
+  "entries": [
+    {
+      "rank": 1,
+      "name": "Khamrah",
+      "house": "Lattafa"
+    },
+    {
+      "rank": 2,
+      "name": "Baccarat Rouge 540",
+      "house": "Maison Francis Kurkdjian"
+    },
+    {
+      "rank": 3,
+      "name": "Vanilla 28",
+      "house": "Kayali"
+    },
+    {
+      "rank": 4,
+      "name": "Bianco Latte",
+      "house": "Giardini di Toscana"
+    },
+    {
+      "rank": 5,
+      "name": "Yara",
+      "house": "Lattafa"
+    },
+    {
+      "rank": 6,
+      "name": "Eclaire",
+      "house": "Kayali"
+    },
+    {
+      "rank": 7,
+      "name": "Coco Mademoiselle",
+      "house": "Chanel"
+    },
+    {
+      "rank": 8,
+      "name": "J'adore",
+      "house": "Dior"
+    }
+  ]
+}

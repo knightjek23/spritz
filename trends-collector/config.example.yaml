@@ -1,0 +1,42 @@
+# Copy to config.yaml and fill in. Enable only the sources you want running.
+# A "watchlist" is the set of fragrances you track for search/buzz signals.
+# Keep the `name`/`brand` consistent so ids stay stable across weeks.
+
+google_trends:
+  enabled: true
+  geo: "US"                      # or "" for worldwide
+  watchlist:
+    - { name: "Coco Mademoiselle", brand: "Chanel", query: "Coco Mademoiselle perfume" }
+    - { name: "Libre",             brand: "YSL",    query: "YSL Libre perfume" }
+    - { name: "Born In Roma Donna", brand: "Valentino", query: "Valentino Born in Roma perfume" }
+    # ...add the catalog you care about
+
+retailer_bestsellers:
+  enabled: true
+  # Selectors are examples -- inspect the live page and update them. Sites change
+  # their markup; treat scraping as best-effort and review when a source goes quiet.
+  endpoints:
+    - url: "https://www.sephora.com/beauty/best-selling-perfume"
+      item_selector: "[data-comp='ProductGrid'] a[data-comp='ProductTile']"
+      name_selector: "span.ProductTile-name"
+      brand_selector: "span.ProductTile-brand"
+
+reddit:
+  enabled: true
+  subreddit: "fragrance"
+  user_agent: "fragrance-trends/1.0 by u/yourname"
+  # Prefer env vars REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET over hardcoding.
+  client_id: ""
+  client_secret: ""
+  watchlist:
+    - { name: "Coco Mademoiselle", brand: "Chanel", aliases: ["coco mademoiselle", "coco mlle"] }
+    - { name: "Molecule 01", brand: "Escentric Molecules", aliases: ["molecule 01", "molecule01"] }
+
+fragrantica:
+  # Off by default: aggressive anti-bot + restrictive ToS. Enable at your own risk
+  # and review their terms. Consider it the least reliable signal.
+  enabled: false
+  trending_url: "https://www.fragrantica.com/trends/"
+  item_selector: ".cell"
+  name_selector: ".perfume-name"
+  brand_selector: ".brand-name"

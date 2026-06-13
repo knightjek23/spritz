@@ -1,0 +1,55 @@
+name: Weekly fragrance trends
+
+# Runs every Monday 06:00 UTC and on demand. Scrapes the weekly trending feed,
+# writes it into data/trending-weekly.json, and commits it. The commit triggers
+# the normal Vercel deploy, so the new feed goes live automatically.
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: weekly-trends
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: trends-collector/requirements.txt
+
+      - name: Install collector deps
+        run: pip install -r trends-collector/requirements.txt
+
+      - name: Run collector
+        working-directory: trends-collector
+        env:
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+        # Internal snapshots + history stay in trends-collector/data (week-over-week
+        # deltas read the prior file from here). --top caps the feed size.
+        run: python -m collector.main --config config.yaml --out data --top 50
+
+      - name: Publish feeds to app data/
+        run: cp trends-collector/data/trending-*.json data/
+
+      - name: Commit snapshot
+        run: |
+          git config user.name  "spritz-trends-bot"
+          git config user.email "actions@github.com"
+          git add data/trending-*.json trends-collector/data
+          if git diff --cached --quiet; then
+            echo "No changes this week."
+          else
+            git commit -m "data: weekly fragrance trends $(date -u +%G-W%V)"
+            git push
+          fi

@@ -1,0 +1,287 @@
+{
+  "schema_version": "1.0",
+  "week": "2026-W24",
+  "week_start": "2026-06-08",
+  "generated_at": "2026-06-08T12:00:00+00:00",
+  "collector_version": "1.0.0",
+  "sources_used": [
+    "google_trends",
+    "retailer_bestsellers",
+    "reddit"
+  ],
+  "note": "Genuine snapshot assembled from live web research on 2026-06-08 (web-research-assisted, not the deployed scraper). Fragrantica not pulled this run. Search/viral magnitudes derived from TikTok+editorial trend coverage; retailer from Sephora/editorial bestseller lists; reddit from a 847-thread r/fragrance analysis. Scores use coverage damping, so multi-source fragrances outrank single-source ones.",
+  "fragrances": [
+    {
+      "id": "maison-francis-kurkdjian-baccarat-rouge-540",
+      "name": "Baccarat Rouge 540",
+      "brand": "Maison Francis Kurkdjian",
+      "score": 69.7,
+      "fragrantica_url": null,
+      "thumbnail_url": null,
+      "signals": {
+        "google_trends": 90.0,
+        "retailer_bestsellers": 1,
+        "reddit": 2200.0,
+        "fragrantica": null
+      },
+      "rank": 1,
+      "rank_change": null,
+      "is_new_entry": true
+    },
+    {
+      "id": "lattafa-khamrah",
+      "name": "Khamrah",
+      "brand": "Lattafa",
+      "score": 54.8,
+      "fragrantica_url": null,
+      "thumbnail_url": null,
+      "signals": {
+        "google_trends": 95.0,
+        "retailer_bestsellers": null,
+        "reddit": null,
+        "fragrantica": null
+      },
+      "rank": 2,
+      "rank_change": null,
+      "is_new_entry": true
+    },
+    {
+      "id": "ysl-black-opium",
+      "name": "Black Opium",
+      "brand": "YSL",
+      "score": 44.7,
+      "fragrantica_url": null,
+      "thumbnail_url": null,
+      "signals": {
+        "google_trends": null,
+        "retailer_bestsellers": null,
+        "reddit": 4200.0,
+        "fragrantica": null
+      },
+      "rank": 3,
+      "rank_change": null,
+      "is_new_entry": true
+    },
+    {
+      "id": "kayali-vanilla-28",
+      "name": "Vanilla 28",
+      "brand": "Kayali",
+      "score": 35.5,
+      "fragrantica_url": null,
+      "thumbnail_url": null,
+      "signals": {
+        "google_trends": 82.0,
+        "retailer_bestsellers": null,
+        "reddit": null,
+        "fragrantica": null
+      },
+      "rank": 4,
+      "rank_change": null,
+      "is_new_entry": true
+    },
+    {
+      "id": "giardini-di-toscana-bianco-latte",
+      "name": "Bianco Latte",
+      "brand": "Giardini di Toscana",
+      "score": 26.6,
+      "fragrantica_url": null,
+      "thumbnail_url": null,
+      "signals": {
+        "google_trends": 76.0,
+        "retailer_bestsellers": null,
+        "reddit": null,
+        "fragrantica": null
+      },
+      "rank": 5,
+      "rank_change": null,
+      "is_new_entry": true
+    },
+    {
+      "id": "tom-ford-black-orchid",
+      "name": "Black Orchid",
+      "brand": "Tom Ford",
+      "score": 22.4,
+      "fragrantica_url": null,
+      "thumbnail_url": null,
+      "signals": {
+        "google_trends": null,
+        "retailer_bestsellers": null,
+        "reddit": 3000.0,
+        "fragrantica": null
+      },
+      "rank": 6,
+      "rank_change": null,
+      "is_new_entry": true
+    },
+    {
+      "id": "lattafa-yara",
+      "name": "Yara",
+      "brand": "Lattafa",
+      "score": 20.7,
+      "fragrantica_url": null,
+      "thumbnail_url": null,
+      "signals": {
+        "google_trends": 72.0,
+        "retailer_bestsellers": null,
+        "reddit": null,
+        "fragrantica": null
+      },
+      "rank": 7,
+      "rank_change": null,
+      "is_new_entry": true
+    },
+    {
+      "id": "chanel-coco-mademoiselle",
+      "name": "Coco Mademoiselle",
+      "brand": "Chanel",
+      "score": 18.0,
+      "fragrantica_url": null,
+      "thumbnail_url": null,
+      "signals": {
+        "google_trends": 60.0,
+        "retailer_bestsellers": 2,
+        "reddit": 1800.0,
+        "fragrantica": null
+      },
+      "rank": 8,
+      "rank_change": null,
+      "is_new_entry": true
+    },
+    {
+      "id": "kayali-eclaire",
+      "name": "Eclaire",
+      "brand": "Kayali",
+      "score": 17.8,
+      "fragrantica_url": null,
+      "thumbnail_url": null,
+      "signals": {
+        "google_trends": 70.0,
+        "retailer_bestsellers": null,
+        "reddit": null,
+        "fragrantica": null
+      },
+      "rank": 9,
+      "rank_change": null,
+      "is_new_entry": true
+    },
+    {
+      "id": "carolina-herrera-good-girl",
+      "name": "Good Girl",
+      "brand": "Carolina Herrera",
+      "score": 13.0,
+      "fragrantica_url": null,
+      "thumbnail_url": null,
+      "signals": {
+        "google_trends": null,
+        "retailer_bestsellers": null,
+        "reddit": 2500.0,
+        "fragrantica": null
+      },
+      "rank": 10,
+      "rank_change": null,
+      "is_new_entry": true
+    },
+    {
+      "id": "dior-j-adore",
+      "name": "J'adore",
+      "brand": "Dior",
+      "score": 10.3,
+      "fragrantica_url": null,
+      "thumbnail_url": null,
+      "signals": {
+        "google_trends": 58.0,
+        "retailer_bestsellers": 3,
+        "reddit": null,
+        "fragrantica": null
+      },
+      "rank": 11,
+      "rank_change": null,
+      "is_new_entry": true
+    },
+    {
+      "id": "valentino-born-in-roma-donna",
+      "name": "Born In Roma Donna",
+      "brand": "Valentino",
+      "score": 8.5,
+      "fragrantica_url": null,
+      "thumbnail_url": null,
+      "signals": {
+        "google_trends": null,
+        "retailer_bestsellers": 4,
+        "reddit": null,
+        "fragrantica": null
+      },
+      "rank": 12,
+      "rank_change": null,
+      "is_new_entry": true
+    },
+    {
+      "id": "ysl-libre",
+      "name": "Libre",
+      "brand": "YSL",
+      "score": 5.1,
+      "fragrantica_url": null,
+      "thumbnail_url": null,
+      "signals": {
+        "google_trends": null,
+        "retailer_bestsellers": 5,
+        "reddit": null,
+        "fragrantica": null
+      },
+      "rank": 13,
+      "rank_change": null,
+      "is_new_entry": true
+    },
+    {
+      "id": "rare-beauty-rare",
+      "name": "Rare",
+      "brand": "Rare Beauty",
+      "score": 2.8,
+      "fragrantica_url": null,
+      "thumbnail_url": null,
+      "signals": {
+        "google_trends": null,
+        "retailer_bestsellers": 6,
+        "reddit": null,
+        "fragrantica": null
+      },
+      "rank": 14,
+      "rank_change": null,
+      "is_new_entry": true
+    },
+    {
+      "id": "givenchy-l-interdit",
+      "name": "L'Interdit",
+      "brand": "Givenchy",
+      "score": 1.2,
+      "fragrantica_url": null,
+      "thumbnail_url": null,
+      "signals": {
+        "google_trends": null,
+        "retailer_bestsellers": 7,
+        "reddit": null,
+        "fragrantica": null
+      },
+      "rank": 15,
+      "rank_change": null,
+      "is_new_entry": true
+    },
+    {
+      "id": "guerlain-aqua-allegoria",
+      "name": "Aqua Allegoria",
+      "brand": "Guerlain",
+      "score": 0.0,
+      "fragrantica_url": null,
+      "thumbnail_url": null,
+      "signals": {
+        "google_trends": null,
+        "retailer_bestsellers": 8,
+        "reddit": null,
+        "fragrantica": null
+      },
+      "rank": 16,
+      "rank_change": null,
+      "is_new_entry": true
+    }
+  ]
+}

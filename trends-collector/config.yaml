@@ -1,0 +1,41 @@
+# Deploy-ready config used by the GitHub Actions workflow.
+# Reddit creds come from repo secrets (REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET).
+# Fragrantica is off (anti-bot + ToS). Expand the watchlists with your catalog.
+
+google_trends:
+  enabled: true
+  geo: "US"
+  watchlist:
+    - { name: "Coco Mademoiselle", brand: "Chanel",   query: "Coco Mademoiselle perfume" }
+    - { name: "Libre", brand: "YSL",                   query: "YSL Libre perfume" }
+    - { name: "Born In Roma Donna", brand: "Valentino", query: "Valentino Born in Roma perfume" }
+    - { name: "Vanilla Sex", brand: "Tom Ford",        query: "Tom Ford Vanilla Sex" }
+    - { name: "Molecule 01", brand: "Escentric Molecules", query: "Molecule 01 perfume" }
+    - { name: "Bleu de Chanel", brand: "Chanel",       query: "Bleu de Chanel" }
+    - { name: "Baccarat Rouge 540", brand: "MFK",      query: "Baccarat Rouge 540" }
+
+retailer_bestsellers:
+  enabled: true
+  endpoints:
+    - url: "https://www.sephora.com/beauty/best-selling-perfume"
+      item_selector: "[data-comp='ProductGrid'] a[data-comp='ProductTile']"
+      name_selector: "span.ProductTile-name"
+      brand_selector: "span.ProductTile-brand"
+
+reddit:
+  enabled: true
+  subreddit: "fragrance"
+  user_agent: "fragrance-trends/1.0 (github actions)"
+  watchlist:
+    - { name: "Coco Mademoiselle", brand: "Chanel", aliases: ["coco mademoiselle", "coco mlle"] }
+    - { name: "Molecule 01", brand: "Escentric Molecules", aliases: ["molecule 01", "molecule01"] }
+    - { name: "Vanilla Sex", brand: "Tom Ford", aliases: ["vanilla sex", "tf vanilla sex"] }
+    - { name: "Baccarat Rouge 540", brand: "MFK", aliases: ["baccarat rouge", "br540", "br 540"] }
+    - { name: "Libre", brand: "YSL", aliases: ["ysl libre"] }
+
+fragrantica:
+  enabled: false
+  trending_url: "https://www.fragrantica.com/trends/"
+  item_selector: ".cell"
+  name_selector: ".perfume-name"
+  brand_selector: ".brand-name"
