@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Roboto } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Nav } from "@/components/nav";
+import { BottomNav } from "@/components/bottom-nav";
 import "./globals.css";
 
 // Playfair Display — high-contrast serif for hero / section headings.
@@ -64,7 +65,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <html lang="en" className={`${playfair.variable} ${roboto.variable}`}>
         <body className="min-h-screen flex flex-col font-sans">
           <Nav />
-          <main className="flex-1">{children}</main>
+          {/* pb-28 reserves space for the fixed bottom nav (~85px tall:
+              tab area + home-indicator strip). The nav itself self-hides
+              on /scan (camera takeover), but the padding stays — better
+              to have a bit of empty space on camera pages than to clip
+              content on every other page. */}
+          <main className="flex-1 pb-28">{children}</main>
+          <BottomNav />
         </body>
       </html>
     </ClerkProvider>
