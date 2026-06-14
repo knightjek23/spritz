@@ -145,107 +145,133 @@ function isActiveTab(pathname: string, tab: Tab): boolean {
 }
 
 // ===== Icons =====
-// Stroke-based inline SVGs. currentColor inherits the text color set on
-// the wrapping span, so the active/inactive states need no extra props.
+// Inline SVGs sourced directly from the Spritz Iconography brand
+// reference (Figma node 61:4). The original Figma exports hardcoded
+// stroke="#2C2420" and (for the scan corner brackets) fill="#2C2420";
+// those were swapped to currentColor here so the wrapping span's text
+// color (ink/85 inactive, emerald active) themes the icons in place.
+//
+// Cream fills in the encyclopedia icon (fill="#FAF6ED" on the figure
+// bodies) were swapped to fill="none" so active-state recoloring
+// doesn't leave cream rectangles overlaying the emerald outlines.
+//
+// Home icon stays inline-drawn — the Figma upload didn't include a
+// Home SVG. Drop the file into public/icons/home.svg and swap when
+// available.
+//
+// Stroke widths preserved from the Figma source (0.5 for the
+// continuous-path icons, 0.66 for the multi-shape ones). The "active"
+// state is color-only — no stroke bump, to honor the 1px ultra-light
+// brand guideline.
 
-function HomeIcon({ active }: { active: boolean }) {
+function HomeIcon({ active: _active }: { active: boolean }) {
+  // Placeholder until the brand Home SVG is delivered.
   return (
     <svg
       viewBox="0 0 32 32"
       fill="none"
       stroke="currentColor"
-      strokeWidth={active ? "2" : "1.6"}
+      strokeWidth="0.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="w-7 h-7"
+      className="w-8 h-8"
       aria-hidden
     >
-      <path d="M5 14L16 5l11 9v12a2 2 0 0 1-2 2h-6v-8h-6v8H7a2 2 0 0 1-2-2V14z" />
+      <path d="M5 14L16 6l11 8" />
+      <path d="M7 13v13h18V13" />
     </svg>
   );
 }
 
-function ShelfIcon({ active }: { active: boolean }) {
+function ShelfIcon({ active: _active }: { active: boolean }) {
   return (
     <svg
       viewBox="0 0 32 32"
       fill="none"
-      stroke="currentColor"
-      strokeWidth={active ? "2" : "1.6"}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="w-7 h-7"
+      className="w-8 h-8"
       aria-hidden
     >
-      {/* Outer cabinet */}
-      <rect x="5" y="4" width="22" height="24" rx="2" />
-      {/* Two interior shelves */}
-      <line x1="5" y1="13" x2="27" y2="13" />
-      <line x1="5" y1="21" x2="27" y2="21" />
-      {/* Bottles on each shelf — three columns */}
-      <rect x="9" y="7" width="4" height="5" rx="0.5" />
-      <rect x="15" y="7" width="3" height="5" rx="0.5" />
-      <rect x="20" y="7" width="3" height="5" rx="0.5" />
-      <rect x="9" y="15" width="3" height="5" rx="0.5" />
-      <rect x="14" y="15" width="4" height="5" rx="0.5" />
+      <path
+        d="M16.0001 15.9999V11.9996C16.0001 11.646 15.8596 11.3068 15.6096 11.0567C15.3596 10.8067 15.0205 10.6662 14.6669 10.6662H12.0005C11.6469 10.6662 11.3078 10.8067 11.0578 11.0567C10.8077 11.3068 10.6673 11.646 10.6673 11.9996V15.9999M21.3329 26.6674V22.6671C21.3329 22.3135 21.1924 21.9743 20.9424 21.7242C20.6924 21.4742 20.3533 21.3337 19.9997 21.3337H17.3333C16.9797 21.3337 16.6406 21.4742 16.3906 21.7242C16.1405 21.9743 16.0001 22.3135 16.0001 22.6671V26.6674M26.6657 29.3343V2.66553M5.33447 15.9999H26.6657M5.33447 26.6674H26.6657M5.33447 2.66553V29.3343M5.33447 5.33241H26.6657"
+        stroke="currentColor"
+        strokeWidth="0.5"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
 
-function ScanIcon({ active }: { active: boolean }) {
+function ScanIcon({ active: _active }: { active: boolean }) {
   return (
     <svg
       viewBox="0 0 32 32"
       fill="none"
-      stroke="currentColor"
-      strokeWidth={active ? "2.2" : "1.8"}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="w-7 h-7"
+      className="w-8 h-8"
       aria-hidden
     >
-      {/* Four corner brackets — the scan bottle framing language */}
-      <path d="M5 10V6a1 1 0 0 1 1-1h4" />
-      <path d="M27 10V6a1 1 0 0 0-1-1h-4" />
-      <path d="M5 22v4a1 1 0 0 0 1 1h4" />
-      <path d="M27 22v4a1 1 0 0 1-1 1h-4" />
+      {/* Inner bottle silhouette — three vertical rects (cap, body, cap
+          on opposite side) + two curved shoulders + ellipse for the
+          bottle neck */}
+      <rect x="6.75293" y="8.33325" width="1.31818" height="18.6666" rx="0.659091" stroke="currentColor" strokeWidth="0.66" />
+      <rect x="6.75293" y="8.33325" width="18.4545" height="18.6666" rx="0.66" stroke="currentColor" strokeWidth="0.66" />
+      <rect x="23.8896" y="8.33325" width="1.31818" height="18.6666" rx="0.659091" stroke="currentColor" strokeWidth="0.66" />
+      <path d="M7.4118 8.33325C8.19078 8.33325 8.96213 8.57467 9.68181 9.04371C10.4015 9.51275 11.0554 10.2002 11.6062 11.0669C12.157 11.9336 12.594 12.9625 12.8921 14.0949C13.1902 15.2272 13.3436 16.4409 13.3436 17.6666C13.3436 18.8922 13.1902 20.1059 12.8921 21.2383C12.594 22.3707 12.157 23.3995 11.6062 24.2662C11.0554 25.1329 10.4015 25.8204 9.68181 26.2894C8.96213 26.7585 8.19078 26.9999 7.4118 26.9999L7.4118 17.6666L7.4118 8.33325Z" stroke="currentColor" strokeWidth="0.66" />
+      <path d="M24.5485 26.9999C22.9753 26.9999 21.4665 26.0166 20.3541 24.2662C19.2417 22.5159 18.6167 20.1419 18.6167 17.6666C18.6167 15.1912 19.2417 12.8173 20.3541 11.0669C21.4665 9.31658 22.9753 8.33325 24.5485 8.33325L24.5485 17.6666L24.5485 26.9999Z" stroke="currentColor" strokeWidth="0.66" />
+      <ellipse cx="15.9801" cy="5.66666" rx="2.63636" ry="2.66666" stroke="currentColor" strokeWidth="0.66" />
+      {/* Four corner brackets — the scan frame indicators. These use
+          fill (not stroke) so they tint with currentColor cleanly. */}
+      <rect x="1" y="1" width="4.5" height="0.75" fill="currentColor" />
+      <rect x="1" y="1" width="0.75" height="4.5" fill="currentColor" />
+      <rect x="26.5" y="1" width="4.5" height="0.75" fill="currentColor" />
+      <rect x="30.25" y="1" width="0.75" height="4.5" fill="currentColor" />
+      <rect x="1" y="30.25" width="4.5" height="0.75" fill="currentColor" />
+      <rect x="1" y="26" width="0.75" height="4.5" fill="currentColor" />
+      <rect x="26.5" y="30.25" width="4.5" height="0.75" fill="currentColor" />
+      <rect x="30.25" y="26" width="0.75" height="4.5" fill="currentColor" />
     </svg>
   );
 }
 
-function EncyclopediaIcon({ active }: { active: boolean }) {
+function EncyclopediaIcon({ active: _active }: { active: boolean }) {
   return (
     <svg
       viewBox="0 0 32 32"
       fill="none"
-      stroke="currentColor"
-      strokeWidth={active ? "2" : "1.6"}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="w-7 h-7"
+      className="w-8 h-8"
       aria-hidden
     >
-      {/* Open book — center spine, two facing pages */}
-      <path d="M4 7c4 0 8 1.5 12 4 4-2.5 8-4 12-4v18c-4 0-8 1.5-12 4-4-2.5-8-4-12-4V7z" />
-      <line x1="16" y1="11" x2="16" y2="29" />
+      {/* Two-figure "shared knowledge" composition: small head + body
+          on the right, larger head + body on the left, overlapping
+          accessory rect, and a foreground bookshelf-style center
+          element. Cream fills from the Figma source swapped to "none"
+          so active-state tinting doesn't leave a cream overlay. */}
+      <ellipse cx="23.4303" cy="6.84989" rx="2.63636" ry="2.69999" stroke="currentColor" strokeWidth="0.66" />
+      <rect x="17.4985" y="9.5498" width="11.8636" height="18.2249" stroke="currentColor" strokeWidth="0.66" />
+      <rect x="5.96477" y="4.4799" width="3.29455" height="3.38999" stroke="currentColor" strokeWidth="0.66" />
+      <rect x="3.65723" y="8.19995" width="7.90909" height="19.5749" rx="1.32" stroke="currentColor" strokeWidth="0.66" />
+      <rect x="6.95312" y="10.8999" width="18.4545" height="18.8999" rx="0.66" fill="none" stroke="currentColor" strokeWidth="0.66" />
+      <rect x="6.95312" y="28.45" width="18.4545" height="1.35" rx="0.66" stroke="currentColor" strokeWidth="0.66" />
+      <path d="M7.61199 10.8999C8.39097 10.8999 9.16232 11.1443 9.882 11.6192C10.6017 12.0941 11.2556 12.7902 11.8064 13.6677C12.3572 14.5452 12.7942 15.587 13.0923 16.7335C13.3904 17.8801 13.5438 19.1089 13.5438 20.3499C13.5438 21.5909 13.3904 22.8197 13.0923 23.9662C12.7942 25.1127 12.3572 26.1545 11.8064 27.032C11.2556 27.9095 10.6017 28.6056 9.882 29.0805C9.16232 29.5554 8.39097 29.7998 7.61199 29.7998L7.61199 20.3499L7.61199 10.8999Z" fill="none" stroke="currentColor" strokeWidth="0.66" />
+      <path d="M24.7487 29.7998C23.1755 29.7998 21.6667 28.8042 20.5543 27.032C19.4419 25.2598 18.8169 22.8562 18.8169 20.3499C18.8169 17.8436 19.4419 15.4399 20.5543 13.6677C21.6667 11.8955 23.1755 10.8999 24.7487 10.8999L24.7487 20.3499L24.7487 29.7998Z" fill="none" stroke="currentColor" strokeWidth="0.66" />
+      <ellipse cx="16.1801" cy="6.85004" rx="3.95455" ry="4.04999" fill="none" stroke="currentColor" strokeWidth="0.66" />
     </svg>
   );
 }
 
-function ProfileIcon({ active }: { active: boolean }) {
+function ProfileIcon({ active: _active }: { active: boolean }) {
   return (
     <svg
       viewBox="0 0 32 32"
       fill="none"
-      stroke="currentColor"
-      strokeWidth={active ? "2" : "1.6"}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="w-7 h-7"
+      className="w-8 h-8"
       aria-hidden
     >
-      <circle cx="16" cy="11" r="5" />
-      <path d="M6 27c0-5.5 4.5-10 10-10s10 4.5 10 10" />
+      <path
+        d="M16.0001 17.3333C19.6816 17.3333 22.6661 14.3486 22.6661 10.6667C22.6661 6.98477 19.6816 4 16.0001 4C12.3185 4 9.33407 6.98477 9.33407 10.6667C9.33407 14.3486 12.3185 17.3333 16.0001 17.3333ZM16.0001 17.3333C18.8288 17.3333 21.5416 18.4571 23.5418 20.4575C25.542 22.4579 26.6657 25.171 26.6657 28M16.0001 17.3333C13.1714 17.3333 10.4585 18.4571 8.45835 20.4575C6.45817 22.4579 5.33447 25.171 5.33447 28"
+        stroke="currentColor"
+        strokeWidth="0.5"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
