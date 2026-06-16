@@ -51,3 +51,54 @@ h1, h2, h3, h4 {
   background: var(--accent-line);
   width: 100%;
 }
+
+/* ===== Spritz "rise" intro animation =====
+   Used on the home page to give each text/CTA block a quick fade-up
+   on first paint. Elements start 16px below their final position at 0
+   opacity and settle into place with an ease-out-expo curve that feels
+   light and confident rather than bouncy.
+
+   Usage:
+     <h1 className="spritz-rise spritz-rise-1">...</h1>
+     <p  className="spritz-rise spritz-rise-2">...</p>
+
+   The `spritz-rise-N` classes stagger the start time by 80ms each.
+   animation-fill-mode: both holds the start state until the delay
+   elapses (no flash of fully-rendered content) and holds the end state
+   after the animation completes. */
+
+@keyframes spritz-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.spritz-rise {
+  animation: spritz-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.spritz-rise-1  { animation-delay: 0ms;   }
+.spritz-rise-2  { animation-delay: 80ms;  }
+.spritz-rise-3  { animation-delay: 160ms; }
+.spritz-rise-4  { animation-delay: 240ms; }
+.spritz-rise-5  { animation-delay: 320ms; }
+.spritz-rise-6  { animation-delay: 400ms; }
+.spritz-rise-7  { animation-delay: 480ms; }
+.spritz-rise-8  { animation-delay: 560ms; }
+.spritz-rise-9  { animation-delay: 640ms; }
+.spritz-rise-10 { animation-delay: 720ms; }
+
+/* Respect users who've asked the OS for reduced motion — skip the
+   animation entirely and render elements in their final state. */
+@media (prefers-reduced-motion: reduce) {
+  .spritz-rise {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}

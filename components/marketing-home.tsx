@@ -20,22 +20,26 @@ import { TrendingFeeds } from "./trending-feeds";
 export function MarketingHome() {
   return (
     <div className="mx-auto max-w-md px-6 pt-16 pb-12 flex flex-col items-center text-center">
-      <span className="inline-block px-3 py-1 mb-6 bg-brass text-ink text-xs font-mono uppercase tracking-wider rounded-full">
+      {/* Each block carries a spritz-rise-N stagger so the page settles
+          in from below in one fluid motion on first paint (~80ms between
+          starts, 600ms each, ease-out-expo). Honors prefers-reduced-
+          motion globally via globals.css. */}
+      <span className="spritz-rise spritz-rise-1 inline-block px-3 py-1 mb-6 bg-brass text-ink text-xs font-mono uppercase tracking-wider rounded-full">
         v0.1 · The fragrance encyclopedia
       </span>
 
-      <h1 className="font-display text-6xl mb-4 leading-[0.95]">
+      <h1 className="spritz-rise spritz-rise-2 font-display text-6xl mb-4 leading-[0.95]">
         Every fragrance,
         <br />
         broken down.
       </h1>
 
-      <p className="text-slate text-lg mb-3 max-w-xs leading-snug">
+      <p className="spritz-rise spritz-rise-3 text-slate text-lg mb-3 max-w-xs leading-snug">
         What&apos;s in it, who made it, how it wears, and which cheaper bottles
         smell almost the same.
       </p>
 
-      <p className="text-sm text-slate/80 mb-10 max-w-xs leading-snug">
+      <p className="spritz-rise spritz-rise-4 text-sm text-slate/80 mb-10 max-w-xs leading-snug">
         New to fragrance? Browse families to find your kind of scent. Already
         have a bottle? Scan the label.
       </p>
@@ -44,7 +48,7 @@ export function MarketingHome() {
           the tester was looking for and didn't realize was the whole product. */}
       <Link
         href="/families"
-        className="w-full bg-emerald text-cream py-4 rounded-2xl font-medium tracking-wide mb-3 hover:bg-emerald/90 transition"
+        className="spritz-rise spritz-rise-5 w-full bg-emerald text-cream py-4 rounded-2xl font-medium tracking-wide mb-3 hover:bg-emerald/90 transition"
       >
         Browse the encyclopedia
       </Link>
@@ -54,7 +58,7 @@ export function MarketingHome() {
           is one of three ways into it. */}
       <Link
         href="/scan"
-        className="w-full border border-ink/15 text-ink py-4 rounded-2xl font-medium tracking-wide hover:bg-ink/5 transition mb-3"
+        className="spritz-rise spritz-rise-6 w-full border border-ink/15 text-ink py-4 rounded-2xl font-medium tracking-wide hover:bg-ink/5 transition mb-3"
       >
         Scan a bottle
       </Link>
@@ -63,12 +67,12 @@ export function MarketingHome() {
           full-width CTAs. Same destination, lighter hit. */}
       <Link
         href="/search"
-        className="text-sm text-slate hover:text-ink underline underline-offset-4 py-2 transition"
+        className="spritz-rise spritz-rise-7 text-sm text-slate hover:text-ink underline underline-offset-4 py-2 transition"
       >
         Or search by name
       </Link>
 
-      <p className="mt-10 text-xs font-mono uppercase tracking-widest text-slate">
+      <p className="spritz-rise spritz-rise-8 mt-10 text-xs font-mono uppercase tracking-widest text-slate">
         Free to use · no card needed
       </p>
 
@@ -78,7 +82,7 @@ export function MarketingHome() {
       {/* Culture-side trending (external scraper feed) above the scan-based
           pulse. This one has data from day one; <TrendingSection /> fills in
           as real scan volume accrues. Both self-hide when empty. */}
-      <div className="w-full text-left mt-4">
+      <div className="spritz-rise spritz-rise-9 w-full text-left mt-4">
         <TrendingFeeds />
         <TrendingSection />
       </div>

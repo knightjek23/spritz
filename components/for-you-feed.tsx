@@ -28,23 +28,25 @@ export function ForYouFeed({ data }: { data: Recommendations }) {
       {/* 1. Primary CTAs — Encyclopedia (primary), Scan (secondary),
             Search (tertiary text link). Mirrors components/marketing-home
             so signed-in and signed-out users see the same entry trio at
-            the top of the page. */}
+            the top of the page. Each entry carries a spritz-rise-N
+            stagger so the page settles in from below on first paint
+            (same animation as the marketing home, kept consistent). */}
       <div className="flex flex-col items-stretch mb-10">
         <Link
           href="/families"
-          className="w-full text-center bg-emerald text-cream py-4 rounded-2xl font-medium tracking-wide mb-3 hover:bg-emerald/90 transition"
+          className="spritz-rise spritz-rise-1 w-full text-center bg-emerald text-cream py-4 rounded-2xl font-medium tracking-wide mb-3 hover:bg-emerald/90 transition"
         >
           Browse the encyclopedia
         </Link>
         <Link
           href="/scan"
-          className="w-full text-center border border-ink/15 text-ink py-4 rounded-2xl font-medium tracking-wide mb-3 hover:bg-ink/5 transition"
+          className="spritz-rise spritz-rise-2 w-full text-center border border-ink/15 text-ink py-4 rounded-2xl font-medium tracking-wide mb-3 hover:bg-ink/5 transition"
         >
           Scan a bottle
         </Link>
         <Link
           href="/search"
-          className="text-center text-sm text-slate hover:text-ink underline underline-offset-4 py-2 transition"
+          className="spritz-rise spritz-rise-3 text-center text-sm text-slate hover:text-ink underline underline-offset-4 py-2 transition"
         >
           Or search by name
         </Link>
@@ -53,7 +55,7 @@ export function ForYouFeed({ data }: { data: Recommendations }) {
       {/* 2. "Based on what you wear" header — sits between the CTAs and
             the personalized recs so the user reads CTAs, then learns why
             the next section exists, then sees the recs. */}
-      <header className="mb-6">
+      <header className="spritz-rise spritz-rise-4 mb-6">
         <p className="font-mono text-xs uppercase tracking-widest text-slate mb-1">
           For you
         </p>
