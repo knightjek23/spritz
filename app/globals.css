@@ -79,19 +79,23 @@ h1, h2, h3, h4 {
 }
 
 .spritz-rise {
-  animation: spritz-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: spritz-rise 0.95s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.spritz-rise-1  { animation-delay: 0ms;   }
-.spritz-rise-2  { animation-delay: 80ms;  }
-.spritz-rise-3  { animation-delay: 160ms; }
-.spritz-rise-4  { animation-delay: 240ms; }
-.spritz-rise-5  { animation-delay: 320ms; }
-.spritz-rise-6  { animation-delay: 400ms; }
-.spritz-rise-7  { animation-delay: 480ms; }
-.spritz-rise-8  { animation-delay: 560ms; }
-.spritz-rise-9  { animation-delay: 640ms; }
-.spritz-rise-10 { animation-delay: 720ms; }
+/* Stagger steps bumped to 130ms so the cascade reads slower and softer.
+   Full sequence at 10 elements: last starts at 1170ms, finishes ~2.12s
+   after first paint — a gentle, deliberate introduction rather than a
+   quick fanfare. */
+.spritz-rise-1  { animation-delay: 0ms;    }
+.spritz-rise-2  { animation-delay: 130ms;  }
+.spritz-rise-3  { animation-delay: 260ms;  }
+.spritz-rise-4  { animation-delay: 390ms;  }
+.spritz-rise-5  { animation-delay: 520ms;  }
+.spritz-rise-6  { animation-delay: 650ms;  }
+.spritz-rise-7  { animation-delay: 780ms;  }
+.spritz-rise-8  { animation-delay: 910ms;  }
+.spritz-rise-9  { animation-delay: 1040ms; }
+.spritz-rise-10 { animation-delay: 1170ms; }
 
 /* Respect users who've asked the OS for reduced motion — skip the
    animation entirely and render elements in their final state. */
