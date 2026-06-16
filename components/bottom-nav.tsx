@@ -202,6 +202,9 @@ function ShelfIcon({ active: _active }: { active: boolean }) {
 }
 
 function ScanIcon({ active: _active }: { active: boolean }) {
+  // Updated to the simpler "Icon Box 2" variant from the latest Figma
+  // export: bottle silhouette (three vertical rects + cap ellipse) sits
+  // inside the four corner-bracket scan frame, no curved shoulder paths.
   return (
     <svg
       viewBox="0 0 32 32"
@@ -209,17 +212,11 @@ function ScanIcon({ active: _active }: { active: boolean }) {
       className="w-8 h-8"
       aria-hidden
     >
-      {/* Inner bottle silhouette — three vertical rects (cap, body, cap
-          on opposite side) + two curved shoulders + ellipse for the
-          bottle neck */}
-      <rect x="6.75293" y="8.33325" width="1.31818" height="18.6666" rx="0.659091" stroke="currentColor" strokeWidth="0.66" />
-      <rect x="6.75293" y="8.33325" width="18.4545" height="18.6666" rx="0.66" stroke="currentColor" strokeWidth="0.66" />
-      <rect x="23.8896" y="8.33325" width="1.31818" height="18.6666" rx="0.659091" stroke="currentColor" strokeWidth="0.66" />
-      <path d="M7.4118 8.33325C8.19078 8.33325 8.96213 8.57467 9.68181 9.04371C10.4015 9.51275 11.0554 10.2002 11.6062 11.0669C12.157 11.9336 12.594 12.9625 12.8921 14.0949C13.1902 15.2272 13.3436 16.4409 13.3436 17.6666C13.3436 18.8922 13.1902 20.1059 12.8921 21.2383C12.594 22.3707 12.157 23.3995 11.6062 24.2662C11.0554 25.1329 10.4015 25.8204 9.68181 26.2894C8.96213 26.7585 8.19078 26.9999 7.4118 26.9999L7.4118 17.6666L7.4118 8.33325Z" stroke="currentColor" strokeWidth="0.66" />
-      <path d="M24.5485 26.9999C22.9753 26.9999 21.4665 26.0166 20.3541 24.2662C19.2417 22.5159 18.6167 20.1419 18.6167 17.6666C18.6167 15.1912 19.2417 12.8173 20.3541 11.0669C21.4665 9.31658 22.9753 8.33325 24.5485 8.33325L24.5485 17.6666L24.5485 26.9999Z" stroke="currentColor" strokeWidth="0.66" />
-      <ellipse cx="15.9801" cy="5.66666" rx="2.63636" ry="2.66666" stroke="currentColor" strokeWidth="0.66" />
-      {/* Four corner brackets — the scan frame indicators. These use
-          fill (not stroke) so they tint with currentColor cleanly. */}
+      <rect x="6.75293" y="8.33325" width="1.31818" height="18.6666" rx="0.659091" stroke="currentColor" strokeWidth="0.5" />
+      <rect x="6.75293" y="8.33325" width="18.4545" height="18.6666" rx="0.66" stroke="currentColor" strokeWidth="0.5" />
+      <rect x="23.8896" y="8.33325" width="1.31818" height="18.6666" rx="0.659091" stroke="currentColor" strokeWidth="0.5" />
+      <ellipse cx="15.9801" cy="5.66666" rx="2.63636" ry="2.66666" stroke="currentColor" strokeWidth="0.5" />
+      {/* Four corner brackets — filled so they tint with currentColor. */}
       <rect x="1" y="1" width="4.5" height="0.75" fill="currentColor" />
       <rect x="1" y="1" width="0.75" height="4.5" fill="currentColor" />
       <rect x="26.5" y="1" width="4.5" height="0.75" fill="currentColor" />
@@ -233,6 +230,11 @@ function ScanIcon({ active: _active }: { active: boolean }) {
 }
 
 function EncyclopediaIcon({ active: _active }: { active: boolean }) {
+  // Updated to the "Encyclopedia 3" variant: two figures with
+  // rectangular bodies + heads (right smaller, left larger), with a
+  // central foreground rectangle and an overlapping accessory square
+  // on the left figure. Cream fills preserved from the source so the
+  // intentional layering reads against the cream nav background.
   return (
     <svg
       viewBox="0 0 32 32"
@@ -240,20 +242,12 @@ function EncyclopediaIcon({ active: _active }: { active: boolean }) {
       className="w-8 h-8"
       aria-hidden
     >
-      {/* Two-figure "shared knowledge" composition: small head + body
-          on the right, larger head + body on the left, overlapping
-          accessory rect, and a foreground bookshelf-style center
-          element. Cream fills from the Figma source swapped to "none"
-          so active-state tinting doesn't leave a cream overlay. */}
-      <ellipse cx="23.4303" cy="6.84989" rx="2.63636" ry="2.69999" stroke="currentColor" strokeWidth="0.66" />
-      <rect x="17.4985" y="9.5498" width="11.8636" height="18.2249" stroke="currentColor" strokeWidth="0.66" />
-      <rect x="5.96477" y="4.4799" width="3.29455" height="3.38999" stroke="currentColor" strokeWidth="0.66" />
-      <rect x="3.65723" y="8.19995" width="7.90909" height="19.5749" rx="1.32" stroke="currentColor" strokeWidth="0.66" />
-      <rect x="6.95312" y="10.8999" width="18.4545" height="18.8999" rx="0.66" fill="none" stroke="currentColor" strokeWidth="0.66" />
-      <rect x="6.95312" y="28.45" width="18.4545" height="1.35" rx="0.66" stroke="currentColor" strokeWidth="0.66" />
-      <path d="M7.61199 10.8999C8.39097 10.8999 9.16232 11.1443 9.882 11.6192C10.6017 12.0941 11.2556 12.7902 11.8064 13.6677C12.3572 14.5452 12.7942 15.587 13.0923 16.7335C13.3904 17.8801 13.5438 19.1089 13.5438 20.3499C13.5438 21.5909 13.3904 22.8197 13.0923 23.9662C12.7942 25.1127 12.3572 26.1545 11.8064 27.032C11.2556 27.9095 10.6017 28.6056 9.882 29.0805C9.16232 29.5554 8.39097 29.7998 7.61199 29.7998L7.61199 20.3499L7.61199 10.8999Z" fill="none" stroke="currentColor" strokeWidth="0.66" />
-      <path d="M24.7487 29.7998C23.1755 29.7998 21.6667 28.8042 20.5543 27.032C19.4419 25.2598 18.8169 22.8562 18.8169 20.3499C18.8169 17.8436 19.4419 15.4399 20.5543 13.6677C21.6667 11.8955 23.1755 10.8999 24.7487 10.8999L24.7487 20.3499L24.7487 29.7998Z" fill="none" stroke="currentColor" strokeWidth="0.66" />
-      <ellipse cx="16.1801" cy="6.85004" rx="3.95455" ry="4.04999" fill="none" stroke="currentColor" strokeWidth="0.66" />
+      <ellipse cx="23.425" cy="6.8499" rx="2.635" ry="2.7" stroke="currentColor" strokeWidth="0.5" />
+      <path d="M17.4985 9.55005H29.3585V27.77H17.4985V9.55005Z" stroke="currentColor" strokeWidth="0.5" />
+      <path d="M3.65723 8.19995H11.5672V27.77H3.65723V8.19995Z" stroke="currentColor" strokeWidth="0.5" />
+      <rect x="5.62988" y="4.1499" width="3.95" height="4.05" stroke="currentColor" strokeWidth="0.5" />
+      <rect x="6.95312" y="10.8999" width="18.4545" height="18.8999" rx="0.66" fill="#FAF6ED" stroke="currentColor" strokeWidth="0.5" />
+      <ellipse cx="16.1801" cy="6.85004" rx="3.95455" ry="4.04999" fill="#FAF6ED" stroke="currentColor" strokeWidth="0.5" />
     </svg>
   );
 }
