@@ -4,6 +4,8 @@ house: Tom Ford
 slug: tom-ford--oud-wood
 year: 2007
 perfumer: Richard Herpin
+longevity_description: "Six to seven hours on skin, which is modest for a Private Blend. The soft woody trail stays close on a collared shirt all day."
+projection_description: "Restrained by design. Sits close to skin and reads as expensive personal space rather than a room-filler. People catch it when they hug you."
 how_to_wear:
   occasions: [year-round, work, daily wear]
   how_to_wear: A polite, accessible oud. Daily wear in any setting.

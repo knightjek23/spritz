@@ -69,7 +69,7 @@ async function main() {
   while (true) {
     const { data: page, error } = await supabase
       .from("fragrances")
-      .select("id, name, house, top_notes, mid_notes, base_notes, notes_descriptions, house_history, perfumer, wear_guidance, editorial_notes")
+      .select("id, name, house, top_notes, mid_notes, base_notes, notes_descriptions, house_history, perfumer, wear_guidance, editorial_notes, longevity_description, projection_description")
       .range(from, from + PAGE - 1);
     if (error) throw error;
     if (!page || page.length === 0) break;
@@ -119,6 +119,15 @@ async function main() {
         }
         if (fragMatch.frontmatter.perfumer && !row.perfumer) {
           updates.perfumer = fragMatch.frontmatter.perfumer;
+        }
+        // Plain-English performance descriptions — write through verbatim
+        // when present. Optional; the UI gracefully omits the line when
+        // the column is null.
+        if (fragMatch.frontmatter.longevity_description) {
+          updates.longevity_description = fragMatch.frontmatter.longevity_description;
+        }
+        if (fragMatch.frontmatter.projection_description) {
+          updates.projection_description = fragMatch.frontmatter.projection_description;
         }
       }
 

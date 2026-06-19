@@ -4,10 +4,12 @@ house: Creed
 slug: creed--aventus
 year: 2010
 perfumer: Olivier Creed, Erwin Creed
+longevity_description: "Eight to ten hours on skin from a good batch, longer on clothing. The smoky-birch base hangs on jackets for days."
+projection_description: "Big pineapple cloud for the first hour that reaches across a room, then it settles into a confident arm's-length presence people lean toward."
 how_to_wear:
   occasions: [day-to-night, work, confidence settings]
   how_to_wear: A versatile, slightly-too-loud daily wear that became a status fragrance.
-  layering_notes: Loud enough on its own. If anything, restraint helps: two sprays max.
+  layering_notes: "Loud enough on its own. If anything, restraint helps: two sprays max."
 dupes:
   - house: Armaf
     name: Club de Nuit Intense Man

@@ -4,6 +4,8 @@ house: Versace
 slug: versace--eros
 year: 2012
 perfumer: Aurélien Guichard
+longevity_description: "Eight to ten hours on skin, and the sweet tonka-vanilla base stays on a t-shirt overnight."
+projection_description: "Loud sweet-mint cloud for the first two hours that fills a club or a crowded bar. Easy to overspray; one is usually enough indoors."
 how_to_wear:
   occasions: [going out, evening, club]
   how_to_wear: A loud club fragrance. One spray indoors, two outdoors.

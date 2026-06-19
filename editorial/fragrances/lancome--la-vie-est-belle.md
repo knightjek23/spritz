@@ -4,6 +4,8 @@ house: Lancôme
 slug: lancome--la-vie-est-belle
 year: 2012
 perfumer: Olivier Polge, Dominique Ropion, Anne Flipo
+longevity_description: "Ten hours easily from a single spray, and the praline-tonka base hangs on coats and scarves into the next day."
+projection_description: "Big, sweet cloud for the first two hours that fills a room. Then it pulls in, but never quite goes quiet against warm skin."
 how_to_wear:
   occasions: [daily wear, work, year-round]
   how_to_wear: Sweet-floral default. One spray; the projection does the rest.

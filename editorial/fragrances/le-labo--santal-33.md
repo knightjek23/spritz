@@ -4,6 +4,8 @@ house: Le Labo
 slug: le-labo--santal-33
 year: 2011
 perfumer: Frank Voelkl
+longevity_description: "Eight to ten hours on skin. The leathery sandalwood dry-down clings to denim and worn-in cotton for days."
+projection_description: "Modest in warm weather, more present in the cold. Friends notice across a couch; the rest of the room takes a minute to find it."
 how_to_wear:
   occasions: [daily wear, casual, urban]
   how_to_wear: A signature fragrance designed to read as "you". Most wearable in close-quarters settings.

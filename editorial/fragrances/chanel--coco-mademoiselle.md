@@ -4,6 +4,8 @@ house: Chanel
 slug: chanel--coco-mademoiselle
 year: 2001
 perfumer: Jacques Polge
+longevity_description: "Wears eight to ten hours easily. The patchouli-rose dry-down clings to wool and cotton into the next morning."
+projection_description: "Moderate, well-mannered cloud that fills a small office or a dinner table. Confident without crowding the room."
 how_to_wear:
   occasions: [daily wear, work, year-round]
   how_to_wear: A polished daily wear that became a generational signature. Two sprays.

@@ -4,6 +4,8 @@ house: Chanel
 slug: chanel--no-5
 year: 1921
 perfumer: Ernest Beaux
+longevity_description: "Eight hours of structured wear from a single spray, with the powdery aldehyde-floral whisper still on a silk scarf the next day."
+projection_description: "Fills a room for the first thirty minutes, then pulls in and reads as a refined personal aura. It announces itself once, then stays close."
 how_to_wear:
   occasions: [evening, formal, anything where you want presence]
   how_to_wear: A historical artifact you can wear. One spray is plenty.

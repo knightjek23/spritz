@@ -4,6 +4,8 @@ house: Giorgio Armani
 slug: giorgio-armani--acqua-di-gio
 year: 1996
 perfumer: Alberto Morillas
+longevity_description: "Five to six hours on skin for the classic EDT, which is honest for an aquatic. The Profumo version pushes closer to eight."
+projection_description: "Bright sea-spray opening that carries for the first thirty minutes, then sits close like a clean salt-and-citrus film on warm skin."
 how_to_wear:
   occasions: [daily wear, work, summer, year-round]
   how_to_wear: The default casual fragrance for two generations. Two sprays.

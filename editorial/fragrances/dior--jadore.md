@@ -4,6 +4,8 @@ house: Dior
 slug: dior--jadore
 year: 1999
 perfumer: Calice Becker
+longevity_description: "Six to eight hours on skin. The white-floral haze fades gracefully rather than disappearing, and a soft trace stays on your blouse into the evening."
+projection_description: "Gentle, polished bouquet that stays within a conversational distance. People notice when they hug you, not when you walk in."
 how_to_wear:
   occasions: [daily wear, work, evening, year-round]
   how_to_wear: Built for everyone. Wears at any time, any setting.

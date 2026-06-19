@@ -4,6 +4,8 @@ house: Dior
 slug: dior--sauvage
 year: 2015
 perfumer: François Demachy
+longevity_description: "Ten plus hours from two sprays of the EDP, with the ambroxan still humming on your shirt the next morning. The Elixir goes even longer."
+projection_description: "Big, clean cloud that fills an elevator on the first hour and reads from across a room. Settles to arm's length but never quite goes quiet."
 how_to_wear:
   occasions: [daily wear, work, year-round]
   how_to_wear: A polished crowd-pleaser engineered to be liked by almost everyone.

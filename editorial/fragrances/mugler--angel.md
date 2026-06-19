@@ -4,6 +4,8 @@ house: Mugler
 slug: mugler--angel
 year: 1992
 perfumer: Olivier Cresp, Yves de Chiris
+longevity_description: "Twelve plus hours from a single spray. The patchouli-chocolate base survives a shower and stays on clothing for days."
+projection_description: "Fills a room within the first hour and reaches into the hallway. Even after it pulls in, you can still find it from across a couch."
 how_to_wear:
   occasions: [evening, cold weather, going out]
   how_to_wear: One spray and only on skin. Test it before committing to a full bottle.

@@ -113,20 +113,46 @@ export default async function FragrancePage({ params }: { params: { id: string }
           content block, not buried after editorial. */}
       <KnownDupes fragranceId={f.id} initialDupes={f.dupes} />
 
-      {/* Longevity + sillage — only render when we actually have data */}
-      {hasPerformanceData && (
-        <section className="grid grid-cols-2 gap-6 mb-10">
-          <ScoreBar
-            label="Longevity"
-            value={f.longevity_score}
-            confidence={f.longevity_confidence}
-            unit="hours"
-          />
-          <ScoreBar
-            label="Sillage"
-            value={f.sillage_score}
-            confidence={f.sillage_confidence}
-          />
+      {/* Longevity + projection — bars give the numeric quantification,
+          descriptions translate it into plain English ("Wears a full
+          day"). Renders when EITHER the numeric scores are present OR
+          a description is. Sillage column renamed to Projection in the
+          UI per Session 01 — sillage is industry jargon. */}
+      {(hasPerformanceData || f.longevity_description || f.projection_description) && (
+        <section className="grid grid-cols-1 gap-6 mb-10">
+          <div className="grid grid-cols-2 gap-6">
+            <ScoreBar
+              label="Longevity"
+              value={f.longevity_score}
+              confidence={f.longevity_confidence}
+              unit="hours"
+            />
+            <ScoreBar
+              label="Projection"
+              value={f.sillage_score}
+              confidence={f.sillage_confidence}
+            />
+          </div>
+          {(f.longevity_description || f.projection_description) && (
+            <div className="grid grid-cols-1 gap-3 text-sm text-ink/85 leading-relaxed">
+              {f.longevity_description && (
+                <p>
+                  <span className="font-mono uppercase tracking-wider text-[10px] text-slate mr-2">
+                    Longevity
+                  </span>
+                  {f.longevity_description}
+                </p>
+              )}
+              {f.projection_description && (
+                <p>
+                  <span className="font-mono uppercase tracking-wider text-[10px] text-slate mr-2">
+                    Projection
+                  </span>
+                  {f.projection_description}
+                </p>
+              )}
+            </div>
+          )}
         </section>
       )}
 

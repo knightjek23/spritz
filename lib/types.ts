@@ -48,6 +48,12 @@ export interface Fragrance {
   longevity_confidence: number | null;
   sillage_score: number | null;
   sillage_confidence: number | null;
+  // Plain-English companions to the numeric scores. Optional editorial
+  // content for beginners who can't translate "longevity 8.5h sillage
+  // 0.7" into wear behavior. UI labels the sillage_* pair as
+  // "Projection" per Session 01 feedback — sillage is industry jargon.
+  longevity_description: string | null;
+  projection_description: string | null;
   season_tags: string[];
   time_tags: string[];
   similar_ids: string[];

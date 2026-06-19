@@ -4,6 +4,8 @@ house: Yves Saint Laurent
 slug: yves-saint-laurent--black-opium
 year: 2014
 perfumer: Honorine Blanc, Nathalie Lorson, Marie Salamagne, Olivier Cresp
+longevity_description: "Eight to ten hours easily, with the coffee-vanilla base still on your jacket and pillowcase the next morning."
+projection_description: "Big sweet cloud for the first hour that fills a room. Settles to arm's length after, but people still catch it when you walk by."
 how_to_wear:
   occasions: [evening, going out, cooler weather]
   how_to_wear: Sweet coffee-vanilla. One spray; it projects hard.

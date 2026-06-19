@@ -4,6 +4,8 @@ house: Yves Saint Laurent
 slug: yves-saint-laurent--y-eau-de-parfum
 year: 2018
 perfumer: Dominique Ropion
+longevity_description: "Eight or nine hours on skin from the EDP. The ambergris-cedar base hangs on a shirt collar into the next day."
+projection_description: "Clean, present cloud for the first hour that reaches across a meeting table. Then it settles to within arm's length and reads as fresh skin with weight."
 how_to_wear:
   occasions: [daily wear, work, year-round]
   how_to_wear: A clean, slightly fougère take on the modern fresh masculine. Two sprays.

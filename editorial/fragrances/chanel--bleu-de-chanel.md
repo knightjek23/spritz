@@ -4,6 +4,8 @@ house: Chanel
 slug: chanel--bleu-de-chanel
 year: 2010
 perfumer: Jacques Polge
+longevity_description: "Comfortably wears through a full work day, with a soft mineral-cedar trail still on your collar at the end of it. The EDP and Parfum push closer to ten hours."
+projection_description: "Polite cloud for the first hour or two, then settles to within arm's reach. Reads as quiet presence rather than announcement."
 how_to_wear:
   occasions: [work, daily wear, year-round, professional settings]
   how_to_wear: A reliable, well-designed daily fragrance. Hard to wear wrong.

@@ -28,6 +28,8 @@ export type Database = {
           longevity_confidence: number | null;
           sillage_score: number | null;
           sillage_confidence: number | null;
+          longevity_description: string | null;
+          projection_description: string | null;
           season_tags: string[];
           time_tags: string[];
           similar_ids: string[];
@@ -66,6 +68,8 @@ export type Database = {
           longevity_confidence?: number | null;
           sillage_score?: number | null;
           sillage_confidence?: number | null;
+          longevity_description?: string | null;
+          projection_description?: string | null;
           season_tags?: string[];
           time_tags?: string[];
           similar_ids?: string[];

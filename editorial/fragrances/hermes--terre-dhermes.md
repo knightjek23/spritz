@@ -4,6 +4,8 @@ house: Hermès
 slug: hermes--terre-dhermes
 year: 2006
 perfumer: Jean-Claude Ellena
+longevity_description: "Six to eight hours from the EDT, with the flinty vetiver still on your jacket the next morning. The Parfum easily clears ten."
+projection_description: "Restrained by design. A clear citrus-stone signature within arm's length that someone catches when they step in to shake your hand."
 how_to_wear:
   occasions: [daily wear, work, year-round, outdoor]
   how_to_wear: A grown-up daily wear. One spray; it has presence.

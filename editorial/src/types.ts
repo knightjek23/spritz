@@ -48,6 +48,11 @@ export const FragranceFrontmatter = z.object({
   perfumer: z.string().optional(),
   how_to_wear: WearGuidance.optional(),
   dupes: z.array(DupeRec).optional(),
+  // Plain-English performance descriptions — companions to the numeric
+  // longevity_score / sillage_score. UI labels sillage as "Projection"
+  // (sillage is industry jargon).
+  longevity_description: z.string().optional(),
+  projection_description: z.string().optional(),
 });
 
 export type NoteContent = {

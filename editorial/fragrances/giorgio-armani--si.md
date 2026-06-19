@@ -4,6 +4,8 @@ house: Giorgio Armani
 slug: giorgio-armani--si
 year: 2013
 perfumer: Christine Nagel
+longevity_description: "Eight or nine hours of comfortable wear. The blackcurrant-patchouli base lingers on a sweater into the next day."
+projection_description: "Soft, rounded cloud for the first hour that fills a small room, then settles to within arm's reach. Closer to refined than commanding."
 how_to_wear:
   occasions: [daily wear, work, year-round, evening]
   how_to_wear: A versatile chypre-gourmand. Two sprays does it.

@@ -4,6 +4,8 @@ house: Tom Ford
 slug: tom-ford--black-orchid
 year: 2006
 perfumer: Pierre Negrin, David Apel
+longevity_description: "Twelve plus hours on skin from a half spray, and the dark patchouli-vanilla stays on a jacket for a week of wear."
+projection_description: "Brutal opening cloud that fills a room and pushes into the hallway. Settles after a couple of hours but never goes truly close."
 how_to_wear:
   occasions: [evening, cold weather, going out]
   how_to_wear: A heavy evening fragrance. Half a spray on skin, never on clothes.

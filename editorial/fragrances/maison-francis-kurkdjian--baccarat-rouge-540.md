@@ -4,6 +4,8 @@ house: Maison Francis Kurkdjian
 slug: maison-francis-kurkdjian--baccarat-rouge-540
 year: 2015
 perfumer: Francis Kurkdjian
+longevity_description: "Notorious for going twelve plus hours. You'll smell it on yesterday's shirt and faintly on the pillowcase the morning after."
+projection_description: "Reaches across a room without effort. The signature warm-sugar and woodsmoke haze that people instantly recognize from three feet away."
 how_to_wear:
   occasions: [evening, going out, cooler weather]
   how_to_wear: Surprisingly versatile for something this distinctive. Use sparingly. It projects hard.
@@ -23,7 +25,7 @@ dupes:
     name: Ventana Diamond
     similarity: close
     price_tier: budget
-    note: Solid BR540 reference: saffron and amber prominent, slightly drier finish.
+    note: "Solid BR540 reference: saffron and amber prominent, slightly drier finish."
 ---
 
 Baccarat Rouge 540 was originally a limited collaboration between Kurkdjian and the Baccarat crystal house for the brand's 250th anniversary; it became permanent when demand made the limited run untenable. The fragrance is built around a saffron-jasmine-amber accord that smells faintly of warm sugar, woodsmoke, and metal. Instantly recognizable and almost impossible to mistake for anything else. It defined a decade of niche perfumery; the clones are now a category of their own. The polarizing quality is real: people either find it transcendent or describe it as "burnt cotton candy."
