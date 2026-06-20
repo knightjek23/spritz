@@ -31,16 +31,20 @@ export default async function FragrancePage({ params }: { params: { id: string }
 
   return (
     <article className="mx-auto max-w-md px-6 py-10">
-      {/* Bottle hero — the one place we use glassmorphism per design direction.
-          Soft frosted card, gentle gradient backdrop, centered bottle. */}
+      {/* Bottle hero — opaque cream card so the bottle photo's white
+          background can cleanly multiply into the cream backdrop. The
+          previous glassmorphism (bg-cream/40 + backdrop-blur-xl) made
+          the blend target non-uniform, leaving a visible white square
+          around the bottle. Soft outer wash + border + shadow retain
+          the depth that the glass effect used to give. */}
       {f.bottle_image_url && (
         <section className="mb-8 relative">
-          {/* Backdrop wash — provides the "depth" the glass effect refracts against */}
+          {/* Backdrop wash — subtle color halo behind the card. */}
           <div
             aria-hidden
             className="absolute inset-0 -inset-x-6 rounded-3xl bg-gradient-to-br from-emerald/10 via-brass/10 to-paper/40 blur-xl -z-10"
           />
-          <div className="rounded-3xl bg-cream/40 backdrop-blur-xl border border-ink/5 shadow-sm py-8 px-6 flex items-center justify-center">
+          <div className="rounded-3xl bg-cream border border-ink/5 shadow-sm py-8 px-6 flex items-center justify-center isolate">
             <div className="relative w-[200px] h-[267px]">
               <Image
                 src={f.bottle_image_url}
