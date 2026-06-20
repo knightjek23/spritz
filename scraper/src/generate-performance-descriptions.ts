@@ -36,22 +36,34 @@ const LIMIT = Number(args.find((a) => a.startsWith("--limit="))?.split("=")[1] ?
 const BATCH = Number(args.find((a) => a.startsWith("--batch="))?.split("=")[1] ?? "25");
 const DRY = args.includes("--dry");
 
-const SYSTEM_PROMPT = `You write performance descriptions for fragrances in the Spritz editorial voice: plain English, sensory, confident, anchored in concrete reference points a first-time fragrance buyer can picture (a scarf, a sweater, an arm's length, a room, a hallway, an elevator). No industry jargon. No "sillage" or "tenacity." No purple prose. No em dashes (—) anywhere; use periods, colons, or commas.
+const SYSTEM_PROMPT = `You write performance assessments for fragrances in the Spritz editorial voice: plain English, sensory, confident, anchored in concrete reference points a first-time fragrance buyer can picture (a scarf, a sweater, an arm's length, a room, a hallway, an elevator). No industry jargon. No "sillage" or "tenacity." No purple prose. No em dashes (—) anywhere; use periods, colons, or commas.
 
-For each fragrance you'll receive notes, family, year, gender, and (where available) numeric longevity and sillage scores from community ratings. Use those to ground the description. If the community scores are missing, infer from notes and family (heavy oriental/woody/amber = bigger longevity and projection; fresh citrus/green = lighter on both).
+You'll receive each fragrance's notes pyramid, family/accords, year, gender, and (where available) community longevity and sillage scores. Use those to ground your output. If community scores are missing, INFER from notes and family using these heuristics:
+- Heavy bases (oud, amber, vanilla, oakmoss, patchouli, musk, ambroxan) → high longevity (7-9)
+- Heavy accords (oriental, woody, gourmand, leather, chypre) → strong projection (6-9)
+- Fresh / citrus / aquatic / green → lighter on both (3-6 longevity, 3-6 projection)
+- Light florals, hesperidic openings → shorter wear (3-5), modest projection (3-5)
 
 Return STRICT JSON with this shape:
 {
-  "longevity": "<1-2 sentences describing how long it wears in practice>",
-  "projection": "<1-2 sentences describing how far it travels off the skin>"
+  "longevity_score": <number 0-10 where 10 = wears 10+ hours on skin>,
+  "longevity_confidence": <number 0-1: 0.85 if famous and well-documented, 0.6 if notable, 0.4 if obscure / pure inference>,
+  "longevity_description": "<1-2 sentences describing how long it wears in practice>",
+  "projection_score": <number 0-10 where 10 = reaches across a room>,
+  "projection_confidence": <number 0-1, same scale as above>,
+  "projection_description": "<1-2 sentences describing how far it travels off the skin>"
 }
 
-Longevity examples:
+Score calibration:
+- Longevity 1-3 = under 4 hours; 4-6 = half-day; 7-8 = full day; 9-10 = into the next morning / on clothing for days
+- Projection 1-3 = skin scent, intimate; 4-6 = arm's-length cloud; 7-8 = friends notice from across a couch; 9-10 = elevator-clearing, reaches across rooms
+
+Description examples — longevity:
 - Heavy: "Wears all day and into the next morning. Still on a wool coat after a week."
 - Moderate: "About six hours on skin, gone from clothing by the next wash."
 - Light: "Three or four hours before you need a refresh. Made to be re-applied."
 
-Projection examples:
+Description examples — projection:
 - Beast mode: "Reaches across a room without effort. Friends notice from across a couch."
 - Moderate: "An arm's-length cloud at first, then settles in close after the first hour."
 - Skin scent: "Sits close to skin. Someone has to lean in to catch it."
@@ -69,7 +81,25 @@ interface FragranceRow {
   mid_notes: Array<{ name: string }> | null;
   base_notes: Array<{ name: string }> | null;
   longevity_score: number | null;
+  longevity_confidence: number | null;
+  longevity_description: string | null;
   sillage_score: number | null;
+  sillage_confidence: number | null;
+  projection_description: string | null;
+}
+
+interface AiResult {
+  longevity_score: number;
+  longevity_confidence: number;
+  longevity_description: string;
+  projection_score: number;
+  projection_confidence: number;
+  projection_description: string;
+}
+
+function clamp(n: unknown, lo: number, hi: number): number | null {
+  if (typeof n !== "number" || Number.isNaN(n)) return null;
+  return Math.max(lo, Math.min(hi, n));
 }
 
 function noteList(notes: Array<{ name: string }> | null): string {
@@ -94,7 +124,7 @@ Community longevity score (0-10): ${f.longevity_score ?? "(unrated)"}
 Community sillage score (0-10): ${f.sillage_score ?? "(unrated)"}`;
 }
 
-async function generateOne(f: FragranceRow): Promise<{ longevity: string; projection: string } | null> {
+async function generateOne(f: FragranceRow): Promise<AiResult | null> {
   try {
     const res = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -104,19 +134,38 @@ async function generateOne(f: FragranceRow): Promise<{ longevity: string; projec
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: buildUserPrompt(f) },
       ],
-      max_tokens: 250,
+      max_tokens: 400,
     });
     const raw = res.choices[0]?.message?.content ?? "{}";
-    const parsed = JSON.parse(raw) as { longevity?: unknown; projection?: unknown };
-    if (typeof parsed.longevity !== "string" || typeof parsed.projection !== "string") {
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+
+    const longevity_score = clamp(parsed.longevity_score, 0, 10);
+    const projection_score = clamp(parsed.projection_score, 0, 10);
+    const longevity_confidence = clamp(parsed.longevity_confidence, 0, 1);
+    const projection_confidence = clamp(parsed.projection_confidence, 0, 1);
+
+    if (
+      longevity_score === null ||
+      projection_score === null ||
+      longevity_confidence === null ||
+      projection_confidence === null ||
+      typeof parsed.longevity_description !== "string" ||
+      typeof parsed.projection_description !== "string"
+    ) {
       return null;
     }
+
     // Defensive em dash sweep — the system prompt forbids them but the
     // model occasionally slips one through. Replace with ", " to keep
     // the sentence readable.
-    const longevity = parsed.longevity.replace(/—/g, ", ").trim();
-    const projection = parsed.projection.replace(/—/g, ", ").trim();
-    return { longevity, projection };
+    return {
+      longevity_score,
+      longevity_confidence,
+      longevity_description: parsed.longevity_description.replace(/—/g, ", ").trim(),
+      projection_score,
+      projection_confidence,
+      projection_description: parsed.projection_description.replace(/—/g, ", ").trim(),
+    };
   } catch (err) {
     console.warn(`  ! ${f.house} — ${f.name}: ${err instanceof Error ? err.message : String(err)}`);
     return null;
@@ -140,12 +189,19 @@ async function main() {
     if (LIMIT && remaining === 0) break;
     const pageSize = Math.min(BATCH, remaining || BATCH);
 
+    // Pull rows that are missing EITHER the descriptions OR the numeric
+    // scores. The 989 rows from the first pass have descriptions but
+    // still need scores, so the filter widens to catch them. The per-
+    // row update below uses ?? coalescing so existing non-null values
+    // are never overwritten.
     const { data: rows, error } = await supabase
       .from("fragrances")
       .select(
-        "id, name, house, year, gender, family, top_notes, mid_notes, base_notes, longevity_score, sillage_score",
+        "id, name, house, year, gender, family, top_notes, mid_notes, base_notes, longevity_score, longevity_confidence, longevity_description, sillage_score, sillage_confidence, projection_description",
       )
-      .is("longevity_description", null)
+      .or(
+        "longevity_score.is.null,longevity_description.is.null,sillage_score.is.null,projection_description.is.null",
+      )
       .order("popularity_rank", { ascending: true, nullsFirst: false })
       .limit(pageSize)
       .returns<FragranceRow[]>();
@@ -169,14 +225,21 @@ async function main() {
 
       if (DRY) {
         console.log(`  [dry] ${f.house} — ${f.name}`);
-        console.log(`        L: ${result.longevity}`);
-        console.log(`        P: ${result.projection}`);
+        console.log(`        L: ${result.longevity_score.toFixed(1)} (${result.longevity_confidence.toFixed(2)}) ${result.longevity_description}`);
+        console.log(`        P: ${result.projection_score.toFixed(1)} (${result.projection_confidence.toFixed(2)}) ${result.projection_description}`);
       } else {
+        // Coalesce against existing values — anything already non-null
+        // wins so the editorial-authored descriptions (and any
+        // previously-scraped community scores) survive intact.
         const { error: upErr } = await supabase
           .from("fragrances")
           .update({
-            longevity_description: result.longevity,
-            projection_description: result.projection,
+            longevity_score: f.longevity_score ?? result.longevity_score,
+            longevity_confidence: f.longevity_confidence ?? result.longevity_confidence,
+            longevity_description: f.longevity_description ?? result.longevity_description,
+            sillage_score: f.sillage_score ?? result.projection_score,
+            sillage_confidence: f.sillage_confidence ?? result.projection_confidence,
+            projection_description: f.projection_description ?? result.projection_description,
           })
           .eq("id", f.id);
         if (upErr) {
