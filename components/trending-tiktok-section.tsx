@@ -65,14 +65,18 @@ export async function TrendingTikTokSection({
           {rows.map((f) => {
             const inner = (
               <>
-                <div className="relative aspect-square rounded-xl overflow-hidden bg-paper border border-ink/10 mb-2">
+                {/* isolate + mix-blend-multiply removes the bottle photo's
+                    white background by multiplying it into the paper-toned
+                    card backdrop. Matches the detail-page hero treatment;
+                    no more white rectangle behind each thumbnail. */}
+                <div className="relative aspect-square rounded-xl overflow-hidden bg-paper border border-ink/10 mb-2 isolate">
                   {f.imageUrl ? (
                     <Image
                       src={f.imageUrl}
                       alt={`${f.house} ${f.name}`}
                       fill
                       sizes="140px"
-                      className="object-contain p-2 group-hover:scale-105 transition-transform"
+                      className="object-contain p-2 mix-blend-multiply group-hover:scale-105 transition-transform"
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center font-mono text-[10px] text-slate uppercase tracking-wider">
