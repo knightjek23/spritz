@@ -1,51 +1,46 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-08T12:00:00+00:00",
+  "generated_at": "2026-06-22T12:12:39.894128+00:00",
   "period": {
-    "start": "2026-06-08",
-    "end": "2026-06-14"
+    "start": "2026-06-22",
+    "end": "2026-06-28"
   },
   "source": "google_trends",
   "entries": [
     {
       "rank": 1,
-      "name": "Khamrah",
-      "house": "Lattafa"
+      "name": "Baccarat Rouge 540",
+      "house": "MFK"
     },
     {
       "rank": 2,
-      "name": "Baccarat Rouge 540",
-      "house": "Maison Francis Kurkdjian"
+      "name": "Bleu de Chanel",
+      "house": "Chanel"
     },
     {
       "rank": 3,
-      "name": "Vanilla 28",
-      "house": "Kayali"
+      "name": "Born In Roma Donna",
+      "house": "Valentino"
     },
     {
       "rank": 4,
-      "name": "Bianco Latte",
-      "house": "Giardini di Toscana"
+      "name": "Libre",
+      "house": "YSL"
     },
     {
       "rank": 5,
-      "name": "Yara",
-      "house": "Lattafa"
-    },
-    {
-      "rank": 6,
-      "name": "Eclaire",
-      "house": "Kayali"
-    },
-    {
-      "rank": 7,
       "name": "Coco Mademoiselle",
       "house": "Chanel"
     },
     {
-      "rank": 8,
-      "name": "J'adore",
-      "house": "Dior"
+      "rank": 6,
+      "name": "Vanilla Sex",
+      "house": "Tom Ford"
+    },
+    {
+      "rank": 7,
+      "name": "Molecule 01",
+      "house": "Escentric Molecules"
     }
   ]
 }
