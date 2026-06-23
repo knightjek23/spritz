@@ -106,3 +106,26 @@ h1, h2, h3, h4 {
     transform: none;
   }
 }
+
+/* Bottom-sheet entrance — slides up from below with a soft ease-out so
+   the card menu doesn't pop in jarringly. Same cubic-bezier as
+   spritz-rise for consistency, but shorter (280ms) since this is a
+   modal transition, not a content reveal. */
+@keyframes spritz-sheet-rise {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-spritz-sheet-rise {
+  animation: spritz-sheet-rise 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-spritz-sheet-rise {
+    animation: none;
+  }
+}

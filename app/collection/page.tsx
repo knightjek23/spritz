@@ -8,11 +8,12 @@
 //      each suggest a different next action, since their use cases differ).
 //   3. Signed-in + populated → tappable list of cards.
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import type { CollectionItem, CollectionStatus, Fragrance } from "@/lib/types";
+import { CardMenu } from "@/components/card-menu";
 
 type ItemWithFragrance = CollectionItem & { fragrance: Fragrance };
 
@@ -96,13 +97,19 @@ function SignedInCollection() {
   const [items, setItems] = useState<ItemWithFragrance[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  // Hoisted into a callback so CardMenu's onDelete can refresh the list
+  // after a successful Delete without having to navigate or full-reload.
+  const refetch = useCallback(() => {
     setLoading(true);
     fetch(`/api/collection?status=${tab}`)
       .then((r) => r.json())
       .then((d) => setItems(d.items ?? []))
       .finally(() => setLoading(false));
   }, [tab]);
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   const empty = EMPTY_COPY[tab];
 
@@ -145,15 +152,19 @@ function SignedInCollection() {
         </div>
       )}
 
+      {/* Shelf rows. The card itself is a Link to the detail page; the
+          kebab on the right opens a bottom-sheet menu (CardMenu) with
+          Like / Dislike / Share / Buy / Find Dupe / Delete. The kebab
+          calls stopPropagation so it never triggers the row's Link. */}
       <ul className="space-y-2">
         {items.map((it) => (
-          <li key={it.id}>
+          <li key={it.id} className="relative">
             <Link
               href={`/fragrance/${it.fragrance.id}`}
-              className="flex items-center gap-3 px-3 py-2 rounded-xl border border-ink/10 hover:bg-ink/5 transition"
+              className="flex items-center gap-3 px-3 py-2 pr-14 rounded-xl border border-ink/10 hover:bg-ink/5 transition"
             >
               {it.fragrance.bottle_image_url ? (
-                <div className="shrink-0 w-12 h-16 relative">
+                <div className="shrink-0 w-12 h-16 relative isolate">
                   <Image
                     src={it.fragrance.bottle_image_url}
                     alt=""
@@ -170,6 +181,20 @@ function SignedInCollection() {
                 <div className="text-xs text-slate truncate">{it.fragrance.house}</div>
               </div>
             </Link>
+            {/* Kebab sits absolutely over the row's right padding so the
+                whole card stays one tappable Link target. */}
+            <div className="absolute top-1/2 -translate-y-1/2 right-3">
+              <CardMenu
+                fragrance={{
+                  id: it.fragrance.id,
+                  name: it.fragrance.name,
+                  house: it.fragrance.house,
+                  bottle_image_url: it.fragrance.bottle_image_url,
+                }}
+                collectionItemId={it.id}
+                onDelete={refetch}
+              />
+            </div>
           </li>
         ))}
       </ul>
