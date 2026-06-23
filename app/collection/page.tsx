@@ -193,4 +193,15 @@ function SignedInCollection() {
                   id: it.fragrance.id,
                   name: it.fragrance.name,
                   house: it.fragrance.house,
-                  bottle_image_url: it.fragrance.bottle_image_url
+                  bottle_image_url: it.fragrance.bottle_image_url,
+                }}
+                collectionItemId={it.id}
+                onDelete={refetch}
+              />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
