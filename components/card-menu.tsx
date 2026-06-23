@@ -18,6 +18,7 @@
 // fires the onDelete callback so the parent can refresh its list.
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -41,6 +42,16 @@ export function CardMenu({ fragrance, collectionItemId, onDelete }: CardMenuProp
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);
+
+  // Mounted gate for createPortal — document.body doesn't exist during
+  // SSR, and even though this is a "use client" component, hydration runs
+  // before the first user interaction. Flip mounted = true after the first
+  // client render so the portal target is guaranteed available before we
+  // try to render into it.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Lock body scroll while sheet is open so the page underneath
   // doesn't drift when the user drags around the sheet.
@@ -176,89 +187,116 @@ export function CardMenu({ fragrance, collectionItemId, onDelete }: CardMenuProp
         </svg>
       </button>
 
-      {/* Bottom sheet — fixed full-screen overlay so it sits above the
-          bottom nav. Backdrop dismisses on tap; the sheet itself
-          stopPropagations so taps inside don't close it. */}
-      {open && (
-        <div
-          className="fixed inset-0 z-[60] flex flex-col justify-end"
-          onClick={close}
-        >
-          {/* Backdrop — soft scrim, ink at low opacity so the cream
-              still reads through. */}
-          <div className="absolute inset-0 bg-ink/30" aria-hidden />
+      {/* Bottom sheet + toast are portaled to document.body so they
+          escape any ancestor transform/filter context (the kebab is
+          wrapped in `-translate-y-1/2` on the shelf row, which would
+          otherwise make `position: fixed` resolve relative to that 32px
+          wrapper instead of the viewport — sheet would render as a
+          narrow column next to the kebab, and the backdrop wouldn't
+          cover the page so outside taps couldn't dismiss). */}
+      {mounted &&
+        createPortal(
+          <>
+            {open && (
+              <div
+                className="fixed inset-0 z-[60] flex flex-col justify-end"
+                onClick={close}
+              >
+                {/* Backdrop — soft scrim, ink at low opacity so the cream
+                    still reads through. Click anywhere outside the sheet
+                    to dismiss. */}
+                <div className="absolute inset-0 bg-ink/30" aria-hidden />
 
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label={`Options for ${fragrance.name}`}
-            onClick={(e) => e.stopPropagation()}
-            className="relative bg-cream rounded-t-3xl pt-2 pb-6 shadow-2xl animate-spritz-sheet-rise"
-          >
-            {/* Drag handle pill — affordance even though we're not
-                wiring real drag-to-dismiss yet. */}
-            <div className="mx-auto w-10 h-1 rounded-full bg-ink/20 mb-3" aria-hidden />
-
-            {/* Card preview — same layout as the shelf row so the user
-                knows exactly which fragrance the menu is operating on. */}
-            <div className="mx-4 mb-2 flex items-center gap-3 px-3 py-3 rounded-2xl bg-paper border border-ink/10">
-              {fragrance.bottle_image_url ? (
-                <div className="shrink-0 w-12 h-16 relative isolate">
-                  <Image
-                    src={fragrance.bottle_image_url}
-                    alt=""
-                    fill
-                    sizes="48px"
-                    className="object-contain mix-blend-multiply"
+                <div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label={`Options for ${fragrance.name}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="relative bg-cream rounded-t-3xl pt-2 pb-6 shadow-2xl animate-spritz-sheet-rise mx-auto w-full max-w-md"
+                >
+                  {/* Drag handle pill — affordance even though we're not
+                      wiring real drag-to-dismiss yet. */}
+                  <div
+                    className="mx-auto w-10 h-1 rounded-full bg-ink/20 mb-3"
+                    aria-hidden
                   />
+
+                  {/* Card preview — same layout as the shelf row so the
+                      user knows exactly which fragrance the menu is
+                      operating on. */}
+                  <div className="mx-4 mb-2 flex items-center gap-3 px-3 py-3 rounded-2xl bg-paper border border-ink/10">
+                    {fragrance.bottle_image_url ? (
+                      <div className="shrink-0 w-12 h-16 relative isolate">
+                        <Image
+                          src={fragrance.bottle_image_url}
+                          alt=""
+                          fill
+                          sizes="48px"
+                          className="object-contain mix-blend-multiply"
+                        />
+                      </div>
+                    ) : (
+                      <div className="shrink-0 w-12 h-16 rounded bg-ink/5" aria-hidden />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="font-display text-lg leading-tight truncate">
+                        {fragrance.name}
+                      </div>
+                      <div className="text-sm text-slate truncate">
+                        {fragrance.house}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Menu list. Each item is a full-width row, large tap
+                      target, inherits ink color so icons can use
+                      currentColor and match the label tone. */}
+                  <ul className="px-2">
+                    <MenuItem icon={<HeartIcon />} label="Like" onClick={onLike} />
+                    <MenuItem
+                      icon={<ThumbsDownIcon />}
+                      label="Dislike"
+                      onClick={onDislike}
+                    />
+                    <MenuItem icon={<AtomIcon />} label="Share" onClick={onShare} />
+                    <MenuItem icon={<DoorIcon />} label="Buy" onClick={onBuy} />
+                    <MenuItem
+                      icon={<DropletIcon />}
+                      label="Find Dupe"
+                      onClick={onFindDupe}
+                    />
+                    {collectionItemId && (
+                      <MenuItem
+                        icon={<CircleXIcon />}
+                        label={busy ? "Removing…" : "Delete"}
+                        onClick={onDeleteAction}
+                        disabled={busy}
+                        tone="danger"
+                      />
+                    )}
+                  </ul>
                 </div>
-              ) : (
-                <div className="shrink-0 w-12 h-16 rounded bg-ink/5" aria-hidden />
-              )}
-              <div className="min-w-0 flex-1">
-                <div className="font-display text-lg leading-tight truncate">
-                  {fragrance.name}
-                </div>
-                <div className="text-sm text-slate truncate">{fragrance.house}</div>
               </div>
-            </div>
+            )}
 
-            {/* Menu list. Each item is a full-width row, large tap
-                target, inherits ink color so icons can use currentColor
-                and match the label tone. */}
-            <ul className="px-2">
-              <MenuItem icon={<HeartIcon />} label="Like" onClick={onLike} />
-              <MenuItem icon={<ThumbsDownIcon />} label="Dislike" onClick={onDislike} />
-              <MenuItem icon={<AtomIcon />} label="Share" onClick={onShare} />
-              <MenuItem icon={<DoorIcon />} label="Buy" onClick={onBuy} />
-              <MenuItem icon={<DropletIcon />} label="Find Dupe" onClick={onFindDupe} />
-              {collectionItemId && (
-                <MenuItem
-                  icon={<CircleXIcon />}
-                  label={busy ? "Removing…" : "Delete"}
-                  onClick={onDeleteAction}
-                  disabled={busy}
-                  tone="danger"
-                />
-              )}
-            </ul>
-          </div>
-        </div>
-      )}
-
-      {/* Toast — fixed near the top so it doesn't get covered by the
-          bottom nav. Only renders when a stub action fires or share/delete
-          needs to surface a result. */}
-      {toast && (
-        <div
-          role="status"
-          className={`fixed top-4 left-1/2 -translate-x-1/2 z-[70] px-4 py-2 rounded-full text-sm shadow-lg ${
-            toast.tone === "error" ? "bg-ink text-cream" : "bg-cream text-ink border border-ink/10"
-          }`}
-        >
-          {toast.message}
-        </div>
-      )}
+            {/* Toast — fixed near the top so it doesn't get covered by
+                the bottom nav. Only renders when a stub action fires or
+                share/delete needs to surface a result. */}
+            {toast && (
+              <div
+                role="status"
+                className={`fixed top-4 left-1/2 -translate-x-1/2 z-[70] px-4 py-2 rounded-full text-sm shadow-lg ${
+                  toast.tone === "error"
+                    ? "bg-ink text-cream"
+                    : "bg-cream text-ink border border-ink/10"
+                }`}
+              >
+                {toast.message}
+              </div>
+            )}
+          </>,
+          document.body,
+        )}
     </>
   );
 }
@@ -390,11 +428,4 @@ function CircleXIcon() {
   return (
     <svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden>
       <path
-        d="M19.0001 12.9998L12.9996 19.0003M12.9996 12.9998L19.0001 19.0003M26.0006 16.0001C26.0006 21.5234 21.5231 26.0009 15.9998 26.0009C10.4765 26.0009 5.99902 21.5234 5.99902 16.0001C5.99902 10.4768 10.4765 5.99927 15.9998 5.99927C21.5231 5.99927 26.0006 10.4768 26.0006 16.0001Z"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
+       
