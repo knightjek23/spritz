@@ -226,17 +226,21 @@ export function CardMenu({ fragrance, collectionItemId, onDelete }: CardMenuProp
                       operating on. */}
                   <div className="mx-4 mb-2 flex items-center gap-3 px-3 py-3 rounded-2xl bg-paper border border-ink/10">
                     {fragrance.bottle_image_url ? (
-                      <div className="shrink-0 w-12 h-16 relative isolate">
+                      // Same bg-paper + isolate + mix-blend-multiply trio as
+                      // the shelf row thumbnail so the preview's bottle
+                      // dissolves into the card backdrop instead of sitting
+                      // in a white box.
+                      <div className="shrink-0 w-12 h-16 relative isolate bg-paper rounded-md overflow-hidden">
                         <Image
                           src={fragrance.bottle_image_url}
                           alt=""
                           fill
                           sizes="48px"
-                          className="object-contain mix-blend-multiply"
+                          className="object-contain mix-blend-multiply p-1"
                         />
                       </div>
                     ) : (
-                      <div className="shrink-0 w-12 h-16 rounded bg-ink/5" aria-hidden />
+                      <div className="shrink-0 w-12 h-16 rounded-md bg-ink/5" aria-hidden />
                     )}
                     <div className="min-w-0 flex-1">
                       <div className="font-display text-lg leading-tight truncate">

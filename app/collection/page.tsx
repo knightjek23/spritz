@@ -164,17 +164,21 @@ function SignedInCollection() {
               className="flex items-center gap-3 px-3 py-2 pr-14 rounded-xl border border-ink/10 hover:bg-ink/5 transition"
             >
               {it.fragrance.bottle_image_url ? (
-                <div className="shrink-0 w-12 h-16 relative isolate">
+                // bg-paper + isolate + mix-blend-multiply trio: the multiply
+                // needs an opaque backdrop to blend into (without it, the
+                // white bottle background stays white). Matches the trending
+                // card thumbnail pattern.
+                <div className="shrink-0 w-12 h-16 relative isolate bg-paper rounded-md overflow-hidden">
                   <Image
                     src={it.fragrance.bottle_image_url}
                     alt=""
                     fill
                     sizes="48px"
-                    className="object-contain mix-blend-multiply"
+                    className="object-contain mix-blend-multiply p-1"
                   />
                 </div>
               ) : (
-                <div className="shrink-0 w-12 h-16 rounded bg-paper" aria-hidden />
+                <div className="shrink-0 w-12 h-16 rounded-md bg-paper" aria-hidden />
               )}
               <div className="min-w-0 flex-1">
                 <div className="font-medium truncate">{it.fragrance.name}</div>
@@ -189,15 +193,4 @@ function SignedInCollection() {
                   id: it.fragrance.id,
                   name: it.fragrance.name,
                   house: it.fragrance.house,
-                  bottle_image_url: it.fragrance.bottle_image_url,
-                }}
-                collectionItemId={it.id}
-                onDelete={refetch}
-              />
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
+                  bottle_image_url: it.fragrance.bottle_image_url
