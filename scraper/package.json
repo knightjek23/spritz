@@ -6,6 +6,8 @@
   "type": "module",
   "scripts": {
     "discover": "tsx src/scrape-fragrantica.ts discover",
+    "discover:sitemap": "tsx src/scrape-fragrantica.ts discover:sitemap",
+    "discover:brands": "tsx src/scrape-fragrantica.ts discover:brands",
     "discover:debug": "tsx src/scrape-fragrantica.ts discover:debug",
     "scrape": "tsx src/scrape-fragrantica.ts scrape",
     "scrape:dry": "tsx src/scrape-fragrantica.ts scrape --dry-run",
