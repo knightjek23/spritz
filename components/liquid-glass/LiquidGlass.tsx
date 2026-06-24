@@ -165,11 +165,27 @@ export const LiquidGlass = forwardRef<HTMLElement, LiquidGlassProps>(
     // complex to represent" during the prod build).
     const TagComponent = Tag as ElementType;
 
+    // Outer container: just the border-radius + any caller-provided style.
+    // Crucially, we do NOT set `position` here — that lets the caller use
+    // `sticky top-0`, `fixed bottom-0`, `absolute`, etc. via className
+    // without being overridden by inline styles (inline always wins over
+    // CSS classes, so setting position:relative here would clobber every
+    // sticky/fixed caller silently).
     const container: CSSProperties = {
-      position: "relative",
       borderRadius: radiusPx,
       ...style,
     };
+
+    // Inner wrapper carries the position:relative that the glass layers
+    // need as their containing block. Because it's a child of Tag, it
+    // doesn't affect Tag's own positioning (Tag can be sticky/fixed/
+    // anything). `borderRadius: inherit` makes the inner share Tag's
+    // rounded shape so the layers clip correctly.
+    const wrapper: CSSProperties = {
+      position: "relative",
+      borderRadius: "inherit",
+    };
+
     const fill: CSSProperties = {
       position: "absolute",
       inset: 0,
@@ -187,7 +203,7 @@ export const LiquidGlass = forwardRef<HTMLElement, LiquidGlassProps>(
           aria-label={ariaLabel}
           style={{ ...container, background: "rgba(28,28,32,0.9)" }}
         >
-          <div style={{ position: "relative" }}>{children}</div>
+          <div style={wrapper}>{children}</div>
         </TagComponent>
       );
     }
@@ -201,39 +217,41 @@ export const LiquidGlass = forwardRef<HTMLElement, LiquidGlassProps>(
         aria-label={ariaLabel}
         style={container}
       >
-        {/* bend: backdrop blur + liquid displacement */}
-        <div
-          style={{
-            ...fill,
-            backdropFilter: `blur(${blurPx}px)`,
-            WebkitBackdropFilter: `blur(${blurPx}px)`,
-            filter: filterId ? `url(#${filterId})` : undefined,
-            zIndex: 0,
-          }}
-        />
-        {/* optional tint */}
-        {tint && (
-          <div style={{ ...fill, background: tint, zIndex: 1 }} />
-        )}
-        {/* face: lift shadow */}
-        <div
-          style={{
-            ...fill,
-            boxShadow:
-              "0 4px 4px rgba(0,0,0,0.15), 0 0 12px rgba(0,0,0,0.08)",
-            zIndex: 2,
-          }}
-        />
-        {/* edge: beveled rim highlight */}
-        <div
-          style={{
-            ...fill,
-            boxShadow: `inset 3px 3px 3px 0 rgba(255,255,255,${edgeOp}), inset -3px -3px 3px 0 rgba(255,255,255,${edgeOp})`,
-            zIndex: 3,
-          }}
-        />
-        {/* content */}
-        <div style={{ position: "relative", zIndex: 4 }}>{children}</div>
+        <div style={wrapper}>
+          {/* bend: backdrop blur + liquid displacement */}
+          <div
+            style={{
+              ...fill,
+              backdropFilter: `blur(${blurPx}px)`,
+              WebkitBackdropFilter: `blur(${blurPx}px)`,
+              filter: filterId ? `url(#${filterId})` : undefined,
+              zIndex: 0,
+            }}
+          />
+          {/* optional tint */}
+          {tint && (
+            <div style={{ ...fill, background: tint, zIndex: 1 }} />
+          )}
+          {/* face: lift shadow */}
+          <div
+            style={{
+              ...fill,
+              boxShadow:
+                "0 4px 4px rgba(0,0,0,0.15), 0 0 12px rgba(0,0,0,0.08)",
+              zIndex: 2,
+            }}
+          />
+          {/* edge: beveled rim highlight */}
+          <div
+            style={{
+              ...fill,
+              boxShadow: `inset 3px 3px 3px 0 rgba(255,255,255,${edgeOp}), inset -3px -3px 3px 0 rgba(255,255,255,${edgeOp})`,
+              zIndex: 3,
+            }}
+          />
+          {/* content */}
+          <div style={{ position: "relative", zIndex: 4 }}>{children}</div>
+        </div>
       </TagComponent>
     );
   },
