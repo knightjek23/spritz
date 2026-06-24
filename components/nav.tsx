@@ -14,6 +14,10 @@ export function Nav() {
         as="nav"
         preset="nav"
         tint="rgba(250,246,237,0.55)"
+        // Cream-toned rim (matches the tint RGB) so the glass edge reads
+        // as part of the bar instead of a stark white highlight against
+        // the warmer page color.
+        edgeColor="250, 246, 237"
         // Inline positioning so sticky always wins — Tailwind's `sticky
         // top-0` was getting clobbered by something in the new flex
         // layout + body height stack. Inline style is the surest path.

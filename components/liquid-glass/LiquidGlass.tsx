@@ -120,6 +120,10 @@ export interface LiquidGlassProps {
   radius?: number;
   /** Rim highlight opacity 0..1. */
   edge?: number;
+  /** Rim highlight RGB triplet as "R, G, B" — default "255, 255, 255" (white).
+   *  Use to color-match the rim to the surrounding tint, e.g.
+   *  edgeColor="250, 246, 237" for a cream-toned rim on a cream nav. */
+  edgeColor?: string;
   /** Optional translucent fill over the glass, e.g. 'rgba(255,255,255,0.06)'. */
   tint?: string;
   className?: string;
@@ -139,6 +143,7 @@ export const LiquidGlass = forwardRef<HTMLElement, LiquidGlassProps>(
       blur,
       radius,
       edge,
+      edgeColor,
       tint,
       className,
       style,
@@ -153,6 +158,7 @@ export const LiquidGlass = forwardRef<HTMLElement, LiquidGlassProps>(
     const radiusPx =
       (radius ?? p.radius) >= 999 ? 9999 : radius ?? p.radius;
     const edgeOp = edge ?? p.edge;
+    const edgeRgb = edgeColor ?? "255, 255, 255";
 
     const reduced = usePrefersReducedTransparency();
     useEffect(() => {
@@ -241,11 +247,13 @@ export const LiquidGlass = forwardRef<HTMLElement, LiquidGlassProps>(
               zIndex: 2,
             }}
           />
-          {/* edge: beveled rim highlight */}
+          {/* edge: beveled rim highlight. Color comes from the edgeColor
+              prop so callers can match the rim to the tint (cream nav →
+              cream rim) instead of the default stark white. */}
           <div
             style={{
               ...fill,
-              boxShadow: `inset 3px 3px 3px 0 rgba(255,255,255,${edgeOp}), inset -3px -3px 3px 0 rgba(255,255,255,${edgeOp})`,
+              boxShadow: `inset 3px 3px 3px 0 rgba(${edgeRgb},${edgeOp}), inset -3px -3px 3px 0 rgba(${edgeRgb},${edgeOp})`,
               zIndex: 3,
             }}
           />

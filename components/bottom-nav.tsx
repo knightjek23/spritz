@@ -98,6 +98,9 @@ export function BottomNav() {
       preset="bottom-nav"
       radius={0}
       tint="rgba(242,237,228,0.65)"
+      // Paper-toned rim (matches the tint RGB) so the glass edge sits
+      // tonally with the bar instead of bright white against paper.
+      edgeColor="242, 237, 228"
       role="navigation"
       aria-label="Primary"
       // Inline positioning so fixed always wins regardless of any
