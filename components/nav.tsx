@@ -1,11 +1,21 @@
 import Link from "next/link";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { NavSearch } from "./nav-search";
+import { LiquidGlass } from "./liquid-glass/LiquidGlass";
 
 export function Nav() {
   return (
     <>
-      <nav className="border-b border-ink/10 bg-cream/80 backdrop-blur sticky top-0 z-10">
+      {/* Liquid-glass top nav. Preset 'nav' = radius 0 (full-width edge to
+          edge), 2px backdrop blur, subtle displacement filter, rim
+          highlight. A faint cream tint keeps text legible against scrolled
+          page content underneath. */}
+      <LiquidGlass
+        as="nav"
+        preset="nav"
+        tint="rgba(250,246,237,0.55)"
+        className="border-b border-ink/10 sticky top-0 z-10"
+      >
         <div className="mx-auto max-w-md px-6 h-14 flex items-center justify-between">
           <Link href="/" className="font-display text-2xl tracking-tight text-ink">
             spritz
@@ -36,7 +46,7 @@ export function Nav() {
             </SignedOut>
           </div>
         </div>
-      </nav>
+      </LiquidGlass>
       {/* Second row: typeahead search, sticks below the nav.
           Self-hides on /search so we don't double up. */}
       <NavSearch />

@@ -1,0 +1,233 @@
+"use client";
+
+/**
+ * LiquidGlass.tsx
+ *
+ * Reusable liquid-glass (iOS-26 / Apple) skin: three stacked layers — bend
+ * (backdrop blur + displacement), face (lift shadow), edge (inset rim
+ * highlight). Wrap any element to give it a frosted, refracting glass surface.
+ *
+ *   <LiquidGlass preset="bottom-nav" className="fixed bottom-0 inset-x-0">…</LiquidGlass>
+ *
+ * Render <LiquidGlassDefs /> once near the app root so the displacement
+ * filters exist in the document. If you forget, ensureDefs() injects them
+ * lazily on the first mount.
+ *
+ * Verbatim from the liquid-glass skill (assets/LiquidGlass.tsx) with minor
+ * import path adjustments for this project.
+ */
+
+import {
+  forwardRef,
+  useEffect,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
+import {
+  buildLiquidGlassFilters,
+  DEFAULT_VARIANTS,
+  LIQUID_GLASS_FILTERS_ID,
+  type DisplaceVariant,
+} from "./liquid-glass-filters";
+
+export type LiquidGlassPreset =
+  | "nav"
+  | "bottom-nav"
+  | "search"
+  | "card"
+  | "modal"
+  | "button";
+
+interface PresetDef {
+  filter: string; // displacement variant id
+  blur: number; // backdrop blur px
+  radius: number; // px; 999 → pill
+  edge: number; // rim highlight opacity 0..1
+}
+
+export const PRESETS: Record<LiquidGlassPreset, PresetDef> = {
+  nav: { filter: "lg-glass-subtle", blur: 2, radius: 0, edge: 0.45 },
+  "bottom-nav": { filter: "lg-glass-subtle", blur: 2, radius: 32, edge: 0.45 },
+  search: { filter: "lg-glass-subtle", blur: 2, radius: 999, edge: 0.45 },
+  card: { filter: "lg-glass", blur: 3, radius: 24, edge: 0.45 },
+  modal: { filter: "lg-glass", blur: 4, radius: 28, edge: 0.4 },
+  button: { filter: "lg-glass-subtle", blur: 2, radius: 16, edge: 0.5 },
+};
+
+// --- filter defs (inject once) ---
+
+export function LiquidGlassDefs({
+  variants = DEFAULT_VARIANTS,
+}: {
+  variants?: DisplaceVariant[];
+}) {
+  const [render, setRender] = useState(false);
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (document.getElementById(LIQUID_GLASS_FILTERS_ID)) return;
+    setRender(true);
+  }, []);
+  if (!render) return null;
+  return (
+    <div
+      id={LIQUID_GLASS_FILTERS_ID}
+      aria-hidden
+      style={{
+        position: "absolute",
+        width: 0,
+        height: 0,
+        overflow: "hidden",
+      }}
+      dangerouslySetInnerHTML={{ __html: buildLiquidGlassFilters(variants) }}
+    />
+  );
+}
+
+function ensureDefs() {
+  if (typeof document === "undefined") return;
+  if (document.getElementById(LIQUID_GLASS_FILTERS_ID)) return;
+  const host = document.createElement("div");
+  host.id = LIQUID_GLASS_FILTERS_ID;
+  host.setAttribute("aria-hidden", "true");
+  host.style.cssText =
+    "position:absolute;width:0;height:0;overflow:hidden";
+  host.innerHTML = buildLiquidGlassFilters();
+  document.body.appendChild(host);
+}
+
+function usePrefersReducedTransparency() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-transparency: reduce)");
+    const update = () => setReduced(mq.matches);
+    update();
+    mq.addEventListener?.("change", update);
+    return () => mq.removeEventListener?.("change", update);
+  }, []);
+  return reduced;
+}
+
+// --- component ---
+
+export interface LiquidGlassProps {
+  children?: ReactNode;
+  preset?: LiquidGlassPreset;
+  /** Displacement variant id; overrides the preset. '' disables the wobble. */
+  filter?: string;
+  blur?: number;
+  radius?: number;
+  /** Rim highlight opacity 0..1. */
+  edge?: number;
+  /** Optional translucent fill over the glass, e.g. 'rgba(255,255,255,0.06)'. */
+  tint?: string;
+  className?: string;
+  style?: CSSProperties;
+  as?: keyof JSX.IntrinsicElements;
+  // Pass-through attributes that some elements (nav, header) need.
+  role?: string;
+  "aria-label"?: string;
+}
+
+export const LiquidGlass = forwardRef<HTMLElement, LiquidGlassProps>(
+  function LiquidGlass(props, ref) {
+    const {
+      children,
+      preset = "card",
+      filter,
+      blur,
+      radius,
+      edge,
+      tint,
+      className,
+      style,
+      as: Tag = "div",
+      role,
+      "aria-label": ariaLabel,
+    } = props;
+
+    const p = PRESETS[preset];
+    const filterId = filter ?? p.filter;
+    const blurPx = blur ?? p.blur;
+    const radiusPx =
+      (radius ?? p.radius) >= 999 ? 9999 : radius ?? p.radius;
+    const edgeOp = edge ?? p.edge;
+
+    const reduced = usePrefersReducedTransparency();
+    useEffect(() => {
+      ensureDefs();
+    }, []);
+
+    const container: CSSProperties = {
+      position: "relative",
+      borderRadius: radiusPx,
+      ...style,
+    };
+    const fill: CSSProperties = {
+      position: "absolute",
+      inset: 0,
+      borderRadius: "inherit",
+      pointerEvents: "none",
+    };
+
+    if (reduced) {
+      return (
+        <Tag
+          ref={ref as never}
+          data-liquid-glass-root
+          className={className}
+          role={role}
+          aria-label={ariaLabel}
+          style={{ ...container, background: "rgba(28,28,32,0.9)" }}
+        >
+          <div style={{ position: "relative" }}>{children}</div>
+        </Tag>
+      );
+    }
+
+    return (
+      <Tag
+        ref={ref as never}
+        data-liquid-glass-root
+        className={className}
+        role={role}
+        aria-label={ariaLabel}
+        style={container}
+      >
+        {/* bend: backdrop blur + liquid displacement */}
+        <div
+          style={{
+            ...fill,
+            backdropFilter: `blur(${blurPx}px)`,
+            WebkitBackdropFilter: `blur(${blurPx}px)`,
+            filter: filterId ? `url(#${filterId})` : undefined,
+            zIndex: 0,
+          }}
+        />
+        {/* optional tint */}
+        {tint && (
+          <div style={{ ...fill, background: tint, zIndex: 1 }} />
+        )}
+        {/* face: lift shadow */}
+        <div
+          style={{
+            ...fill,
+            boxShadow:
+              "0 4px 4px rgba(0,0,0,0.15), 0 0 12px rgba(0,0,0,0.08)",
+            zIndex: 2,
+          }}
+        />
+        {/* edge: beveled rim highlight */}
+        <div
+          style={{
+            ...fill,
+            boxShadow: `inset 3px 3px 3px 0 rgba(255,255,255,${edgeOp}), inset -3px -3px 3px 0 rgba(255,255,255,${edgeOp})`,
+            zIndex: 3,
+          }}
+        />
+        {/* content */}
+        <div style={{ position: "relative", zIndex: 4 }}>{children}</div>
+      </Tag>
+    );
+  },
+);

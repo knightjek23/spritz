@@ -23,6 +23,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LiquidGlass } from "./liquid-glass/LiquidGlass";
 
 interface Tab {
   href: string;
@@ -86,10 +87,20 @@ export function BottomNav() {
   if (pathname.startsWith("/scan")) return null;
 
   return (
-    <nav
+    // Liquid-glass bottom nav. Preset 'bottom-nav' defaults to a 32px
+    // pill radius (Instagram-style floating bar), but Spritz's existing
+    // shape is full-width edge-to-edge — so we override radius to 0 and
+    // keep the border-top for definition against the page. The paper
+    // tint sits over the displacement layer so labels and icons stay
+    // legible regardless of what's behind them.
+    <LiquidGlass
+      as="nav"
+      preset="bottom-nav"
+      radius={0}
+      tint="rgba(242,237,228,0.65)"
       role="navigation"
       aria-label="Primary"
-      className="fixed bottom-0 left-0 right-0 z-40 bg-[#f2ede4]/95 backdrop-blur-md border-t border-white/20"
+      className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/20"
     >
       <ul className="flex items-start justify-between px-2 pt-3">
         {TABS.map((tab) => {
@@ -128,7 +139,7 @@ export function BottomNav() {
       <div className="flex items-center justify-center h-[34px]">
         <div className="bg-white/30 h-[5px] w-[134px] rounded-full" aria-hidden />
       </div>
-    </nav>
+    </LiquidGlass>
   );
 }
 

@@ -3,6 +3,7 @@ import { Playfair_Display, Roboto } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Nav } from "@/components/nav";
 import { BottomNav } from "@/components/bottom-nav";
+import { LiquidGlassDefs } from "@/components/liquid-glass/LiquidGlass";
 import "./globals.css";
 
 // Playfair Display — high-contrast serif for hero / section headings.
@@ -64,6 +65,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <ClerkProvider>
       <html lang="en" className={`${playfair.variable} ${roboto.variable}`}>
         <body className="min-h-screen flex flex-col font-sans">
+          {/* SVG <defs> for the liquid-glass displacement filters. Mounted
+              once near the root so any <LiquidGlass> in the tree can
+              reference url(#lg-glass-subtle) etc. by id. Component is
+              client-only and renders nothing visible. */}
+          <LiquidGlassDefs />
           <Nav />
           {/* pb-28 reserves space for the fixed bottom nav (~85px tall:
               tab area + home-indicator strip). The nav itself self-hides
