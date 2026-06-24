@@ -100,7 +100,10 @@ export function BottomNav() {
       tint="rgba(242,237,228,0.65)"
       role="navigation"
       aria-label="Primary"
-      className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/20"
+      // Inline positioning so fixed always wins regardless of any
+      // ancestor that may have inadvertently created a containing block.
+      style={{ position: "fixed", bottom: 0, left: 0, right: 0 }}
+      className="z-40 border-t border-white/20"
     >
       <ul className="flex items-start justify-between px-2 pt-3">
         {TABS.map((tab) => {

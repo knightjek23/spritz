@@ -14,7 +14,11 @@ export function Nav() {
         as="nav"
         preset="nav"
         tint="rgba(250,246,237,0.55)"
-        className="border-b border-ink/10 sticky top-0 z-10"
+        // Inline positioning so sticky always wins — Tailwind's `sticky
+        // top-0` was getting clobbered by something in the new flex
+        // layout + body height stack. Inline style is the surest path.
+        style={{ position: "sticky", top: 0 }}
+        className="border-b border-ink/10 z-10"
       >
         <div className="mx-auto max-w-md px-6 h-14 flex items-center justify-between">
           <Link href="/" className="font-display text-2xl tracking-tight text-ink">
