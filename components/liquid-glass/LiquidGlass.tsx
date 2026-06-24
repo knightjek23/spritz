@@ -22,6 +22,7 @@ import {
   useEffect,
   useState,
   type CSSProperties,
+  type ElementType,
   type ReactNode,
 } from "react";
 import {
@@ -158,6 +159,12 @@ export const LiquidGlass = forwardRef<HTMLElement, LiquidGlassProps>(
       ensureDefs();
     }, []);
 
+    // Cast Tag to a generic ElementType so TypeScript stops trying to
+    // unify the ref union across every keyof JSX.IntrinsicElements (the
+    // union explodes and trips the strict checker with "union type too
+    // complex to represent" during the prod build).
+    const TagComponent = Tag as ElementType;
+
     const container: CSSProperties = {
       position: "relative",
       borderRadius: radiusPx,
@@ -172,8 +179,8 @@ export const LiquidGlass = forwardRef<HTMLElement, LiquidGlassProps>(
 
     if (reduced) {
       return (
-        <Tag
-          ref={ref as never}
+        <TagComponent
+          ref={ref}
           data-liquid-glass-root
           className={className}
           role={role}
@@ -181,13 +188,13 @@ export const LiquidGlass = forwardRef<HTMLElement, LiquidGlassProps>(
           style={{ ...container, background: "rgba(28,28,32,0.9)" }}
         >
           <div style={{ position: "relative" }}>{children}</div>
-        </Tag>
+        </TagComponent>
       );
     }
 
     return (
-      <Tag
-        ref={ref as never}
+      <TagComponent
+        ref={ref}
         data-liquid-glass-root
         className={className}
         role={role}
@@ -227,7 +234,7 @@ export const LiquidGlass = forwardRef<HTMLElement, LiquidGlassProps>(
         />
         {/* content */}
         <div style={{ position: "relative", zIndex: 4 }}>{children}</div>
-      </Tag>
+      </TagComponent>
     );
   },
 );
