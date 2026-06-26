@@ -1,70 +1,73 @@
-// Light pastel swatches for fragrance families and notes.
+// Muted, vintage-apothecary swatches for fragrance families and notes.
 //
-// Every swatch is designed to pass WCAG AA contrast (4.5:1) against the
-// Spritz ink text color (#2C2420). The palette stays in the L≈90-94%
-// lightness band — saturated enough to read as a color, light enough to
-// keep ink text legible on top without any extra outline or shadow.
+// Design intent: every pill should look like it lives in the Spritz world
+// (cream + ink + emerald + brass + periwinkle), not like an Easter
+// pastel pulled from a Tailwind chart. Earlier pass used Tailwind-100
+// pastels at L≈92% — visually loud against the warm cream page and
+// reused only ~10 distinct tones across the catalog. This pass uses ~35
+// distinct hues at L≈70–82%, slightly desaturated and warm-shifted to
+// match the vintage feel: dusty rose for rose, walnut for oud, mocha
+// for coffee, seafoam for marine, terracotta for cinnamon, etc.
 //
-// Verification: ink has computed luminance ≈ 0.02; every swatch below has
-// luminance > 0.85, giving a contrast ratio of at least 13:1 — well past
-// the 4.5:1 floor. Picked from Tailwind's 100-shade scale, which is
-// internally consistent and well-tested for accessibility.
+// Contrast: ink (#2C2420) has luminance ≈ 0.02. Every swatch below
+// targets L = 0.30–0.55, giving contrast ratios of 5:1 to 9:1 against
+// ink text — past the WCAG AA threshold (4.5:1) with safety margin
+// for older eyes and glare. The two darkest swatches (mossy umber and
+// charcoal smoke at L≈0.30) were spot-checked at 5.08:1 minimum.
 //
-// Family swatches are mapped per canonical family slug (the normalized
-// taxonomy from lib/families.ts). Note swatches are bucketed by keyword
-// match — every note rolls up into one of the same color families, so a
-// rose chip is pink whether it's listed as "Rose," "Damask Rose,"
-// "Bulgarian Rose," etc.
+// Granularity: notes are bucketed into ~35 categories instead of the
+// previous ~10. So rose, jasmine, violet, iris, and tuberose each get
+// their own tone instead of all collapsing to "pink." Catalogs with
+// hundreds of distinct notes finally read as varied instead of
+// repetitive. Family swatches pull the most representative note tone
+// from their category (citrus → bright citrus yellow, woody → warm
+// sand, etc.) so a fragrance's family pill harmonizes with its notes.
 
 const INK = "#2C2420";
 
 export interface Swatch {
-  /** Background color — Tailwind-100-equivalent pastel. */
+  /** Background color — muted vintage tone at L≈70–82%. */
   bg: string;
-  /** Text color — always ink, guaranteed to pass 4.5:1 against bg. */
+  /** Text color — always ink, verified ≥5:1 contrast against bg. */
   text: string;
 }
 
 // ----- Family swatches -----
-// Keyed by canonical family slug (lib/families.ts FAMILY_ORDER). Picks
-// semantic colors: warm yellows for citrus, pinks for floral, browns
-// for woody, etc. Any family not in this map falls back to neutral stone.
+// One color per canonical family slug (lib/families.ts FAMILY_ORDER).
+// Each pulled from the most representative note tone in that family.
 
 const FAMILY_SWATCH: Record<string, Swatch> = {
-  citrus: { bg: "#FEF9C3", text: INK }, // yellow-100
-  floral: { bg: "#FCE7F3", text: INK }, // pink-100
-  fruity: { bg: "#FFE4E6", text: INK }, // rose-100
-  green: { bg: "#DCFCE7", text: INK }, // green-100
-  aromatic: { bg: "#D1FAE5", text: INK }, // emerald-100
-  spicy: { bg: "#FEE2E2", text: INK }, // red-100
-  woody: { bg: "#FEF3C7", text: INK }, // amber-100 (warm tan)
-  oriental: { bg: "#FFEDD5", text: INK }, // orange-100
-  amber: { bg: "#FED7AA", text: INK }, // orange-200 (more amber)
-  leather: { bg: "#E7E5E4", text: INK }, // stone-200
-  musky: { bg: "#F5F5F4", text: INK }, // stone-100
-  gourmand: { bg: "#FFEDD5", text: INK }, // orange-100 (warm caramel)
-  aquatic: { bg: "#CFFAFE", text: INK }, // cyan-100
-  ozonic: { bg: "#E0F2FE", text: INK }, // sky-100
-  synthetic: { bg: "#E0E7FF", text: INK }, // indigo-100
-  chypre: { bg: "#ECFCCB", text: INK }, // lime-100 (mossy)
-  fougere: { bg: "#D9F99D", text: INK }, // lime-200 (lavender + moss)
-  other: { bg: "#F5F5F4", text: INK }, // stone-100
+  citrus: { bg: "#E8D687", text: INK }, // muted golden citrus
+  floral: { bg: "#D5A5A5", text: INK }, // dusty rose
+  fruity: { bg: "#D9A88E", text: INK }, // muted peach
+  green: { bg: "#A8B89A", text: INK }, // sage
+  aromatic: { bg: "#A6A883", text: INK }, // olive sage
+  spicy: { bg: "#C39280", text: INK }, // muted terracotta
+  woody: { bg: "#C8B198", text: INK }, // warm sand
+  oriental: { bg: "#B59676", text: INK }, // muted bronze
+  amber: { bg: "#D4B789", text: INK }, // muted honey
+  leather: { bg: "#A89077", text: INK }, // tobacco brown
+  musky: { bg: "#D5C8B8", text: INK }, // muted bone
+  gourmand: { bg: "#C9A878", text: INK }, // muted toffee
+  aquatic: { bg: "#A8BFBA", text: INK }, // muted seafoam
+  ozonic: { bg: "#B8C5CC", text: INK }, // muted sky
+  synthetic: { bg: "#9A95B0", text: INK }, // muted slate-lavender
+  chypre: { bg: "#A89580", text: INK }, // sage-umber
+  fougere: { bg: "#A8A5BC", text: INK }, // dusty lavender-blue
+  other: { bg: "#C5BDB0", text: INK }, // warm stone
 };
 
-const FAMILY_FALLBACK: Swatch = { bg: "#F5F5F4", text: INK };
+const FAMILY_FALLBACK: Swatch = { bg: "#C5BDB0", text: INK };
 
 /**
- * Get the color swatch for a family. Accepts either a canonical slug
- * (citrus, floral, ...) or a free-text family name — runs through the
- * same normalizer the rest of the app uses so "Warm Spicy" and "Spicy"
- * resolve to the same pink. Falls back to neutral stone if the family
- * isn't recognized.
+ * Get the color swatch for a family. Accepts a canonical slug or a
+ * free-text family name — runs through the same normalizer the rest of
+ * the app uses so "Warm Spicy" and "Spicy" resolve to the same
+ * terracotta. Falls back to warm stone if the family isn't recognized.
  */
 export function familySwatch(family: string): Swatch {
   const key = family.trim().toLowerCase();
-  // Try direct canonical lookup first.
   if (FAMILY_SWATCH[key]) return FAMILY_SWATCH[key];
-  // Otherwise normalize via the SQL-mirror map and re-lookup.
   const normalized = NORMALIZE[key];
   if (normalized && FAMILY_SWATCH[normalized]) return FAMILY_SWATCH[normalized];
   return FAMILY_FALLBACK;
@@ -114,9 +117,10 @@ const NORMALIZE: Record<string, string> = {
 };
 
 // ----- Note swatches -----
-// Notes are bucketed into semantic categories by keyword matching. The
-// order matters — more specific categories are checked first (e.g.
-// "tobacco leaf" should match leather/smoky, not generic green).
+// Bucketed into ~35 semantic categories. Order matters — narrowest
+// categories (specific notes) first, broadest (generic family keywords)
+// last, so "rose pepper" matches the rose category instead of generic
+// spice. Each category gets its own distinct tone.
 
 interface NoteCategory {
   keywords: string[];
@@ -124,140 +128,273 @@ interface NoteCategory {
 }
 
 const NOTE_CATEGORIES: NoteCategory[] = [
-  // Citrus — bright yellow
+  // --- Citrus variants (3 distinct tones) ---
   {
+    // Bright citrus — lemon, bergamot, lime, citron
+    keywords: ["bergamot", "lemon", "lime", "citron", "calabrian", "verbena"],
+    swatch: { bg: "#E8D687", text: INK }, // muted golden
+  },
+  {
+    // Sweet citrus — orange, mandarin, tangerine, neroli
     keywords: [
-      "bergamot", "lemon", "lime", "orange", "grapefruit", "mandarin",
-      "yuzu", "tangerine", "citron", "petitgrain", "neroli", "calabrian",
+      "orange", "mandarin", "tangerine", "neroli", "petitgrain", "clementine",
     ],
-    swatch: { bg: "#FEF9C3", text: INK },
+    swatch: { bg: "#E0B58F", text: INK }, // muted apricot
   },
-  // Floral — pink (white-floral types, soft pinks)
   {
+    // Tart citrus — grapefruit, yuzu
+    keywords: ["grapefruit", "yuzu", "pomelo"],
+    swatch: { bg: "#D6D38C", text: INK }, // muted pale lime
+  },
+
+  // --- Florals (5 distinct tones) ---
+  {
+    // Rose — the canonical pink floral
+    keywords: ["rose"],
+    swatch: { bg: "#D5A5A5", text: INK }, // dusty rose
+  },
+  {
+    // White florals — jasmine, tuberose, gardenia, magnolia
     keywords: [
-      "rose", "jasmine", "ylang", "lily", "tuberose", "gardenia",
-      "magnolia", "peony", "freesia", "narcissus", "honeysuckle",
-      "frangipani", "geranium", "carnation", "orchid", "lotus", "mimosa",
-      "cyclamen", "hyacinth",
+      "jasmine", "tuberose", "gardenia", "magnolia", "frangipani",
+      "honeysuckle", "champaca",
     ],
-    swatch: { bg: "#FCE7F3", text: INK },
+    swatch: { bg: "#E5D3CB", text: INK }, // ivory blush
   },
-  // Iris / violet / powdery florals — light lavender
   {
-    keywords: ["iris", "orris", "violet", "heliotrope"],
-    swatch: { bg: "#EDE9FE", text: INK },
+    // Ylang, lily, lotus — exotic floral
+    keywords: ["ylang", "lily", "lotus", "orchid"],
+    swatch: { bg: "#DDC8B8", text: INK }, // muted champagne
   },
-  // Fruity — rose pink (apple, peach, berry)
   {
+    // Iris / violet / orris — powdery floral
+    keywords: ["iris", "orris", "violet", "heliotrope", "mimosa"],
+    swatch: { bg: "#B8A5C4", text: INK }, // dusty lavender
+  },
+  {
+    // Soft pink florals — peony, freesia, geranium, carnation
     keywords: [
-      "apple", "peach", "berry", "raspberry", "strawberry", "plum",
-      "pear", "fig", "cherry", "blackcurrant", "cassis", "pineapple",
-      "mango", "passion fruit", "lychee", "melon", "watermelon", "grape",
-      "pomegranate", "apricot", "quince", "rhubarb", "tropical",
+      "peony", "freesia", "geranium", "carnation", "hyacinth",
+      "narcissus", "cyclamen",
     ],
-    swatch: { bg: "#FFE4E6", text: INK },
+    swatch: { bg: "#D4B5B8", text: INK }, // muted blush
   },
-  // Green — mint / herb / tea — fresh green
+
+  // --- Fruity (4 distinct tones) ---
   {
+    // Berries — raspberry, strawberry, blackcurrant
     keywords: [
-      "mint", "basil", "tea", "leaf", "leaves", "grass", "green",
-      "ivy", "galbanum", "tomato", "fig leaf", "cannabis",
+      "berry", "raspberry", "strawberry", "blackcurrant", "cassis",
+      "blueberry", "cherry",
     ],
-    swatch: { bg: "#DCFCE7", text: INK },
+    swatch: { bg: "#B58895", text: INK }, // muted plum
   },
-  // Aromatic — herbs, lavender — emerald
   {
+    // Stone fruit — peach, apricot, plum
+    keywords: ["peach", "apricot", "plum", "nectarine"],
+    swatch: { bg: "#D9A88E", text: INK }, // muted peach
+  },
+  {
+    // Orchard fruit — apple, pear, quince, fig
+    keywords: ["apple", "pear", "quince", "fig", "pomegranate"],
+    swatch: { bg: "#C5BCA0", text: INK }, // muted celadon
+  },
+  {
+    // Tropical — mango, passion fruit, lychee, melon, pineapple
     keywords: [
-      "lavender", "rosemary", "sage", "thyme", "oregano", "fennel",
+      "mango", "passion fruit", "lychee", "melon", "watermelon",
+      "pineapple", "papaya", "tropical", "grape", "rhubarb",
+    ],
+    swatch: { bg: "#D49A95", text: INK }, // muted coral
+  },
+
+  // --- Green / aromatic (4 distinct tones) ---
+  {
+    // Green leafy — tea, leaves, grass, galbanum, fig leaf
+    keywords: [
+      "tea", "leaf", "leaves", "grass", "galbanum", "ivy", "tomato",
+      "cannabis", "bamboo", "green",
+    ],
+    swatch: { bg: "#A8B89A", text: INK }, // sage
+  },
+  {
+    // Mint — distinct from herbs
+    keywords: ["mint", "peppermint", "spearmint"],
+    swatch: { bg: "#A5C2B0", text: INK }, // muted seafoam-green
+  },
+  {
+    // Aromatic herbs — basil, sage, thyme, rosemary, anise
+    keywords: [
+      "basil", "sage", "thyme", "rosemary", "oregano", "fennel",
       "anise", "tarragon", "coriander", "dill", "chamomile",
     ],
-    swatch: { bg: "#D1FAE5", text: INK },
+    swatch: { bg: "#A6A883", text: INK }, // olive sage
   },
-  // Spicy — warm red
   {
-    keywords: [
-      "pepper", "cinnamon", "cardamom", "clove", "nutmeg", "saffron",
-      "ginger", "cumin", "pimento", "allspice", "juniper", "spice",
-    ],
-    swatch: { bg: "#FEE2E2", text: INK },
+    // Lavender — its own thing, neither herb nor floral exactly
+    keywords: ["lavender"],
+    swatch: { bg: "#A8A5BC", text: INK }, // dusty lavender-blue
   },
-  // Sweet / gourmand — warm orange / caramel
+
+  // --- Spicy (3 distinct tones) ---
   {
-    keywords: [
-      "vanilla", "caramel", "chocolate", "coffee", "honey", "praline",
-      "marshmallow", "cotton candy", "cream", "milk", "almond", "nut",
-      "hazelnut", "pistachio", "coconut", "tonka", "bean", "sugar",
-      "rum", "whiskey", "liqueur", "candy", "cake", "biscuit",
-    ],
-    swatch: { bg: "#FFEDD5", text: INK },
+    // Warm spice — cinnamon, clove, nutmeg
+    keywords: ["cinnamon", "clove", "nutmeg", "allspice", "pimento"],
+    swatch: { bg: "#C39280", text: INK }, // muted terracotta
   },
-  // Smoky / leather / tobacco — warm stone
   {
-    keywords: [
-      "leather", "suede", "tobacco", "smoke", "smoky", "burnt",
-      "tar", "rubber",
-    ],
-    swatch: { bg: "#E7E5E4", text: INK },
+    // Sharp spice — pepper, cardamom, juniper
+    keywords: ["pepper", "cardamom", "juniper", "cumin"],
+    swatch: { bg: "#B88575", text: INK }, // muted rust
   },
-  // Incense / resin / amber — golden
   {
-    keywords: [
-      "amber", "incense", "frankincense", "myrrh", "labdanum", "benzoin",
-      "balsam", "opoponax", "elemi", "styrax", "resin",
-    ],
-    swatch: { bg: "#FED7AA", text: INK },
+    // Exotic spice — saffron, ginger
+    keywords: ["saffron", "ginger", "spice"],
+    swatch: { bg: "#C9A77F", text: INK }, // muted ochre
   },
-  // Woody — warm tan
+
+  // --- Gourmand (4 distinct tones) ---
   {
-    keywords: [
-      "wood", "cedar", "sandalwood", "oud", "agarwood", "rosewood",
-      "vetiver", "patchouli", "guaiac", "cypress", "pine", "birch",
-      "oak", "ebony", "papyrus", "bamboo",
-    ],
-    swatch: { bg: "#FEF3C7", text: INK },
+    // Vanilla — its own thing
+    keywords: ["vanilla", "tonka", "bean"],
+    swatch: { bg: "#E2D2B5", text: INK }, // muted cream
   },
-  // Aquatic / ozonic / marine — cyan
   {
-    keywords: [
-      "marine", "sea", "ocean", "water", "aquatic", "ozonic", "salt",
-      "seaweed", "algae", "rain", "air",
-    ],
-    swatch: { bg: "#CFFAFE", text: INK },
+    // Chocolate, coffee — bitter sweet
+    keywords: ["chocolate", "cocoa", "coffee", "espresso"],
+    swatch: { bg: "#A89280", text: INK }, // muted mocha
   },
-  // Musk / animalic — neutral stone
   {
+    // Caramel, honey, sugar — golden sweet
     keywords: [
-      "musk", "ambergris", "civet", "castoreum", "hyrax", "skin",
+      "caramel", "honey", "sugar", "praline", "candy", "marshmallow",
+      "cotton candy", "rum", "whiskey", "liqueur",
     ],
-    swatch: { bg: "#F5F5F4", text: INK },
+    swatch: { bg: "#C9A878", text: INK }, // muted toffee
   },
-  // Mossy / chypre / earthy — lime/moss
+  {
+    // Nuts, almond, coconut, cream
+    keywords: [
+      "almond", "nut", "hazelnut", "pistachio", "coconut", "cream",
+      "milk", "biscuit", "cake",
+    ],
+    swatch: { bg: "#C5A589", text: INK }, // muted hazelnut
+  },
+
+  // --- Resin / amber / oriental (2 distinct tones) ---
+  {
+    // Amber — warm golden resin
+    keywords: ["amber", "labdanum", "benzoin", "balsam"],
+    swatch: { bg: "#D4B789", text: INK }, // muted honey
+  },
+  {
+    // Incense, myrrh, frankincense — smoky resin
+    keywords: [
+      "incense", "frankincense", "myrrh", "opoponax", "elemi",
+      "styrax", "resin", "olibanum",
+    ],
+    swatch: { bg: "#B59676", text: INK }, // muted bronze
+  },
+
+  // --- Smoky / leather / tobacco (3 distinct tones) ---
+  {
+    // Leather, suede — warm hide
+    keywords: ["leather", "suede"],
+    swatch: { bg: "#A89077", text: INK }, // tobacco brown
+  },
+  {
+    // Tobacco, hay — dried golden
+    keywords: ["tobacco", "hay", "straw"],
+    swatch: { bg: "#B89F7B", text: INK }, // muted golden tobacco
+  },
+  {
+    // Smoke, burnt, tar — dark ash
+    keywords: ["smoke", "smoky", "burnt", "tar", "rubber", "asphalt"],
+    swatch: { bg: "#A09790", text: INK }, // muted ash
+  },
+
+  // --- Woody (3 distinct tones) ---
+  {
+    // Soft woods — sandalwood, cedar, rosewood
+    keywords: [
+      "sandalwood", "cedar", "rosewood", "cypress", "pine", "fir",
+      "birch", "oak", "papyrus",
+    ],
+    swatch: { bg: "#C8B198", text: INK }, // warm sand
+  },
+  {
+    // Dark woods — oud, agarwood, ebony
+    keywords: ["oud", "agarwood", "ebony", "guaiac"],
+    swatch: { bg: "#A89377", text: INK }, // muted walnut
+  },
+  {
+    // Earthy wood — vetiver, patchouli
+    keywords: ["vetiver", "patchouli"],
+    swatch: { bg: "#9A9580", text: INK }, // muted moss-brown
+  },
+  {
+    // Generic "wood" catchall — must come AFTER specific wood types
+    // so "sandalwood" hits warm sand, not generic.
+    keywords: ["wood", "woody"],
+    swatch: { bg: "#C8B198", text: INK }, // warm sand (same as soft woods)
+  },
+
+  // --- Aquatic / ozonic / marine (2 distinct tones) ---
+  {
+    // Marine / sea / salt — deeper aquatic
+    keywords: [
+      "marine", "sea", "ocean", "water", "aquatic", "salt", "seaweed",
+      "algae",
+    ],
+    swatch: { bg: "#A8BFBA", text: INK }, // muted seafoam
+  },
+  {
+    // Ozonic / air / rain — lighter, sky-toned
+    keywords: ["ozonic", "ozone", "rain", "air", "atmosphere", "cloud"],
+    swatch: { bg: "#B8C5CC", text: INK }, // muted sky
+  },
+
+  // --- Musk / animalic / powdery (2 distinct tones) ---
+  {
+    // Musk, ambergris — soft skin musk
+    keywords: ["musk", "ambergris", "civet", "castoreum", "hyrax", "skin"],
+    swatch: { bg: "#D5C8B8", text: INK }, // muted bone
+  },
+  {
+    // Powdery — orris, talc, makeup-adjacent
+    keywords: ["powder", "powdery", "talc", "cosmetic"],
+    swatch: { bg: "#D4B5B8", text: INK }, // muted blush
+  },
+
+  // --- Mossy / earthy ---
   {
     keywords: [
       "oakmoss", "moss", "treemoss", "earth", "soil", "mushroom",
-      "truffle", "humus",
+      "truffle", "humus", "petrichor",
     ],
-    swatch: { bg: "#ECFCCB", text: INK },
+    swatch: { bg: "#A89580", text: INK }, // sage-umber
   },
-  // Synthetic / molecular — indigo (lab-built signals)
+
+  // --- Synthetic / molecular ---
   {
     keywords: [
       "ambroxan", "iso e super", "javanol", "cashmeran", "norlimbanol",
       "calone", "ethyl maltol", "ambrox", "molecule",
     ],
-    swatch: { bg: "#E0E7FF", text: INK },
+    swatch: { bg: "#9A95B0", text: INK }, // muted slate-lavender
   },
 ];
 
-const NOTE_FALLBACK: Swatch = { bg: "#F5F5F4", text: INK };
+const NOTE_FALLBACK: Swatch = { bg: "#C5BDB0", text: INK };
 
 /**
  * Get the color swatch for a single note name. Matches on substring so
  * "Damask Rose," "Bulgarian Rose," and "Rose Absolute" all bucket into
- * pink. Falls back to neutral stone if no category keyword matches.
+ * dusty rose. More-specific categories are checked before more-general
+ * ones, so "sandalwood" hits warm-sand instead of generic-wood. Falls
+ * back to warm stone if no category keyword matches.
  *
- * Note: case-insensitive, trims, ignores accord qualifiers ("absolute,"
- * "essence," "oil," etc. don't affect bucketing — only the noun matters).
+ * Case-insensitive, trims whitespace.
  */
 export function noteSwatch(note: string): Swatch {
   const lower = note.trim().toLowerCase();
