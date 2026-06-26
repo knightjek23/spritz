@@ -36,6 +36,13 @@ function displaceFilter(v: DisplaceVariant): string {
 /** Default variants used by the presets. */
 export const DEFAULT_VARIANTS: DisplaceVariant[] = [
   { id: "lg-glass-subtle", baseFrequency: [0.004, 0.008], scale: 40 },
+  // Custom Spritz variant tuned for nav-height bars (~56-85px). Bigger
+  // scale than 'subtle' so the wobble is visible on mobile, but with a
+  // tighter noise frequency than 'lg-glass' (cards) so it doesn't smear
+  // on thin elements. Found by testing: scale ~70 is the highest a thin
+  // bar can take before the displacement starts pulling text apart at
+  // its edges.
+  { id: "lg-glass-nav", baseFrequency: [0.006, 0.012], scale: 70 },
   { id: "lg-glass", baseFrequency: [0.003, 0.007], scale: 100 },
   { id: "lg-glass-strong", baseFrequency: [0.003, 0.007], scale: 180 },
 ];

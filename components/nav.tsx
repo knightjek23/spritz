@@ -13,8 +13,17 @@ export function Nav() {
       <LiquidGlass
         as="nav"
         preset="nav"
-        tint="rgba(250,246,237,0.55)"
-        // Cream-toned rim (matches the tint RGB) so the glass edge reads
+        // Override the preset's filter + blur for mobile visibility. The
+        // subtle preset (scale 40) was nearly invisible on cream; the
+        // custom lg-glass-nav (scale 70, tighter noise) gives a visible
+        // wobble without smearing the bar text. Blur bumped to 4px to
+        // soften the displacement edges.
+        filter="lg-glass-nav"
+        blur={4}
+        // Tint dropped from 0.55 → 0.35 so more of what's underneath
+        // shows through and the refraction is actually visible.
+        tint="rgba(250,246,237,0.35)"
+        // Cream-toned rim matches the tint RGB so the glass edge reads
         // as part of the bar instead of a stark white highlight against
         // the warmer page color.
         edgeColor="250, 246, 237"

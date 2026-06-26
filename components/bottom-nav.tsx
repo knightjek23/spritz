@@ -97,8 +97,15 @@ export function BottomNav() {
       as="nav"
       preset="bottom-nav"
       radius={0}
-      tint="rgba(242,237,228,0.65)"
-      // Paper-toned rim (matches the tint RGB) so the glass edge sits
+      // Custom nav-tuned displacement (scale 70 with tighter noise) so
+      // the refraction is visible on mobile instead of reading as flat
+      // blur. Blur bumped to 4px to soften the displacement edges.
+      filter="lg-glass-nav"
+      blur={4}
+      // Tint dropped from 0.65 → 0.45 so more of what's behind shows
+      // through and the wobble is actually visible.
+      tint="rgba(242,237,228,0.45)"
+      // Paper-toned rim matches the tint RGB so the glass edge sits
       // tonally with the bar instead of bright white against paper.
       edgeColor="242, 237, 228"
       role="navigation"
