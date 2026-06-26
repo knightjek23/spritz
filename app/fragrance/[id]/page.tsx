@@ -9,6 +9,7 @@ import { SimilarSection } from "@/components/similar-section";
 import { SaveButton } from "@/components/save-button";
 import { NotesPyramid } from "@/components/notes-pyramid";
 import { KnownDupes } from "@/components/known-dupes";
+import { KnownConsensus } from "@/components/known-consensus";
 import { FamilyPills } from "@/components/family-pills";
 import { houseSlug } from "@/lib/houses";
 import type { Fragrance } from "@/lib/types";
@@ -115,7 +116,18 @@ export default async function FragrancePage({ params }: { params: { id: string }
           → "what's a cheaper version of this". The Pro upsell case still
           renders here for free users but is now the second visible
           content block, not buried after editorial. */}
-      <KnownDupes fragranceId={f.id} initialDupes={f.dupes} />
+      <KnownDupes
+        fragranceId={f.id}
+        fragranceName={f.name}
+        fragranceHouse={f.house}
+        initialDupes={f.dupes}
+      />
+
+      {/* Community consensus — Pro AI feature, sits right after dupes so
+          the natural reading order is: notes (what's in it) → dupes
+          (cheaper version?) → consensus (worth buying this one OR a
+          dupe?). Same Pro-gate + Living Breadcrumb pattern as dupes. */}
+      <KnownConsensus fragrance={f} />
 
       {/* Longevity + projection — bars give the numeric quantification,
           descriptions translate it into plain English ("Wears a full

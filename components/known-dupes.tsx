@@ -13,6 +13,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import type { DupeRecommendation } from "@/lib/types";
+import { LivingBreadcrumb, generatedReceipt } from "./living-breadcrumb";
 
 const TIER_LABEL: Record<string, string> = {
   budget: "budget",
@@ -29,9 +30,17 @@ const SIMILARITY_PILL: Record<string, string> = {
 
 export function KnownDupes({
   fragranceId,
+  fragranceName,
+  fragranceHouse,
   initialDupes,
 }: {
   fragranceId: string;
+  /** Used by the Living Breadcrumb so the status line says "Pulling
+   *  community dupe references for {Name} by {House}…" — grounding the
+   *  message in the user's actual request per the Agentic Update
+   *  Formula (Action + Specific Item + Limits). */
+  fragranceName: string;
+  fragranceHouse: string;
   initialDupes: DupeRecommendation[] | null | undefined;
 }) {
   // isLoaded gates the Pro-only branch so SSR and the first client render
@@ -141,6 +150,25 @@ export function KnownDupes({
   // (and the unmount that can follow it) when Clerk resolves a beat after
   // first paint.
   if (isLoaded && isSignedIn && isPro) {
+    // Three-stage Living Breadcrumb per the AI Transparency Patterns
+    // playbook. Replaces the previous "Generating dupes…" placeholder
+    // (which reads as stalled on a 3-5s wait). Each stage line follows
+    // the Agentic Update Formula: Action Word + Specific Item + Limits.
+    const stages = [
+      {
+        afterMs: 0,
+        copy: `Pulling community dupe references for ${fragranceName} by ${fragranceHouse}…`,
+      },
+      {
+        afterMs: 1500,
+        copy: "Checking budget, mid-tier, and niche alternatives…",
+      },
+      {
+        afterMs: 3000,
+        copy: "Filtering to confident matches only…",
+      },
+    ];
+
     return (
       <section className="mb-10">
         <h2 className="font-display text-2xl mb-2">Known dupes</h2>
@@ -152,8 +180,9 @@ export function KnownDupes({
           disabled={generating}
           className="w-full px-4 py-3 rounded-xl bg-ink text-cream font-medium hover:bg-ink/90 disabled:opacity-60 transition"
         >
-          {generating ? "Generating dupes…" : "Generate dupes with AI"}
+          {generating ? "Working…" : "Generate dupes with AI"}
         </button>
+        <LivingBreadcrumb active={generating} stages={stages} className="mt-3" />
         {error && <p className="text-sm text-burgundy mt-3">{error}</p>}
       </section>
     );

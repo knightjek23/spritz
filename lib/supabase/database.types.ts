@@ -45,6 +45,13 @@ export type Database = {
           bottle_image_url: string | null;
           editorial_notes: string | null;
           dupes: DupeRecommendation[];
+          // Community consensus (Pro feature)
+          consensus_summary: string | null;
+          consensus_verdict: string | null;
+          consensus_pros: string[] | null;
+          consensus_cons: string[] | null;
+          consensus_confidence: number | null;
+          consensus_generated_at: string | null;
           // Internal
           fragrantica_url: string | null;
           avg_retail_price: number | null;
@@ -84,6 +91,12 @@ export type Database = {
           bottle_image_url?: string | null;
           editorial_notes?: string | null;
           dupes?: DupeRecommendation[];
+          consensus_summary?: string | null;
+          consensus_verdict?: string | null;
+          consensus_pros?: string[] | null;
+          consensus_cons?: string[] | null;
+          consensus_confidence?: number | null;
+          consensus_generated_at?: string | null;
           fragrantica_url?: string | null;
           avg_retail_price?: number | null;
           price_tier?: "budget" | "mid" | "designer" | "niche" | null;

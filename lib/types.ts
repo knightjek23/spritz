@@ -34,6 +34,28 @@ export interface DupeRecommendation {
   generated_at?: string;
 }
 
+/**
+ * Community-consensus take on a fragrance, synthesized by AI from the
+ * public conversation (Reddit, Fragrantica, Basenotes, FragranceTok,
+ * forum reviews). Pro-gated. Cached per fragrance — generated on first
+ * Pro request and returned from cache on subsequent requests.
+ */
+export interface ConsensusRecord {
+  /** 2-3 paragraphs of what users actually say. */
+  summary: string;
+  /** Short "worth the buy?" verdict line. */
+  verdict: string;
+  /** Bullet points: what users praise. */
+  pros: string[];
+  /** Bullet points: what users criticize. */
+  cons: string[];
+  /** Model self-rated 0-1 (low for new/niche fragrances with little
+   *  community signal). UI shows a caveat banner when this is < 0.5. */
+  confidence: number;
+  /** ISO timestamp; used by the UI's audit-trail receipt. */
+  generated_at: string;
+}
+
 export interface Fragrance {
   id: string;
   name: string;
@@ -65,6 +87,15 @@ export interface Fragrance {
   bottle_image_url: string | null;
   editorial_notes: string | null;
   dupes: DupeRecommendation[];
+  // Community consensus (Pro feature) — null until first Pro user
+  // requests generation, then cached forever. UI surfaces this in the
+  // KnownConsensus component on the detail page.
+  consensus_summary: string | null;
+  consensus_verdict: string | null;
+  consensus_pros: string[] | null;
+  consensus_cons: string[] | null;
+  consensus_confidence: number | null;
+  consensus_generated_at: string | null;
   // Internal use only — never rendered directly
   avg_retail_price: number | null;
   price_tier: PriceTier | null;
