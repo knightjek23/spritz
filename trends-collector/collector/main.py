@@ -27,7 +27,8 @@ def build_sources(cfg: dict):
     sources = []
     if cfg.get("google_trends", {}).get("enabled"):
         c = cfg["google_trends"]
-        sources.append(GoogleTrends(watchlist=c["watchlist"], geo=c.get("geo", "US")))
+        sources.append(GoogleTrends(watchlist=c["watchlist"], geo=c.get("geo", "US"),
+                                    discover_rising=c.get("discover_rising", False)))
     if cfg.get("retailer_bestsellers", {}).get("enabled"):
         sources.append(RetailerBestsellers(endpoints=cfg["retailer_bestsellers"]["endpoints"]))
     if cfg.get("reddit", {}).get("enabled"):

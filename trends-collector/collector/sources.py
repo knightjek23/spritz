@@ -53,9 +53,10 @@ class Source:
 class GoogleTrends(Source):
     key = "google_trends"
 
-    def __init__(self, watchlist: list[dict], geo: str = "US"):
+    def __init__(self, watchlist: list[dict], geo: str = "US", discover_rising: bool = False):
         self.watchlist = watchlist
         self.geo = geo
+        self.discover_rising = discover_rising
 
     def collect(self) -> list[RawSignal]:
         from pytrends.request import TrendReq  # pip install pytrends
@@ -66,16 +67,47 @@ class GoogleTrends(Source):
             kw = [item["query"] for item in batch]
             pytrends.build_payload(kw, timeframe="now 7-d", geo=self.geo)
             df = pytrends.interest_over_time()
-            if df.empty:
-                continue
-            for item in batch:
-                q = item["query"]
-                if q in df.columns:
-                    out.append(RawSignal(
-                        name=item["name"], brand=item.get("brand"),
-                        value=float(df[q].mean()), source=self.key,
-                    ))
+            if not df.empty:
+                for item in batch:
+                    q = item["query"]
+                    if q in df.columns:
+                        out.append(RawSignal(
+                            name=item["name"], brand=item.get("brand"),
+                            value=float(df[q].mean()), source=self.key,
+                        ))
+            if self.discover_rising:
+                try:
+                    out.extend(self._rising(pytrends, batch))
+                except Exception:
+                    pass  # discovery is best-effort; never break the main pull
         return out
+
+    def _rising(self, pytrends, batch) -> list[RawSignal]:
+        """Auto-discover newly-spiking fragrance searches via related 'rising' queries."""
+        related = pytrends.related_queries()
+        found, seen = [], set()
+        for item in batch:
+            data = related.get(item["query"]) or {}
+            rising = data.get("rising")
+            if rising is None or getattr(rising, "empty", True):
+                continue
+            for _, row in rising.iterrows():
+                name = self._clean(str(row.get("query", "")))
+                sid = name.lower()
+                if not name or sid in seen:
+                    continue
+                seen.add(sid)
+                raw = row.get("value", 0)
+                # "Breakout" -> treat as max; otherwise clamp the % rise into 0-100
+                val = 100.0 if str(raw).lower() == "breakout" else min(100.0, float(raw) / 50.0)
+                found.append(RawSignal(name=name, brand=None, value=val, source=self.key))
+        return found
+
+    @staticmethod
+    def _clean(query: str) -> str:
+        skip = {"perfume", "cologne", "fragrance", "edp", "edt", "parfum", "scent"}
+        words = [w for w in re.split(r"\s+", query.strip()) if w.lower() not in skip]
+        return " ".join(words).strip().title()
 
 
 # --------------------------------------------------------------------------- #
