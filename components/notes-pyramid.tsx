@@ -18,6 +18,7 @@ import type { Fragrance, Note } from "@/lib/types";
 // Import from lib/slugs (zero deps) NOT lib/notes (pulls in node:fs/promises
 // and breaks the client bundle build).
 import { noteSlug } from "@/lib/slugs";
+import { noteSwatch } from "@/lib/swatches";
 
 export function NotesPyramid({ fragrance }: { fragrance: Fragrance }) {
   // notes_descriptions is a jsonb { [normalized_name]: "flavor description" }
@@ -86,12 +87,25 @@ function NoteChip({
   const [open, setOpen] = useState(false);
   const hasDescription = !!description;
   const slug = noteSlug(note.name);
+  // Color-coded chip — citrus yellow, woody amber, floral pink, etc.
+  // All swatches pass 4.5:1 against ink text by a comfortable margin
+  // (verified in lib/swatches.ts). When the chip is open (expanded
+  // description), we invert to ink + cream so the active state stays
+  // visually distinct from the resting color.
+  const swatch = noteSwatch(note.name);
+  const restingStyle: React.CSSProperties = open
+    ? {}
+    : { backgroundColor: swatch.bg, color: swatch.text };
 
   return (
     <li className="inline-block">
-      <div className="inline-flex items-center rounded-full overflow-hidden bg-ink/5">
+      <div
+        className="inline-flex items-center rounded-full overflow-hidden"
+        style={restingStyle}
+      >
         {/* Primary tap target — expand description if we have one,
-            otherwise act like a label (no-op). */}
+            otherwise act like a label (no-op). Active state inverts to
+            ink/cream so the user knows which chip is expanded. */}
         <button
           type="button"
           onClick={() => hasDescription && setOpen((v) => !v)}
@@ -99,23 +113,24 @@ function NoteChip({
             open
               ? "bg-ink text-cream"
               : hasDescription
-              ? "hover:bg-ink/10 text-ink cursor-pointer"
-              : "text-ink cursor-default"
+              ? "hover:brightness-95 cursor-pointer"
+              : "cursor-default"
           }`}
           aria-expanded={hasDescription ? open : undefined}
           title={hasDescription ? "Tap for flavor profile" : note.name}
         >
           {note.name}
         </button>
-        {/* Secondary action — link to the encyclopedia entry. Visually
-            quiet, distinct hit area so it doesn't fight the primary tap. */}
+        {/* Secondary action — link to the encyclopedia entry. Inherits
+            the swatch background but adds a soft ink-tinted divider so
+            the two tap targets stay visually distinct on color. */}
         <Link
           href={`/note/${slug}`}
           aria-label={`View encyclopedia entry for ${note.name}`}
           className={`px-2 py-1.5 text-xs transition border-l border-ink/10 ${
             open
               ? "bg-ink text-cream/80 hover:text-cream"
-              : "text-slate hover:bg-ink/10 hover:text-ink"
+              : "text-ink/70 hover:brightness-95 hover:text-ink"
           }`}
         >
           →

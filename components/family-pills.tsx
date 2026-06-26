@@ -22,6 +22,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FAMILY_BLURB, familyName, normalizeFamily } from "@/lib/families";
+import { familySwatch } from "@/lib/swatches";
 
 interface Props {
   /** Raw family strings from fragrances.family[]. May be accords or canonical slugs. */
@@ -45,17 +46,24 @@ export function FamilyPills({ families }: Props) {
   return (
     <>
       <div className="flex flex-wrap gap-2">
-        {families.map((fam) => (
-          <button
-            key={fam}
-            type="button"
-            onClick={() => setActive(fam)}
-            className="px-3 py-1.5 bg-paper hover:bg-brass/40 text-ink text-sm rounded-full capitalize transition"
-            aria-haspopup="dialog"
-          >
-            {fam}
-          </button>
-        ))}
+        {families.map((fam) => {
+          // Color-coded pill per family — yellows for citrus, pinks for
+          // floral, etc. All swatches pass 4.5:1 against ink text by a
+          // comfortable margin (verified in lib/swatches.ts).
+          const swatch = familySwatch(fam);
+          return (
+            <button
+              key={fam}
+              type="button"
+              onClick={() => setActive(fam)}
+              style={{ backgroundColor: swatch.bg, color: swatch.text }}
+              className="px-3 py-1.5 text-sm rounded-full capitalize transition hover:brightness-95"
+              aria-haspopup="dialog"
+            >
+              {fam}
+            </button>
+          );
+        })}
       </div>
 
       {active && (
