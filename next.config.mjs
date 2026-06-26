@@ -20,6 +20,15 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: "10mb", // scan images
     },
+    // The trending sections read data/*.json at request time via fs. Next won't
+    // trace dynamically-read files into the serverless bundle on its own, so on
+    // Vercel the loader would get ENOENT and the sections would silently hide.
+    // Force the feed files into the bundle for the home routes that render them.
+    // (Files are a few KB each; the overhead is negligible.)
+    outputFileTracingIncludes: {
+      "/": ["./data/*.json"],
+      "/**": ["./data/*.json"],
+    },
   },
 };
 
