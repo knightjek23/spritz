@@ -21,6 +21,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import type { Reaction } from "@/lib/types";
 
 interface CardMenuProps {
   fragrance: {
@@ -31,17 +32,40 @@ interface CardMenuProps {
   };
   /** Present for shelf cards; absent (and Delete hidden) on trending cards. */
   collectionItemId?: string;
+  /** The user's current reaction on this fragrance, if any. Used to show
+   *  the active state on Like/Dislike menu rows and to drive toggle
+   *  semantics (tapping Like again unlikes). */
+  currentReaction?: Reaction | null;
   /** Called after a successful Delete so the parent can refetch its list. */
   onDelete?: () => void;
+  /** Called after a successful reaction change so the parent can refresh
+   *  the shelf indicator. Passed the new reaction (or null if cleared). */
+  onReactionChange?: (next: Reaction | null) => void;
 }
 
 type ToastState = { message: string; tone: "neutral" | "error" } | null;
 
-export function CardMenu({ fragrance, collectionItemId, onDelete }: CardMenuProps) {
+export function CardMenu({
+  fragrance,
+  collectionItemId,
+  currentReaction,
+  onDelete,
+  onReactionChange,
+}: CardMenuProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);
+
+  // Local optimistic mirror of currentReaction so the menu row's active
+  // state updates instantly on tap (before the API call returns). Falls
+  // back to the prop's value when it changes (e.g. parent refetch).
+  const [reaction, setReaction] = useState<Reaction | null>(
+    currentReaction ?? null,
+  );
+  useEffect(() => {
+    setReaction(currentReaction ?? null);
+  }, [currentReaction]);
 
   // Mounted gate for createPortal — document.body doesn't exist during
   // SSR, and even though this is a "use client" component, hydration runs
@@ -86,17 +110,45 @@ export function CardMenu({ fragrance, collectionItemId, onDelete }: CardMenuProp
 
   // ----- Actions -----
 
-  const onLike = () => {
-    // TODO: persist to a reactions table. For now, optimistic toast so
-    // the user knows the menu worked even before infra exists.
-    setToast({ message: "Liked. (We'll save these soon.)", tone: "neutral" });
+  // Shared toggle handler — used by both Like and Dislike rows. Tapping
+  // the row with `target` reaction means:
+  //   no current reaction → set to target
+  //   current === target → clear (toggle off)
+  //   current !== target → swap to target
+  // Optimistic: flip the local state immediately, then POST to persist.
+  // If the server rejects (offline, auth lost), revert the local state
+  // and surface a quiet error toast.
+  async function toggleReaction(target: Reaction) {
+    const next: Reaction | null = reaction === target ? null : target;
+    const previous = reaction;
+    setReaction(next);
+    onReactionChange?.(next);
     close();
-  };
+    try {
+      const res = await fetch(`/api/reactions/${fragrance.id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reaction: next }),
+      });
+      if (!res.ok) {
+        // Revert optimistic update and surface the failure.
+        setReaction(previous);
+        onReactionChange?.(previous);
+        if (res.status === 401) {
+          setToast({ message: "Sign in to save reactions", tone: "error" });
+        } else {
+          setToast({ message: "Couldn't save. Try again.", tone: "error" });
+        }
+      }
+    } catch {
+      setReaction(previous);
+      onReactionChange?.(previous);
+      setToast({ message: "Couldn't save. Try again.", tone: "error" });
+    }
+  }
 
-  const onDislike = () => {
-    setToast({ message: "Noted. (We'll save these soon.)", tone: "neutral" });
-    close();
-  };
+  const onLike = () => toggleReaction("like");
+  const onDislike = () => toggleReaction("dislike");
 
   const onShare = async () => {
     const url = `${window.location.origin}/fragrance/${fragrance.id}`;
@@ -256,11 +308,21 @@ export function CardMenu({ fragrance, collectionItemId, onDelete }: CardMenuProp
                       target, inherits ink color so icons can use
                       currentColor and match the label tone. */}
                   <ul className="px-2">
-                    <MenuItem icon={<HeartIcon />} label="Like" onClick={onLike} />
+                    {/* Like + Dislike show their active state via a filled
+                        icon + emerald tint on the icon when this is the
+                        user's current reaction. Tapping the active row
+                        clears it (toggle off). */}
                     <MenuItem
-                      icon={<ThumbsDownIcon />}
-                      label="Dislike"
+                      icon={<HeartIcon filled={reaction === "like"} />}
+                      label={reaction === "like" ? "Liked" : "Like"}
+                      onClick={onLike}
+                      active={reaction === "like"}
+                    />
+                    <MenuItem
+                      icon={<ThumbsDownIcon filled={reaction === "dislike"} />}
+                      label={reaction === "dislike" ? "Disliked" : "Dislike"}
                       onClick={onDislike}
+                      active={reaction === "dislike"}
                     />
                     <MenuItem icon={<AtomIcon />} label="Share" onClick={onShare} />
                     <MenuItem icon={<DoorIcon />} label="Buy" onClick={onBuy} />
@@ -313,24 +375,32 @@ function MenuItem({
   onClick,
   disabled,
   tone,
+  active,
 }: {
   icon: React.ReactNode;
   label: string;
   onClick: () => void;
   disabled?: boolean;
   tone?: "default" | "danger";
+  active?: boolean;
 }) {
-  const toneClass =
-    tone === "danger" ? "text-ink hover:bg-ink/5" : "text-ink hover:bg-ink/5";
+  // Active rows (the user's current reaction) tint the icon emerald so
+  // the menu reads at a glance which option is selected. Label stays ink
+  // so legibility doesn't dip.
+  const iconColor = active ? "text-emerald" : "text-ink/80";
   return (
     <li>
       <button
         type="button"
         onClick={onClick}
         disabled={disabled}
-        className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition disabled:opacity-50 ${toneClass}`}
+        className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-ink hover:bg-ink/5 transition disabled:opacity-50 ${
+          active ? "bg-ink/[0.03]" : ""
+        }`}
       >
-        <span className="shrink-0 w-7 h-7 flex items-center justify-center text-ink/80">
+        <span
+          className={`shrink-0 w-7 h-7 flex items-center justify-center ${iconColor}`}
+        >
           {icon}
         </span>
         <span className="text-base font-medium">{label}</span>
@@ -343,9 +413,15 @@ function MenuItem({
 // Same geometry as the SVGs Josh provided, scaled to 24x24 viewport,
 // using currentColor so they pick up the menu-item text color.
 
-function HeartIcon() {
+function HeartIcon({ filled = false }: { filled?: boolean }) {
   return (
-    <svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden>
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 32 32"
+      fill={filled ? "currentColor" : "none"}
+      aria-hidden
+    >
       <path
         d="M3.95647 8.5118C3.11569 9.73437 2.66555 11.1832 2.66553 12.667C2.66553 15.7337 4.66568 18.0003 6.66583 20.0004L14.0104 27.1098C14.2625 27.3919 14.5717 27.6173 14.9175 27.7707C15.2634 27.9242 15.6379 28.0024 16.0163 28C16.3946 27.9976 16.7682 27.9147 17.112 27.7568C17.4559 27.599 17.7622 27.3698 18.0107 27.0844L25.3339 20.0004C27.3341 18.0003 29.3342 15.7203 29.3342 12.667C29.3413 11.18 28.8953 9.72606 28.0556 8.49878C27.2159 7.2715 26.0223 6.32905 24.6337 5.79687C23.2451 5.26468 21.7273 5.168 20.2824 5.51969C18.8375 5.87138 17.5339 6.65476 16.5453 7.76557C16.4754 7.84026 16.391 7.8998 16.2971 7.94051C16.2033 7.98122 16.1022 8.00222 15.9999 8.00222C15.8976 8.00222 15.7964 7.98122 15.7026 7.94051C15.6088 7.8998 15.5244 7.84026 15.4545 7.76557C14.4627 6.66194 13.1595 5.88508 11.7169 5.53761C10.2743 5.19014 8.76026 5.2884 7.3747 5.81942C5.98914 6.35044 4.79726 7.28923 3.95647 8.5118Z"
         stroke="currentColor"
@@ -356,9 +432,15 @@ function HeartIcon() {
   );
 }
 
-function ThumbsDownIcon() {
+function ThumbsDownIcon({ filled = false }: { filled?: boolean }) {
   return (
-    <svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden>
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 32 32"
+      fill={filled ? "currentColor" : "none"}
+      aria-hidden
+    >
       <path
         d="M10.9999 14.0001V26.0006M19.0004 9.87985L18.0003 14.0001H23.8307C24.1412 14.0001 24.4474 14.0724 24.7251 14.2113C25.0029 14.3502 25.2444 14.5518 25.4307 14.8002C25.6171 15.0486 25.743 15.337 25.7985 15.6425C25.8541 15.948 25.8377 16.2623 25.7508 16.5605L23.4206 24.561C23.2995 24.9764 23.0468 25.3414 22.7006 25.6011C22.3544 25.8607 21.9333 26.0011 21.5005 26.0011H7.99974C7.46926 26.0011 6.96051 25.7903 6.58541 25.4153C6.21031 25.0402 5.99963 24.5314 5.99963 24.0009V16.0003C5.99963 15.4698 6.21031 14.9611 6.58541 14.586C6.96051 14.2109 7.46926 14.0001 7.99974 14.0001H10.7599C11.132 14 11.4966 13.896 11.8128 13.6999C12.1291 13.5038 12.3844 13.2233 12.5499 12.8901L16.0002 5.99951C16.4718 6.00536 16.936 6.11772 17.358 6.32813C17.7801 6.53854 18.1492 6.84168 18.4377 7.21483C18.7262 7.58798 18.9267 8.02151 19.0241 8.48293C19.1215 8.94436 19.1133 9.42191 19.0004 9.87985Z"
         stroke="currentColor"

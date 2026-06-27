@@ -4,7 +4,7 @@
 // Until then, this keeps the SupabaseClient<Database> generic happy and gives the
 // API routes real autocomplete + type safety.
 
-import type { Note, DupeRecommendation } from "../types";
+import type { Note, DupeRecommendation, Reaction } from "../types";
 
 export type Database = {
   // Required by @supabase/supabase-js >= 2.50 — the SDK looks for this on the
@@ -151,6 +151,35 @@ export type Database = {
           },
           {
             foreignKeyName: "collection_items_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      user_reactions: {
+        Row: {
+          user_id: string;
+          fragrance_id: string;
+          reaction: Reaction;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          fragrance_id: string;
+          reaction: Reaction;
+        };
+        Update: Partial<Database["public"]["Tables"]["user_reactions"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "user_reactions_fragrance_id_fkey";
+            columns: ["fragrance_id"];
+            referencedRelation: "fragrances";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "user_reactions_user_id_fkey";
             columns: ["user_id"];
             referencedRelation: "users";
             referencedColumns: ["id"];

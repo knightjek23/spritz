@@ -52,7 +52,34 @@ export async function GET(req: Request) {
 
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ items: data ?? [] });
+
+  // Bundle in the user's reactions so the shelf can render the
+  // like/dislike indicator icons without a second round trip. Pull every
+  // reaction this user has (typically a small set) and merge by
+  // fragrance_id. If the reactions table doesn't exist yet (migration
+  // 0013 not applied), fall through silently — items render without
+  // the indicator instead of 500-ing the whole shelf.
+  let reactionByFragrance: Record<string, "like" | "dislike"> = {};
+  try {
+    const { data: reactions } = await supabase
+      .from("user_reactions")
+      .select("fragrance_id, reaction")
+      .eq("user_id", user.id);
+    if (reactions) {
+      for (const r of reactions) {
+        reactionByFragrance[r.fragrance_id] = r.reaction;
+      }
+    }
+  } catch {
+    /* silent fallthrough — see comment above */
+  }
+
+  const items = (data ?? []).map((it: { fragrance_id: string } & Record<string, unknown>) => ({
+    ...it,
+    reaction: reactionByFragrance[it.fragrance_id] ?? null,
+  }));
+
+  return NextResponse.json({ items });
 }
 
 export async function POST(req: Request) {

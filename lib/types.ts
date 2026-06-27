@@ -5,6 +5,7 @@ export type Gender = "masculine" | "feminine" | "unisex";
 export type PriceTier = "budget" | "mid" | "designer" | "niche";
 export type CollectionStatus = "own" | "tried" | "wishlist";
 export type Plan = "free" | "pro";
+export type Reaction = "like" | "dislike";
 export type Retailer = "scentbird" | "fragrancenet" | "nordstrom";
 export type VisionProvider = "gpt4o" | "google";
 
@@ -118,6 +119,16 @@ export interface CollectionItem {
   status: CollectionStatus;
   note: string | null;
   added_at: string;
+}
+
+/** Per-user Like / Dislike on a fragrance. Independent from collection —
+ *  a user can react to a fragrance they don't own. */
+export interface UserReaction {
+  user_id: string;
+  fragrance_id: string;
+  reaction: Reaction;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ScanEvent {
