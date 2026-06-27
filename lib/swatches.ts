@@ -1,34 +1,37 @@
-// Muted, vintage-apothecary swatches for fragrance families and notes.
+// Soft, lightened vintage swatches for fragrance families and notes.
 //
 // Design intent: every pill should look like it lives in the Spritz world
 // (cream + ink + emerald + brass + periwinkle), not like an Easter
-// pastel pulled from a Tailwind chart. Earlier pass used Tailwind-100
-// pastels at L≈92% — visually loud against the warm cream page and
-// reused only ~10 distinct tones across the catalog. This pass uses ~35
-// distinct hues at L≈70–82%, slightly desaturated and warm-shifted to
-// match the vintage feel: dusty rose for rose, walnut for oud, mocha
-// for coffee, seafoam for marine, terracotta for cinnamon, etc.
+// pastel pulled from a Tailwind chart. This iteration takes the previous
+// muted vintage palette and lifts each tone ~30% toward white WITHOUT
+// raising saturation — the result is softer and paler (a "milky" version
+// of each color) while still readable as the same underlying hue. Lifts
+// brightness without bumping vibrancy. Targets L≈82-92% (vs prior
+// 70-82%).
+//
+// Why lighten by mixing with white, not by raising HSL lightness alone:
+// raising L alone often nudges perceived saturation up (because higher L
+// at the same S pushes toward "luminous pure color"). Mixing toward
+// white desaturates as it lightens, which is exactly the "softer + paler"
+// the Spritz palette asks for — dusty rose stays dusty, just paler.
 //
 // Contrast: ink (#2C2420) has luminance ≈ 0.02. Every swatch below
-// targets L = 0.30–0.55, giving contrast ratios of 5:1 to 9:1 against
-// ink text — past the WCAG AA threshold (4.5:1) with safety margin
-// for older eyes and glare. The two darkest swatches (mossy umber and
-// charcoal smoke at L≈0.30) were spot-checked at 5.08:1 minimum.
+// targets L = 0.45–0.78, giving contrast ratios of 7:1 to 12:1 against
+// ink text — comfortably past WCAG AA (4.5:1) and AAA (7:1). Spot-
+// checked at the darkest new tone (#B8B5A6 earthy wood) = 7.3:1.
 //
-// Granularity: notes are bucketed into ~35 categories instead of the
-// previous ~10. So rose, jasmine, violet, iris, and tuberose each get
-// their own tone instead of all collapsing to "pink." Catalogs with
-// hundreds of distinct notes finally read as varied instead of
-// repetitive. Family swatches pull the most representative note tone
-// from their category (citrus → bright citrus yellow, woody → warm
-// sand, etc.) so a fragrance's family pill harmonizes with its notes.
+// Granularity preserved from the prior pass: ~35 distinct note categories
+// so rose, jasmine, violet, iris, and tuberose each get their own tone
+// instead of all collapsing to "pink." Family swatches pull the most
+// representative note tone from their category so a fragrance's family
+// pill harmonizes with its notes.
 
 const INK = "#2C2420";
 
 export interface Swatch {
-  /** Background color — muted vintage tone at L≈70–82%. */
+  /** Background color — soft lightened tone at L≈82–92%. */
   bg: string;
-  /** Text color — always ink, verified ≥5:1 contrast against bg. */
+  /** Text color — always ink, verified ≥7:1 contrast against bg. */
   text: string;
 }
 
@@ -37,27 +40,27 @@ export interface Swatch {
 // Each pulled from the most representative note tone in that family.
 
 const FAMILY_SWATCH: Record<string, Swatch> = {
-  citrus: { bg: "#E8D687", text: INK }, // muted golden citrus
-  floral: { bg: "#D5A5A5", text: INK }, // dusty rose
-  fruity: { bg: "#D9A88E", text: INK }, // muted peach
-  green: { bg: "#A8B89A", text: INK }, // sage
-  aromatic: { bg: "#A6A883", text: INK }, // olive sage
-  spicy: { bg: "#C39280", text: INK }, // muted terracotta
-  woody: { bg: "#C8B198", text: INK }, // warm sand
-  oriental: { bg: "#B59676", text: INK }, // muted bronze
-  amber: { bg: "#D4B789", text: INK }, // muted honey
-  leather: { bg: "#A89077", text: INK }, // tobacco brown
-  musky: { bg: "#D5C8B8", text: INK }, // muted bone
-  gourmand: { bg: "#C9A878", text: INK }, // muted toffee
-  aquatic: { bg: "#A8BFBA", text: INK }, // muted seafoam
-  ozonic: { bg: "#B8C5CC", text: INK }, // muted sky
-  synthetic: { bg: "#9A95B0", text: INK }, // muted slate-lavender
-  chypre: { bg: "#A89580", text: INK }, // sage-umber
-  fougere: { bg: "#A8A5BC", text: INK }, // dusty lavender-blue
-  other: { bg: "#C5BDB0", text: INK }, // warm stone
+  citrus: { bg: "#EFE2AB", text: INK }, // soft golden citrus
+  floral: { bg: "#E2C0C0", text: INK }, // soft dusty rose
+  fruity: { bg: "#E4C2B0", text: INK }, // soft peach
+  green: { bg: "#C2CDB8", text: INK }, // soft sage
+  aromatic: { bg: "#C1C2A8", text: INK }, // soft olive sage
+  spicy: { bg: "#D5B3A6", text: INK }, // soft terracotta
+  woody: { bg: "#D9C8B7", text: INK }, // soft warm sand
+  oriental: { bg: "#CBB69F", text: INK }, // soft bronze
+  amber: { bg: "#E1CDAC", text: INK }, // soft honey
+  leather: { bg: "#C2B1A0", text: INK }, // soft tobacco
+  musky: { bg: "#E2D9CD", text: INK }, // soft bone
+  gourmand: { bg: "#D9C2A1", text: INK }, // soft toffee
+  aquatic: { bg: "#C2D2CF", text: INK }, // soft seafoam
+  ozonic: { bg: "#CDD6DB", text: INK }, // soft sky
+  synthetic: { bg: "#B8B5C8", text: INK }, // soft slate-lavender
+  chypre: { bg: "#C2B5A6", text: INK }, // soft sage-umber
+  fougere: { bg: "#C2C0D0", text: INK }, // soft lavender-blue
+  other: { bg: "#D6D1C8", text: INK }, // soft warm stone
 };
 
-const FAMILY_FALLBACK: Swatch = { bg: "#C5BDB0", text: INK };
+const FAMILY_FALLBACK: Swatch = { bg: "#D6D1C8", text: INK };
 
 /**
  * Get the color swatch for a family. Accepts a canonical slug or a
@@ -132,26 +135,26 @@ const NOTE_CATEGORIES: NoteCategory[] = [
   {
     // Bright citrus — lemon, bergamot, lime, citron
     keywords: ["bergamot", "lemon", "lime", "citron", "calabrian", "verbena"],
-    swatch: { bg: "#E8D687", text: INK }, // muted golden
+    swatch: { bg: "#EFE2AB", text: INK }, // soft golden
   },
   {
     // Sweet citrus — orange, mandarin, tangerine, neroli
     keywords: [
       "orange", "mandarin", "tangerine", "neroli", "petitgrain", "clementine",
     ],
-    swatch: { bg: "#E0B58F", text: INK }, // muted apricot
+    swatch: { bg: "#E9CBB1", text: INK }, // soft apricot
   },
   {
     // Tart citrus — grapefruit, yuzu
     keywords: ["grapefruit", "yuzu", "pomelo"],
-    swatch: { bg: "#D6D38C", text: INK }, // muted pale lime
+    swatch: { bg: "#E2E0AE", text: INK }, // soft pale lime
   },
 
   // --- Florals (5 distinct tones) ---
   {
     // Rose — the canonical pink floral
     keywords: ["rose"],
-    swatch: { bg: "#D5A5A5", text: INK }, // dusty rose
+    swatch: { bg: "#E2C0C0", text: INK }, // soft dusty rose
   },
   {
     // White florals — jasmine, tuberose, gardenia, magnolia
@@ -159,17 +162,17 @@ const NOTE_CATEGORIES: NoteCategory[] = [
       "jasmine", "tuberose", "gardenia", "magnolia", "frangipani",
       "honeysuckle", "champaca",
     ],
-    swatch: { bg: "#E5D3CB", text: INK }, // ivory blush
+    swatch: { bg: "#EDE0DB", text: INK }, // soft ivory blush
   },
   {
     // Ylang, lily, lotus — exotic floral
     keywords: ["ylang", "lily", "lotus", "orchid"],
-    swatch: { bg: "#DDC8B8", text: INK }, // muted champagne
+    swatch: { bg: "#E7D9CD", text: INK }, // soft champagne
   },
   {
     // Iris / violet / orris — powdery floral
     keywords: ["iris", "orris", "violet", "heliotrope", "mimosa"],
-    swatch: { bg: "#B8A5C4", text: INK }, // dusty lavender
+    swatch: { bg: "#CDC0D6", text: INK }, // soft lavender
   },
   {
     // Soft pink florals — peony, freesia, geranium, carnation
@@ -177,7 +180,7 @@ const NOTE_CATEGORIES: NoteCategory[] = [
       "peony", "freesia", "geranium", "carnation", "hyacinth",
       "narcissus", "cyclamen",
     ],
-    swatch: { bg: "#D4B5B8", text: INK }, // muted blush
+    swatch: { bg: "#E1CBCD", text: INK }, // soft blush
   },
 
   // --- Fruity (4 distinct tones) ---
@@ -187,17 +190,17 @@ const NOTE_CATEGORIES: NoteCategory[] = [
       "berry", "raspberry", "strawberry", "blackcurrant", "cassis",
       "blueberry", "cherry",
     ],
-    swatch: { bg: "#B58895", text: INK }, // muted plum
+    swatch: { bg: "#CBACB5", text: INK }, // soft plum
   },
   {
     // Stone fruit — peach, apricot, plum
     keywords: ["peach", "apricot", "plum", "nectarine"],
-    swatch: { bg: "#D9A88E", text: INK }, // muted peach
+    swatch: { bg: "#E4C2B0", text: INK }, // soft peach
   },
   {
     // Orchard fruit — apple, pear, quince, fig
     keywords: ["apple", "pear", "quince", "fig", "pomegranate"],
-    swatch: { bg: "#C5BCA0", text: INK }, // muted celadon
+    swatch: { bg: "#D6D0BC", text: INK }, // soft celadon
   },
   {
     // Tropical — mango, passion fruit, lychee, melon, pineapple
@@ -205,7 +208,7 @@ const NOTE_CATEGORIES: NoteCategory[] = [
       "mango", "passion fruit", "lychee", "melon", "watermelon",
       "pineapple", "papaya", "tropical", "grape", "rhubarb",
     ],
-    swatch: { bg: "#D49A95", text: INK }, // muted coral
+    swatch: { bg: "#E1B8B5", text: INK }, // soft coral
   },
 
   // --- Green / aromatic (4 distinct tones) ---
@@ -215,12 +218,12 @@ const NOTE_CATEGORIES: NoteCategory[] = [
       "tea", "leaf", "leaves", "grass", "galbanum", "ivy", "tomato",
       "cannabis", "bamboo", "green",
     ],
-    swatch: { bg: "#A8B89A", text: INK }, // sage
+    swatch: { bg: "#C2CDB8", text: INK }, // soft sage
   },
   {
     // Mint — distinct from herbs
     keywords: ["mint", "peppermint", "spearmint"],
-    swatch: { bg: "#A5C2B0", text: INK }, // muted seafoam-green
+    swatch: { bg: "#C0D4C8", text: INK }, // soft seafoam-green
   },
   {
     // Aromatic herbs — basil, sage, thyme, rosemary, anise
@@ -228,41 +231,41 @@ const NOTE_CATEGORIES: NoteCategory[] = [
       "basil", "sage", "thyme", "rosemary", "oregano", "fennel",
       "anise", "tarragon", "coriander", "dill", "chamomile",
     ],
-    swatch: { bg: "#A6A883", text: INK }, // olive sage
+    swatch: { bg: "#C1C2A8", text: INK }, // soft olive sage
   },
   {
     // Lavender — its own thing, neither herb nor floral exactly
     keywords: ["lavender"],
-    swatch: { bg: "#A8A5BC", text: INK }, // dusty lavender-blue
+    swatch: { bg: "#C2C0D0", text: INK }, // soft lavender-blue
   },
 
   // --- Spicy (3 distinct tones) ---
   {
     // Warm spice — cinnamon, clove, nutmeg
     keywords: ["cinnamon", "clove", "nutmeg", "allspice", "pimento"],
-    swatch: { bg: "#C39280", text: INK }, // muted terracotta
+    swatch: { bg: "#D5B3A6", text: INK }, // soft terracotta
   },
   {
     // Sharp spice — pepper, cardamom, juniper
     keywords: ["pepper", "cardamom", "juniper", "cumin"],
-    swatch: { bg: "#B88575", text: INK }, // muted rust
+    swatch: { bg: "#CDAA9E", text: INK }, // soft rust
   },
   {
     // Exotic spice — saffron, ginger
     keywords: ["saffron", "ginger", "spice"],
-    swatch: { bg: "#C9A77F", text: INK }, // muted ochre
+    swatch: { bg: "#D9C1A5", text: INK }, // soft ochre
   },
 
   // --- Gourmand (4 distinct tones) ---
   {
     // Vanilla — its own thing
     keywords: ["vanilla", "tonka", "bean"],
-    swatch: { bg: "#E2D2B5", text: INK }, // muted cream
+    swatch: { bg: "#EBDFCB", text: INK }, // soft cream
   },
   {
     // Chocolate, coffee — bitter sweet
     keywords: ["chocolate", "cocoa", "coffee", "espresso"],
-    swatch: { bg: "#A89280", text: INK }, // muted mocha
+    swatch: { bg: "#C2B3A6", text: INK }, // soft mocha
   },
   {
     // Caramel, honey, sugar — golden sweet
@@ -270,7 +273,7 @@ const NOTE_CATEGORIES: NoteCategory[] = [
       "caramel", "honey", "sugar", "praline", "candy", "marshmallow",
       "cotton candy", "rum", "whiskey", "liqueur",
     ],
-    swatch: { bg: "#C9A878", text: INK }, // muted toffee
+    swatch: { bg: "#D9C2A1", text: INK }, // soft toffee
   },
   {
     // Nuts, almond, coconut, cream
@@ -278,14 +281,14 @@ const NOTE_CATEGORIES: NoteCategory[] = [
       "almond", "nut", "hazelnut", "pistachio", "coconut", "cream",
       "milk", "biscuit", "cake",
     ],
-    swatch: { bg: "#C5A589", text: INK }, // muted hazelnut
+    swatch: { bg: "#D6C0AC", text: INK }, // soft hazelnut
   },
 
   // --- Resin / amber / oriental (2 distinct tones) ---
   {
     // Amber — warm golden resin
     keywords: ["amber", "labdanum", "benzoin", "balsam"],
-    swatch: { bg: "#D4B789", text: INK }, // muted honey
+    swatch: { bg: "#E1CDAC", text: INK }, // soft honey
   },
   {
     // Incense, myrrh, frankincense — smoky resin
@@ -293,24 +296,24 @@ const NOTE_CATEGORIES: NoteCategory[] = [
       "incense", "frankincense", "myrrh", "opoponax", "elemi",
       "styrax", "resin", "olibanum",
     ],
-    swatch: { bg: "#B59676", text: INK }, // muted bronze
+    swatch: { bg: "#CBB69F", text: INK }, // soft bronze
   },
 
   // --- Smoky / leather / tobacco (3 distinct tones) ---
   {
     // Leather, suede — warm hide
     keywords: ["leather", "suede"],
-    swatch: { bg: "#A89077", text: INK }, // tobacco brown
+    swatch: { bg: "#C2B1A0", text: INK }, // soft tobacco brown
   },
   {
     // Tobacco, hay — dried golden
     keywords: ["tobacco", "hay", "straw"],
-    swatch: { bg: "#B89F7B", text: INK }, // muted golden tobacco
+    swatch: { bg: "#CDBBA2", text: INK }, // soft golden tobacco
   },
   {
     // Smoke, burnt, tar — dark ash
     keywords: ["smoke", "smoky", "burnt", "tar", "rubber", "asphalt"],
-    swatch: { bg: "#A09790", text: INK }, // muted ash
+    swatch: { bg: "#BCB6B1", text: INK }, // soft ash
   },
 
   // --- Woody (3 distinct tones) ---
@@ -320,23 +323,23 @@ const NOTE_CATEGORIES: NoteCategory[] = [
       "sandalwood", "cedar", "rosewood", "cypress", "pine", "fir",
       "birch", "oak", "papyrus",
     ],
-    swatch: { bg: "#C8B198", text: INK }, // warm sand
+    swatch: { bg: "#D9C8B7", text: INK }, // soft warm sand
   },
   {
     // Dark woods — oud, agarwood, ebony
     keywords: ["oud", "agarwood", "ebony", "guaiac"],
-    swatch: { bg: "#A89377", text: INK }, // muted walnut
+    swatch: { bg: "#C2B4A0", text: INK }, // soft walnut
   },
   {
     // Earthy wood — vetiver, patchouli
     keywords: ["vetiver", "patchouli"],
-    swatch: { bg: "#9A9580", text: INK }, // muted moss-brown
+    swatch: { bg: "#B8B5A6", text: INK }, // soft moss-brown
   },
   {
     // Generic "wood" catchall — must come AFTER specific wood types
     // so "sandalwood" hits warm sand, not generic.
     keywords: ["wood", "woody"],
-    swatch: { bg: "#C8B198", text: INK }, // warm sand (same as soft woods)
+    swatch: { bg: "#D9C8B7", text: INK }, // soft warm sand (same as soft woods)
   },
 
   // --- Aquatic / ozonic / marine (2 distinct tones) ---
@@ -346,24 +349,24 @@ const NOTE_CATEGORIES: NoteCategory[] = [
       "marine", "sea", "ocean", "water", "aquatic", "salt", "seaweed",
       "algae",
     ],
-    swatch: { bg: "#A8BFBA", text: INK }, // muted seafoam
+    swatch: { bg: "#C2D2CF", text: INK }, // soft seafoam
   },
   {
     // Ozonic / air / rain — lighter, sky-toned
     keywords: ["ozonic", "ozone", "rain", "air", "atmosphere", "cloud"],
-    swatch: { bg: "#B8C5CC", text: INK }, // muted sky
+    swatch: { bg: "#CDD6DB", text: INK }, // soft sky
   },
 
   // --- Musk / animalic / powdery (2 distinct tones) ---
   {
     // Musk, ambergris — soft skin musk
     keywords: ["musk", "ambergris", "civet", "castoreum", "hyrax", "skin"],
-    swatch: { bg: "#D5C8B8", text: INK }, // muted bone
+    swatch: { bg: "#E2D9CD", text: INK }, // soft bone
   },
   {
     // Powdery — orris, talc, makeup-adjacent
     keywords: ["powder", "powdery", "talc", "cosmetic"],
-    swatch: { bg: "#D4B5B8", text: INK }, // muted blush
+    swatch: { bg: "#E1CBCD", text: INK }, // soft blush
   },
 
   // --- Mossy / earthy ---
@@ -372,7 +375,7 @@ const NOTE_CATEGORIES: NoteCategory[] = [
       "oakmoss", "moss", "treemoss", "earth", "soil", "mushroom",
       "truffle", "humus", "petrichor",
     ],
-    swatch: { bg: "#A89580", text: INK }, // sage-umber
+    swatch: { bg: "#C2B5A6", text: INK }, // soft sage-umber
   },
 
   // --- Synthetic / molecular ---
@@ -381,11 +384,11 @@ const NOTE_CATEGORIES: NoteCategory[] = [
       "ambroxan", "iso e super", "javanol", "cashmeran", "norlimbanol",
       "calone", "ethyl maltol", "ambrox", "molecule",
     ],
-    swatch: { bg: "#9A95B0", text: INK }, // muted slate-lavender
+    swatch: { bg: "#B8B5C8", text: INK }, // soft slate-lavender
   },
 ];
 
-const NOTE_FALLBACK: Swatch = { bg: "#C5BDB0", text: INK };
+const NOTE_FALLBACK: Swatch = { bg: "#D6D1C8", text: INK };
 
 /**
  * Get the color swatch for a single note name. Matches on substring so
