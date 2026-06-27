@@ -9,7 +9,14 @@
 -- constraint ensures one reaction per (user, fragrance), and the API
 -- upserts/deletes to achieve toggle behavior.
 
-create type if not exists public.reaction_type as enum ('like', 'dislike');
+-- Postgres has no `CREATE TYPE IF NOT EXISTS`. The DO block swallows
+-- the duplicate_object error on re-runs so this migration stays
+-- idempotent (safe to apply twice).
+do $$ begin
+  create type public.reaction_type as enum ('like', 'dislike');
+exception
+  when duplicate_object then null;
+end $$;
 
 create table if not exists public.user_reactions (
   user_id       uuid not null references public.users(id) on delete cascade,
