@@ -10,7 +10,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { FAMILY_BLURB, familyName, familySlug } from "@/lib/families";
-import { houseSlug } from "@/lib/houses";
 import type { Fragrance } from "@/lib/types";
 
 export const revalidate = 300;
@@ -107,14 +106,16 @@ export default async function FamilyPage({
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="font-medium truncate">{f.name}</div>
+                    {/* House rendered as plain text (not a nested Link)
+                        because nested <a> tags are invalid HTML and the
+                        Server-Component onClick handler that previously
+                        tried to gate them crashed the page with
+                        "Event handlers cannot be passed to Client
+                        Component props." Two-tap path to the house page:
+                        tap card → fragrance detail → house link in
+                        the header. */}
                     <div className="text-xs text-slate truncate">
-                      <Link
-                        href={`/house/${houseSlug(f.house)}`}
-                        className="hover:text-ink transition"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {f.house}
-                      </Link>
+                      {f.house}
                       {f.year ? ` · ${f.year}` : ""}
                     </div>
                   </div>
