@@ -9,6 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "check:server-onclick": "node scripts/check-server-onclick.mjs",
+    "prebuild": "npm run check:server-onclick",
     "db:migrate": "npx supabase db push",
     "db:reset": "npx supabase db reset",
     "screenshots:auth": "node scripts/screenshots/auth.mjs",
