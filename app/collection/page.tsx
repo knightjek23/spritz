@@ -215,7 +215,19 @@ function SignedInCollection() {
                 collectionItemId={it.id}
                 currentReaction={it.reaction}
                 onDelete={refetch}
-                onReactionChange={refetch}
+                // Inline local state update instead of a full refetch —
+                // the API call already happened inside CardMenu, and
+                // refetch() would flip loading=true and flash the
+                // "Loading…" line during a routine reaction toggle.
+                // Mutating just the one item's reaction keeps the
+                // indicator in sync silently.
+                onReactionChange={(next) =>
+                  setItems((current) =>
+                    current.map((item) =>
+                      item.id === it.id ? { ...item, reaction: next } : item,
+                    ),
+                  )
+                }
               />
             </div>
           </li>
