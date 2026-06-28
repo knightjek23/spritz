@@ -87,35 +87,34 @@ export function BottomNav() {
   if (pathname.startsWith("/scan")) return null;
 
   return (
-    // Liquid-glass bottom nav. Preset 'bottom-nav' defaults to a 32px
-    // pill radius (Instagram-style floating bar), but Spritz's existing
-    // shape is full-width edge-to-edge — so we override radius to 0 and
-    // keep the border-top for definition against the page. The paper
-    // tint sits over the displacement layer so labels and icons stay
-    // legible regardless of what's behind them.
+    // Floating-pill bottom nav per Figma node 58:12 — Instagram-style
+    // rounded bar that hovers above the bottom edge with side margins,
+    // not edge-to-edge. 16px corner radius matches the design. The
+    // liquid-glass treatment (blur + displacement + paper tint) carries
+    // over so the bar still refracts content scrolling under it; the
+    // pill shape just gives it visual lift like a card floating over
+    // the page.
     <LiquidGlass
       as="nav"
       preset="bottom-nav"
-      radius={0}
-      // Custom nav-tuned displacement (scale 70 with tighter noise) so
-      // the refraction is visible on mobile instead of reading as flat
-      // blur. Blur bumped to 4px to soften the displacement edges.
+      radius={16}
       filter="lg-glass-nav"
       blur={4}
-      // Tint dropped from 0.65 → 0.45 so more of what's behind shows
-      // through and the wobble is actually visible.
-      tint="rgba(242,237,228,0.45)"
-      // Paper-toned rim matches the tint RGB so the glass edge sits
-      // tonally with the bar instead of bright white against paper.
+      tint="rgba(242,237,228,0.75)"
       edgeColor="242, 237, 228"
       role="navigation"
       aria-label="Primary"
-      // Inline positioning so fixed always wins regardless of any
-      // ancestor that may have inadvertently created a containing block.
-      style={{ position: "fixed", bottom: 0, left: 0, right: 0 }}
-      className="z-40 border-t border-white/20"
+      // Floating placement: 16px from each side, 16px from bottom edge.
+      // On phones with home indicators (iOS), the pill sits just above
+      // the system gesture area instead of fighting it — no need for
+      // the old home-indicator strip.
+      style={{ position: "fixed", bottom: 16, left: 16, right: 16 }}
+      className="z-40"
     >
-      <ul className="flex items-start justify-between px-2 pt-3">
+      {/* 16px horizontal padding inside the pill, items stretched to
+          fill width. Items themselves carry their own selected-state
+          styling. */}
+      <ul className="flex items-center justify-between w-full px-4 py-2">
         {TABS.map((tab) => {
           const active = isActiveTab(pathname, tab);
           return (
@@ -123,19 +122,23 @@ export function BottomNav() {
               <Link
                 href={tab.href}
                 aria-current={active ? "page" : undefined}
-                className="flex flex-col items-center justify-center gap-1.5 py-1 group"
+                // Selected state per Figma: paper-tinted card with
+                // thin gray border, 16px rounded corners, and a soft
+                // drop shadow that gives the lift. Unselected items
+                // are just centered icon + label, no chrome. The
+                // chrome itself IS the active affordance — no color
+                // tinting needed (label/icon stay ink for legibility).
+                className={`flex flex-col items-center justify-center gap-1.5 h-16 rounded-2xl transition ${
+                  active
+                    ? "bg-paper/60 border border-[#a2a2a2]/60 shadow-[0_8px_20px_2px_rgba(0,0,0,0.15)]"
+                    : ""
+                }`}
               >
-                <span
-                  className={`flex items-center justify-center w-8 h-8 ${
-                    active ? "text-emerald" : "text-ink/85"
-                  } transition-colors`}
-                >
+                <span className="flex items-center justify-center w-8 h-8 text-ink/85">
                   {tab.icon(active)}
                 </span>
                 <span
-                  className={`text-[10px] font-light text-center whitespace-nowrap ${
-                    active ? "text-emerald font-medium" : "text-ink/85"
-                  } transition-colors`}
+                  className="text-[10px] font-light text-center whitespace-nowrap text-ink/85"
                   style={{ fontVariationSettings: '"wdth" 100' }}
                 >
                   {tab.label}
@@ -145,13 +148,6 @@ export function BottomNav() {
           );
         })}
       </ul>
-
-      {/* Home-indicator area — matches the iOS home bar height so the
-          nav reads as part of the OS chrome on supporting devices. The
-          white pill is purely decorative; iOS draws its own over the top. */}
-      <div className="flex items-center justify-center h-[34px]">
-        <div className="bg-white/30 h-[5px] w-[134px] rounded-full" aria-hidden />
-      </div>
     </LiquidGlass>
   );
 }

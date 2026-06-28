@@ -71,11 +71,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               client-only and renders nothing visible. */}
           <LiquidGlassDefs />
           <Nav />
-          {/* pb-28 reserves space for the fixed bottom nav (~85px tall:
-              tab area + home-indicator strip). The nav itself self-hides
-              on /scan (camera takeover), but the padding stays — better
-              to have a bit of empty space on camera pages than to clip
-              content on every other page. */}
+          {/* pb-28 reserves space for the floating-pill bottom nav
+              (~80px tall + 16px bottom offset = ~96px occupied). pb-28
+              (112px) gives ~16px breathing room above the pill. Nav
+              self-hides on /scan (camera takeover); padding stays so
+              all other pages have consistent clearance. */}
           <main className="flex-1 pb-28">{children}</main>
           <BottomNav />
         </body>
