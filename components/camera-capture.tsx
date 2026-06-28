@@ -421,35 +421,46 @@ export function CameraCapture({ onCapture, busy = false }: Props) {
       </div>
 
       {/* Bottom tray — gallery / shutter / switch. Hidden in error +
-          fallback since the live camera affordances don't apply. */}
+          fallback since the live camera affordances don't apply.
+          3-column grid (not flex justify-center) so the shutter sits at
+          true horizontal center regardless of the gallery/switch button
+          widths. With flex+gap the group was centered, which pushed the
+          shutter ~8px right of center because the right button is
+          narrower than the left. */}
       {state !== "error" && state !== "fallback" && (
-        <div className="flex items-center justify-center gap-14 px-14 py-4 bg-cream shrink-0">
-          <button
-            type="button"
-            onClick={openGallery}
-            aria-label="Upload from gallery"
-            className="w-12 h-12 rounded-full overflow-hidden bg-ink/5 border border-ink/10 flex items-center justify-center text-ink hover:bg-ink/10 transition"
-          >
-            <GalleryIcon />
-          </button>
+        <div className="grid grid-cols-3 items-center px-8 py-4 bg-cream shrink-0">
+          <div className="flex justify-start">
+            <button
+              type="button"
+              onClick={openGallery}
+              aria-label="Upload from gallery"
+              className="w-12 h-12 rounded-full overflow-hidden bg-ink/5 border border-ink/10 flex items-center justify-center text-ink hover:bg-ink/10 transition"
+            >
+              <GalleryIcon />
+            </button>
+          </div>
 
-          <button
-            type="button"
-            onClick={shutterAction}
-            disabled={shutterDisabled}
-            aria-label={state === "live" ? "Capture" : "Enable camera"}
-            className="w-[72px] h-[72px] rounded-full bg-emerald ring-4 ring-cream ring-offset-2 ring-offset-ink/5 active:scale-95 transition disabled:opacity-50"
-          />
+          <div className="flex justify-center">
+            <button
+              type="button"
+              onClick={shutterAction}
+              disabled={shutterDisabled}
+              aria-label={state === "live" ? "Capture" : "Enable camera"}
+              className="w-[72px] h-[72px] rounded-full bg-emerald ring-4 ring-cream ring-offset-2 ring-offset-ink/5 active:scale-95 transition disabled:opacity-50"
+            />
+          </div>
 
-          <button
-            type="button"
-            onClick={state === "live" ? switchCamera : undefined}
-            disabled={state !== "live"}
-            aria-label="Switch camera"
-            className="w-8 h-8 flex items-center justify-center text-ink hover:text-emerald transition disabled:opacity-40"
-          >
-            <SwitchCameraIcon />
-          </button>
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={state === "live" ? switchCamera : undefined}
+              disabled={state !== "live"}
+              aria-label="Switch camera"
+              className="w-8 h-8 flex items-center justify-center text-ink hover:text-emerald transition disabled:opacity-40"
+            >
+              <SwitchCameraIcon />
+            </button>
+          </div>
         </div>
       )}
 
