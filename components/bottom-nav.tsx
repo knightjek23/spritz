@@ -139,6 +139,14 @@ export function BottomNav() {
             // read as a confident slide instead of a snap.
             transition:
               "transform 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms ease-out",
+            // Promote the indicator to its own GPU compositor layer so
+            // its slide animation doesn't trigger a repaint of the
+            // sibling icons. Without this, the indicator and icons
+            // share a paint layer; each transform tick re-rasterizes
+            // the whole layer and the icons jitter by a subpixel as
+            // anti-aliasing edges recompute. will-change tells the
+            // browser to isolate ahead of time, no jitter.
+            willChange: "transform",
           }}
         />
 
