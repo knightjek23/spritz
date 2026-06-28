@@ -86,6 +86,11 @@ export function BottomNav() {
   // bottom-28 so the nav stays visible during a scan — users can swap
   // tabs without exiting the camera first. No early-return.
 
+  // Index of the currently active tab. Drives the sliding indicator's
+  // transform. Returns -1 when no tab matches the current route (e.g.
+  // /sign-in, /pricing) — the indicator fades out in that case.
+  const activeIndex = TABS.findIndex((t) => isActiveTab(pathname, t));
+
   return (
     // Floating-pill bottom nav per Figma node 58:12 — Instagram-style
     // rounded bar that hovers above the bottom edge with side margins,
@@ -111,10 +116,32 @@ export function BottomNav() {
       style={{ position: "fixed", bottom: 24, left: 16, right: 16 }}
       className="z-40"
     >
-      {/* 16px horizontal padding inside the pill, items stretched to
-          fill width. Items themselves carry their own selected-state
-          styling. */}
-      <ul className="flex items-center justify-between w-full px-4 py-2">
+      {/* 8px padding all around. Items fill the rest in equal flex-1
+          columns. A single absolutely-positioned indicator (the lifted
+          paper card) slides between columns on tab change instead of
+          being per-item — Instagram's pattern. One GPU-accelerated
+          transform animation, no layout thrash. */}
+      <ul className="relative flex items-center w-full p-2">
+        {/* Sliding selected-state card. Width = (full - horizontal
+            padding) / tab count. Sits at left: 8px (matches p-2) and
+            translates by its own width × activeIndex to land on the
+            current tab. transform is the only animated property — GPU
+            cheap and consistent across browsers. */}
+        <div
+          aria-hidden
+          className="absolute inset-y-2 left-2 rounded-2xl bg-paper/60 border border-[#a2a2a2]/60 shadow-[0_8px_20px_2px_rgba(0,0,0,0.15)] pointer-events-none"
+          style={{
+            width: `calc((100% - 16px) / ${TABS.length})`,
+            transform: `translateX(${Math.max(0, activeIndex) * 100}%)`,
+            opacity: activeIndex >= 0 ? 1 : 0,
+            // ease-out-quart (matches the sheet-rise animation) at
+            // 280ms — quick enough to feel responsive, eased enough to
+            // read as a confident slide instead of a snap.
+            transition:
+              "transform 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms ease-out",
+          }}
+        />
+
         {TABS.map((tab) => {
           const active = isActiveTab(pathname, tab);
           return (
@@ -122,17 +149,7 @@ export function BottomNav() {
               <Link
                 href={tab.href}
                 aria-current={active ? "page" : undefined}
-                // Selected state per Figma: paper-tinted card with
-                // thin gray border, 16px rounded corners, and a soft
-                // drop shadow that gives the lift. Unselected items
-                // are just centered icon + label, no chrome. The
-                // chrome itself IS the active affordance — no color
-                // tinting needed (label/icon stay ink for legibility).
-                className={`flex flex-col items-center justify-center gap-1.5 h-16 rounded-2xl transition ${
-                  active
-                    ? "bg-paper/60 border border-[#a2a2a2]/60 shadow-[0_8px_20px_2px_rgba(0,0,0,0.15)]"
-                    : ""
-                }`}
+                className="relative flex flex-col items-center justify-center gap-1.5 h-16"
               >
                 <span className="flex items-center justify-center w-8 h-8 text-ink/85">
                   {tab.icon(active)}
