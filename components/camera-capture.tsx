@@ -271,7 +271,12 @@ export function CameraCapture({ onCapture, busy = false }: Props) {
   const shutterDisabled = !shutterAction || state === "starting";
 
   return (
-    <div className="fixed inset-0 z-50 bg-cream flex flex-col">
+    // Camera takeover ends at bottom-28 (112px) so the floating nav pill
+    // (24px from bottom + ~80px tall = ~104px occupied) stays visible
+    // and tappable while scanning. Earlier this was `inset-0` and the
+    // nav self-hid on /scan; new behavior keeps the nav accessible so
+    // users can bail to another tab mid-scan without backing out first.
+    <div className="fixed inset-x-0 top-0 bottom-28 z-50 bg-cream flex flex-col">
       {/* Top bar — solid cream, X left, flash right. Flash only when live + supported. */}
       <header className="flex items-center justify-between px-6 py-2 bg-cream shrink-0">
         <button

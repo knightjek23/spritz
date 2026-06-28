@@ -81,10 +81,10 @@ const TABS: Tab[] = [
 export function BottomNav() {
   const pathname = usePathname() ?? "/";
 
-  // Hide on the camera takeover. The CameraCapture component uses fixed
-  // positioning to cover the whole viewport, including the bottom tray
-  // where the shutter lives — the nav would land on top of it.
-  if (pathname.startsWith("/scan")) return null;
+  // Note: previously hidden on /scan because the camera takeover used
+  // `inset-0` and covered the whole viewport. Camera now ends at
+  // bottom-28 so the nav stays visible during a scan — users can swap
+  // tabs without exiting the camera first. No early-return.
 
   return (
     // Floating-pill bottom nav per Figma node 58:12 — Instagram-style
