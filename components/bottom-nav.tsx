@@ -104,11 +104,11 @@ export function BottomNav() {
       edgeColor="242, 237, 228"
       role="navigation"
       aria-label="Primary"
-      // Floating placement: 16px from each side, 16px from bottom edge.
-      // On phones with home indicators (iOS), the pill sits just above
-      // the system gesture area instead of fighting it — no need for
-      // the old home-indicator strip.
-      style={{ position: "fixed", bottom: 16, left: 16, right: 16 }}
+      // Floating placement: 16px from each side, 24px from bottom edge.
+      // On phones with home indicators (iOS), the pill sits comfortably
+      // above the system gesture area — no need for the old
+      // home-indicator strip.
+      style={{ position: "fixed", bottom: 24, left: 16, right: 16 }}
       className="z-40"
     >
       {/* 16px horizontal padding inside the pill, items stretched to
