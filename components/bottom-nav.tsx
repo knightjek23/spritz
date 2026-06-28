@@ -266,8 +266,12 @@ function EncyclopediaIcon({ active: _active }: { active: boolean }) {
       <path d="M17.4985 9.55005H29.3585V27.77H17.4985V9.55005Z" stroke="currentColor" strokeWidth="0.5" />
       <path d="M3.65723 8.19995H11.5672V27.77H3.65723V8.19995Z" stroke="currentColor" strokeWidth="0.5" />
       <rect x="5.62988" y="4.1499" width="3.95" height="4.05" stroke="currentColor" strokeWidth="0.5" />
-      <rect x="6.95312" y="10.8999" width="18.4545" height="18.8999" rx="0.66" fill="#FAF6ED" stroke="currentColor" strokeWidth="0.5" />
-      <ellipse cx="16.1801" cy="6.85004" rx="3.95455" ry="4.04999" fill="#FAF6ED" stroke="currentColor" strokeWidth="0.5" />
+      {/* Front bottle (foreground rectangle + cap ellipse) filled with
+          paper (#F2EDE4) so it matches the nav bar's tint color instead
+          of the lighter cream (#FAF6ED). Without this, the bottle reads
+          as a separate light island floating on the bar. */}
+      <rect x="6.95312" y="10.8999" width="18.4545" height="18.8999" rx="0.66" fill="#F2EDE4" stroke="currentColor" strokeWidth="0.5" />
+      <ellipse cx="16.1801" cy="6.85004" rx="3.95455" ry="4.04999" fill="#F2EDE4" stroke="currentColor" strokeWidth="0.5" />
     </svg>
   );
 }
