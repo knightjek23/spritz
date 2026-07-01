@@ -18,6 +18,8 @@
     "upload": "tsx src/upload-to-supabase.ts",
     "compute-dupes": "tsx src/compute-dupe-pairs.ts",
     "mirror:images": "tsx src/mirror-images.ts",
+    "consensus": "tsx src/generate-consensus.ts",
+    "notes": "tsx src/generate-note-descriptions.ts",
     "all": "npm run discover && npm run scrape && npm run parse && npm run vectorize && npm run upload && npm run compute-dupes"
   },
   "dependencies": {
