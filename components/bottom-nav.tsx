@@ -93,16 +93,15 @@ export function BottomNav() {
 
   return (
     // Floating-pill bottom nav per Figma node 58:12 — Instagram-style
-    // rounded bar that hovers above the bottom edge with side margins,
-    // not edge-to-edge. 16px corner radius matches the design. The
-    // liquid-glass treatment (blur + displacement + paper tint) carries
-    // over so the bar still refracts content scrolling under it; the
-    // pill shape just gives it visual lift like a card floating over
-    // the page.
+    // fully-rounded bar (64px radius) that hovers above the bottom edge
+    // with side margins, not edge-to-edge. The liquid-glass treatment
+    // (blur + displacement + paper tint) carries over so the bar still
+    // refracts content scrolling under it; the pill shape just gives it
+    // visual lift like a card floating over the page.
     <LiquidGlass
       as="nav"
       preset="bottom-nav"
-      radius={16}
+      radius={64}
       filter="lg-glass-nav"
       blur={4}
       tint="rgba(242,237,228,0.75)"
@@ -116,20 +115,23 @@ export function BottomNav() {
       style={{ position: "fixed", bottom: 24, left: 16, right: 16 }}
       className="z-40"
     >
-      {/* 8px padding all around. Items fill the rest in equal flex-1
-          columns. A single absolutely-positioned indicator (the lifted
-          paper card) slides between columns on tab change instead of
-          being per-item — Instagram's pattern. One GPU-accelerated
-          transform animation, no layout thrash. */}
-      <ul className="relative flex items-center w-full p-2">
-        {/* Sliding selected-state card. Width = (full - horizontal
-            padding) / tab count. Sits at left: 8px (matches p-2) and
+      {/* Row is 72px tall per Figma. 8px horizontal padding, no vertical
+          padding — the row fills the full height (LiquidGlass wraps it
+          exactly). Items are equal flex-1 columns. A single absolutely-
+          positioned indicator (the lifted paper pill) slides between
+          columns on tab change instead of being per-item — Instagram's
+          pattern. One GPU-accelerated transform animation, no layout
+          thrash. */}
+      <ul className="relative flex items-center h-[72px] w-full px-2">
+        {/* Sliding selected-state pill. Width = (full - horizontal
+            padding) / tab count. Sits at left: 8px (matches px-2) and
             translates by its own width × activeIndex to land on the
             current tab. transform is the only animated property — GPU
-            cheap and consistent across browsers. */}
+            cheap and consistent across browsers. Fully rounded (64px)
+            per Figma so the active state reads as a floating capsule. */}
         <div
           aria-hidden
-          className="absolute inset-y-2 left-2 rounded-2xl bg-paper/60 border border-[#a2a2a2]/60 shadow-[0_8px_20px_2px_rgba(0,0,0,0.15)] pointer-events-none"
+          className="absolute inset-y-0 left-2 rounded-[64px] bg-paper/60 border border-[#a2a2a2]/60 shadow-[0_8px_20px_2px_rgba(0,0,0,0.15)] pointer-events-none"
           style={{
             width: `calc((100% - 16px) / ${TABS.length})`,
             transform: `translateX(${Math.max(0, activeIndex) * 100}%)`,
@@ -157,7 +159,7 @@ export function BottomNav() {
               <Link
                 href={tab.href}
                 aria-current={active ? "page" : undefined}
-                className="relative flex flex-col items-center justify-center gap-1.5 h-16"
+                className="relative flex flex-col items-center justify-center gap-1 h-full"
               >
                 <span className="flex items-center justify-center w-8 h-8 text-ink/85">
                   {tab.icon(active)}
