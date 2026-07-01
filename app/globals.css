@@ -133,3 +133,38 @@ h1, h2, h3, h4 {
     animation: none;
   }
 }
+
+/* iOS-app-style page transition — fades + slides the incoming page in
+   from the right when the user navigates to a non-tab route. Curve is
+   Apple's canonical ease (approx cubic-bezier(0.32, 0.72, 0, 1)) —
+   starts fast, decelerates hard into place. 320ms lands in the
+   "clearly deliberate but not slow" band Apple uses for push/pop
+   navigation.
+   Only fires on route changes because PageTransition keys the
+   wrapper by pathname; tab-root ↔ tab-root switches keep a stable
+   key and don't retrigger the animation. */
+@keyframes spritz-page-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-page-slide-in {
+  animation: spritz-page-slide-in 320ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  /* Promote to its own compositor layer during the animation so the
+     transform doesn't repaint the fixed nav bars or trigger jank on
+     large detail pages with heavy images. */
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-page-slide-in {
+    animation: none;
+    will-change: auto;
+  }
+}

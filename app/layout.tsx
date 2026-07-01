@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Nav } from "@/components/nav";
 import { BottomNav } from "@/components/bottom-nav";
 import { LiquidGlassDefs } from "@/components/liquid-glass/LiquidGlass";
+import { PageTransition } from "@/components/page-transition";
 import "./globals.css";
 
 // Playfair Display — high-contrast serif for hero / section headings.
@@ -76,7 +77,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               (112px) gives 16px breathing room above the pill. Nav
               stays visible on /scan too (camera caps at bottom-28),
               padding is universal so all pages have consistent clearance. */}
-          <main className="flex-1 pb-28">{children}</main>
+          <main className="flex-1 pb-28">
+            {/* PageTransition wraps every route so non-tab routes fade
+                + slide in on navigation (iOS-app pattern). Tab-root
+                switches stay instant. */}
+            <PageTransition>{children}</PageTransition>
+          </main>
           <BottomNav />
         </body>
       </html>
