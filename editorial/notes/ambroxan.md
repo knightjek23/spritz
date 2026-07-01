@@ -1,7 +1,7 @@
 ---
 name: ambroxan
 type: note
-aliases: [ambrox, ambroxide, cetalox]
+aliases: [ambrox, ambroxide, cetalox, ambrofix, ambrocenide, amber ketal, sylvamber, boisiris]
 family: amber
 ---
 

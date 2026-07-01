@@ -10,11 +10,11 @@
 // on a 5-minute cycle (notes don't churn fast).
 
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { loadNote, loadAllNotes } from "@/lib/notes";
+import { resolveNoteQueries } from "@/lib/note-aliases";
 import type { Fragrance } from "@/lib/types";
 
 export const revalidate = 300;
@@ -47,24 +47,44 @@ export async function generateMetadata({
 export default async function NotePage({ params }: { params: { slug: string } }) {
   const note = await loadNote(params.slug);
 
-  // Even if we don't have an editorial entry, the catalog might still have
-  // the note — let the user find fragrances featuring it. Render a thinner
-  // page with just the catalog list in that case.
-  // Public read — note browsing is unauthenticated, and the RPC has a
-  // grant to anon. Admin client is used here only because the @supabase/ssr
-  // typed client's .rpc() overload selection is finicky with hand-rolled
+  // Try every candidate query name in sequence (see lib/note-aliases.ts
+  // for resolution rules — covers trademark suffixes, spelling
+  // variants, and canonical synonyms). Union results across variants
+  // so a page for "oud" shows fragrances stored under BOTH "oud" AND
+  // "agarwood (oud)". Dedupe by fragrance id, cap at 60.
+  //
+  // Public read — note browsing is unauthenticated, RPC has a grant to
+  // anon. Admin client used only because the @supabase/ssr typed
+  // client's .rpc() overload selection is finicky with hand-rolled
   // Database types; functionally identical for read-only queries.
   const supabase = createAdminClient();
+  const candidateNames = resolveNoteQueries(params.slug, note?.name);
+  const seenFragranceIds = new Set<string>();
+  const collected: Array<Fragrance & { layer: "top" | "mid" | "base" }> = [];
+  for (const name of candidateNames) {
+    if (collected.length >= 60) break;
+    const { data } = await supabase.rpc("find_fragrances_by_note", {
+      p_note: name,
+      p_limit: 60,
+    });
+    if (!data) continue;
+    for (const row of data as Array<Fragrance & { layer: "top" | "mid" | "base" }>) {
+      if (seenFragranceIds.has(row.id)) continue;
+      seenFragranceIds.add(row.id);
+      collected.push(row);
+      if (collected.length >= 60) break;
+    }
+  }
+  const fragrances = collected;
   const queryName = note?.name ?? params.slug.replace(/-/g, " ");
-  const { data: rows } = await supabase.rpc("find_fragrances_by_note", {
-    p_note: queryName,
-    p_limit: 60,
-  });
 
-  // No editorial AND no catalog matches → 404. Otherwise show what we have.
-  if (!note && (!rows || rows.length === 0)) notFound();
-
-  const fragrances = (rows ?? []) as Array<Fragrance & { layer: "top" | "mid" | "base" }>;
+  // Soft-404: neither editorial nor any variant matched. Render a
+  // recovery page (search + return-to-notes CTAs) instead of the raw
+  // Next.js 404. Route-level notFound() reserved for genuinely
+  // unreachable URLs.
+  if (!note && fragrances.length === 0) {
+    return <NoteNotFound slug={params.slug} />;
+  }
 
   return (
     <article className="mx-auto max-w-md px-6 py-10">
@@ -156,6 +176,55 @@ export default async function NotePage({ params }: { params: { slug: string } })
           </ul>
         </section>
       )}
+    </article>
+  );
+}
+
+// Soft 404 — renders when neither the editorial nor any RPC candidate
+// found this note. Better UX than a hard notFound() (the user can
+// recover in-page, and SEO stays intact with meaningful content).
+function NoteNotFound({ slug }: { slug: string }) {
+  const displayName = slug.replace(/-/g, " ");
+  return (
+    <article className="mx-auto max-w-md px-6 py-10">
+      <p className="mb-4">
+        <Link
+          href="/notes"
+          className="font-mono text-xs uppercase tracking-widest text-slate hover:text-ink"
+        >
+          ← All notes
+        </Link>
+      </p>
+      <header className="mb-8">
+        <p className="font-mono text-xs uppercase tracking-widest text-slate">
+          Note not found
+        </p>
+        <h1 className="font-display text-5xl mt-2 leading-[0.95] capitalize">
+          {displayName}
+        </h1>
+      </header>
+      <section className="mb-10 rounded-xl border border-dashed border-ink/15 p-6">
+        <p className="text-sm text-slate leading-relaxed mb-4">
+          We don&apos;t have a page for <span className="italic">{displayName}</span> yet
+          — either the spelling is uncommon or no fragrance in our catalog uses
+          that exact name. Try browsing all notes or searching for the
+          fragrance you had in mind.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/notes"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald text-cream text-sm font-medium hover:bg-emerald/90 transition"
+          >
+            Browse notes
+          </Link>
+          <Link
+            href="/search"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-ink/15 text-ink text-sm font-medium hover:bg-ink/5 transition"
+          >
+            Search the catalog
+          </Link>
+        </div>
+      </section>
     </article>
   );
 }
