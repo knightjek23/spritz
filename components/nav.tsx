@@ -2,6 +2,7 @@ import Link from "next/link";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { NavSearch } from "./nav-search";
 import { LiquidGlass } from "./liquid-glass/LiquidGlass";
+import { NavBrand } from "./nav-brand";
 
 export function Nav() {
   return (
@@ -34,9 +35,12 @@ export function Nav() {
         className="border-b border-ink/10 z-10"
       >
         <div className="mx-auto max-w-md px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="font-display text-2xl tracking-tight text-ink">
-            spritz
-          </Link>
+          {/* NavBrand is a client sub-component that swaps between the
+              "spritz" wordmark (on tab-root routes) and a back button
+              (on any sub-route). Client-only so it can read the
+              pathname; keeps Nav itself a Server Component so Clerk's
+              SignedIn/SignedOut/UserButton stay server-rendered. */}
+          <NavBrand />
           <div className="flex items-center gap-4 text-sm">
             <SignedIn>
               <Link href="/collection" className="text-slate hover:text-ink">
