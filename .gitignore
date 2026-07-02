@@ -53,3 +53,4 @@ supabase/.temp
 # screenshots: regenerated locally, never committed
 /screenshots/
 /.auth/
+scripts/*.log
