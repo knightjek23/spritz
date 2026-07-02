@@ -55,23 +55,24 @@ export function pickRetailer(_f: Fragrance): Retailer {
 }
 
 /**
- * Build the destination URL for the Buy CTA. Constructs FragranceNet's
- * direct product URL from house + name.
+ * Build the destination URL for the Buy CTA. Routes through
+ * FragranceNet's own search page with "house name" as the query.
  *
- * URL scheme (verified against live catalog, 2026):
- *   https://www.fragrancenet.com/fn/fragrances/{brand-slug}/{brand-slug}-{name-slug}
+ * URL scheme (verified against live site, 2026):
+ *   https://www.fragrancenet.com/fn/search/{url-encoded-query}
  *
- * Two quirks worth noting:
- *   1. `/fn/` prefix — their fragrance vertical lives under `/fn/`,
- *      not the site root. Omitting it 404s.
- *   2. Brand slug repeats — the fragrance path segment is
- *      `{brand}-{name}`, not just `{name}`. So Creed Aventus is
- *      `creed/creed-aventus`, not `creed/aventus`.
+ * Path-based search, not a query param. Encoded via encodeURIComponent
+ * so spaces become %20 and apostrophes/accents don't break the URL.
  *
- * When the URL doesn't match a real product (e.g. fragrance has a
- * variant suffix like "-cologne" or "-edp" we can't predict), the
- * user lands on FragranceNet's empty-search page. Rare enough for now;
- * if it becomes a pattern we'll add a fallback to search URL.
+ * Why search instead of direct product URLs:
+ *   The direct product-URL pattern
+ *   (/fn/fragrances/{brand}/{brand}-{name}) works for maybe 60-70% of
+ *   the catalog. The rest need unpredictable suffixes (-cologne, -edp,
+ *   -perfume) or drop the brand-repeat when the name IS the brand
+ *   (e.g. Juliette Has a Gun / Juliette). Those cases 404 to a hard
+ *   "EAU MY!" page with no soft fallback. Search always lands on
+ *   valid results and the top result is nearly always the intended
+ *   product, so users get one extra click but zero dead ends.
  *
  * Wraps in a Rakuten affiliate deeplink when the publisher + merchant
  * env vars are set; links directly otherwise.
@@ -82,16 +83,8 @@ export function buildAffiliateUrl(f: Fragrance): {
 } {
   const retailer = pickRetailer(f);
 
-  const brandSlug = fragranceNetSlug(f.house);
-  const nameSlug = fragranceNetSlug(f.name);
-
-  // If either slug is empty (pathological input), fall back to search.
-  const productUrl =
-    brandSlug && nameSlug
-      ? `https://www.fragrancenet.com/fn/fragrances/${brandSlug}/${brandSlug}-${nameSlug}`
-      : `https://www.fragrancenet.com/search?${new URLSearchParams({
-          query: `${f.house} ${f.name}`,
-        }).toString()}`;
+  const query = encodeURIComponent(`${f.house} ${f.name}`);
+  const searchUrl = `https://www.fragrancenet.com/fn/search/${query}`;
 
   // Rakuten affiliate wrapping — only when both IDs configured.
   // Format: https://click.linksynergy.com/deeplink?id=<pub>&mid=<merchant>&murl=<encoded target>
@@ -100,9 +93,9 @@ export function buildAffiliateUrl(f: Fragrance): {
       `https://click.linksynergy.com/deeplink?id=${encodeURIComponent(
         FRAGRANCENET_RAKUTEN_PUBLISHER,
       )}&mid=${encodeURIComponent(FRAGRANCENET_RAKUTEN_MERCHANT)}` +
-      `&murl=${encodeURIComponent(productUrl)}`;
+      `&murl=${encodeURIComponent(searchUrl)}`;
     return { url: wrapped, retailer };
   }
 
-  return { url: productUrl, retailer };
+  return { url: searchUrl, retailer };
 }
