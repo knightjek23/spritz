@@ -4,7 +4,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { auth } from "@clerk/nextjs/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { SimilarSection } from "@/components/similar-section";
 import { SaveButton } from "@/components/save-button";
 import { NotesPyramid } from "@/components/notes-pyramid";
@@ -12,8 +14,16 @@ import { KnownDupes } from "@/components/known-dupes";
 import { KnownConsensus } from "@/components/known-consensus";
 import { FamilyPills } from "@/components/family-pills";
 import { houseSlug } from "@/lib/houses";
-import type { Fragrance } from "@/lib/types";
+import {
+  CONCENTRATION_LABEL,
+  CONCENTRATION_SHORT,
+  CONCENTRATION_DESCRIPTION,
+} from "@/lib/concentrations";
+import type { CollectionStatus, Fragrance } from "@/lib/types";
 
+// Calling auth() below opts this route out of static caching, so
+// revalidate is a no-op — but we leave the hint in place in case
+// Next.js changes that behavior later.
 export const revalidate = 60;
 
 export default async function FragrancePage({ params }: { params: { id: string } }) {
@@ -24,6 +34,34 @@ export default async function FragrancePage({ params }: { params: { id: string }
     .eq("id", params.id)
     .maybeSingle<Fragrance>();
   if (!f) notFound();
+
+  // Hydrate the Own / Tried / Wishlist buttons with the current user's
+  // existing collection entries for this fragrance, so returning to a
+  // page you've already saved shows the status immediately without a
+  // client-side round-trip. Also captures the collection_item id per
+  // status so SaveButton can toggle off (DELETE) with a second tap.
+  //
+  // Admin client bypasses RLS same as the /api/collection route.
+  const { userId: clerkUserId } = auth();
+  const savedItemIds: Partial<Record<CollectionStatus, string>> = {};
+  if (clerkUserId) {
+    const admin = createAdminClient();
+    const { data: appUser } = await admin
+      .from("users")
+      .select("id")
+      .eq("clerk_user_id", clerkUserId)
+      .maybeSingle();
+    if (appUser) {
+      const { data: existing } = await admin
+        .from("collection_items")
+        .select("id, status")
+        .eq("user_id", appUser.id)
+        .eq("fragrance_id", f.id);
+      for (const row of existing ?? []) {
+        savedItemIds[row.status as CollectionStatus] = row.id;
+      }
+    }
+  }
 
   const hasPerformanceData =
     f.longevity_score !== null || f.sillage_score !== null;
@@ -60,8 +98,13 @@ export default async function FragrancePage({ params }: { params: { id: string }
         </section>
       )}
 
-      {/* Title block — name + house + year + gender. Family lives below.
-          House name links into the house encyclopedia entry. */}
+      {/* Title block — name + house + year + gender + concentration.
+          Family lives below. House name links into the house
+          encyclopedia entry. Concentration (EDT/EDP/Parfum/Extrait)
+          sits at the end of the metadata line for glanceability; the
+          full plain-English description gets its own section below
+          Notes so people who want the "what does that mean?" answer
+          get it without cluttering the header. */}
       <header className="mb-8">
         <p className="font-mono text-xs uppercase tracking-widest text-slate">
           <Link
@@ -72,16 +115,37 @@ export default async function FragrancePage({ params }: { params: { id: string }
           </Link>
           {f.year && <span> · {f.year}</span>}
           {f.gender && <span> · {f.gender}</span>}
+          {f.concentration && (
+            <span> · {CONCENTRATION_SHORT[f.concentration]}</span>
+          )}
         </p>
         <h1 className="font-display text-5xl mt-2 leading-[0.95]">{f.name}</h1>
       </header>
 
-      {/* Action row — Save + Buy (single Buy CTA, this fragrance only) */}
+      {/* Action row — Save + Buy (single Buy CTA, this fragrance only).
+          initialItemId hydrates each SaveButton with the user's existing
+          collection_items row (if any) so status persists across page
+          loads and the button can toggle off with a second tap. */}
       <section className="grid grid-cols-2 gap-3 mb-10">
         <div className="grid grid-cols-3 col-span-2 gap-2">
-          <SaveButton fragranceId={f.id} status="own" label="Own" />
-          <SaveButton fragranceId={f.id} status="tried" label="Tried" />
-          <SaveButton fragranceId={f.id} status="wishlist" label="Wishlist" />
+          <SaveButton
+            fragranceId={f.id}
+            status="own"
+            label="Own"
+            initialItemId={savedItemIds.own ?? null}
+          />
+          <SaveButton
+            fragranceId={f.id}
+            status="tried"
+            label="Tried"
+            initialItemId={savedItemIds.tried ?? null}
+          />
+          <SaveButton
+            fragranceId={f.id}
+            status="wishlist"
+            label="Wishlist"
+            initialItemId={savedItemIds.wishlist ?? null}
+          />
         </div>
         <Link
           href={`/api/buy/${f.id}`}
@@ -110,6 +174,23 @@ export default async function FragrancePage({ params }: { params: { id: string }
         <h2 className="font-display text-2xl mb-4">Notes</h2>
         <NotesPyramid fragrance={f} />
       </section>
+
+      {/* Concentration / strength — plain-English explainer for what
+          "EDT" / "EDP" / "Parfum" / "Extrait" means. Only renders when
+          the backfill parsed one from the fragrance name. Positioned
+          before Known Dupes so users grasp the strength context before
+          diving into performance and alternatives. */}
+      {f.concentration && (
+        <section className="mb-10">
+          <h2 className="font-display text-2xl mb-3">Concentration</h2>
+          <p className="text-ink font-medium mb-2">
+            {CONCENTRATION_LABEL[f.concentration]}
+          </p>
+          <p className="text-sm text-ink/85 leading-relaxed">
+            {CONCENTRATION_DESCRIPTION[f.concentration]}
+          </p>
+        </section>
+      )}
 
       {/* Known dupes — promoted up the page per Session 01 feedback. Sits
           right after Notes so the natural reading order is "what's in it"
