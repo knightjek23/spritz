@@ -6,6 +6,7 @@ export type PriceTier = "budget" | "mid" | "designer" | "niche";
 export type CollectionStatus = "own" | "tried" | "wishlist";
 export type Plan = "free" | "pro";
 export type Reaction = "like" | "dislike";
+export type Concentration = "edt" | "edp" | "parfum" | "extrait";
 export type Retailer = "scentbird" | "fragrancenet" | "nordstrom";
 export type VisionProvider = "gpt4o" | "google";
 
@@ -88,6 +89,10 @@ export interface Fragrance {
   bottle_image_url: string | null;
   editorial_notes: string | null;
   dupes: DupeRecommendation[];
+  // Concentration / strength (EDT / EDP / Parfum / Extrait). Parsed
+  // from the fragrance name when explicit ("Bleu de Chanel Eau de
+  // Parfum"); NULL when the name gives no clue. See lib/concentrations.ts.
+  concentration: Concentration | null;
   // Community consensus (Pro feature) — null until first Pro user
   // requests generation, then cached forever. UI surfaces this in the
   // KnownConsensus component on the detail page.

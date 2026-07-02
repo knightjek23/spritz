@@ -21,10 +21,15 @@ import {
 } from "@/lib/concentrations";
 import type { CollectionStatus, Fragrance } from "@/lib/types";
 
-// Calling auth() below opts this route out of static caching, so
-// revalidate is a no-op — but we leave the hint in place in case
-// Next.js changes that behavior later.
-export const revalidate = 60;
+// Force dynamic rendering. The page reads Clerk auth() to hydrate the
+// current user's Own/Tried/Wishlist status, so the same URL renders
+// different HTML per user — cannot be cached at the edge. Without this,
+// Next.js 14 would still ISR-cache the page per URL and serve one
+// user's collection state to every subsequent visitor of the same
+// fragrance (visible bug: your ✓ Own appears on someone else's screen,
+// or nothing appears on yours because a signed-out user's render is
+// cached first).
+export const dynamic = "force-dynamic";
 
 export default async function FragrancePage({ params }: { params: { id: string } }) {
   const supabase = await createClient();

@@ -54,11 +54,20 @@ SKIP_UPLOAD="${SKIP_UPLOAD:-0}"
 SKIP_DUPES="${SKIP_DUPES:-0}"
 SKIP_IMAGES="${SKIP_IMAGES:-0}"
 SKIP_AI="${SKIP_AI:-0}"
+SKIP_CONSENSUS="${SKIP_CONSENSUS:-0}"
 ONLY_AI="${ONLY_AI:-0}"
+ONLY_CONSENSUS="${ONLY_CONSENSUS:-0}"
 
 if [ "$ONLY_AI" = "1" ]; then
   SKIP_DISCOVER=1; SKIP_SCRAPE=1; SKIP_PARSE=1
   SKIP_VECTORIZE=1; SKIP_UPLOAD=1; SKIP_DUPES=1; SKIP_IMAGES=1
+  SKIP_CONSENSUS=1
+fi
+
+if [ "$ONLY_CONSENSUS" = "1" ]; then
+  SKIP_DISCOVER=1; SKIP_SCRAPE=1; SKIP_PARSE=1
+  SKIP_VECTORIZE=1; SKIP_UPLOAD=1; SKIP_DUPES=1; SKIP_IMAGES=1
+  SKIP_AI=1
 fi
 
 # Pick the package runner — prefer pnpm, fall back to npm. Both work
@@ -137,21 +146,23 @@ fi
 
 # ----- The pipeline -----
 
-[ "$SKIP_DISCOVER" = "1" ] && skip_step "1/8 discover" || log_step "1/8 discover (find URLs up to SCRAPE_LIMIT)" $RUNNER discover
+[ "$SKIP_DISCOVER" = "1" ] && skip_step "1/9 discover" || log_step "1/9 discover (find URLs up to SCRAPE_LIMIT)" $RUNNER discover
 
-[ "$SKIP_SCRAPE" = "1" ] && skip_step "2/8 scrape" || log_step "2/8 scrape (download HTML, rate-limited 5-15s/req)" $RUNNER scrape
+[ "$SKIP_SCRAPE" = "1" ] && skip_step "2/9 scrape" || log_step "2/9 scrape (download HTML, rate-limited 5-15s/req)" $RUNNER scrape
 
-[ "$SKIP_PARSE" = "1" ] && skip_step "3/8 parse" || log_step "3/8 parse (Cheerio extract to JSON)" $RUNNER parse
+[ "$SKIP_PARSE" = "1" ] && skip_step "3/9 parse" || log_step "3/9 parse (Cheerio extract to JSON)" $RUNNER parse
 
-[ "$SKIP_VECTORIZE" = "1" ] && skip_step "4/8 vectorize" || log_step "4/8 vectorize (note pyramid embeddings)" $RUNNER vectorize
+[ "$SKIP_VECTORIZE" = "1" ] && skip_step "4/9 vectorize" || log_step "4/9 vectorize (note pyramid embeddings)" $RUNNER vectorize
 
-[ "$SKIP_UPLOAD" = "1" ] && skip_step "5/8 upload" || log_step "5/8 upload (upsert to Supabase)" $RUNNER upload
+[ "$SKIP_UPLOAD" = "1" ] && skip_step "5/9 upload" || log_step "5/9 upload (upsert to Supabase)" $RUNNER upload
 
-[ "$SKIP_DUPES" = "1" ] && skip_step "6/8 compute-dupes" || log_step "6/8 compute-dupes (similarity pairs across catalog)" $RUNNER compute-dupes
+[ "$SKIP_DUPES" = "1" ] && skip_step "6/9 compute-dupes" || log_step "6/9 compute-dupes (similarity pairs across catalog)" $RUNNER compute-dupes
 
-[ "$SKIP_IMAGES" = "1" ] && skip_step "7/8 mirror:images" || log_step "7/8 mirror:images (bottle photos → Supabase Storage)" $RUNNER mirror:images
+[ "$SKIP_IMAGES" = "1" ] && skip_step "7/9 mirror:images" || log_step "7/9 mirror:images (bottle photos → Supabase Storage)" $RUNNER mirror:images
 
-[ "$SKIP_AI" = "1" ] && skip_step "8/8 AI performance descriptions" || log_step "8/8 AI performance descriptions (gpt-4o-mini)" $RUNNER tsx src/generate-performance-descriptions.ts
+[ "$SKIP_AI" = "1" ] && skip_step "8/9 AI performance descriptions" || log_step "8/9 AI performance descriptions (gpt-4o-mini)" $RUNNER tsx src/generate-performance-descriptions.ts
+
+[ "$SKIP_CONSENSUS" = "1" ] && skip_step "9/9 AI community consensus" || log_step "9/9 AI community consensus (gpt-4o-mini, ~\$0.0004/row)" $RUNNER consensus
 
 # ----- Summary -----
 

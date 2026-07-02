@@ -45,6 +45,7 @@ export type Database = {
           bottle_image_url: string | null;
           editorial_notes: string | null;
           dupes: DupeRecommendation[];
+          concentration: "edt" | "edp" | "parfum" | "extrait" | null;
           // Community consensus (Pro feature)
           consensus_summary: string | null;
           consensus_verdict: string | null;
@@ -91,6 +92,7 @@ export type Database = {
           bottle_image_url?: string | null;
           editorial_notes?: string | null;
           dupes?: DupeRecommendation[];
+          concentration?: "edt" | "edp" | "parfum" | "extrait" | null;
           consensus_summary?: string | null;
           consensus_verdict?: string | null;
           consensus_pros?: string[] | null;
