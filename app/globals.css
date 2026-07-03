@@ -9,7 +9,7 @@
   color-scheme: light;
   /* 2026 boutique-editorial tokens — semantic, mirrors Tailwind theme */
   --bg-base: #F4EFE6;        /* Cream — replaces Cloud Dancer */
-  --bg-surface: #E8E1D4;     /* Warm paper */
+  --bg-surface: #F0EADE;     /* Creamy warm paper — brightened for slate-text AA contrast */
   --text-primary: #1A1A1A;   /* Ink */
   --text-secondary: #6B6960; /* Slate */
   --accent-primary: #1F3F2E; /* Emerald */

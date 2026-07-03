@@ -11,7 +11,7 @@ const config: Config = {
         // 2026 boutique-editorial palette — Playfair + Roboto + emerald/cream
         // Replaces the prior Consumer/Startup combo (Cloud Dancer/Electric Blue/Acid Yellow).
         cream: "#F4EFE6",      // Base canvas — warmer than Cloud Dancer
-        paper: "#E8E1D4",      // Surface elevation — warmer beige
+        paper: "#F0EADE",      // Surface elevation — creamy warm beige, lifted from prior #E8E1D4 so slate text passes WCAG AA (4.55:1)
         emerald: "#1F3F2E",    // Primary brand — deep forest green
         ink: "#1A1A1A",        // Primary text — deeper black for cream contrast
         slate: "#6B6960",      // Secondary text — warm slate harmonizing with cream
