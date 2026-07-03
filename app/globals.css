@@ -30,6 +30,18 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Global sharp-edge reset — zero border-radius on every element in the
+   app for a sharper, editorial aesthetic. Only exception: the bottom
+   nav pill and everything inside it (sliding selected-card indicator,
+   etc.), which keeps its Figma-spec 64px radius. Uses
+   nav[aria-label="Primary"] as the anchor since the bottom nav is the
+   only nav with that label — the top nav doesn't set aria-label.
+   Overrides all Tailwind rounded-* classes and inline border-radius
+   styles via !important, so no source-code sweep required. */
+*:not(nav[aria-label="Primary"]):not(nav[aria-label="Primary"] *) {
+  border-radius: 0 !important;
+}
+
 body {
   font-family: theme(fontFamily.sans);
   font-weight: 300; /* Roboto Light is the default body weight per the Figma spec */
