@@ -34,16 +34,16 @@ export function ForYouFeed({ data }: { data: Recommendations }) {
             (same animation as the marketing home, kept consistent). */}
       <div className="flex flex-col items-stretch mb-10">
         <Link
-          href="/families"
+          href="/scan"
           className="spritz-rise spritz-rise-1 w-full text-center bg-emerald text-cream py-4 rounded-2xl font-medium tracking-wide mb-3 hover:bg-emerald/90 transition"
         >
-          Browse the encyclopedia
+          Scan a bottle
         </Link>
         <Link
-          href="/scan"
+          href="/families"
           className="spritz-rise spritz-rise-2 w-full text-center border border-ink/15 text-ink py-4 rounded-2xl font-medium tracking-wide mb-3 hover:bg-ink/5 transition"
         >
-          Scan a bottle
+          Browse the encyclopedia
         </Link>
         <Link
           href="/search"

@@ -45,23 +45,26 @@ export function MarketingHome() {
         have a bottle? Scan the label.
       </p>
 
-      {/* Primary: browse the encyclopedia. Per Session 01, this is what
-          the tester was looking for and didn't realize was the whole product. */}
-      <Link
-        href="/families"
-        className="spritz-rise spritz-rise-5 w-full bg-emerald text-cream py-4 rounded-2xl font-medium tracking-wide mb-3 hover:bg-emerald/90 transition"
-      >
-        Browse the encyclopedia
-      </Link>
-
-      {/* Secondary: scan. Demoted from primary; same affordance, lower
-          visual weight. The fragrance encyclopedia is the product, scan
-          is one of three ways into it. */}
+      {/* Primary: scan a bottle. Leads with the action that gets the
+          user from "curious about this bottle" to "here's what it is"
+          in one tap. The camera flow is the highest-signal entry point
+          and the one that makes Spritz feel distinct from other
+          fragrance sites. */}
       <Link
         href="/scan"
-        className="spritz-rise spritz-rise-6 w-full border border-ink/15 text-ink py-4 rounded-2xl font-medium tracking-wide hover:bg-ink/5 transition mb-3"
+        className="spritz-rise spritz-rise-5 w-full bg-emerald text-cream py-4 rounded-2xl font-medium tracking-wide mb-3 hover:bg-emerald/90 transition"
       >
         Scan a bottle
+      </Link>
+
+      {/* Secondary: browse the encyclopedia. Same affordance, quieter
+          visual weight. Still the discovery path for users without a
+          bottle in hand. */}
+      <Link
+        href="/families"
+        className="spritz-rise spritz-rise-6 w-full border border-ink/15 text-ink py-4 rounded-2xl font-medium tracking-wide hover:bg-ink/5 transition mb-3"
+      >
+        Browse the encyclopedia
       </Link>
 
       {/* Tertiary: search. Text-only so it sits visually beneath the two
