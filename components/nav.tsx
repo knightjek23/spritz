@@ -35,6 +35,10 @@ export function Nav() {
         // as part of the bar instead of a stark white highlight against
         // the warmer page color.
         edgeColor="250, 246, 237"
+        // No drop shadow on the top nav — the default lift felt too
+        // heavy under the LiquidGlass rim for the sleeker aesthetic.
+        // Bottom nav still uses the default shadow for its floating pill.
+        shadow={false}
         className="border-b border-ink/10"
       >
         <div className="mx-auto max-w-md px-6 h-14 flex items-center justify-between">

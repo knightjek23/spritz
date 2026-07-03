@@ -126,6 +126,11 @@ export interface LiquidGlassProps {
   edgeColor?: string;
   /** Optional translucent fill over the glass, e.g. 'rgba(255,255,255,0.06)'. */
   tint?: string;
+  /** Face-layer drop shadow. Pass a custom boxShadow string to override
+   *  the default; pass `false` to disable it entirely for a flatter,
+   *  edge-only surface (useful on the top nav where the default lift
+   *  reads too heavy against the LiquidGlass rim). */
+  shadow?: string | false;
   className?: string;
   style?: CSSProperties;
   as?: keyof JSX.IntrinsicElements;
@@ -145,12 +150,20 @@ export const LiquidGlass = forwardRef<HTMLElement, LiquidGlassProps>(
       edge,
       edgeColor,
       tint,
+      shadow,
       className,
       style,
       as: Tag = "div",
       role,
       "aria-label": ariaLabel,
     } = props;
+
+    // Default face-layer shadow — used unless the caller explicitly
+    // overrides or disables it via the `shadow` prop.
+    const DEFAULT_SHADOW =
+      "0 4px 4px rgba(0,0,0,0.15), 0 0 12px rgba(0,0,0,0.08)";
+    const shadowValue =
+      shadow === false ? null : shadow ?? DEFAULT_SHADOW;
 
     const p = PRESETS[preset];
     const filterId = filter ?? p.filter;
@@ -238,15 +251,18 @@ export const LiquidGlass = forwardRef<HTMLElement, LiquidGlassProps>(
           {tint && (
             <div style={{ ...fill, background: tint, zIndex: 1 }} />
           )}
-          {/* face: lift shadow */}
-          <div
-            style={{
-              ...fill,
-              boxShadow:
-                "0 4px 4px rgba(0,0,0,0.15), 0 0 12px rgba(0,0,0,0.08)",
-              zIndex: 2,
-            }}
-          />
+          {/* face: lift shadow — skipped entirely when shadow={false}
+              (some callers, like the top nav, want a flatter surface
+              without the drop). */}
+          {shadowValue && (
+            <div
+              style={{
+                ...fill,
+                boxShadow: shadowValue,
+                zIndex: 2,
+              }}
+            />
+          )}
           {/* edge: beveled rim highlight. Color comes from the edgeColor
               prop so callers can match the rim to the tint (cream nav →
               cream rim) instead of the default stark white. */}
