@@ -19,7 +19,10 @@ export function NavSearch() {
   if (pathname === "/search") return null;
 
   return (
-    <div className="border-b border-ink/10 bg-cream/80 backdrop-blur sticky top-14 z-[9]">
+    // Sticky positioning + z-index dropped — NavScrollWrapper (parent of
+    // Nav) now owns the sticky context for the whole top strip and hides
+    // this row along with the primary nav on scroll-down.
+    <div className="border-b border-ink/10 bg-cream/80 backdrop-blur">
       <div className="mx-auto max-w-md px-6 py-2">
         <SearchAutocomplete
           placeholder="Search fragrances, brands, notes…"
