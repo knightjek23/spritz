@@ -13,6 +13,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { loadAllHouses, houseSlug } from "@/lib/houses";
+import { canonicalHouseSlug } from "@/lib/slugs";
 
 export const revalidate = 3600;
 
@@ -44,19 +45,31 @@ export default async function HousesIndexPage() {
   // where we have them. Editorial houses with zero catalog rows still
   // show up (so users browsing the index can see what we've written about
   // even before the catalog catches up).
+  //
+  // Alias resolution: raw slugs that map to a canonical (e.g.
+  // "maison-martin-margiela" → "maison-margiela") get consolidated. The
+  // canonical entry accumulates the sum of all variant counts, and the
+  // display name/editorial data come from the canonical.
   const merged = new Map<string, DisplayHouse>();
 
   for (const c of catalogHouses ?? []) {
-    const slug = c.slug;
+    const rawSlug = c.slug;
+    const slug = canonicalHouseSlug(rawSlug);
     const ed = editorialBySlug.get(slug);
-    merged.set(slug, {
-      slug,
-      name: ed?.name ?? c.house,
-      count: c.fragrance_count,
-      hasEditorial: !!ed,
-      country: ed?.country,
-      founded: ed?.founded,
-    });
+    const existing = merged.get(slug);
+    if (existing) {
+      // Alias merge — sum counts, keep canonical display name.
+      existing.count += c.fragrance_count;
+    } else {
+      merged.set(slug, {
+        slug,
+        name: ed?.name ?? (rawSlug === slug ? c.house : slug),
+        count: c.fragrance_count,
+        hasEditorial: !!ed,
+        country: ed?.country,
+        founded: ed?.founded,
+      });
+    }
   }
 
   for (const ed of editorialHouses) {
@@ -71,14 +84,14 @@ export default async function HousesIndexPage() {
     });
   }
 
-  // Sort: editorial houses first (the curated ones), then everything else
-  // by catalog count descending. Within editorial, alpha.
+  // Sort: editorial houses first (the curated ones), then catalog-only
+  // alphabetically. Both sections use alpha now so the encyclopedia
+  // feels like a browsable A-Z rather than a leaderboard.
   const houses = Array.from(merged.values()).sort((a, b) => {
     if (a.hasEditorial !== b.hasEditorial) {
       return a.hasEditorial ? -1 : 1;
     }
-    if (a.hasEditorial) return a.name.localeCompare(b.name);
-    return b.count - a.count;
+    return a.name.localeCompare(b.name);
   });
 
   const editorialCount = houses.filter((h) => h.hasEditorial).length;

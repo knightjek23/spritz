@@ -15,6 +15,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { loadHouse, loadAllHouses } from "@/lib/houses";
+import { canonicalHouseSlug, slugsForCanonicalHouse } from "@/lib/slugs";
 import type { Fragrance } from "@/lib/types";
 
 export const revalidate = 300;
@@ -33,20 +34,37 @@ export async function generateMetadata({
 }
 
 export default async function HousePage({ params }: { params: { slug: string } }) {
-  const house = await loadHouse(params.slug);
+  // Canonicalize the incoming slug so aliases (e.g.
+  // /house/maison-martin-margiela) render the same page as the canonical
+  // (/house/maison-margiela) instead of a stub with half the catalog.
+  const canonical = canonicalHouseSlug(params.slug);
+  const house = await loadHouse(canonical);
 
-  // Pull catalog rows even when we don't have editorial — a house can
-  // exist in the catalog without an editorial entry.
+  // Pull catalog rows for the canonical slug AND every alias. The RPC
+  // does exact-match on slug, so we fan out and merge client-side. For
+  // most houses this is a single call; only aliased houses (Margiela)
+  // hit the multi-call path.
   const supabase = createAdminClient();
-  const { data: rows } = await supabase.rpc("find_fragrances_by_house", {
-    p_slug: params.slug,
-    p_limit: 200,
+  const querySlugs = slugsForCanonicalHouse(canonical);
+  const responses = await Promise.all(
+    querySlugs.map((s) =>
+      supabase.rpc("find_fragrances_by_house", { p_slug: s, p_limit: 200 }),
+    ),
+  );
+  const rows = responses.flatMap((r) => (r.data ?? []) as Fragrance[]);
+  // Dedupe by id in case the same row somehow appears via multiple
+  // slugs (defensive — shouldn't happen with the current data model).
+  const seen = new Set<string>();
+  const unique = rows.filter((r) => {
+    if (seen.has(r.id)) return false;
+    seen.add(r.id);
+    return true;
   });
 
-  if (!house && (!rows || rows.length === 0)) notFound();
+  if (!house && unique.length === 0) notFound();
 
-  const fragrances = (rows ?? []) as Fragrance[];
-  const displayName = house?.name ?? fragrances[0]?.house ?? params.slug;
+  const fragrances = unique;
+  const displayName = house?.name ?? fragrances[0]?.house ?? canonical;
 
   return (
     <article className="mx-auto max-w-md px-6 py-10">
