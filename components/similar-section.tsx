@@ -65,7 +65,7 @@ export function SimilarSection({ fragranceId }: { fragranceId: string }) {
               <li key={d.fragrance.id}>
                 <Link
                   href={`/fragrance/${d.fragrance.id}`}
-                  className="flex items-start gap-3 px-3 py-3 rounded-xl border border-ink/10 hover:bg-ink/5 transition"
+                  className="flex items-start gap-3 px-3 py-3 rounded-xl bg-paper border border-ink/10 hover:brightness-95 transition"
                 >
                   {d.fragrance.bottle_image_url ? (
                     <div className="shrink-0 w-12 h-16 relative">

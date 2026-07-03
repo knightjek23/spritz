@@ -62,7 +62,7 @@ export default function EncyclopediaHubPage() {
         <div className="grid grid-cols-1 gap-3">
           <Link
             href="/families"
-            className="group flex items-center justify-between px-5 py-5 rounded-2xl border border-ink/10 hover:bg-ink/5 transition"
+            className="group flex items-center justify-between px-5 py-5 rounded-2xl bg-paper border border-ink/10 hover:brightness-95 transition"
           >
             <div className="min-w-0">
               <p className="font-mono text-[10px] uppercase tracking-widest text-slate mb-1">
@@ -80,7 +80,7 @@ export default function EncyclopediaHubPage() {
 
           <Link
             href="/notes"
-            className="group flex items-center justify-between px-5 py-5 rounded-2xl border border-ink/10 hover:bg-ink/5 transition"
+            className="group flex items-center justify-between px-5 py-5 rounded-2xl bg-paper border border-ink/10 hover:brightness-95 transition"
           >
             <div className="min-w-0">
               <p className="font-mono text-[10px] uppercase tracking-widest text-slate mb-1">
@@ -98,7 +98,7 @@ export default function EncyclopediaHubPage() {
 
           <Link
             href="/houses"
-            className="group flex items-center justify-between px-5 py-5 rounded-2xl border border-ink/10 hover:bg-ink/5 transition"
+            className="group flex items-center justify-between px-5 py-5 rounded-2xl bg-paper border border-ink/10 hover:brightness-95 transition"
           >
             <div className="min-w-0">
               <p className="font-mono text-[10px] uppercase tracking-widest text-slate mb-1">

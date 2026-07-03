@@ -141,7 +141,7 @@ export default async function NotePage({ params }: { params: { slug: string } })
               <li key={f.id}>
                 <Link
                   href={`/fragrance/${f.id}`}
-                  className="flex items-center gap-3 px-3 py-2 rounded-xl border border-ink/10 hover:bg-ink/5 transition"
+                  className="flex items-center gap-3 px-3 py-2 rounded-xl bg-paper border border-ink/10 hover:brightness-95 transition"
                 >
                   {f.bottle_image_url ? (
                     <div className="shrink-0 w-12 h-16 relative">

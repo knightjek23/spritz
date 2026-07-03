@@ -87,7 +87,7 @@ export default async function FamiliesIndexPage() {
           <li key={f.slug}>
             <Link
               href={`/family/${f.slug}`}
-              className="flex items-baseline justify-between gap-3 px-4 py-3 rounded-xl border border-ink/10 hover:bg-ink/5 transition"
+              className="flex items-baseline justify-between gap-3 px-4 py-3 rounded-xl bg-paper border border-ink/10 hover:brightness-95 transition"
             >
               <div className="min-w-0 flex-1">
                 <div className="font-display text-xl capitalize leading-tight">

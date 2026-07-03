@@ -91,7 +91,7 @@ export function ForYouFeed({ data }: { data: Recommendations }) {
               <li key={f.id}>
                 <Link
                   href={`/fragrance/${f.id}`}
-                  className="flex items-center gap-3 px-3 py-3 rounded-xl border border-ink/10 hover:bg-ink/5 transition"
+                  className="flex items-center gap-3 px-3 py-3 rounded-xl bg-paper border border-ink/10 hover:brightness-95 transition"
                 >
                   {f.bottle_image_url ? (
                     <div className="shrink-0 w-12 h-16 relative">
@@ -217,25 +217,25 @@ export function ForYouFeed({ data }: { data: Recommendations }) {
         <div className="grid grid-cols-4 gap-2 text-xs">
           <Link
             href="/notes"
-            className="text-center px-2 py-2 rounded-lg border border-ink/10 hover:bg-ink/5 transition"
+            className="text-center px-2 py-2 rounded-lg bg-paper border border-ink/10 hover:brightness-95 transition"
           >
             By note
           </Link>
           <Link
             href="/houses"
-            className="text-center px-2 py-2 rounded-lg border border-ink/10 hover:bg-ink/5 transition"
+            className="text-center px-2 py-2 rounded-lg bg-paper border border-ink/10 hover:brightness-95 transition"
           >
             By house
           </Link>
           <Link
             href="/families"
-            className="text-center px-2 py-2 rounded-lg border border-ink/10 hover:bg-ink/5 transition"
+            className="text-center px-2 py-2 rounded-lg bg-paper border border-ink/10 hover:brightness-95 transition"
           >
             By family
           </Link>
           <Link
             href="/collection"
-            className="text-center px-2 py-2 rounded-lg border border-ink/10 hover:bg-ink/5 transition"
+            className="text-center px-2 py-2 rounded-lg bg-paper border border-ink/10 hover:brightness-95 transition"
           >
             My shelf
           </Link>

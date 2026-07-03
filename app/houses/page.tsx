@@ -125,7 +125,7 @@ export default async function HousesIndexPage() {
                 <li key={h.slug}>
                   <Link
                     href={`/house/${h.slug}`}
-                    className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-ink/10 hover:bg-ink/5 transition"
+                    className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-paper border border-ink/10 hover:brightness-95 transition"
                   >
                     <div className="min-w-0 flex-1">
                       <div className="font-display text-lg leading-tight">{h.name}</div>
