@@ -57,7 +57,10 @@ export function NavBrand() {
 
   if (TAB_ROOTS.has(pathname)) {
     return (
-      <Link href="/" className="font-display text-2xl tracking-tight text-ink">
+      <Link
+        href="/"
+        className="font-display text-2xl tracking-tight text-emerald hover:text-emerald/80 transition"
+      >
         spritz
       </Link>
     );
