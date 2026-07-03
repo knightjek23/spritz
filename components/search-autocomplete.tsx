@@ -191,6 +191,21 @@ export function SearchAutocomplete({
     }
   }
 
+  // Full clear — wipes the input, suggestions, and dropdown state.
+  // Refocuses so the user can immediately start a fresh search.
+  function clear() {
+    setQ("");
+    setSuggestions([]);
+    setOpen(false);
+    setHighlight(0);
+    // Cancel any pending debounce or in-flight request so a stale
+    // result can't repopulate the dropdown after clearing.
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    abortRef.current?.abort();
+    onQueryChange?.("");
+    inputRef.current?.focus();
+  }
+
   const showDropdown =
     open && q.trim().length >= MIN_QUERY_LEN && (loading || suggestions.length > 0);
 
@@ -227,15 +242,42 @@ export function SearchAutocomplete({
           autoFocus={autoFocus}
           autoComplete="off"
           spellCheck={false}
-          className="w-full px-4 py-3 pr-10 rounded-xl border border-ink/20 bg-cream focus:outline-none focus:border-ink"
+          className="w-full px-4 py-3 pr-11 rounded-xl border border-ink/20 bg-cream focus:outline-none focus:border-ink"
         />
-        {/* Loading dot — subtle, no spinner since dropdown stays clean */}
-        {loading && (
+        {/* Right-side affordance — clear-X when the user has typed
+            anything, otherwise the loading pulse (only visible in the
+            edge case where a fetch is in flight with no text, which
+            practically never happens but stays here as a defensive
+            indicator). The X takes visual priority so users always have
+            a one-tap wipe. */}
+        {q.length > 0 ? (
+          <button
+            type="button"
+            onClick={clear}
+            aria-label="Clear search"
+            className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-ink/50 hover:text-ink transition"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              aria-hidden
+            >
+              <path
+                d="M4 4L12 12M12 4L4 12"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+        ) : loading ? (
           <span
             aria-hidden
             className="absolute right-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-emerald animate-pulse"
           />
-        )}
+        ) : null}
       </div>
 
       {/* Dropdown */}
