@@ -1,14 +1,14 @@
 // Encyclopedia detail page — the visual + UX hero of Spritz.
 // Lead with what the bottle IS, not with what to buy instead.
 
+import { cache } from "react";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { auth } from "@clerk/nextjs/server";
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SimilarSection } from "@/components/similar-section";
-import { SaveButton } from "@/components/save-button";
+import { SaveButtonsRow } from "@/components/save-buttons-row";
 import { NotesPyramid } from "@/components/notes-pyramid";
 import { KnownDupes } from "@/components/known-dupes";
 import { KnownConsensus } from "@/components/known-consensus";
@@ -19,54 +19,120 @@ import {
   CONCENTRATION_SHORT,
   CONCENTRATION_DESCRIPTION,
 } from "@/lib/concentrations";
-import type { CollectionStatus, Fragrance } from "@/lib/types";
+import type { Fragrance } from "@/lib/types";
 
-// Force dynamic rendering. The page reads Clerk auth() to hydrate the
-// current user's Own/Tried/Wishlist status, so the same URL renders
-// different HTML per user — cannot be cached at the edge. Without this,
-// Next.js 14 would still ISR-cache the page per URL and serve one
-// user's collection state to every subsequent visitor of the same
-// fragrance (visible bug: your ✓ Own appears on someone else's screen,
-// or nothing appears on yours because a signed-out user's render is
-// cached first).
-export const dynamic = "force-dynamic";
+// ISR: the page content is identical for every visitor — per-user
+// Own/Tried/Wishlist state hydrates CLIENT-side via SaveButtonsRow (one
+// authenticated fetch after mount), so nothing user-specific is baked
+// into the HTML and the edge can cache it. This page type is the app's
+// core SEO surface; it used to be force-dynamic just for the save
+// buttons, which made every crawler hit a full SSR + auth + DB pass.
+export const revalidate = 3600;
 
-export default async function FragrancePage({ params }: { params: { id: string } }) {
-  const supabase = await createClient();
-  const { data: f } = await supabase
+// Pre-render only the most popular fragrances at build; everything else
+// renders on first request and is then cached by ISR (identical SEO
+// outcome — crawlers just pay one slower first hit per page). Keep this
+// number SMALL: every entry is a full page render + Supabase fetch at
+// build time, and large values make `next build` look frozen (especially
+// with build output on a cloud-synced disk). Tune via env if needed;
+// FRAGRANCE_PRERENDER_COUNT=0 skips build-time prerendering entirely.
+export async function generateStaticParams() {
+  const count = parseInt(process.env.FRAGRANCE_PRERENDER_COUNT ?? "50", 10);
+  if (count <= 0) return [];
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("fragrances")
+    .select("id")
+    .order("popularity_rank", { ascending: true, nullsFirst: false })
+    .limit(count);
+  return (data ?? []).map((f) => ({ id: f.id }));
+}
+
+const SITE = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+// Dedupes the fetch between generateMetadata and the page render.
+const getFragrance = cache(async (id: string) => {
+  const supabase = createAdminClient();
+  const { data } = await supabase
     .from("fragrances")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", id)
     .maybeSingle<Fragrance>();
+  return data;
+});
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { id: string };
+}): Promise<Metadata> {
+  const f = await getFragrance(params.id);
+  if (!f) return { title: "Fragrance not found" };
+
+  const title = `${f.name} by ${f.house} — notes, longevity, dupes`;
+  const family = (f.family ?? [])[0];
+  const description = [
+    `Everything about ${f.name} by ${f.house}`,
+    f.year ? ` (${f.year})` : "",
+    family ? `: ${family} fragrance` : "",
+    ` — full notes pyramid, longevity, projection, and known dupes.`,
+  ].join("");
+
+  return {
+    title,
+    description,
+    alternates: { canonical: `${SITE}/fragrance/${f.id}` },
+    openGraph: {
+      title: `${f.name} by ${f.house}`,
+      description,
+      type: "website",
+      url: `${SITE}/fragrance/${f.id}`,
+      ...(f.bottle_image_url ? { images: [{ url: f.bottle_image_url }] } : {}),
+    },
+    twitter: {
+      card: f.bottle_image_url ? "summary_large_image" : "summary",
+    },
+  };
+}
+
+export default async function FragrancePage({ params }: { params: { id: string } }) {
+  const f = await getFragrance(params.id);
   if (!f) notFound();
 
-  // Hydrate the Own / Tried / Wishlist buttons with the current user's
-  // existing collection entries for this fragrance, so returning to a
-  // page you've already saved shows the status immediately without a
-  // client-side round-trip. Also captures the collection_item id per
-  // status so SaveButton can toggle off (DELETE) with a second tap.
-  //
-  // Admin client bypasses RLS same as the /api/collection route.
-  const { userId: clerkUserId } = auth();
-  const savedItemIds: Partial<Record<CollectionStatus, string>> = {};
-  if (clerkUserId) {
-    const admin = createAdminClient();
-    const { data: appUser } = await admin
-      .from("users")
-      .select("id")
-      .eq("clerk_user_id", clerkUserId)
-      .maybeSingle();
-    if (appUser) {
-      const { data: existing } = await admin
-        .from("collection_items")
-        .select("id, status")
-        .eq("user_id", appUser.id)
-        .eq("fragrance_id", f.id);
-      for (const row of existing ?? []) {
-        savedItemIds[row.status as CollectionStatus] = row.id;
-      }
-    }
-  }
+  // JSON-LD: Product + BreadcrumbList. The encyclopedia's rich-result
+  // eligibility (name, brand, image in search) comes from this.
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Product",
+        name: f.name,
+        brand: { "@type": "Brand", name: f.house },
+        ...(f.bottle_image_url ? { image: f.bottle_image_url } : {}),
+        ...(f.year ? { releaseDate: String(f.year) } : {}),
+        url: `${SITE}/fragrance/${f.id}`,
+        category: "Fragrance",
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Spritz", item: SITE },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: f.house,
+            item: `${SITE}/house/${houseSlug(f.house)}`,
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: f.name,
+            item: `${SITE}/fragrance/${f.id}`,
+          },
+        ],
+      },
+    ],
+  };
 
   const hasPerformanceData =
     f.longevity_score !== null || f.sillage_score !== null;
@@ -75,6 +141,13 @@ export default async function FragrancePage({ params }: { params: { id: string }
 
   return (
     <article className="mx-auto max-w-md px-6 py-10">
+      <script
+        type="application/ld+json"
+        // Escape "<" so no catalog string can break out of the script tag.
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
       {/* Bottle hero — opaque cream card so the bottle photo's white
           background can cleanly multiply into the cream backdrop. The
           previous glassmorphism (bg-cream/40 + backdrop-blur-xl) made
@@ -128,30 +201,10 @@ export default async function FragrancePage({ params }: { params: { id: string }
       </header>
 
       {/* Action row — Save + Buy (single Buy CTA, this fragrance only).
-          initialItemId hydrates each SaveButton with the user's existing
-          collection_items row (if any) so status persists across page
-          loads and the button can toggle off with a second tap. */}
+          SaveButtonsRow hydrates the user's existing collection state
+          client-side so this page can stay ISR-cached. */}
       <section className="grid grid-cols-2 gap-3 mb-10">
-        <div className="grid grid-cols-3 col-span-2 gap-2">
-          <SaveButton
-            fragranceId={f.id}
-            status="own"
-            label="Own"
-            initialItemId={savedItemIds.own ?? null}
-          />
-          <SaveButton
-            fragranceId={f.id}
-            status="tried"
-            label="Tried"
-            initialItemId={savedItemIds.tried ?? null}
-          />
-          <SaveButton
-            fragranceId={f.id}
-            status="wishlist"
-            label="Wishlist"
-            initialItemId={savedItemIds.wishlist ?? null}
-          />
-        </div>
+        <SaveButtonsRow fragranceId={f.id} />
         <Link
           href={`/api/buy/${f.id}`}
           className="col-span-2 bg-emerald text-cream py-3 rounded-xl text-center font-medium hover:bg-emerald/90 transition"

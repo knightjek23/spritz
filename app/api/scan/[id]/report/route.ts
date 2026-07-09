@@ -12,6 +12,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { checkIpThrottle, clientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -24,6 +25,12 @@ export async function POST(
   req: Request,
   { params }: { params: { id: string } },
 ) {
+  // Best-effort throttle: this writes catalog-expansion signal, so keep
+  // one source from poisoning it in bulk. Legit users submit ~1 per scan.
+  if (!checkIpThrottle(`report:${clientIp(req)}`, 10)) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+  }
+
   const parsed = Body.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) {
     return NextResponse.json({ error: "invalid_body" }, { status: 400 });

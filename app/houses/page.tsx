@@ -18,7 +18,7 @@ import { canonicalHouseSlug } from "@/lib/slugs";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Houses · Spritz",
+  title: "Houses",
   description:
     "Every perfume house in our encyclopedia. Tom Ford, Chanel, Dior, Maison Margiela, Lattafa, and the rest of the catalog.",
 };

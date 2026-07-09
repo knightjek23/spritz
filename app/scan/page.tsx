@@ -27,6 +27,20 @@ import { ReportMiss } from "@/components/report-miss";
 import { CameraCapture } from "@/components/camera-capture";
 import type { ScanResult } from "@/lib/types";
 
+// Server error slugs → human copy. Anything unrecognized falls back to a
+// generic line rather than leaking a raw code into the UI.
+function errorCopy(code: string): string {
+  switch (code) {
+    case "rate_limited":
+      return "You've hit today's scan limit. It resets at midnight UTC — or search by name below.";
+    case "invalid_body":
+      return "That photo didn't come through right. Try taking it again.";
+    case "scan_failed":
+    default:
+      return "Something went wrong reading the bottle. Give it another try.";
+  }
+}
+
 export default function ScanPage() {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -46,10 +60,15 @@ export default function ScanPage() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ image: base64 }),
       });
-      const data = (await res.json()) as ScanResult | { error: string };
+      // Defensive parse: a proxy-level 500/502 may have no JSON body, and
+      // the raw SyntaxError must never reach the error banner.
+      const data = (await res.json().catch(() => null)) as
+        | ScanResult
+        | { error: string }
+        | null;
 
-      if (!res.ok) {
-        setError("error" in data ? data.error : "scan_failed");
+      if (!res.ok || !data) {
+        setError(errorCopy(data && "error" in data ? data.error : "scan_failed"));
         return;
       }
 
@@ -63,8 +82,9 @@ export default function ScanPage() {
       // Miss → set result so the no-match panel renders and the camera
       // unmounts cleanly.
       setResult(r);
-    } catch (e) {
-      setError(String(e));
+    } catch {
+      // Network failure / offline — not a server error code.
+      setError("We couldn't reach the server. Check your connection and try again.");
     } finally {
       setBusy(false);
     }
@@ -81,9 +101,7 @@ export default function ScanPage() {
         {error && (
           <div className="fixed left-0 right-0 bottom-28 mx-auto max-w-sm z-[60] px-4">
             <div className="p-4 rounded-xl border border-burgundy/40 bg-cream shadow-lg">
-              <p className="text-burgundy text-sm mb-1">
-                Couldn&apos;t scan: {error}.
-              </p>
+              <p className="text-burgundy text-sm mb-1">{error}</p>
               <p className="text-sm text-ink">
                 Lighting and angle matter. Try a flatter shot, then{" "}
                 <button

@@ -19,12 +19,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { TrendingFeeds } from "@/components/trending-feeds";
 import { TrendingSection } from "@/components/trending-section";
+import { PopularByHouse } from "@/components/popular-by-house";
 
 export const metadata: Metadata = {
-  title: "Encyclopedia · Spritz",
+  title: "Encyclopedia",
   description:
     "Every fragrance, every note, every house. Browse by family or note, or see what's trending this week.",
 };
+
+// Without this the page is statically rendered once at build and the
+// "trending this week" surfaces stay frozen until the next deploy.
+export const revalidate = 3600;
 
 export default function EncyclopediaHubPage() {
   return (
@@ -53,6 +58,13 @@ export default function EncyclopediaHubPage() {
           read as complementary: "what TikTok is wearing" + "what
           Spritz users are scanning." */}
       <TrendingSection />
+
+      {/* Most popular by house — the top 5 houses (by depth of their
+          10 best fragrances' popularity scores), each with a ranked
+          top-10 scroller behind a pill tab. All-time cultural-presence
+          complement to the two week-scoped trending blocks above.
+          Self-hides until migration 0016 is applied. */}
+      <PopularByHouse />
 
       {/* Three browse-by-X entries — primary navigation into the
           encyclopedia. Big tap targets so it's clear these are the

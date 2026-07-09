@@ -16,7 +16,7 @@ import { z } from "zod";
 import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { readBottle, disambiguateByImage } from "@/lib/vision";
-import { checkScanRateLimit, hashIp } from "@/lib/rate-limit";
+import { checkScanRateLimit, hashIp, clientIp } from "@/lib/rate-limit";
 import type { Fragrance, ScanResult } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -26,7 +26,15 @@ export const runtime = "nodejs";
 export const maxDuration = 45;
 
 const Body = z.object({
-  image: z.string().min(100), // base64
+  // Base64 image. Max ~8MB of base64 (~6MB decoded) — Vercel caps request
+  // bodies at 4.5MB anyway, but the explicit cap protects self-hosted
+  // deployments from memory/cost bombs. Charset check rejects non-base64
+  // payloads before they reach OpenAI.
+  image: z
+    .string()
+    .min(100)
+    .max(8_000_000)
+    .regex(/^[A-Za-z0-9+/=]+$/, "not base64"),
 });
 
 // Auto-match if text-OCR alone yields a candidate with this similarity.
@@ -50,8 +58,7 @@ export async function POST(req: Request) {
   }
 
   // Identity + rate limit
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "0.0.0.0";
-  const ipHash = hashIp(ip);
+  const ipHash = hashIp(clientIp(req));
   const { userId: clerkUserId } = auth();
 
   const supabase = createAdminClient();
@@ -77,105 +84,113 @@ export async function POST(req: Request) {
     );
   }
 
-  // ============== Layer 1a: OCR ==============
-  const read = await readBottle(parsed.data.image);
+  // Everything below hits external services (OpenAI, Supabase). Without
+  // this try/catch an OpenAI outage returned a bodyless 500 and the client
+  // surfaced a raw JSON.parse SyntaxError on the flagship feature.
+  try {
+    // ============== Layer 1a: OCR ==============
+    const read = await readBottle(parsed.data.image);
 
-  // ============== Layer 2: text-based candidate lookup ==============
-  // Pull DISAMBIGUATE_CANDIDATE_COUNT rows so the disambiguator has
-  // material to work with if we end up needing it. The fast path only
-  // looks at the top one, so the extra rows are cheap insurance.
-  let matched: Fragrance | null = null;
-  let candidates: Array<{ fragrance: Fragrance; confidence: number }> = [];
-  let matchMethod: ScanResult["match_method"] = "none";
-  let visualReason: string | undefined;
+    // ============== Layer 2: text-based candidate lookup ==============
+    // Pull DISAMBIGUATE_CANDIDATE_COUNT rows so the disambiguator has
+    // material to work with if we end up needing it. The fast path only
+    // looks at the top one, so the extra rows are cheap insurance.
+    let matched: Fragrance | null = null;
+    let candidates: Array<{ fragrance: Fragrance; confidence: number }> = [];
+    let matchMethod: ScanResult["match_method"] = "none";
+    let visualReason: string | undefined;
 
-  if (read.brand && read.name) {
-    const { data: rows } = await supabase
-      .rpc("search_fragrances", {
-        p_brand: read.brand,
-        p_name: read.name,
-        p_limit: DISAMBIGUATE_CANDIDATE_COUNT,
-      })
-      .returns<Array<Fragrance & { match_score: number }>>();
+    if (read.brand && read.name) {
+      const { data: rows } = await supabase
+        .rpc("search_fragrances", {
+          p_brand: read.brand,
+          p_name: read.name,
+          p_limit: DISAMBIGUATE_CANDIDATE_COUNT,
+        })
+        .returns<Array<Fragrance & { match_score: number }>>();
 
-    if (rows && rows.length > 0) {
-      candidates = rows.map((r) => ({ fragrance: r, confidence: r.match_score }));
-      const top = candidates[0];
+      if (rows && rows.length > 0) {
+        candidates = rows.map((r) => ({ fragrance: r, confidence: r.match_score }));
+        const top = candidates[0];
 
-      // ============== Fast path: high-confidence text match ==============
-      if (top.confidence >= TEXT_AUTOMATCH_THRESHOLD) {
-        matched = top.fragrance;
-        matchMethod = "text";
-      }
+        // ============== Fast path: high-confidence text match ==============
+        if (top.confidence >= TEXT_AUTOMATCH_THRESHOLD) {
+          matched = top.fragrance;
+          matchMethod = "text";
+        }
 
-      // ============== Layer 1b: visual disambiguation ==============
-      // Trigger only when we have multiple plausible candidates and at
-      // least one has a bottle image to compare against. Skipped on
-      // hopeless reads (top below the floor) and confident reads (above
-      // the auto-match threshold).
-      else if (top.confidence >= MINIMUM_CANDIDATE_FLOOR) {
-        const withImages = candidates
-          .map((c, i) => ({
-            index: i,
-            brand: c.fragrance.house,
-            name: c.fragrance.name,
-            bottleImageUrl: c.fragrance.bottle_image_url ?? "",
-          }))
-          .filter((c) => c.bottleImageUrl.length > 0);
+        // ============== Layer 1b: visual disambiguation ==============
+        // Trigger only when we have multiple plausible candidates and at
+        // least one has a bottle image to compare against. Skipped on
+        // hopeless reads (top below the floor) and confident reads (above
+        // the auto-match threshold).
+        else if (top.confidence >= MINIMUM_CANDIDATE_FLOOR) {
+          const withImages = candidates
+            .map((c, i) => ({
+              index: i,
+              brand: c.fragrance.house,
+              name: c.fragrance.name,
+              bottleImageUrl: c.fragrance.bottle_image_url ?? "",
+            }))
+            .filter((c) => c.bottleImageUrl.length > 0);
 
-        if (withImages.length >= 2) {
-          const dis = await disambiguateByImage(parsed.data.image, withImages);
-          if (
-            dis.matchIndex !== null &&
-            dis.matchIndex >= 0 &&
-            dis.matchIndex < withImages.length
-          ) {
-            // dis.matchIndex is an index into withImages, NOT the original
-            // candidates array — map it back via the .index field we stored.
-            const originalIndex = withImages[dis.matchIndex].index;
-            matched = candidates[originalIndex].fragrance;
-            matchMethod = "visual";
-            visualReason = dis.reason || undefined;
+          if (withImages.length >= 2) {
+            const dis = await disambiguateByImage(parsed.data.image, withImages);
+            if (
+              dis.matchIndex !== null &&
+              dis.matchIndex >= 0 &&
+              dis.matchIndex < withImages.length
+            ) {
+              // dis.matchIndex is an index into withImages, NOT the original
+              // candidates array — map it back via the .index field we stored.
+              const originalIndex = withImages[dis.matchIndex].index;
+              matched = candidates[originalIndex].fragrance;
+              matchMethod = "visual";
+              visualReason = dis.reason || undefined;
 
-            // Boost the chosen candidate to the top so the response surfaces
-            // it as the primary match. Useful for clients that render the
-            // candidate list as a disambiguation picker.
-            if (originalIndex !== 0) {
-              const chosen = candidates.splice(originalIndex, 1)[0];
-              candidates.unshift(chosen);
+              // Boost the chosen candidate to the top so the response surfaces
+              // it as the primary match. Useful for clients that render the
+              // candidate list as a disambiguation picker.
+              if (originalIndex !== 0) {
+                const chosen = candidates.splice(originalIndex, 1)[0];
+                candidates.unshift(chosen);
+              }
             }
           }
         }
       }
     }
-  }
 
-  // ============== Log scan_event ==============
-  const { data: event } = await supabase
-    .from("scan_events")
-    .insert({
-      user_id: appUserId,
-      ip_hash: ipHash,
+    // ============== Log scan_event ==============
+    const { data: event } = await supabase
+      .from("scan_events")
+      .insert({
+        user_id: appUserId,
+        ip_hash: ipHash,
+        detected_brand: read.brand,
+        detected_name: read.name,
+        matched_fragrance_id: matched?.id ?? null,
+        confidence: read.confidence,
+        vision_provider: read.provider,
+        latency_ms: Date.now() - t0,
+      })
+      .select("id")
+      .single();
+
+    const result: ScanResult = {
+      matched,
+      candidates,
+      confidence: read.confidence,
       detected_brand: read.brand,
       detected_name: read.name,
-      matched_fragrance_id: matched?.id ?? null,
-      confidence: read.confidence,
-      vision_provider: read.provider,
-      latency_ms: Date.now() - t0,
-    })
-    .select("id")
-    .single();
+      scan_event_id: event?.id ?? "",
+      match_method: matchMethod,
+      ...(visualReason ? { visual_reason: visualReason } : {}),
+    };
 
-  const result: ScanResult = {
-    matched,
-    candidates,
-    confidence: read.confidence,
-    detected_brand: read.brand,
-    detected_name: read.name,
-    scan_event_id: event?.id ?? "",
-    match_method: matchMethod,
-    ...(visualReason ? { visual_reason: visualReason } : {}),
-  };
-
-  return NextResponse.json(result);
+    return NextResponse.json(result);
+  } catch (err) {
+    console.error("scan failed", err);
+    return NextResponse.json({ error: "scan_failed" }, { status: 500 });
+  }
 }

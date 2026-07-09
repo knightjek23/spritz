@@ -2,6 +2,9 @@
 //
 // Top: editorial story from editorial/houses/<slug>.md (history, style,
 // founder, country, link out to official site).
+// Middle: "Most popular" top-10 scroller (same FragranceScroller surface
+// as the encyclopedia hub) — only when the house has more than 10
+// fragrances, so it never just duplicates a short catalog list.
 // Bottom: every fragrance from this house in our catalog, ranked by
 // popularity.
 //
@@ -16,6 +19,7 @@ import Image from "next/image";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { loadHouse, loadAllHouses } from "@/lib/houses";
 import { canonicalHouseSlug, slugsForCanonicalHouse } from "@/lib/slugs";
+import { FragranceScroller } from "@/components/fragrance-scroller";
 import type { Fragrance } from "@/lib/types";
 
 export const revalidate = 300;
@@ -25,11 +29,17 @@ export async function generateMetadata({
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const house = await loadHouse(params.slug);
-  if (!house) return { title: "House not found · Spritz" };
+  // Canonicalize the same way the page body does. Without this, alias
+  // URLs (e.g. /house/maison-martin-margiela) rendered full content
+  // under the title "House not found". The canonical alternate also
+  // stops aliases from being indexed as duplicates.
+  const canonical = canonicalHouseSlug(params.slug);
+  const house = await loadHouse(canonical);
+  if (!house) return { title: "House not found" };
   return {
-    title: `${house.name} · Spritz`,
+    title: house.name,
     description: house.body.split("\n").slice(0, 2).join(" ").slice(0, 160),
+    alternates: { canonical: `/house/${canonical}` },
   };
 }
 
@@ -63,8 +73,27 @@ export default async function HousePage({ params }: { params: { slug: string } }
 
   if (!house && unique.length === 0) notFound();
 
-  const fragrances = unique;
+  // The RPC returns rows ordered by popularity_rank, but the alias
+  // fan-out merge can interleave lists, so re-sort defensively.
+  const fragrances = unique.sort((a, b) => {
+    const ra = a.popularity_rank ?? Number.MAX_SAFE_INTEGER;
+    const rb = b.popularity_rank ?? Number.MAX_SAFE_INTEGER;
+    return ra - rb || a.name.localeCompare(b.name);
+  });
   const displayName = house?.name ?? fragrances[0]?.house ?? canonical;
+
+  // Top-10 scroller only earns its place when there's a catalog to
+  // summarize — for houses with ≤10 fragrances it would just repeat
+  // the full list directly below it.
+  const topTen =
+    fragrances.length > 10
+      ? fragrances.slice(0, 10).map((f) => ({
+          id: f.id,
+          name: f.name,
+          house: f.house,
+          bottle_image_url: f.bottle_image_url,
+        }))
+      : [];
 
   return (
     <article className="mx-auto max-w-md px-6 py-10">
@@ -128,6 +157,20 @@ export default async function HousePage({ params }: { params: { slug: string } }
             fragrance from them in our catalog.
           </p>
         </section>
+      )}
+
+      {/* Most popular — same ranked scroller surface as the encyclopedia
+          hub, scoped to this house. Sits between editorial and the full
+          catalog so a skimmer gets the greatest hits without scrolling
+          the whole list. */}
+      {topTen.length > 0 && (
+        <FragranceScroller
+          title="Most popular"
+          rows={topTen}
+          variant="compact"
+          showRank
+          showHouse={false}
+        />
       )}
 
       {/* Catalog */}

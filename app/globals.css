@@ -180,3 +180,39 @@ h1, h2, h3, h4 {
     will-change: auto;
   }
 }
+
+/* Slim scrollbar for horizontal card scrollers (trending rows,
+   popular-by-house, pill tabs). Windows browsers draw a chunky
+   white/gray track under every overflow-x-auto row, which reads as a
+   stray white bar on the cream canvas. Instead: transparent track,
+   4px pill thumb in ink at low opacity — visible enough for desktop
+   scroll discoverability, quiet enough to disappear into the canvas.
+   Mobile overlay scrollbars (iOS/Android) are unaffected. */
+.slim-scrollbar::-webkit-scrollbar {
+  height: 4px;
+  background: transparent;
+}
+.slim-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  /* The scroll containers are full-bleed (-mx-6), so the raw track spans
+     24px past the page gutter on both sides. Inset it so the thumb's
+     travel range aligns with the text/cards above it. */
+  margin: 0 1.5rem;
+}
+.slim-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(26, 26, 26, 0.18); /* ink @ 18% */
+  border-radius: 9999px;
+}
+.slim-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(26, 26, 26, 0.32);
+}
+/* Firefox has no ::-webkit-scrollbar; give it the standard-property
+   equivalent. Guarded so Chromium (which supports BOTH and lets the
+   standard properties override the pseudo-element styling) keeps the
+   4px pill above. */
+@supports not selector(::-webkit-scrollbar) {
+  .slim-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(26, 26, 26, 0.25) transparent;
+  }
+}

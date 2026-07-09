@@ -1,9 +1,16 @@
-# dependencies
-/node_modules
-/scraper/node_modules
+# dependencies — any node_modules anywhere (root, scraper, editorial,
+# trends-collector, etc.). If a nested one is already tracked, untrack it:
+#   git rm -r --cached <path>/node_modules
+**/node_modules
 /.pnp
 .pnp.js
 .yarn/install-state.gz
+
+# npm is the package manager of record — block other lockfiles from
+# reappearing (root had both package-lock.json and pnpm-lock.yaml, which
+# makes Vercel's package-manager detection nondeterministic)
+pnpm-lock.yaml
+yarn.lock
 
 # testing
 /coverage

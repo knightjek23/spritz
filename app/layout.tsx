@@ -1,8 +1,10 @@
+import "@/lib/env"; // fail fast on missing env vars in production
 import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Roboto } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Nav } from "@/components/nav";
 import { BottomNav } from "@/components/bottom-nav";
+import { Analytics } from "@/components/analytics";
 import { LiquidGlassDefs } from "@/components/liquid-glass/LiquidGlass";
 import { PageTransition } from "@/components/page-transition";
 import "./globals.css";
@@ -24,7 +26,14 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "Spritz: know what you're wearing",
+  // Resolves relative OG/Twitter image URLs against the real domain
+  // instead of localhost / the raw *.vercel.app deployment URL.
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
+  title: {
+    default: "Spritz: know what you're wearing",
+    // Child pages set just their own title; the template appends the brand.
+    template: "%s · Spritz",
+  },
   description: "Scan a bottle. See its full profile, perfumer, and how to wear it.",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, title: "Spritz", statusBarStyle: "black-translucent" },
@@ -57,8 +66,8 @@ export const viewport: Viewport = {
   themeColor: "#1F3F2E", // Emerald — matches the new brand color
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  // No maximumScale / userScalable lock: blocking pinch-zoom fails
+  // WCAG 1.4.4 (Android respects the lock; low-vision users can't zoom).
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -84,6 +93,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <PageTransition>{children}</PageTransition>
           </main>
           <BottomNav />
+          {/* PostHog — renders nothing unless NEXT_PUBLIC_POSTHOG_KEY is set. */}
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>

@@ -13,7 +13,7 @@ import { FAMILY_ORDER, FAMILY_BLURB, familyName } from "@/lib/families";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Families · Spritz",
+  title: "Families",
   description:
     "Browse fragrances by family: citrus, floral, woody, oriental, gourmand, leather, and beyond. The shape of the bottle in one word.",
 };

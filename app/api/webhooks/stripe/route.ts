@@ -97,17 +97,27 @@ export async function POST(req: Request) {
   }
 
   switch (event.type) {
-    case "checkout.session.completed":
+    // Explicit per-type handling — the old combined branch duck-typed on
+    // `.subscription` with `as any`, and a checkout session without a
+    // subscription (async payment, one-time) would fall through and be
+    // read AS a subscription, mislabeling entitlement.
+    case "checkout.session.completed": {
+      const session = event.data.object as Stripe.Checkout.Session;
+      if (typeof session.subscription !== "string") {
+        // No subscription attached (yet) — the subsequent
+        // customer.subscription.created event carries the entitlement.
+        break;
+      }
+      const sub = await stripe.subscriptions.retrieve(session.subscription);
+      const isActive = sub.status === "active" || sub.status === "trialing";
+      await setPlanByCustomer(sub.customer as string, isActive ? "pro" : "free");
+      break;
+    }
     case "customer.subscription.created":
     case "customer.subscription.updated": {
-      const sub = (event.data.object as any).subscription
-        ? await stripe.subscriptions.retrieve(
-            (event.data.object as Stripe.Checkout.Session).subscription as string,
-          )
-        : (event.data.object as Stripe.Subscription);
-      const customerId = sub.customer as string;
+      const sub = event.data.object as Stripe.Subscription;
       const isActive = sub.status === "active" || sub.status === "trialing";
-      await setPlanByCustomer(customerId, isActive ? "pro" : "free");
+      await setPlanByCustomer(sub.customer as string, isActive ? "pro" : "free");
       break;
     }
     case "customer.subscription.deleted": {

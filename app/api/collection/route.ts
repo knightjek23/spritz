@@ -1,4 +1,5 @@
 // GET    /api/collection?status=own|tried|wishlist
+// GET    /api/collection?fragranceId=<uuid>   (light: save-state for one fragrance)
 // POST   /api/collection      body: { fragrance_id, status, note? }
 // DELETE /api/collection?id=<collection_item_id>
 //
@@ -36,6 +37,22 @@ export async function GET(req: Request) {
   if (!user) return NextResponse.json({ items: [] });
 
   const url = new URL(req.url);
+
+  // Light path: save-state hydration for the fragrance detail page.
+  // The page is ISR-cached (same HTML for everyone), so SaveButtons fetch
+  // the user's own/tried/wishlist rows here after hydration. Returns only
+  // {id, status} — no fragrance join.
+  const fragranceId = url.searchParams.get("fragranceId");
+  if (fragranceId) {
+    const { data, error } = await supabase0
+      .from("collection_items")
+      .select("id, status")
+      .eq("user_id", user.id)
+      .eq("fragrance_id", fragranceId);
+    if (error) return NextResponse.json({ error: "lookup_failed" }, { status: 500 });
+    return NextResponse.json({ items: data ?? [] });
+  }
+
   const rawStatus = url.searchParams.get("status");
   const status: "own" | "tried" | "wishlist" | null =
     rawStatus === "own" || rawStatus === "tried" || rawStatus === "wishlist"

@@ -19,12 +19,16 @@ export function FragranceScroller({
   rows,
   variant = "default",
   showRank = true,
+  showHouse = true,
 }: {
   title: string;
   rows: ScrollerRow[];
   variant?: "default" | "compact";
   /** Show the #n chip. Off for sets where order isn't a ranking. */
   showRank?: boolean;
+  /** Show the house eyebrow on each card. Off when the surrounding
+      page is already scoped to one house (e.g. /house/[slug]). */
+  showHouse?: boolean;
 }) {
   if (!rows || rows.length === 0) return null;
 
@@ -34,7 +38,11 @@ export function FragranceScroller({
         <h2 className="font-display text-2xl">{title}</h2>
       </div>
 
-      <div className="-mx-6 px-6 overflow-x-auto snap-x snap-mandatory">
+      {/* scroll-pl-6 keeps snap-start items aligned to the padded content
+          edge (the page gutter) — without it, mandatory snap pulls the
+          first card to the full-bleed border edge on load, 24px left of
+          every other element on the page. */}
+      <div className="-mx-6 px-6 scroll-pl-6 overflow-x-auto snap-x snap-mandatory slim-scrollbar">
         <ul className="flex gap-3 pb-2">
           {rows.map((f, i) => (
             <li key={f.id} className="snap-start shrink-0 w-[140px]">
@@ -59,9 +67,11 @@ export function FragranceScroller({
                     </span>
                   )}
                 </div>
-                <p className="font-mono text-[10px] uppercase tracking-wider text-slate truncate">
-                  {f.house}
-                </p>
+                {showHouse && (
+                  <p className="font-mono text-[10px] uppercase tracking-wider text-slate truncate">
+                    {f.house}
+                  </p>
+                )}
                 <p className="font-display text-sm leading-tight truncate group-hover:text-emerald transition-colors">
                   {f.name}
                 </p>

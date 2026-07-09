@@ -8,6 +8,21 @@ import type { VisionProvider } from "./types";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY ?? "" });
 
+// OCR cost knobs. Defaults preserve current behavior (gpt-4o, auto detail).
+// Reading two words off a label is likely a gpt-4o-mini + detail:"low" job
+// (~10x cheaper per scan: "low" costs 85 input tokens flat vs high-detail
+// tiling) — run the accuracy eval, then flip these in env:
+//   SCAN_OCR_MODEL=gpt-4o-mini
+//   SCAN_OCR_DETAIL=low
+// The disambiguation pass below intentionally stays on full gpt-4o —
+// comparing bottle shapes/caps/labels is exactly what high detail is for.
+const OCR_MODEL = process.env.SCAN_OCR_MODEL ?? "gpt-4o";
+const OCR_DETAIL = (["low", "high", "auto"] as const).includes(
+  process.env.SCAN_OCR_DETAIL as "low" | "high" | "auto",
+)
+  ? (process.env.SCAN_OCR_DETAIL as "low" | "high" | "auto")
+  : "auto";
+
 export interface VisionRead {
   brand: string | null;
   name: string | null;
@@ -28,7 +43,7 @@ export async function readBottleWithGPT4o(
   imageBase64: string,
 ): Promise<VisionRead> {
   const response = await openai.chat.completions.create({
-    model: "gpt-4o",
+    model: OCR_MODEL,
     messages: [
       {
         role: "user",
@@ -36,7 +51,10 @@ export async function readBottleWithGPT4o(
           { type: "text", text: READ_PROMPT },
           {
             type: "image_url",
-            image_url: { url: `data:image/jpeg;base64,${imageBase64}` },
+            image_url: {
+              url: `data:image/jpeg;base64,${imageBase64}`,
+              detail: OCR_DETAIL,
+            },
           },
         ],
       },

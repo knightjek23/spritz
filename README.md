@@ -20,12 +20,13 @@ See [`Spritz_PRD_v1.md`](./Spritz_PRD_v1.md) for the full v1 product spec, [`SET
 
 ## Visual identity
 
-Per the 2026 Consumer / Startup design combo:
+- **Type:** Playfair Display (display / headings) + Roboto (body, small, metadata)
+- **Base:** Cream / paper tones (see `tailwind.config.ts` for the token set)
+- **Primary:** Emerald `#1F3F2E` (CTAs, brand, theme color)
+- **Accents:** Brass (saved states, badges), Burgundy (errors)
+- **Type colors:** Ink + Slate
 
-- **Type:** Clash Display (display) + Inter (body), variable fonts
-- **Base:** Cloud Dancer `#F0EEE9` (replacing stark white)
-- **Accents:** Electric Blue `#0057FF` (primary CTAs, brand) + Acid Yellow `#D4FF00` (highlights, badges)
-- **Type colors:** Ink `#2C2C2A` + Slate UI `#78766F`
+Full reference: `Spritz_Design_System.html`.
 
 ## Getting started
 

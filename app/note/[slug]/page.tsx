@@ -37,10 +37,11 @@ export async function generateMetadata({
   params: { slug: string };
 }): Promise<Metadata> {
   const note = await loadNote(params.slug);
-  if (!note) return { title: "Note not found · Spritz" };
+  if (!note) return { title: "Note not found" };
   return {
-    title: `${note.name} · Spritz`,
+    title: note.name,
     description: note.body.split("\n").slice(0, 2).join(" ").slice(0, 160),
+    alternates: { canonical: `/note/${params.slug}` },
   };
 }
 

@@ -13,7 +13,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { loadAreaFeed, isFeedStale, type TrendingArea } from "@/lib/trending/feed";
-import { joinTrendingToCatalog } from "@/lib/trending/join";
+import { joinTrendingToCatalogCached } from "@/lib/trending/join";
 import type { JoinedTrendingEntry } from "@/lib/trending/types";
 
 type AreaDef = { area: TrendingArea; title: string };
@@ -42,7 +42,13 @@ async function AreaRow({
 
   let rows: JoinedTrendingEntry[] = [];
   try {
-    rows = await joinTrendingToCatalog(feed.entries.slice(0, limit));
+    // Cached on (area, generated_at): the per-entry fuzzy-match RPCs run
+    // once per feed per hour, not once per pageview.
+    rows = await joinTrendingToCatalogCached(
+      area,
+      feed.generated_at,
+      feed.entries.slice(0, limit),
+    );
   } catch (err) {
     console.warn(`[trending-feeds] join threw for ${area}:`, err instanceof Error ? err.message : String(err));
     return null;
@@ -58,7 +64,7 @@ async function AreaRow({
         </span>
       </div>
 
-      <div className="-mx-6 px-6 overflow-x-auto snap-x snap-mandatory">
+      <div className="-mx-6 px-6 scroll-pl-6 overflow-x-auto snap-x snap-mandatory slim-scrollbar">
         <ul className="flex gap-3 pb-2">
           {rows.map((f) => {
             const inner = (

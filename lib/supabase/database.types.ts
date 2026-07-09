@@ -279,6 +279,20 @@ export type Database = {
           Database["public"]["Tables"]["fragrances"]["Row"] & { match_score: number }
         >;
       };
+      // Slim variant for /api/search (migration 0018) — same matching,
+      // only the columns the search UI renders.
+      search_fragrances_lite: {
+        Args: { p_brand: string; p_name: string; p_limit?: number };
+        Returns: Array<{
+          id: string;
+          name: string;
+          house: string;
+          family: string[];
+          year: number | null;
+          bottle_image_url: string | null;
+          match_score: number;
+        }>;
+      };
       find_similar_fragrances: {
         Args: { p_id: string; p_limit?: number };
         Returns: Array<
@@ -330,6 +344,19 @@ export type Database = {
           year: number | null;
           bottle_image_url: string | null;
           scan_count: number;
+        }>;
+      };
+      list_popular_by_house: {
+        Args: { p_houses?: number; p_per_house?: number };
+        Returns: Array<{
+          house: string;
+          house_rank: number;
+          id: string;
+          name: string;
+          year: number | null;
+          bottle_image_url: string | null;
+          popularity_rank: number;
+          house_position: number;
         }>;
       };
     };

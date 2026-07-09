@@ -16,6 +16,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 interface TrendingRow {
@@ -28,6 +29,27 @@ interface TrendingRow {
   bottle_image_url: string | null;
   scan_count: number;
 }
+
+// Same rows for every visitor — cache across requests so the RPC runs
+// once per 15 min instead of once per pageview.
+const fetchTrendingRows = unstable_cache(
+  async (limit: number, days: number): Promise<TrendingRow[] | null> => {
+    const supabase = createAdminClient();
+    const { data: rows, error } = await supabase
+      .rpc("list_trending_fragrances", { p_limit: limit, p_days: days })
+      .returns<TrendingRow[]>();
+    if (error) {
+      console.warn(
+        "[trending] RPC error (likely migration 0010 not deployed):",
+        error.message,
+      );
+      return null;
+    }
+    return Array.isArray(rows) ? rows : [];
+  },
+  ["trending-section-rpc"],
+  { revalidate: 900 },
+);
 
 export async function TrendingSection({
   limit = 10,
@@ -46,15 +68,9 @@ export async function TrendingSection({
   // render without it, not 500.
   let data: TrendingRow[] = [];
   try {
-    const supabase = createAdminClient();
-    const { data: rows, error } = await supabase
-      .rpc("list_trending_fragrances", { p_limit: limit, p_days: days })
-      .returns<TrendingRow[]>();
-    if (error) {
-      console.warn("[trending] RPC error (likely migration 0010 not deployed):", error.message);
-      return null;
-    }
-    data = Array.isArray(rows) ? rows : [];
+    const rows = await fetchTrendingRows(limit, days);
+    if (rows === null) return null;
+    data = rows;
   } catch (err) {
     console.warn("[trending] threw:", err instanceof Error ? err.message : String(err));
     return null;
@@ -80,7 +96,7 @@ export async function TrendingSection({
       {/* Horizontal scroller. snap-x snap-mandatory gives a tactile
           carousel feel; the cards are sized so two-and-a-bit are visible
           per screen on mobile, hinting at the scroll. */}
-      <div className="-mx-6 px-6 overflow-x-auto snap-x snap-mandatory">
+      <div className="-mx-6 px-6 scroll-pl-6 overflow-x-auto snap-x snap-mandatory slim-scrollbar">
         <ul className="flex gap-3 pb-2">
           {data.map((f, i) => (
             <li

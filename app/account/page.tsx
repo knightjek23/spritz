@@ -16,11 +16,17 @@
 //   - Identity / password / 2FA — Clerk has a hosted page for that. We
 //     link out instead of reimplementing it.
 
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ManageSubscriptionButton, SignOutButton } from "@/components/account-actions";
+
+export const metadata: Metadata = {
+  title: "Account",
+  robots: { index: false }, // user-specific, sign-in walled
+};
 
 // Don't cache — plan + usage stats should be fresh on every visit.
 export const dynamic = "force-dynamic";

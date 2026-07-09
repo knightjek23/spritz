@@ -5,17 +5,29 @@
 // it returns [] so the calling section simply self-hides.
 
 import "server-only";
+import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ScrollerRow } from "@/components/fragrance-scroller";
 
 const SELECT = "id, name, house, bottle_image_url";
+
+// These surfaces are decorative and identical for every visitor, so cache
+// them across requests. Without this, every render of the home /
+// encyclopedia pages re-ran the queries (including the 5,000-row
+// collection_items pull below). 15 min staleness is invisible here.
+const CACHE_REVALIDATE_SECONDS = 900;
 
 /**
  * "Trending on Fragrantica" — straight from the catalog's popularity_rank
  * (scraped from Fragrantica at catalog-build time). Lower rank = more popular.
  * This replaces the live Fragrantica scrape: same signal, no anti-bot, no ToS risk.
  */
-export async function getPopularOnFragrantica(limit = 12): Promise<ScrollerRow[]> {
+export const getPopularOnFragrantica = unstable_cache(
+  _getPopularOnFragrantica,
+  ["db-trending-popular"],
+  { revalidate: CACHE_REVALIDATE_SECONDS },
+);
+async function _getPopularOnFragrantica(limit = 12): Promise<ScrollerRow[]> {
   try {
     const supabase = createAdminClient();
     const { data, error } = await supabase
@@ -39,7 +51,12 @@ export async function getPopularOnFragrantica(limit = 12): Promise<ScrollerRow[]
  * "New this year" — recent releases, ordered by popularity. Falls back to the
  * prior year too so the section isn't empty early in a calendar year.
  */
-export async function getNewThisYear(limit = 12): Promise<ScrollerRow[]> {
+export const getNewThisYear = unstable_cache(
+  _getNewThisYear,
+  ["db-trending-new-this-year"],
+  { revalidate: CACHE_REVALIDATE_SECONDS },
+);
+async function _getNewThisYear(limit = 12): Promise<ScrollerRow[]> {
   try {
     const supabase = createAdminClient();
     const minYear = new Date().getUTCFullYear() - 1;
@@ -66,7 +83,12 @@ export async function getNewThisYear(limit = 12): Promise<ScrollerRow[]> {
  * can't GROUP BY without an RPC, so we pull the recent collection_items window
  * and tally in memory. Fine at this volume; promote to an RPC if it grows.
  */
-export async function getMostAddedToCollection(limit = 12, days = 90): Promise<ScrollerRow[]> {
+export const getMostAddedToCollection = unstable_cache(
+  _getMostAddedToCollection,
+  ["db-trending-most-added"],
+  { revalidate: CACHE_REVALIDATE_SECONDS },
+);
+async function _getMostAddedToCollection(limit = 12, days = 90): Promise<ScrollerRow[]> {
   try {
     const supabase = createAdminClient();
     const since = new Date(Date.now() - days * 86_400_000).toISOString();

@@ -1,8 +1,29 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { JoinedTrendingEntry, MatchMethod, TrendingEntry } from "./types";
 
 const FUZZY_AUTO_MATCH = 0.85;
+
+/**
+ * Cached join. The raw join fires one trigram-search RPC per unmatched
+ * entry (up to ~12 per feed, ~48 across the four home-page areas), which
+ * is far too expensive to run per pageview. Feeds only change when the
+ * weekly collector commits a new file, so cache on (area, generated_at):
+ * a new feed automatically gets a fresh cache entry, and within a feed's
+ * lifetime the RPCs run once per revalidation instead of once per render.
+ */
+export function joinTrendingToCatalogCached(
+  area: string,
+  generatedAt: string,
+  entries: TrendingEntry[],
+): Promise<JoinedTrendingEntry[]> {
+  return unstable_cache(
+    () => joinTrendingToCatalog(entries),
+    ["trending-join", area, generatedAt, String(entries.length)],
+    { revalidate: 3600 },
+  )();
+}
 
 type CatalogLite = {
   id: string;

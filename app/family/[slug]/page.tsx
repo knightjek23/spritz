@@ -1,8 +1,10 @@
 // /family/[slug] — encyclopedia entry for a fragrance family.
 //
-// Header pulls from FAMILY_BLURB (curated, small set). Body is the
-// catalog list of every fragrance whose family[] includes this slug,
-// ordered by popularity.
+// Header pulls from FAMILY_BLURB (curated, small set). Then a "Most
+// popular" top-10 scroller (same FragranceScroller surface as the
+// encyclopedia hub and house pages) when the family has more than 10
+// fragrances, followed by the catalog list of every fragrance whose
+// family[] includes this slug, ordered by popularity.
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -10,6 +12,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { FAMILY_BLURB, familyName, familySlug } from "@/lib/families";
+import { FragranceScroller } from "@/components/fragrance-scroller";
 import type { Fragrance } from "@/lib/types";
 
 export const revalidate = 300;
@@ -19,13 +22,17 @@ export async function generateMetadata({
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const name = familyName(params.slug);
-  const blurb = FAMILY_BLURB[params.slug.toLowerCase()];
+  // Canonicalize the same way the page body does so alias slugs emit
+  // the canonical URL rather than indexable duplicates.
+  const slug = familySlug(params.slug);
+  const name = familyName(slug);
+  const blurb = FAMILY_BLURB[slug];
   return {
-    title: `${name} fragrances · Spritz`,
+    title: `${name} fragrances`,
     description: blurb
       ? `${blurb} Every ${name.toLowerCase()} fragrance in the Spritz encyclopedia.`
       : `${name} fragrances in the Spritz encyclopedia.`,
+    alternates: { canonical: `/family/${slug}` },
   };
 }
 
@@ -49,6 +56,19 @@ export default async function FamilyPage({
 
   const name = familyName(slug);
   const blurb = FAMILY_BLURB[slug];
+
+  // Top-10 scroller only when there's a catalog to summarize — for
+  // families with ≤10 fragrances it would just repeat the full list
+  // below. Rows arrive from the RPC already ordered by popularity_rank.
+  const topTen =
+    fragrances.length > 10
+      ? fragrances.slice(0, 10).map((f) => ({
+          id: f.id,
+          name: f.name,
+          house: f.house,
+          bottle_image_url: f.bottle_image_url,
+        }))
+      : [];
 
   return (
     <article className="mx-auto max-w-md px-6 py-10">
@@ -78,6 +98,17 @@ export default async function FamilyPage({
           </p>
         )}
       </header>
+
+      {/* Most popular — ranked top-10 scroller, house eyebrow ON since
+          a family page spans many houses. */}
+      {topTen.length > 0 && (
+        <FragranceScroller
+          title="Most popular"
+          rows={topTen}
+          variant="compact"
+          showRank
+        />
+      )}
 
       {fragrances.length > 0 ? (
         <section className="mb-10">

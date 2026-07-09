@@ -5,9 +5,13 @@
 //   Signed-in with at least one `own` fragrance → ForYouFeed
 //     (personalized recommendations grounded in their shelf).
 //
-// Server Component. Anonymous renders are essentially static (no Supabase
-// call). Signed-in renders fetch the user's collection + similarity data
-// inline; cached by Next on a short TTL since collections don't churn fast.
+// Server Component. NOTE: because this page calls auth(), Next renders it
+// per-request (a route-level `revalidate` would be silently ignored —
+// auth() reads request headers, which opts the route out of static/ISR).
+// The render itself is cheap, though: every data surface MarketingHome
+// touches (trending feeds, trending RPC, catalog scrollers) is wrapped in
+// unstable_cache, so an anonymous request is an auth check plus cache
+// reads — not the 30-50 Supabase round trips it used to be.
 //
 // Note: SEO crawlers never see the personalized variant — they hit the
 // route without auth cookies, so they always get MarketingHome. The page
@@ -17,10 +21,6 @@ import { auth } from "@clerk/nextjs/server";
 import { getRecommendations } from "@/lib/recommendations";
 import { ForYouFeed } from "@/components/for-you-feed";
 import { MarketingHome } from "@/components/marketing-home";
-
-// Soft revalidation — personalized data can be a minute stale without
-// users noticing. Keeps the signed-in path fast.
-export const revalidate = 60;
 
 export default async function HomePage() {
   const { userId } = auth();

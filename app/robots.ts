@@ -17,6 +17,8 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           "/api/",          // never serve API endpoints to crawlers
           "/collection",    // user-specific
+          "/account",       // user-specific
+          "/welcome",       // post-signup onboarding
           "/sign-in",       // auth flow
           "/sign-up",       // auth flow
         ],

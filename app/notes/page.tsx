@@ -13,7 +13,7 @@ import { FAMILY_ORDER, FAMILY_BLURB } from "@/lib/families";
 export const revalidate = 86400; // once a day
 
 export const metadata: Metadata = {
-  title: "Notes encyclopedia · Spritz",
+  title: "Notes encyclopedia",
   description:
     "Every fragrance note, what it smells like, and the bottles that feature it. Citrus, floral, woody, oriental, and beyond.",
 };
