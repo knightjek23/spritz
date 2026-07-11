@@ -6,7 +6,7 @@
 //
 // Session 01 Finding 4: the tester anchored Pro value on what's
 // culturally hot ("Instagram/TikTok famous fragrances"). Trending is the
-// encyclopedia-side answer to that — what people are actually scanning
+// library-side answer to that — what people are actually scanning
 // this week — without diluting positioning by literally labeling things
 // "TikTok fragrances."
 //

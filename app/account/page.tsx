@@ -105,7 +105,7 @@ export default async function AccountPage() {
           {plan === "pro" ? (
             <>
               <p className="text-sm text-slate mb-5 leading-relaxed">
-                AI-generated dupes, full editorial encyclopedia, expanded
+                AI-generated dupes, full editorial library, expanded
                 similar-fragrance results, and unlimited collection.
               </p>
               {hasStripeCustomer ? (
@@ -120,7 +120,7 @@ export default async function AccountPage() {
             <>
               <p className="text-sm text-slate mb-5 leading-relaxed">
                 You&apos;re on the free plan. Pro unlocks AI dupes, full
-                encyclopedia depth, and an unlimited collection.
+                library depth, and an unlimited collection.
               </p>
               <Link
                 href="/pricing"

@@ -44,7 +44,7 @@ export default async function FamiliesIndexPage() {
   }
 
   // Editorial families that don't have any catalog rows yet still appear,
-  // just with count 0. Keeps the encyclopedia complete instead of having
+  // just with count 0. Keeps the library complete instead of having
   // gaps appear and disappear as the catalog grows.
   for (const slug of Object.keys(FAMILY_BLURB)) {
     if (merged.has(slug)) continue;
@@ -71,7 +71,7 @@ export default async function FamiliesIndexPage() {
     <article className="mx-auto max-w-md px-6 py-10">
       <header className="mb-8">
         <p className="font-mono text-xs uppercase tracking-widest text-slate">
-          Encyclopedia · {ordered.length} families
+          Library · {ordered.length} families
         </p>
         <h1 className="font-display text-5xl mt-2 leading-[0.95]">
           The families

@@ -1,7 +1,7 @@
 "use client";
 
 // Notes pyramid — top / heart / base. Each chip is a tap-to-expand
-// flavor description AND a link to the full note encyclopedia entry.
+// flavor description AND a link to the full note library entry.
 //
 // Interaction model:
 //   - First tap: expand the inline description (if we have one) — fast
@@ -121,12 +121,12 @@ function NoteChip({
         >
           {note.name}
         </button>
-        {/* Secondary action — link to the encyclopedia entry. Inherits
+        {/* Secondary action — link to the library entry. Inherits
             the swatch background but adds a soft ink-tinted divider so
             the two tap targets stay visually distinct on color. */}
         <Link
           href={`/note/${slug}`}
-          aria-label={`View encyclopedia entry for ${note.name}`}
+          aria-label={`View library entry for ${note.name}`}
           className={`px-2 py-1.5 text-xs transition border-l border-ink/10 ${
             open
               ? "bg-ink text-cream/80 hover:text-cream"

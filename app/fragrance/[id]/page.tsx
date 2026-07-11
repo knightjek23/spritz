@@ -1,4 +1,4 @@
-// Encyclopedia detail page — the visual + UX hero of Spritz.
+// Library detail page — the visual + UX hero of Spritz.
 // Lead with what the bottle IS, not with what to buy instead.
 
 import { cache } from "react";
@@ -99,7 +99,7 @@ export default async function FragrancePage({ params }: { params: { id: string }
   const f = await getFragrance(params.id);
   if (!f) notFound();
 
-  // JSON-LD: Product + BreadcrumbList. The encyclopedia's rich-result
+  // JSON-LD: Product + BreadcrumbList. The library's rich-result
   // eligibility (name, brand, image in search) comes from this.
   const jsonLd = {
     "@context": "https://schema.org",
@@ -178,7 +178,7 @@ export default async function FragrancePage({ params }: { params: { id: string }
 
       {/* Title block — name + house + year + gender + concentration.
           Family lives below. House name links into the house
-          encyclopedia entry. Concentration (EDT/EDP/Parfum/Extrait)
+          library entry. Concentration (EDT/EDP/Parfum/Extrait)
           sits at the end of the metadata line for glanceability; the
           full plain-English description gets its own section below
           Notes so people who want the "what does that mean?" answer

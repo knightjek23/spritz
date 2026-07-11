@@ -7,6 +7,17 @@
 // SETUP.md.
 const nextConfig = {
   reactStrictMode: true,
+  // /encyclopedia → /library rename (2026-07-05). Permanent redirect so
+  // any pre-rename link, bookmark, or crawled URL keeps working.
+  async redirects() {
+    return [
+      {
+        source: "/encyclopedia",
+        destination: "/library",
+        permanent: true,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       // Supabase storage for scan images + fragrance bottle thumbnails.

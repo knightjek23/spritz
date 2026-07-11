@@ -20,7 +20,7 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "Houses",
   description:
-    "Every perfume house in our encyclopedia. Tom Ford, Chanel, Dior, Maison Margiela, Lattafa, and the rest of the catalog.",
+    "Every perfume house in our library. Tom Ford, Chanel, Dior, Maison Margiela, Lattafa, and the rest of the catalog.",
 };
 
 interface DisplayHouse {
@@ -85,7 +85,7 @@ export default async function HousesIndexPage() {
   }
 
   // Sort: editorial houses first (the curated ones), then catalog-only
-  // alphabetically. Both sections use alpha now so the encyclopedia
+  // alphabetically. Both sections use alpha now so the library
   // feels like a browsable A-Z rather than a leaderboard.
   const houses = Array.from(merged.values()).sort((a, b) => {
     if (a.hasEditorial !== b.hasEditorial) {
@@ -101,7 +101,7 @@ export default async function HousesIndexPage() {
     <article className="mx-auto max-w-md px-6 py-10">
       <header className="mb-8">
         <p className="font-mono text-xs uppercase tracking-widest text-slate">
-          Encyclopedia · {houses.length} houses
+          Library · {houses.length} houses
         </p>
         <h1 className="font-display text-5xl mt-2 leading-[0.95]">
           The houses

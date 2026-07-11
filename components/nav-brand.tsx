@@ -1,7 +1,7 @@
 "use client";
 
 // NavBrand — the left slot of the top nav. On tab-root routes (Home,
-// Shelf, Scan, Encyclopedia, Profile) shows the "spritz" wordmark.
+// Shelf, Scan, Library, Profile) shows the "spritz" wordmark.
 // On any other route, shows a back button that goes to the previous
 // screen via browser history, or falls back to a per-route parent.
 //
@@ -20,7 +20,7 @@ import { BackButton } from "./back-button";
 
 // Tab-root routes — the five destinations the bottom nav switches
 // between. On these, back is meaningless; show the wordmark instead.
-const TAB_ROOTS = new Set(["/", "/collection", "/scan", "/encyclopedia", "/account"]);
+const TAB_ROOTS = new Set(["/", "/collection", "/scan", "/library", "/account"]);
 
 /**
  * Per-route back fallback. When a user direct-links into a page and
@@ -29,14 +29,14 @@ const TAB_ROOTS = new Set(["/", "/collection", "/scan", "/encyclopedia", "/accou
  * fallbackFor() below.
  */
 const FALLBACK_MAP: Array<[prefix: string, href: string]> = [
-  ["/fragrance/", "/encyclopedia"],
+  ["/fragrance/", "/library"],
   ["/family/", "/families"],
-  ["/families", "/encyclopedia"],
+  ["/families", "/library"],
   ["/house/", "/houses"],
-  ["/houses", "/encyclopedia"],
+  ["/houses", "/library"],
   ["/note/", "/notes"],
-  ["/notes", "/encyclopedia"],
-  ["/search", "/encyclopedia"],
+  ["/notes", "/library"],
+  ["/search", "/library"],
   ["/pricing", "/account"],
   ["/welcome", "/"],
   ["/sign-in", "/"],

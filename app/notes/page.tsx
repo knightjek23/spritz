@@ -1,4 +1,4 @@
-// /notes — encyclopedia index. Every editorial note we have, grouped by
+// /notes — library index. Every editorial note we have, grouped by
 // fragrance family (citrus, floral, woody, etc.). Each card links into
 // the per-note page.
 //
@@ -13,7 +13,7 @@ import { FAMILY_ORDER, FAMILY_BLURB } from "@/lib/families";
 export const revalidate = 86400; // once a day
 
 export const metadata: Metadata = {
-  title: "Notes encyclopedia",
+  title: "Notes library",
   description:
     "Every fragrance note, what it smells like, and the bottles that feature it. Citrus, floral, woody, oriental, and beyond.",
 };
@@ -34,7 +34,7 @@ export default async function NotesIndexPage() {
     <article className="mx-auto max-w-md px-6 py-10">
       <header className="mb-8">
         <p className="font-mono text-xs uppercase tracking-widest text-slate">
-          Encyclopedia · {notes.length} notes
+          Library · {notes.length} notes
         </p>
         <h1 className="font-display text-5xl mt-2 leading-[0.95]">
           The notes

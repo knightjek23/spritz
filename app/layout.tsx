@@ -49,7 +49,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Spritz: know what you're wearing",
     description:
-      "The fragrance encyclopedia. Scan any bottle to read its full story: notes, perfumer, longevity, how to wear it.",
+      "The fragrance library. Scan any bottle to read its full story: notes, perfumer, longevity, how to wear it.",
     siteName: "Spritz",
     type: "website",
     images: [{ url: "/icon-512.png", width: 512, height: 512, alt: "Spritz" }],
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary",
     title: "Spritz: know what you're wearing",
-    description: "The fragrance encyclopedia, in your pocket.",
+    description: "The fragrance library, in your pocket.",
     images: ["/icon-512.png"],
   },
 };

@@ -81,7 +81,7 @@ export interface Fragrance {
   season_tags: string[];
   time_tags: string[];
   similar_ids: string[];
-  // Encyclopedia content (the new core per PRD §1)
+  // Library content (the new core per PRD §1)
   perfumer: string | null;
   house_history: string | null;
   wear_guidance: WearGuidance;

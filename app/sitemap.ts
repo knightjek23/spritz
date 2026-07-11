@@ -4,7 +4,7 @@
 //   1. Static marketing pages (home, search, scan, notes index, pricing).
 //   2. Every fragrance detail page (pulled from Supabase, ordered by
 //      popularity so search engines crawl high-value pages first).
-//   3. Every note encyclopedia entry (filesystem-backed, ~80 of them).
+//   3. Every note library entry (filesystem-backed, ~80 of them).
 //
 // Regenerated on demand by Next's ISR; doesn't need a build to pick up
 // new fragrances. Throttled by `revalidate` to avoid hammering Supabase

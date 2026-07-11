@@ -157,7 +157,7 @@ export default function PricingPage() {
         <h1 className="font-display text-5xl leading-[0.95] mb-4">
           The full
           <br />
-          encyclopedia.
+          library.
         </h1>
         <p className="text-slate text-base leading-relaxed max-w-xs">
           Every perfumer credit, every house story, every note&apos;s flavor

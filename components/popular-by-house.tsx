@@ -1,4 +1,4 @@
-// "Most popular" by-house surface for the Encyclopedia hub.
+// "Most popular" by-house surface for the Library hub.
 //
 // Server Component — fetches the top 5 houses (each with their top 10
 // fragrances) from the list_popular_by_house RPC (migration 0016) and

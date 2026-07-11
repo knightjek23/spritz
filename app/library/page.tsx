@@ -1,14 +1,14 @@
-// /encyclopedia — the hub page for the Encyclopedia bottom-nav tab.
+// /library — the hub page for the Library bottom-nav tab.
 //
 // Consolidates three browse-by-X entries (notes, houses, families) and
 // surfaces both trending feeds (scrape-based + scan-based) at the top.
-// The intent is that tapping Encyclopedia in the nav lands a user on a
+// The intent is that tapping Library in the nav lands a user on a
 // single page that answers "what's in here and where do I start?" —
 // rather than dumping them into a single index that only covers one
 // dimension.
 //
 // Trending is duplicated here AND on the home page intentionally. Home
-// is the destination for "what's new" / "what's hot"; Encyclopedia is
+// is the destination for "what's new" / "what's hot"; Library is
 // the destination for "what is this thing and how do I explore it." A
 // trending list belongs in both — same data, different reading order.
 //
@@ -22,21 +22,17 @@ import { TrendingSection } from "@/components/trending-section";
 import { PopularByHouse } from "@/components/popular-by-house";
 
 export const metadata: Metadata = {
-  title: "Encyclopedia",
+  title: "Library · Spritz",
   description:
     "Every fragrance, every note, every house. Browse by family or note, or see what's trending this week.",
 };
 
-// Without this the page is statically rendered once at build and the
-// "trending this week" surfaces stay frozen until the next deploy.
-export const revalidate = 3600;
-
-export default function EncyclopediaHubPage() {
+export default function LibraryHubPage() {
   return (
     <div className="mx-auto max-w-md px-6 py-10">
       <header className="mb-8">
         <p className="font-mono text-xs uppercase tracking-widest text-slate mb-2">
-          The encyclopedia
+          The library
         </p>
         <h1 className="font-display text-5xl leading-[0.95] mb-3">
           Every fragrance,
@@ -67,7 +63,7 @@ export default function EncyclopediaHubPage() {
       <PopularByHouse />
 
       {/* Three browse-by-X entries — primary navigation into the
-          encyclopedia. Big tap targets so it's clear these are the
+          library. Big tap targets so it's clear these are the
           main entries, not buried links. */}
       <section className="mt-12 mb-10">
         <h2 className="font-display text-2xl mb-4">Browse</h2>

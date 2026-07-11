@@ -2,7 +2,7 @@
 
 // Bottom navigation bar — mobile-first, primary destination switcher.
 //
-// Matches Figma node 58:12: 5 tabs (Home, Shelf, Scan, Encyclopedia,
+// Matches Figma node 58:12: 5 tabs (Home, Shelf, Scan, Library,
 // Profile), Roboto ExtraLight 10px labels, paper bg with subtle white
 // top border + backdrop blur, and an iOS-style home-indicator strip at
 // the bottom for devices with on-screen home bars.
@@ -11,7 +11,7 @@
 //   - Home          → /              (marketing home or For You feed)
 //   - Shelf         → /collection    (Own / Tried / Wishlist)
 //   - Scan          → /scan          (full-screen camera takeover)
-//   - Encyclopedia  → /encyclopedia  (hub: trending + by note / house / family)
+//   - Library  → /library  (hub: trending + by note / house / family)
 //   - Profile       → /account       (plan, usage, sign-out)
 //
 // Active state: the icon + label switch to emerald when the user is on
@@ -30,7 +30,7 @@ interface Tab {
   label: string;
   /** Routes considered "under" this tab — any pathname starting with one
    *  of these matches as active. Lets /collection?tab=own light up Shelf,
-   *  and /fragrance/[id] or /note/[slug] light up Encyclopedia. */
+   *  and /fragrance/[id] or /note/[slug] light up Library. */
   matchPrefixes: string[];
   icon: (active: boolean) => React.ReactNode;
 }
@@ -55,10 +55,10 @@ const TABS: Tab[] = [
     icon: (active) => <ScanIcon active={active} />,
   },
   {
-    href: "/encyclopedia",
-    label: "Encyclopedia",
+    href: "/library",
+    label: "Library",
     matchPrefixes: [
-      "/encyclopedia",
+      "/library",
       "/families",
       "/family",
       "/houses",
@@ -68,7 +68,7 @@ const TABS: Tab[] = [
       "/fragrance",
       "/search",
     ],
-    icon: (active) => <EncyclopediaIcon active={active} />,
+    icon: (active) => <LibraryIcon active={active} />,
   },
   {
     href: "/account",
@@ -198,7 +198,7 @@ function isActiveTab(pathname: string, tab: Tab): boolean {
 // those were swapped to currentColor here so the wrapping span's text
 // color (ink/85 inactive, emerald active) themes the icons in place.
 //
-// Cream fills in the encyclopedia icon (fill="#FAF6ED" on the figure
+// Cream fills in the library icon (fill="#FAF6ED" on the figure
 // bodies) were swapped to fill="none" so active-state recoloring
 // doesn't leave cream rectangles overlaying the emerald outlines.
 //
@@ -276,8 +276,8 @@ function ScanIcon({ active: _active }: { active: boolean }) {
   );
 }
 
-function EncyclopediaIcon({ active: _active }: { active: boolean }) {
-  // Updated to the "Encyclopedia 3" variant: two figures with
+function LibraryIcon({ active: _active }: { active: boolean }) {
+  // Updated to the "Library 3" variant: two figures with
   // rectangular bodies + heads (right smaller, left larger), with a
   // central foreground rectangle and an overlapping accessory square
   // on the left figure. Cream fills preserved from the source so the

@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Search fragrances",
   description:
-    "Search every fragrance in the Spritz encyclopedia by name or house.",
+    "Search every fragrance in the Spritz library by name or house.",
 };
 
 export default function SearchLayout({ children }: { children: React.ReactNode }) {

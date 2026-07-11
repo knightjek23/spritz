@@ -1,8 +1,8 @@
-// /family/[slug] — encyclopedia entry for a fragrance family.
+// /family/[slug] — library entry for a fragrance family.
 //
 // Header pulls from FAMILY_BLURB (curated, small set). Then a "Most
 // popular" top-10 scroller (same FragranceScroller surface as the
-// encyclopedia hub and house pages) when the family has more than 10
+// library hub and house pages) when the family has more than 10
 // fragrances, followed by the catalog list of every fragrance whose
 // family[] includes this slug, ordered by popularity.
 
@@ -30,8 +30,8 @@ export async function generateMetadata({
   return {
     title: `${name} fragrances`,
     description: blurb
-      ? `${blurb} Every ${name.toLowerCase()} fragrance in the Spritz encyclopedia.`
-      : `${name} fragrances in the Spritz encyclopedia.`,
+      ? `${blurb} Every ${name.toLowerCase()} fragrance in the Spritz library.`
+      : `${name} fragrances in the Spritz library.`,
     alternates: { canonical: `/family/${slug}` },
   };
 }

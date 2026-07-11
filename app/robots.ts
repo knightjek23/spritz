@@ -1,6 +1,6 @@
 // app/robots.ts — Next 14 native robots.txt.
 //
-// Open the marketing + encyclopedia surfaces. Block the user-specific and
+// Open the marketing + library surfaces. Block the user-specific and
 // payment surfaces so they don't end up indexed (they require auth and
 // would just produce sign-in walls in Google's index).
 

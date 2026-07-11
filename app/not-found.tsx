@@ -28,10 +28,10 @@ export default function NotFound() {
             Search fragrances
           </Link>
           <Link
-            href="/encyclopedia"
+            href="/library"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-ink/15 text-ink text-sm font-medium hover:bg-ink/5 transition"
           >
-            Browse the encyclopedia
+            Browse the library
           </Link>
         </div>
       </section>

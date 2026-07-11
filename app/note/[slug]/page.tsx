@@ -1,4 +1,4 @@
-// /note/[slug] — encyclopedia entry for a single note.
+// /note/[slug] — library entry for a single note.
 //
 // Two halves:
 //   1. Editorial: the flavor profile, aliases, and family — read from

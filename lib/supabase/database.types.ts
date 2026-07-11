@@ -33,7 +33,7 @@ export type Database = {
           season_tags: string[];
           time_tags: string[];
           similar_ids: string[];
-          // Encyclopedia content
+          // Library content
           perfumer: string | null;
           house_history: string | null;
           wear_guidance: {

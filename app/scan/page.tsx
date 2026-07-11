@@ -74,7 +74,7 @@ export default function ScanPage() {
 
       const r = data as ScanResult;
       if (r.matched) {
-        // Direct hand-off to the encyclopedia page. CameraCapture is
+        // Direct hand-off to the library page. CameraCapture is
         // unmounted as the navigation completes.
         router.push(`/fragrance/${r.matched.id}`);
         return;

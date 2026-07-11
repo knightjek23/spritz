@@ -2,7 +2,7 @@
 // own collection.
 //
 // Layout order (after Josh's pass on Session 01 follow-up):
-//   1. Primary CTAs (Encyclopedia / Scan / Search) — same trio as the
+//   1. Primary CTAs (Library / Scan / Search) — same trio as the
 //      marketing home, so the signed-in and signed-out home stay
 //      consistent at the top of the page.
 //   2. "Based on what you wear" header + seed names.
@@ -26,7 +26,7 @@ import { MostAddedToCollection, PopularOnFragrantica } from "./trending-db-secti
 export function ForYouFeed({ data }: { data: Recommendations }) {
   return (
     <div className="mx-auto max-w-md px-6 py-10">
-      {/* 1. Primary CTAs — Encyclopedia (primary), Scan (secondary),
+      {/* 1. Primary CTAs — Library (primary), Scan (secondary),
             Search (tertiary text link). Mirrors components/marketing-home
             so signed-in and signed-out users see the same entry trio at
             the top of the page. Each entry carries a spritz-rise-N
@@ -43,7 +43,7 @@ export function ForYouFeed({ data }: { data: Recommendations }) {
           href="/families"
           className="spritz-rise spritz-rise-2 w-full text-center border border-ink/15 text-ink py-4 rounded-2xl font-medium tracking-wide mb-3 hover:bg-ink/5 transition"
         >
-          Browse the encyclopedia
+          Browse the library
         </Link>
         <Link
           href="/search"
@@ -212,7 +212,7 @@ export function ForYouFeed({ data }: { data: Recommendations }) {
             estate. */}
       <section className="pt-6 border-t border-ink/10">
         <p className="font-mono text-xs uppercase tracking-widest text-slate mb-3">
-          Explore the encyclopedia
+          Explore the library
         </p>
         <div className="grid grid-cols-4 gap-2 text-xs">
           <Link

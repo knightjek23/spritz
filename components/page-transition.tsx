@@ -3,7 +3,7 @@
 // PageTransition — wraps <main> children so non-tab route changes fade
 // + slide in from the right, iOS-app style. Tab-root ↔ tab-root
 // switches stay instant (no re-triggering the animation every time
-// the user taps between Home / Shelf / Encyclopedia / Profile).
+// the user taps between Home / Shelf / Library / Profile).
 //
 // Mechanism: key={pathname} on non-tab routes forces React to unmount
 // the previous subtree and mount a fresh one, which re-runs the CSS
@@ -23,7 +23,7 @@
 
 import { usePathname } from "next/navigation";
 
-const TAB_ROOTS = new Set(["/", "/collection", "/scan", "/encyclopedia", "/account"]);
+const TAB_ROOTS = new Set(["/", "/collection", "/scan", "/library", "/account"]);
 
 export function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? "/";

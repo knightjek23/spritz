@@ -1,10 +1,10 @@
 // Signed-out / empty-collection home — the marketing landing page.
 //
 // Rewritten after Session 01: the prior hero ("Know what you're wearing"
-// + Scan as primary CTA) read as a scan tool first, encyclopedia second.
-// The tester asked verbatim for "an encyclopedia of different perfumes /
+// + Scan as primary CTA) read as a scan tool first, library second.
+// The tester asked verbatim for "an library of different perfumes /
 // colognes to browse/learn about" — which is exactly what Spritz is, but
-// she didn't see it. New hero leads with the encyclopedia framing,
+// she didn't see it. New hero leads with the library framing,
 // promotes browsing to the primary entry point, and demotes scan to a
 // secondary action. Also leans more beginner-friendly per Session 01
 // Finding 5 (her brother and mom — gift-getters wanting to start
@@ -26,7 +26,7 @@ export function MarketingHome() {
           starts, 600ms each, ease-out-expo). Honors prefers-reduced-
           motion globally via globals.css. */}
       <span className="spritz-rise spritz-rise-1 inline-block px-3 py-1 mb-6 bg-brass text-ink text-xs font-mono uppercase tracking-wider rounded-full">
-        v0.1 · The fragrance encyclopedia
+        v0.1 · The fragrance library
       </span>
 
       <h1 className="spritz-rise spritz-rise-2 font-display text-6xl mb-4 leading-[0.95]">
@@ -57,14 +57,14 @@ export function MarketingHome() {
         Scan a bottle
       </Link>
 
-      {/* Secondary: browse the encyclopedia. Same affordance, quieter
+      {/* Secondary: browse the library. Same affordance, quieter
           visual weight. Still the discovery path for users without a
           bottle in hand. */}
       <Link
         href="/families"
         className="spritz-rise spritz-rise-6 w-full border border-ink/15 text-ink py-4 rounded-2xl font-medium tracking-wide hover:bg-ink/5 transition mb-3"
       >
-        Browse the encyclopedia
+        Browse the library
       </Link>
 
       {/* Tertiary: search. Text-only so it sits visually beneath the two

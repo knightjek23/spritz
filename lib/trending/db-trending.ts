@@ -13,7 +13,7 @@ const SELECT = "id, name, house, bottle_image_url";
 
 // These surfaces are decorative and identical for every visitor, so cache
 // them across requests. Without this, every render of the home /
-// encyclopedia pages re-ran the queries (including the 5,000-row
+// library pages re-ran the queries (including the 5,000-row
 // collection_items pull below). 15 min staleness is invisible here.
 const CACHE_REVALIDATE_SECONDS = 900;
 

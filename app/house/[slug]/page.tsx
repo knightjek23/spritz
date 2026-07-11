@@ -1,9 +1,9 @@
-// /house/[slug] — encyclopedia entry for a perfume house.
+// /house/[slug] — library entry for a perfume house.
 //
 // Top: editorial story from editorial/houses/<slug>.md (history, style,
 // founder, country, link out to official site).
 // Middle: "Most popular" top-10 scroller (same FragranceScroller surface
-// as the encyclopedia hub) — only when the house has more than 10
+// as the library hub) — only when the house has more than 10
 // fragrances, so it never just duplicates a short catalog list.
 // Bottom: every fragrance from this house in our catalog, ranked by
 // popularity.
@@ -159,7 +159,7 @@ export default async function HousePage({ params }: { params: { slug: string } }
         </section>
       )}
 
-      {/* Most popular — same ranked scroller surface as the encyclopedia
+      {/* Most popular — same ranked scroller surface as the library
           hub, scoped to this house. Sits between editorial and the full
           catalog so a skimmer gets the greatest hits without scrolling
           the whole list. */}
