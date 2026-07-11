@@ -216,3 +216,33 @@ h1, h2, h3, h4 {
     scrollbar-color: rgba(26, 26, 26, 0.25) transparent;
   }
 }
+
+/* Scan-screen shutter press. The green center circle shrinks to the
+   "Camera Button Depressed" radius (29.5 / 31.2647 ≈ 0.9436 scale)
+   then snaps back. Fast in (40% of 220ms ≈ 90ms), springy return via
+   the same cubic-bezier the page transitions use. transform-box:
+   fill-box makes scale() pivot on the circle's own center instead of
+   the SVG origin. */
+.shutter-center {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.shutter-center-pressed {
+  animation: spritz-shutter-press 220ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+@keyframes spritz-shutter-press {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(0.9436);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shutter-center-pressed {
+    animation: none;
+  }
+}

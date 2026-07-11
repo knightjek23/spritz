@@ -441,12 +441,10 @@ export function CameraCapture({ onCapture, busy = false }: Props) {
           </div>
 
           <div className="flex justify-center">
-            <button
-              type="button"
-              onClick={shutterAction}
+            <ShutterButton
+              onActivate={shutterAction}
               disabled={shutterDisabled}
-              aria-label={state === "live" ? "Capture" : "Enable camera"}
-              className="w-[72px] h-[72px] rounded-full bg-emerald ring-4 ring-cream ring-offset-2 ring-offset-ink/5 active:scale-95 transition disabled:opacity-50"
+              label={state === "live" ? "Capture" : "Enable camera"}
             />
           </div>
 
@@ -492,6 +490,117 @@ export function CameraCapture({ onCapture, busy = false }: Props) {
 // states. The backdrop-blur lifts it off the cream background even though
 // there's no contrasting video underneath (intent: matches the design's
 // "floating panel" feel regardless of what's behind it).
+// Shutter — Josh's Figma SVGs ("Camera Button" / "Camera Button
+// Depressed"). The two files are identical except the green center
+// circle radius (31.2647 normal → 29.5 depressed), so we render ONE
+// inline SVG and animate that circle instead of swapping images: on
+// press the center quickly shrinks to the depressed radius, then snaps
+// back (keyframes in globals.css, .shutter-center-pressed). Animation
+// starts on pointerdown for immediacy; capture still fires on click.
+// The 96px viewBox carries 12px of built-in shadow padding around the
+// 72px button face, so -my-3 keeps the tray the same height as the old
+// 72px flat button.
+function ShutterButton({
+  onActivate,
+  disabled,
+  label,
+}: {
+  onActivate?: () => void;
+  disabled?: boolean;
+  label: string;
+}) {
+  const [pressed, setPressed] = useState(false);
+
+  return (
+    <button
+      type="button"
+      onClick={onActivate}
+      onPointerDown={() => {
+        if (!disabled) setPressed(true);
+      }}
+      disabled={disabled}
+      aria-label={label}
+      className="w-24 h-24 -my-3 disabled:opacity-50 transition"
+    >
+      <svg
+        viewBox="0 0 96 96"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-full h-full"
+        aria-hidden
+      >
+        <g filter="url(#shutter-shadow)">
+          <circle cx="48" cy="48" r="36" fill="url(#shutter-metal)" />
+          <circle cx="48" cy="48" r="35.5" stroke="#114821" />
+        </g>
+        <circle
+          cx="48"
+          cy="48"
+          r="31.2647"
+          fill="#114821"
+          stroke="#114821"
+          className={`shutter-center${pressed ? " shutter-center-pressed" : ""}`}
+          onAnimationEnd={() => setPressed(false)}
+        />
+        <defs>
+          <filter
+            id="shutter-shadow"
+            x="0"
+            y="0"
+            width="96"
+            height="96"
+            filterUnits="userSpaceOnUse"
+            colorInterpolationFilters="sRGB"
+          >
+            <feFlood floodOpacity="0" result="BackgroundImageFix" />
+            <feColorMatrix
+              in="SourceAlpha"
+              type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+              result="hardAlpha"
+            />
+            <feMorphology
+              radius="4"
+              operator="dilate"
+              in="SourceAlpha"
+              result="effect1_dropShadow"
+            />
+            <feOffset />
+            <feGaussianBlur stdDeviation="4" />
+            <feComposite in2="hardAlpha" operator="out" />
+            <feColorMatrix
+              type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.2 0"
+            />
+            <feBlend
+              mode="normal"
+              in2="BackgroundImageFix"
+              result="effect1_dropShadow"
+            />
+            <feBlend
+              mode="normal"
+              in="SourceGraphic"
+              in2="effect1_dropShadow"
+              result="shape"
+            />
+          </filter>
+          <radialGradient
+            id="shutter-metal"
+            cx="0"
+            cy="0"
+            r="1"
+            gradientUnits="userSpaceOnUse"
+            gradientTransform="translate(48 48) rotate(90) scale(36)"
+          >
+            <stop stopColor="#BDBDBD" />
+            <stop offset="1" stopColor="#D7D7D7" />
+          </radialGradient>
+        </defs>
+      </svg>
+    </button>
+  );
+}
+
 function GlassCard({ children }: { children: React.ReactNode }) {
   return (
     <div className="absolute inset-0 flex items-center justify-center px-6">
