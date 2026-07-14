@@ -19,14 +19,14 @@ const PLANS: Record<Plan, { label: string; price: string; unit: string; sub: str
     label: "Monthly",
     price: "$4.99",
     unit: "/mo",
-    sub: "Billed monthly. Cancel anytime.",
+    sub: "7-day free trial, then $4.99/mo. Cancel anytime.",
     cadence: "monthly",
   },
   annual: {
     label: "Annual",
-    price: "$39",
+    price: "$29.99",
     unit: "/yr",
-    sub: "Two months free. Cancel anytime.",
+    sub: "Billed annually — that's ~$2.50/mo. Cancel anytime.",
     cadence: "annual",
   },
 };
@@ -92,7 +92,7 @@ const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: "Is there a free trial?",
-    a: "Not formally. The Free plan IS the trial. You can scan unlimited bottles, see notes, save up to 25 fragrances, and get curated dupes without paying anything. Pro unlocks the deeper editorial layer and on-demand AI dupes when you're ready.",
+    a: "Yes — the Monthly plan comes with a 7-day free trial. You get full Pro access for a week, and you won't be charged until it ends. Cancel anytime before then and you pay nothing, and the most you'd ever be charged after a trial is $4.99. The Annual plan has no trial — it's billed upfront at $29.99 (~$2.50/mo). And the Free plan is always free: scan unlimited bottles, save up to 25 fragrances, and get curated dupes without paying anything.",
   },
   {
     q: "Do you sell my data?",
@@ -192,7 +192,7 @@ export default function PricingPage() {
               {PLANS[key].label}
               {key === "annual" && (
                 <span className="ml-2 inline-block px-1.5 py-0.5 bg-brass text-ink text-[10px] font-mono uppercase tracking-wider rounded-full">
-                  -35%
+                  -50%
                 </span>
               )}
             </button>
