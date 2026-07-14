@@ -53,9 +53,9 @@ export const spritzClerkAppearance: Appearance = {
       border: `1px solid rgba(26, 26, 26, 0.10)`,
       boxShadow: "none",
     },
-    // The container behind the card (Clerk renders a wrapper) stays transparent
-    // so the page's cream canvas shows through.
-    rootBox: { width: "100%" },
+    // Let the root box size to its content so the parent page's
+    // `justify-center` can center the card (a forced width:100% here
+    // pins the card to the left edge of a full-width box).
     cardBox: { boxShadow: "none", border: "none" },
 
     // Header — Playfair display serif to match h1–h4.
