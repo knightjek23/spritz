@@ -2,6 +2,7 @@ import "@/lib/env"; // fail fast on missing env vars in production
 import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Roboto } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { spritzClerkAppearance } from "@/lib/clerk-appearance";
 import { Nav } from "@/components/nav";
 import { BottomNav } from "@/components/bottom-nav";
 import { Analytics } from "@/components/analytics";
@@ -72,7 +73,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider appearance={spritzClerkAppearance}>
       <html lang="en" className={`${playfair.variable} ${roboto.variable}`}>
         <body className="min-h-screen flex flex-col font-sans">
           {/* SVG <defs> for the liquid-glass displacement filters. Mounted

@@ -4,11 +4,13 @@
 // lands here for a second time.
 
 import { SignUp } from "@clerk/nextjs";
+import { spritzClerkAppearance } from "@/lib/clerk-appearance";
 
 export default function SignUpPage() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-6">
       <SignUp
+        appearance={spritzClerkAppearance}
         signInUrl="/sign-in"
         forceRedirectUrl="/welcome"
         fallbackRedirectUrl="/welcome"
