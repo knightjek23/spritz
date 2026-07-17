@@ -8,6 +8,7 @@ import {
   getPopularOnFragrantica,
   getNewThisYear,
   getMostAddedToCollection,
+  getMostClickedToBuy,
 } from "@/lib/trending/db-trending";
 
 type Variant = "default" | "compact";
@@ -44,4 +45,20 @@ export async function MostAddedToCollection({
 }) {
   const rows = await getMostAddedToCollection(limit);
   return <FragranceScroller title="Most added to collections" rows={rows} variant={variant} />;
+}
+
+/**
+ * First-party purchase intent. The honest stand-in for a retailer bestseller
+ * list, since no affiliate network publishes a sales rank. Self-hides until
+ * there's click volume.
+ */
+export async function MostClickedToBuy({
+  limit = 12,
+  variant = "default",
+}: {
+  limit?: number;
+  variant?: Variant;
+}) {
+  const rows = await getMostClickedToBuy(limit);
+  return <FragranceScroller title="Most shopped this month" rows={rows} variant={variant} />;
 }

@@ -128,6 +128,58 @@ async function _getMostAddedToCollection(limit = 12, days = 90): Promise<Scrolle
   }
 }
 
+/**
+ * "Most clicked to buy" — first-party purchase intent from affiliate_clicks.
+ * This is the honest replacement for the scraped retailer bestseller list:
+ * no affiliate network exposes a public sales rank, and retailer bestseller
+ * pages are client-rendered / anti-bot. Your own click data is the one
+ * bestseller-ish signal you actually own, and it can never break.
+ * Scales with traffic, so it self-hides until clicks accumulate.
+ */
+export const getMostClickedToBuy = unstable_cache(
+  _getMostClickedToBuy,
+  ["db-trending-most-clicked"],
+  { revalidate: CACHE_REVALIDATE_SECONDS },
+);
+async function _getMostClickedToBuy(limit = 12, days = 90): Promise<ScrollerRow[]> {
+  try {
+    const supabase = createAdminClient();
+    const since = new Date(Date.now() - days * 86_400_000).toISOString();
+    const { data: clicks, error } = await supabase
+      .from("affiliate_clicks")
+      .select("fragrance_id, clicked_at")
+      .gte("clicked_at", since)
+      .limit(5000);
+    if (error) {
+      console.warn("[db-trending] most-clicked:", error.message);
+      return [];
+    }
+    const counts = new Map<string, number>();
+    for (const c of clicks ?? []) {
+      counts.set(c.fragrance_id, (counts.get(c.fragrance_id) ?? 0) + 1);
+    }
+    if (counts.size === 0) return [];
+    const topIds = [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, limit)
+      .map(([id]) => id);
+
+    const { data: frs, error: frErr } = await supabase
+      .from("fragrances")
+      .select(SELECT)
+      .in("id", topIds);
+    if (frErr) {
+      console.warn("[db-trending] most-clicked detail:", frErr.message);
+      return [];
+    }
+    const byId = new Map((frs ?? []).map((f) => [f.id, toRow(f)]));
+    return topIds.map((id) => byId.get(id)).filter((r): r is ScrollerRow => !!r);
+  } catch (err) {
+    console.warn("[db-trending] most-clicked threw:", asMsg(err));
+    return [];
+  }
+}
+
 function toRow(f: {
   id: string;
   name: string;

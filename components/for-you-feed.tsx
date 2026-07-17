@@ -21,7 +21,11 @@ import type { Recommendations } from "@/lib/recommendations";
 import { houseSlug } from "@/lib/houses";
 import { TrendingSection } from "./trending-section";
 import { TrendingFeeds } from "./trending-feeds";
-import { MostAddedToCollection, PopularOnFragrantica } from "./trending-db-sections";
+import {
+  MostAddedToCollection,
+  MostClickedToBuy,
+  PopularOnFragrantica,
+} from "./trending-db-sections";
 
 export function ForYouFeed({ data }: { data: Recommendations }) {
   return (
@@ -153,6 +157,7 @@ export function ForYouFeed({ data }: { data: Recommendations }) {
       <TrendingSection variant="compact" />
       {/* First-party + catalog-derived pulses (live Supabase queries). */}
       <MostAddedToCollection variant="compact" />
+      <MostClickedToBuy variant="compact" />
       <PopularOnFragrantica variant="compact" />
 
       {/* 5. Save you money — curated/AI dupes for the user's collection. */}

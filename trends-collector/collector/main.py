@@ -124,8 +124,15 @@ def main(argv=None):
     feed = to_trending_feed(snapshot, source=cfg.get("feed_source", "multi"))
     with open(os.path.join(args.out, "trending-weekly.json"), "w", encoding="utf-8") as fh:
         json.dump(feed, fh, indent=2, ensure_ascii=False)
-    # one feed per source so the app can surface each area separately
+    # one feed per source so the app can surface each area separately.
+    # Skip empty ones: to_source_feeds emits a feed for EVERY known source,
+    # including disabled/failed ones, and writing those would clobber a good
+    # existing feed with 0 entries and make the section vanish from the app.
+    # Leaving the file untouched keeps the last known-good data in place.
     for stem, sfeed in to_source_feeds(snapshot).items():
+        if not sfeed["entries"]:
+            print(f"[skip] {stem}: 0 entries, leaving existing feed untouched", file=sys.stderr)
+            continue
         with open(os.path.join(args.out, f"{stem}.json"), "w", encoding="utf-8") as fh:
             json.dump(sfeed, fh, indent=2, ensure_ascii=False)
     print(f"Wrote {path} ({len(fragrances)} fragrances, sources: {', '.join(used)})")
