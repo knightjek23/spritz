@@ -49,8 +49,18 @@ def build_sources(cfg: dict):
     return sources
 
 
-def load_previous(out_dir: str):
+def load_previous(out_dir: str, current_week: str | None = None):
+    """Most recent snapshot from a PRIOR week.
+
+    The collector runs daily now, so the newest file on disk is usually *this*
+    week's (written by an earlier run today or yesterday). Comparing against it
+    would turn rank_change into a day-over-day delta. Excluding the current
+    week's file keeps rank_change genuinely week-over-week.
+    """
     files = sorted(glob.glob(os.path.join(out_dir, "fragrance-popularity-*.json")))
+    if current_week:
+        skip = f"fragrance-popularity-{current_week}.json"
+        files = [f for f in files if os.path.basename(f) != skip]
     if not files:
         return None
     with open(files[-1], encoding="utf-8") as fh:
@@ -89,7 +99,7 @@ def main(argv=None):
         print("No signals from any source -- not writing a snapshot.", file=sys.stderr)
         return 1
 
-    previous = load_previous(args.out)
+    previous = load_previous(args.out, week_str)
     fragrances = blend(all_signals)[: args.top]
     fragrances = apply_week_over_week(fragrances, previous)
 

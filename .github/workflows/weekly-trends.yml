@@ -1,11 +1,20 @@
-name: Weekly fragrance trends
+name: Fragrance trends collector
 
-# Runs every Monday 06:00 UTC and on demand. Scrapes the weekly trending feed,
-# writes it into data/trending-weekly.json, and commits it. The commit triggers
-# the normal Vercel deploy, so the new feed goes live automatically.
+# Runs DAILY at 07:17 UTC, and on demand.
+#
+# Why daily, and why :17 — it used to be "0 6 * * 1" (Mondays on the hour) and
+# only landed every other week. Two reasons:
+#   1. Google Trends (our only working source) gets rate-limited from GitHub's
+#      shared runner IPs. When every source comes back empty the collector exits
+#      1, the job fails, and nothing is committed. Weekly, one 429 cost a whole
+#      week of freshness.
+#   2. GitHub delays or drops scheduled runs under load, and the top of the hour
+#      is the most congested slot.
+# Running daily off-the-hour means a single failure costs a day, not a fortnight.
+# The commit step is a no-op when nothing changed, so extra runs are ~free.
 on:
   schedule:
-    - cron: "0 6 * * 1"
+    - cron: "17 7 * * *"
   workflow_dispatch: {}
 
 permissions:
@@ -48,8 +57,8 @@ jobs:
           git config user.email "actions@github.com"
           git add data/trending-*.json trends-collector/data
           if git diff --cached --quiet; then
-            echo "No changes this week."
+            echo "No changes today."
           else
-            git commit -m "data: weekly fragrance trends $(date -u +%G-W%V)"
+            git commit -m "data: fragrance trends $(date -u +%F)"
             git push
           fi
