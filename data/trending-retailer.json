@@ -1,10 +1,52 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-06T10:45:06.345118+00:00",
+  "generated_at": "2026-07-17T19:32:09.327917+00:00",
   "period": {
-    "start": "2026-07-06",
-    "end": "2026-07-12"
+    "start": "2026-07-13",
+    "end": "2026-07-19"
   },
   "source": "retailer_bestsellers",
-  "entries": []
+  "note": "Web-research-assisted refresh (not the deployed scraper): the Sephora scrape returns 0 because that page is client-rendered. Ranking derived from July 2026 WWD Sephora/Ulta Q1 online-sales reporting and Sephora bestseller coverage. The next successful collector run overwrites this.",
+  "entries": [
+    {
+      "rank": 1,
+      "name": "Myslf",
+      "house": "Yves Saint Laurent"
+    },
+    {
+      "rank": 2,
+      "name": "Coco Mademoiselle",
+      "house": "Chanel"
+    },
+    {
+      "rank": 3,
+      "name": "Libre",
+      "house": "Yves Saint Laurent"
+    },
+    {
+      "rank": 4,
+      "name": "Uomo Born In Roma",
+      "house": "Valentino"
+    },
+    {
+      "rank": 5,
+      "name": "Donna Born In Roma",
+      "house": "Valentino"
+    },
+    {
+      "rank": 6,
+      "name": "Baccarat Rouge 540",
+      "house": "Maison Francis Kurkdjian"
+    },
+    {
+      "rank": 7,
+      "name": "Vanilla 28",
+      "house": "Kayali"
+    },
+    {
+      "rank": 8,
+      "name": "J'adore",
+      "house": "Dior"
+    }
+  ]
 }
