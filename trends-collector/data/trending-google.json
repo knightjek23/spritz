@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-18T08:59:55.840315+00:00",
+  "generated_at": "2026-07-19T09:17:40.313773+00:00",
   "period": {
     "start": "2026-07-13",
     "end": "2026-07-19"
@@ -29,18 +29,18 @@
     },
     {
       "rank": 5,
+      "name": "Vanilla Sex",
+      "house": "Tom Ford"
+    },
+    {
+      "rank": 6,
       "name": "Coco Mademoiselle",
       "house": "Chanel"
     },
     {
-      "rank": 6,
+      "rank": 7,
       "name": "Molecule 01",
       "house": "Escentric Molecules"
-    },
-    {
-      "rank": 7,
-      "name": "Vanilla Sex",
-      "house": "Tom Ford"
     }
   ]
 }
