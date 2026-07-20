@@ -36,8 +36,8 @@ const PLANS: Record<Plan, { label: string; price: string; unit: string; sub: str
 const FEATURE_MATRIX: Array<{ label: string; free: string; pro: string }> = [
   {
     label: "Scan any bottle",
-    free: "Unlimited",
-    pro: "Unlimited",
+    free: "Unlimited*",
+    pro: "Unlimited*",
   },
   {
     label: "Saved collection",
@@ -249,6 +249,10 @@ export default function PricingPage() {
             </div>
           ))}
         </div>
+        <p className="mt-3 text-xs text-slate leading-relaxed">
+          * Unlimited within fair-use daily limits that keep Spritz fast for
+          everyone and prevent abuse. Normal use never comes close.
+        </p>
       </section>
 
       {/* FAQ */}

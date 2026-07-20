@@ -8,6 +8,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { generateDupesWithAI } from "@/lib/ai-dupes";
+import { checkAiGenLimit } from "@/lib/rate-limit";
 import type { DupeRecommendation, Fragrance } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -54,6 +55,17 @@ export async function POST(
   // 4. Cache check — return existing dupes if present
   if (fragrance.dupes && fragrance.dupes.length > 0) {
     return NextResponse.json({ dupes: fragrance.dupes, cached: true });
+  }
+
+  // 4b. Burst ceiling — only reached on a cache miss (a real model call).
+  if (!checkAiGenLimit(appUser.id)) {
+    return NextResponse.json(
+      {
+        error: "rate_limited",
+        message: "You're generating a lot right now. Give it a minute and try again.",
+      },
+      { status: 429 },
+    );
   }
 
   // 5. Generate via OpenAI

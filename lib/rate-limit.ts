@@ -20,6 +20,11 @@ import crypto from "crypto";
 
 const ANON_LIMIT = parseInt(process.env.SCAN_RATE_LIMIT_ANON ?? "10", 10);
 const FREE_LIMIT = parseInt(process.env.SCAN_RATE_LIMIT_FREE ?? "50", 10);
+// Pro is NOT truly unlimited: GPT-4o vision is the priciest AI call, so a
+// single Pro user (or a stolen Pro login) with no cap could drain the whole
+// global budget and run up the API bill. 300/day is far above any real human
+// use — it functions as an anti-abuse ceiling, not a product limit.
+const PRO_LIMIT = parseInt(process.env.SCAN_RATE_LIMIT_PRO ?? "300", 10);
 const GLOBAL_DAILY_BUDGET = parseInt(
   process.env.SCAN_GLOBAL_DAILY_BUDGET ?? "2000",
   10,
@@ -46,7 +51,11 @@ interface CheckParams {
 export async function checkScanRateLimit(
   params: CheckParams,
 ): Promise<{ allowed: boolean; remaining: number; limit: number }> {
-  const limit = params.userId ? FREE_LIMIT : ANON_LIMIT;
+  const limit = params.isPro
+    ? PRO_LIMIT
+    : params.userId
+      ? FREE_LIMIT
+      : ANON_LIMIT;
   const supabase = createAdminClient();
   const since = utcMidnight();
 
@@ -67,8 +76,8 @@ export async function checkScanRateLimit(
     return { allowed: false, remaining: 0, limit };
   }
 
-  if (params.isPro) return { allowed: true, remaining: Infinity, limit: Infinity };
-
+  // Per-user (or per-IP for anon) daily quota. This now applies to Pro too,
+  // against the higher PRO_LIMIT — Pro is generous, not infinite.
   let query = supabase
     .from("scan_events")
     .select("id", { count: "exact", head: true })
@@ -130,4 +139,28 @@ export function clientIp(req: Request): string {
   return (
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "0.0.0.0"
   );
+}
+
+// ---------------------------------------------------------------------------
+// Per-user ceiling on paid AI *generation* (AI dupes + consensus).
+//
+// These endpoints call a model ONLY on a cache miss, and results are cached
+// globally per fragrance — so total lifetime spend is already bounded by the
+// catalog size (each fragrance is generated once, ever). What this guards is
+// *burst* abuse: a single Pro account scripting generation across the whole
+// catalog in a short window. In-memory / per-instance is a proportionate
+// trade here (no new table, no DB round-trip on the hot path). The hard
+// backstop for total spend is a dashboard spend limit on the model provider
+// (OpenAI today; Anthropic if you migrate) — set one.
+// ---------------------------------------------------------------------------
+
+const AI_GEN_LIMIT = parseInt(process.env.AI_GEN_RATE_LIMIT ?? "20", 10);
+const AI_GEN_WINDOW_MS =
+  parseInt(process.env.AI_GEN_RATE_WINDOW_MIN ?? "10", 10) * 60_000;
+
+/** Returns true if this user may trigger another paid AI generation now.
+ *  Keyed by app user id (UUID). Call only on the cache-miss path, right
+ *  before the model call. */
+export function checkAiGenLimit(userId: string): boolean {
+  return checkIpThrottle(`aigen:${userId}`, AI_GEN_LIMIT, AI_GEN_WINDOW_MS);
 }

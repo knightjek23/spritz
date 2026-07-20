@@ -12,6 +12,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { generateConsensusWithAI } from "@/lib/ai-consensus";
+import { checkAiGenLimit } from "@/lib/rate-limit";
 import type { Fragrance } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -68,6 +69,17 @@ export async function POST(
       },
       cached: true,
     });
+  }
+
+  // 4b. Burst ceiling — only reached on a cache miss (a real model call).
+  if (!checkAiGenLimit(appUser.id)) {
+    return NextResponse.json(
+      {
+        error: "rate_limited",
+        message: "You're generating a lot right now. Give it a minute and try again.",
+      },
+      { status: 429 },
+    );
   }
 
   // 5. Generate via OpenAI
