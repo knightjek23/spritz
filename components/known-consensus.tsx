@@ -80,8 +80,14 @@ export function KnownConsensus({ fragrance }: Props) {
     }
   }
 
-  // ----- State: consensus present -----
-  if (consensus) {
+  // ----- State: consensus present AND user is Pro -----
+  // Gated on isPro so the cached consensus (which is batch-pre-generated
+  // onto most rows) only renders for Pro users. Without the gate the
+  // "present" branch would show the paywalled take to free/signed-out
+  // users, since the data is server-rendered into props. Gating on
+  // isLoaded means the safe default during Clerk's resolve is the upsell,
+  // not a flash of content. Free users fall through to the upsell below.
+  if (consensus && isLoaded && isSignedIn && isPro) {
     const isThinSignal = consensus.confidence < 0.5;
     return (
       <section className="mb-10">
