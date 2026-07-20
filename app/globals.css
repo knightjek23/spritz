@@ -213,7 +213,24 @@ h1, h2, h3, h4 {
 @supports not selector(::-webkit-scrollbar) {
   .slim-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: rgba(26, 26, 26, 0.25) transparent;
+    /* Match the webkit thumb color (ink @ 18%) so desktop Firefox looks
+       identical to desktop Chrome. */
+    scrollbar-color: rgba(26, 26, 26, 0.18) transparent;
+  }
+}
+
+/* Touch devices (phones/tablets): the native scrollbar under a full-bleed
+   card row can't be inset to align with the cards (no track-margin support
+   on iOS/standard scrollbars) and often ignores the custom color. Rather
+   than show a misaligned, mismatched bar, hide it — touch users scroll by
+   swiping, and the peeking next card already signals scrollability. The
+   desktop slim bar above is untouched. */
+@media (pointer: coarse) {
+  .slim-scrollbar {
+    scrollbar-width: none;
+  }
+  .slim-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }
 
