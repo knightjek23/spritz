@@ -25,10 +25,6 @@ export function MarketingHome() {
           in from below in one fluid motion on first paint (~80ms between
           starts, 600ms each, ease-out-expo). Honors prefers-reduced-
           motion globally via globals.css. */}
-      <span className="spritz-rise spritz-rise-1 inline-block px-3 py-1 mb-6 bg-brass text-ink text-xs font-mono uppercase tracking-wider rounded-full">
-        v0.1 · The fragrance library
-      </span>
-
       <h1 className="spritz-rise spritz-rise-2 font-display text-6xl mb-4 leading-[0.95]">
         Every fragrance,
         <br />
