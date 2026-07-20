@@ -5,7 +5,7 @@
 // /fragrance/[id]). Keeps every trending surface visually consistent.
 
 import Link from "next/link";
-import Image from "next/image";
+import { BottleImage } from "@/components/bottle-image";
 
 export interface ScrollerRow {
   id: string;
@@ -48,19 +48,11 @@ export function FragranceScroller({
             <li key={f.id} className="snap-start shrink-0 w-[140px]">
               <Link href={`/fragrance/${f.id}`} className="block group">
                 <div className="relative aspect-square rounded-xl overflow-hidden bg-paper border border-ink/10 mb-2 isolate">
-                  {f.bottle_image_url ? (
-                    <Image
-                      src={f.bottle_image_url}
-                      alt={`${f.house} ${f.name}`}
-                      fill
-                      sizes="140px"
-                      className="object-contain p-2 mix-blend-multiply group-hover:scale-105 transition-transform"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center font-mono text-[10px] text-slate uppercase tracking-wider">
-                      {f.house.slice(0, 2)}
-                    </div>
-                  )}
+                  <BottleImage
+                    src={f.bottle_image_url}
+                    house={f.house}
+                    name={f.name}
+                  />
                   {showRank && (
                     <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-cream/90 backdrop-blur-sm rounded-full font-mono text-[10px] text-ink">
                       #{i + 1}

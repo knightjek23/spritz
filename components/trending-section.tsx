@@ -15,7 +15,7 @@
 // horizontally on narrow screens and wraps on wider ones.
 
 import Link from "next/link";
-import Image from "next/image";
+import { BottleImage } from "@/components/bottle-image";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -112,19 +112,11 @@ export async function TrendingSection({
                     card backdrop. Matches the detail-page hero treatment;
                     no more white rectangle behind each thumbnail. */}
                 <div className="relative aspect-square rounded-xl overflow-hidden bg-paper border border-ink/10 mb-2 isolate">
-                  {f.bottle_image_url ? (
-                    <Image
-                      src={f.bottle_image_url}
-                      alt={`${f.house} ${f.name}`}
-                      fill
-                      sizes="140px"
-                      className="object-contain p-2 mix-blend-multiply group-hover:scale-105 transition-transform"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center font-mono text-[10px] text-slate uppercase tracking-wider">
-                      {f.house.slice(0, 2)}
-                    </div>
-                  )}
+                  <BottleImage
+                    src={f.bottle_image_url}
+                    house={f.house}
+                    name={f.name}
+                  />
                   {/* Rank chip in the corner — light social-proof signal */}
                   <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-cream/90 backdrop-blur-sm rounded-full font-mono text-[10px] text-ink">
                     #{i + 1}

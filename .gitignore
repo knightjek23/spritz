@@ -61,3 +61,5 @@ supabase/.temp
 /screenshots/
 /.auth/
 scripts/*.log
+node_modules.old/
+node_modules.partial/

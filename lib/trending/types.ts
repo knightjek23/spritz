@@ -42,7 +42,7 @@ export interface TrendingFeed {
   entries: TrendingEntry[];
 }
 
-export type MatchMethod = "fragrantica_url" | "fuzzy" | "unmatched";
+export type MatchMethod = "fragrantica_url" | "exact" | "fuzzy" | "unmatched";
 
 export interface JoinedTrendingEntry extends TrendingEntry {
   fragranceId: string | null;

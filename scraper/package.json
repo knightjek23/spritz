@@ -16,6 +16,7 @@
     "parse:one": "tsx src/parser.ts --one",
     "vectorize": "tsx src/note-vector.ts",
     "upload": "tsx src/upload-to-supabase.ts",
+    "import:targets": "tsx src/import-targets.ts",
     "compute-dupes": "tsx src/compute-dupe-pairs.ts",
     "mirror:images": "tsx src/mirror-images.ts",
     "consensus": "tsx src/generate-consensus.ts",

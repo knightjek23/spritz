@@ -16,6 +16,12 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { load, type CheerioAPI } from "cheerio";
 import type { ScrapedFragrance, ScrapedNote } from "./types";
+// Reaches across into the app's lib rather than duplicating the regex
+// list: placeholder detection has to agree between write time (here)
+// and read time (components/bottle-image.tsx), and two copies would
+// drift the first time Fragrantica renames the asset.
+import { cleanBottleImageUrl } from "./image-clean";
+import { applyNameOverride } from "./name-overrides";
 
 const RAW_DIR = path.resolve("data/raw");
 const PARSED_DIR = path.resolve("data/parsed");
@@ -226,10 +232,17 @@ function extractPerfumer($: CheerioAPI): string | null {
   return result;
 }
 
+// Fragrantica serves a generic "IMAGE COMING SOON" graphic in the same
+// itemprop="image" slot as a real bottle photo when they don't have one.
+// Taking it at face value stored a fake photo that renders as a grey
+// silhouette in every card row. cleanBottleImageUrl returns null for
+// those so the column stays honestly empty and the UI falls back to
+// house initials. Same guard on og:image, which has the same problem.
 function extractBottleImage($: CheerioAPI): string | null {
   const itemprop = $('[itemtype*="Product"] img[itemprop="image"]').first().attr("src");
-  if (itemprop) return itemprop;
-  return $('meta[property="og:image"]').attr("content") ?? null;
+  const cleanedItemprop = cleanBottleImageUrl(itemprop);
+  if (cleanedItemprop) return cleanedItemprop;
+  return cleanBottleImageUrl($('meta[property="og:image"]').attr("content"));
 }
 
 // ---------- main parse ----------
@@ -239,13 +252,19 @@ function parseHtml(html: string, sourceUrlFallback: string): ScrapedFragrance | 
 
   // Extract house first so extractName can strip the brand suffix from the h1.
   const house = extractHouse($);
-  const name = extractName($, house);
-  if (!name || !house) {
+  const rawName = extractName($, house);
+  if (!rawName || !house) {
     return null; // both required
   }
 
   const canonical = extractCanonicalUrl($);
   const notes = extractAllNotes($);
+
+  // Override Fragrantica's listed name with the real on-bottle name when
+  // they differ (censored/verbose/brand-prefixed listings). Keyed by the
+  // Fragrantica perfume id, so the canonical URL (or the fallback we were
+  // fetched with) drives the lookup.
+  const name = applyNameOverride(rawName, canonical ?? sourceUrlFallback);
 
   return {
     name,

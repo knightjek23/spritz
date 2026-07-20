@@ -11,7 +11,7 @@
 // Matches components/trending-section.tsx design tokens. Copy avoids em dashes.
 
 import Link from "next/link";
-import Image from "next/image";
+import { BottleImage } from "@/components/bottle-image";
 import { loadAreaFeed, isFeedStale, type TrendingArea } from "@/lib/trending/feed";
 import { joinTrendingToCatalogCached } from "@/lib/trending/join";
 import type { JoinedTrendingEntry } from "@/lib/trending/types";
@@ -74,19 +74,7 @@ async function AreaRow({
                     card backdrop. Matches the detail-page hero treatment;
                     no more white rectangle behind each thumbnail. */}
                 <div className="relative aspect-square rounded-xl overflow-hidden bg-paper border border-ink/10 mb-2 isolate">
-                  {f.imageUrl ? (
-                    <Image
-                      src={f.imageUrl}
-                      alt={`${f.house} ${f.name}`}
-                      fill
-                      sizes="140px"
-                      className="object-contain p-2 mix-blend-multiply group-hover:scale-105 transition-transform"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center font-mono text-[10px] text-slate uppercase tracking-wider">
-                      {f.house.slice(0, 2)}
-                    </div>
-                  )}
+                  <BottleImage src={f.imageUrl} house={f.house} name={f.name} />
                   <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-cream/90 backdrop-blur-sm rounded-full font-mono text-[10px] text-ink">
                     #{f.rank}
                   </span>
