@@ -40,7 +40,7 @@ export function ManageSubscriptionButton() {
         type="button"
         onClick={openPortal}
         disabled={busy}
-        className="w-full bg-ink text-cream py-3 rounded-xl font-medium hover:bg-ink/90 disabled:opacity-60 transition"
+        className="w-full bg-emerald text-cream py-3 rounded-xl font-medium hover:bg-emerald/90 disabled:opacity-60 transition"
       >
         {busy ? "Opening…" : "Manage subscription"}
       </button>
