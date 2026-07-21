@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-19T09:17:40.313773+00:00",
+  "generated_at": "2026-07-21T09:41:12.000339+00:00",
   "period": {
-    "start": "2026-07-13",
-    "end": "2026-07-19"
+    "start": "2026-07-20",
+    "end": "2026-07-26"
   },
   "source": "multi",
   "entries": [
@@ -29,13 +29,13 @@
     },
     {
       "rank": 5,
-      "name": "Vanilla Sex",
-      "house": "Tom Ford"
+      "name": "Coco Mademoiselle",
+      "house": "Chanel"
     },
     {
       "rank": 6,
-      "name": "Coco Mademoiselle",
-      "house": "Chanel"
+      "name": "Vanilla Sex",
+      "house": "Tom Ford"
     },
     {
       "rank": 7,
