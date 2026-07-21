@@ -213,26 +213,23 @@ export default function PricingPage() {
         </div>
       </div>
 
-      {/* Selected plan card. Colors from Figma (node 167-4): Emerald
-          #114821 fill, Cream #FAF6ED text, outlined button. Font hierarchy
-          (display 3xl title/price, sm sub, mono xs footnote) unchanged —
-          only the palette flipped from cream-card/emerald-border to
-          emerald-card/cream-text. */}
-      <div className="rounded-2xl p-6 mb-10 bg-[#114821] border border-black/20">
+      {/* Selected plan card. Stroke + CTA use the emerald token — the same
+          green as every other CTA in the app. */}
+      <div className="border-2 border-emerald rounded-2xl p-6 mb-10 bg-cream">
         <div className="flex items-baseline justify-between mb-1">
-          <h2 className="font-display text-3xl text-[#FAF6ED]">{plan.label}</h2>
-          <span className="font-display text-3xl text-[#FAF6ED]">
+          <h2 className="font-display text-3xl">{plan.label}</h2>
+          <span className="font-display text-3xl">
             {plan.price}
-            <span className="text-sm text-[#FAF6ED]/70 font-sans">{plan.unit}</span>
+            <span className="text-sm text-slate font-sans">{plan.unit}</span>
           </span>
         </div>
-        <p className="text-sm text-[#FAF6ED]/80 mb-5">{plan.sub}</p>
+        <p className="text-sm text-slate mb-5">{plan.sub}</p>
 
         {!isAlreadyPro && (
           <button
             onClick={() => upgrade(selected)}
             disabled={busy}
-            className="w-full border border-[#FAF6ED]/50 text-[#FAF6ED] py-3 rounded-xl font-medium hover:bg-[#FAF6ED]/10 transition disabled:opacity-60"
+            className="w-full bg-emerald text-cream py-3 rounded-xl font-medium hover:bg-emerald/90 transition disabled:opacity-60"
           >
             {busy
               ? "Loading…"
@@ -242,7 +239,7 @@ export default function PricingPage() {
           </button>
         )}
 
-        <p className="mt-3 text-center font-mono text-xs uppercase tracking-widest text-[#FAF6ED]/60">
+        <p className="mt-3 text-center font-mono text-xs uppercase tracking-widest text-slate">
           {isSignedIn ? "Secure checkout via Stripe" : "Sign up first. Takes 30 seconds."}
         </p>
       </div>
