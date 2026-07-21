@@ -1,8 +1,16 @@
 // AI-generated dupes. Used as a Pro-tier fallback when no editorial dupes
 // exist for a fragrance. Cached to DB after first generation.
 //
-// Cost: gpt-4o-mini is roughly $0.15/M input + $0.60/M output tokens.
-// Each call is ~600 input + 400 output tokens = ~$0.0003. Effectively free.
+// Model: gpt-4o. gpt-4o-mini had shallow recall of specific community
+// dupe pairings and rated itself under the confidence floor even for
+// famous ones, so most fragrances returned empty. gpt-4o has much better
+// fragrance-domain recall while the anti-hallucination guardrails below
+// still prevent invented dupes.
+//
+// Cost: gpt-4o is roughly $2.50/M input + $10/M output tokens. Each call
+// is ~600 input + 400 output tokens = ~$0.0055. Cached to the DB after
+// the first generation, so it's a one-time cost per fragrance, and only
+// Pro users can trigger it.
 //
 // Anti-hallucination strategy:
 //   1. Provide ALL fragrance metadata in the prompt (notes, family, year, perfumer)
@@ -57,10 +65,10 @@ Top notes: ${noteList(fragrance.top_notes)}
 Heart notes: ${noteList(fragrance.mid_notes)}
 Base notes: ${noteList(fragrance.base_notes)}
 
-Return up to 5 community-recognized dupes. Skip if none. Confidence below 0.5 = don't include.`;
+Return up to 5 community-recognized dupes. Skip if none. Confidence below 0.4 = don't include.`;
 
   const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "gpt-4o",
     temperature: 0.3,
     response_format: { type: "json_object" },
     messages: [
@@ -94,7 +102,7 @@ Return up to 5 community-recognized dupes. Skip if none. Confidence below 0.5 = 
           d.house.toLowerCase() === fragrance.house.toLowerCase() &&
           d.name.toLowerCase() === fragrance.name.toLowerCase()
         ) &&
-        (typeof d.confidence !== "number" || d.confidence >= 0.5),
+        (typeof d.confidence !== "number" || d.confidence >= 0.4),
     )
     .slice(0, 5)
     .map<DupeRecommendation>((d) => ({
