@@ -43,11 +43,12 @@ export default async function AccountPage() {
   // App user record — the source of truth for plan + stripe linkage.
   const { data: appUser } = await supabase
     .from("users")
-    .select("id, plan, stripe_customer_id, created_at")
+    .select("id, plan, stripe_customer_id, is_lifetime, created_at")
     .eq("clerk_user_id", userId)
     .maybeSingle();
 
   const plan = (appUser?.plan ?? "free") as "free" | "pro";
+  const isLifetime = appUser?.is_lifetime ?? false;
   const memberSince = appUser?.created_at ?? null;
   const hasStripeCustomer = !!appUser?.stripe_customer_id;
 
@@ -97,7 +98,7 @@ export default async function AccountPage() {
             </div>
             {plan === "pro" && (
               <span className="px-2 py-1 rounded-full bg-emerald text-cream text-[10px] font-mono uppercase tracking-wider">
-                Active
+                {isLifetime ? "Lifetime" : "Active"}
               </span>
             )}
           </div>
@@ -108,7 +109,12 @@ export default async function AccountPage() {
                 AI-generated dupes, full editorial library, expanded
                 similar-fragrance results, and unlimited collection.
               </p>
-              {hasStripeCustomer ? (
+              {isLifetime ? (
+                <p className="text-sm text-slate italic">
+                  You have Lifetime access — paid once, yours forever. Nothing to
+                  manage or renew.
+                </p>
+              ) : hasStripeCustomer ? (
                 <ManageSubscriptionButton />
               ) : (
                 <p className="text-sm text-slate italic">

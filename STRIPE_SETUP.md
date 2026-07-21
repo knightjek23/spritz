@@ -1,6 +1,6 @@
 # Stripe Setup Runbook — Spritz Pro
 
-Locked pricing (2026-07-13): **Free · Pro Monthly $4.99/mo with a 7-day free trial · Pro Annual $29.99/yr billed upfront.**
+Locked pricing: **Free · Pro Monthly $4.99/mo with a 7-day free trial · Pro Annual $29.99/yr billed upfront · Pro Lifetime $89 one-time.**
 
 The trial sits on **monthly, not annual** — deliberately. A trial on annual would auto-convert to a $29.99 charge (a "surprise bill"); on monthly the worst-case auto-charge after the trial is $4.99. Annual charges its known $29.99 upfront at checkout.
 
@@ -15,16 +15,19 @@ Stripe dashboard → **Product catalog** → **Add product**.
 - **Name:** `Spritz Pro`
 - **Description:** `Full fragrance library — perfumer credits, house history, note profiles, and on-demand AI dupes.`
 
-Add **two recurring prices** to this one product (not two separate products):
+Add **three prices** to this one product (not separate products):
 
 | Price | Amount | Billing period | Notes |
 |---|---|---|---|
-| Pro Monthly | $4.99 | Monthly | Do **not** set the trial here |
-| Pro Annual | $29.99 | Yearly | — |
+| Pro Monthly | $4.99 | Monthly (recurring) | Do **not** set the trial here |
+| Pro Annual | $29.99 | Yearly (recurring) | — |
+| Pro Lifetime | $89 | **One-time** | Price type "One time", not recurring |
 
-> The 7-day trial is applied in code (`app/api/stripe/checkout/route.ts`, monthly only), not on the Stripe Price. Leave "Free trial" blank on both prices so it isn't applied twice.
+> The 7-day trial is applied in code (`app/api/stripe/checkout/route.ts`, monthly only), not on the Stripe Price. Leave "Free trial" blank on all prices so it isn't applied twice.
+>
+> The Lifetime price **must be one-time (non-recurring)** — the app checks it out in `mode: "payment"` and the webhook grants permanent Pro on `checkout.session.completed`. A recurring Lifetime price would behave like a subscription.
 
-After saving, click each price and copy its **API ID** (looks like `price_1Qx...`). You'll have two.
+After saving, click each price and copy its **API ID** (looks like `price_1Qx...`). You'll have three.
 
 ---
 
@@ -38,6 +41,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_…
 STRIPE_WEBHOOK_SECRET=whsec_…          # from step 3
 STRIPE_PRICE_ID_PRO_MONTHLY=price_…    # the $4.99/mo price API ID
 STRIPE_PRICE_ID_PRO_ANNUAL=price_…     # the $29.99/yr price API ID
+STRIPE_PRICE_ID_PRO_LIFETIME=price_…   # the $89 one-time price API ID
 NEXT_PUBLIC_APP_URL=http://localhost:3000   # your real domain in prod
 ```
 

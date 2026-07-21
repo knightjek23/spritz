@@ -11,9 +11,11 @@
 import { useState } from "react";
 import { useClerk, useUser } from "@clerk/nextjs";
 
-type Plan = "monthly" | "annual";
+type Plan = "monthly" | "annual" | "lifetime";
 
 // Plans configured here so the comparison table and CTA stay in sync.
+// Lifetime is a one-time purchase, but it lives in the same toggle so it's
+// discoverable right alongside Monthly and Annual.
 const PLANS: Record<Plan, { label: string; price: string; unit: string; sub: string; cadence: string }> = {
   monthly: {
     label: "Monthly",
@@ -28,6 +30,13 @@ const PLANS: Record<Plan, { label: string; price: string; unit: string; sub: str
     unit: "/yr",
     sub: "Billed annually — that's ~$2.50/mo. Cancel anytime.",
     cadence: "annual",
+  },
+  lifetime: {
+    label: "Lifetime",
+    price: "$89",
+    unit: " once",
+    sub: "One payment, yours forever. No subscription, no renewals.",
+    cadence: "lifetime",
   },
 };
 
@@ -93,6 +102,10 @@ const FAQ: Array<{ q: string; a: string }> = [
   {
     q: "Is there a free trial?",
     a: "Yes — the Monthly plan comes with a 7-day free trial. You get full Pro access for a week, and you won't be charged until it ends. Cancel anytime before then and you pay nothing, and the most you'd ever be charged after a trial is $4.99. The Annual plan has no trial — it's billed upfront at $29.99 (~$2.50/mo). And the Free plan is always free: scan unlimited bottles, save up to 25 fragrances, and get curated dupes without paying anything.",
+  },
+  {
+    q: "What's the Lifetime option?",
+    a: "A one-time payment of $89 that unlocks Pro permanently — no subscription, no renewals. Same Pro feature set as the monthly and annual plans, just paid once and yours for good. There's no trial on Lifetime since it's a single upfront purchase.",
   },
   {
     q: "Do you sell my data?",
@@ -217,7 +230,11 @@ export default function PricingPage() {
             disabled={busy}
             className="w-full bg-emerald text-cream py-3 rounded-xl font-medium hover:bg-emerald/90 transition disabled:opacity-60"
           >
-            {busy ? "Loading…" : `Start Pro · ${plan.cadence}`}
+            {busy
+              ? "Loading…"
+              : selected === "lifetime"
+                ? "Get Lifetime"
+                : `Start Pro · ${plan.cadence}`}
           </button>
         )}
 
@@ -284,7 +301,11 @@ export default function PricingPage() {
             disabled={busy}
             className="w-full bg-ink text-cream py-4 rounded-2xl font-medium tracking-wide hover:bg-ink/90 transition disabled:opacity-60 mb-3"
           >
-            {busy ? "Loading…" : `Go Pro · ${plan.price}${plan.unit}`}
+            {busy
+              ? "Loading…"
+              : selected === "lifetime"
+                ? `Get Lifetime · ${plan.price}`
+                : `Go Pro · ${plan.price}${plan.unit}`}
           </button>
           <p className="text-xs text-slate font-mono uppercase tracking-widest">
             Cancel anytime · {isSignedIn ? "Secure" : "30-second"} signup

@@ -31,19 +31,46 @@ const ENDPOINT_SECRET = process.env.STRIPE_WEBHOOK_SECRET ?? "";
 type Plan = "free" | "pro";
 
 /**
+ * Mirror the entitlement to Clerk publicMetadata. A Clerk failure does NOT
+ * fail the webhook — Supabase is the source of truth and Clerk reconciles on
+ * the next event or the next sign-in.
+ */
+async function mirrorPlanToClerk(clerkUserId: string, plan: Plan) {
+  try {
+    const client = await clerkClient();
+    await client.users.updateUserMetadata(clerkUserId, {
+      publicMetadata: { plan },
+    });
+  } catch (err) {
+    console.error(
+      "[stripe webhook] Clerk publicMetadata sync failed:",
+      err instanceof Error ? err.message : String(err),
+      "— Supabase is correct, client UI may lag until next sign-in",
+    );
+  }
+}
+
+/**
  * Single setter: updates Supabase first (source of truth), then mirrors
- * to Clerk publicMetadata. A Clerk failure does NOT fail the webhook —
- * Supabase already has the right value and Clerk will reconcile on the
- * next event or the next sign-in.
+ * to Clerk publicMetadata.
+ *
+ * Lifetime protection: when downgrading to "free" we scope the update with
+ * `is_lifetime = false`, so a one-time lifetime buyer can NEVER be reverted
+ * by a subscription lifecycle event (e.g. a later, unrelated subscription
+ * they cancel). Granting "pro" is unconditional.
  */
 async function setPlanByCustomer(customerId: string, plan: Plan) {
   const supabase = createAdminClient();
 
-  // 1. Update Supabase and pull back the clerk_user_id so we can fan out.
-  const { data: row, error } = await supabase
+  let update = supabase
     .from("users")
     .update({ plan })
-    .eq("stripe_customer_id", customerId)
+    .eq("stripe_customer_id", customerId);
+  if (plan === "free") {
+    update = update.eq("is_lifetime", false);
+  }
+
+  const { data: row, error } = await update
     .select("clerk_user_id")
     .maybeSingle();
 
@@ -56,31 +83,49 @@ async function setPlanByCustomer(customerId: string, plan: Plan) {
   }
 
   if (!row?.clerk_user_id) {
-    // Common during first-time checkout: the users row may not yet exist
-    // with this stripe_customer_id (the checkout-completed event arrives
-    // before our /api/checkout success path has stamped it). The next
-    // subscription.updated event will reconcile.
+    // Either no users row is linked to this customer yet (checkout-completed
+    // can arrive before the row is stamped — the next subscription.updated
+    // reconciles), OR this is a lifetime buyer intentionally shielded from a
+    // downgrade. Both are safe to skip.
     console.warn(
-      "[stripe webhook] no users row matches stripe_customer_id",
+      "[stripe webhook] no users row updated for stripe_customer_id",
       customerId,
-      "— skipping Clerk sync",
+      "— skipping Clerk sync (unlinked row, or lifetime buyer protected from downgrade)",
     );
     return;
   }
 
-  // 2. Mirror to Clerk publicMetadata.
-  try {
-    const client = await clerkClient();
-    await client.users.updateUserMetadata(row.clerk_user_id, {
-      publicMetadata: { plan },
-    });
-  } catch (err) {
-    console.error(
-      "[stripe webhook] Clerk publicMetadata sync failed:",
-      err instanceof Error ? err.message : String(err),
-      "— Supabase is correct, client UI may lag until next sign-in",
-    );
+  await mirrorPlanToClerk(row.clerk_user_id, plan);
+}
+
+/**
+ * One-time lifetime purchase: set plan = pro AND is_lifetime = true so the
+ * entitlement is permanent and immune to subscription events.
+ */
+async function grantLifetimeByCustomer(customerId: string) {
+  const supabase = createAdminClient();
+
+  const { data: row, error } = await supabase
+    .from("users")
+    .update({ plan: "pro", is_lifetime: true })
+    .eq("stripe_customer_id", customerId)
+    .select("clerk_user_id")
+    .maybeSingle();
+
+  if (error) {
+    console.error("[stripe webhook] lifetime grant failed:", error.message);
+    return;
   }
+
+  if (!row?.clerk_user_id) {
+    console.warn(
+      "[stripe webhook] lifetime purchase but no users row matches stripe_customer_id",
+      customerId,
+    );
+    return;
+  }
+
+  await mirrorPlanToClerk(row.clerk_user_id, "pro");
 }
 
 export async function POST(req: Request) {
@@ -103,6 +148,16 @@ export async function POST(req: Request) {
     // read AS a subscription, mislabeling entitlement.
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
+
+      // One-time lifetime purchase: mode "payment", no subscription. Grant
+      // permanent Pro once the payment has actually settled.
+      if (session.mode === "payment") {
+        if (session.payment_status === "paid") {
+          await grantLifetimeByCustomer(session.customer as string);
+        }
+        break;
+      }
+
       if (typeof session.subscription !== "string") {
         // No subscription attached (yet) — the subsequent
         // customer.subscription.created event carries the entitlement.

@@ -114,6 +114,9 @@ export interface User {
   email: string | null;
   plan: Plan;
   stripe_customer_id: string | null;
+  // True for one-time lifetime Pro buyers. Entitlement still rides on
+  // `plan === "pro"`; this flag just protects that from subscription events.
+  is_lifetime: boolean;
   created_at: string;
 }
 

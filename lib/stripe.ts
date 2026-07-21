@@ -52,4 +52,6 @@ export const stripe = new Proxy({} as Stripe, {
 export const STRIPE_PRICES = {
   pro_monthly: process.env.STRIPE_PRICE_ID_PRO_MONTHLY ?? "",
   pro_annual: process.env.STRIPE_PRICE_ID_PRO_ANNUAL ?? "",
+  // One-time (non-recurring) price for the $89 lifetime tier.
+  pro_lifetime: process.env.STRIPE_PRICE_ID_PRO_LIFETIME ?? "",
 };

@@ -114,6 +114,7 @@ export type Database = {
           email: string | null;
           plan: "free" | "pro";
           stripe_customer_id: string | null;
+          is_lifetime: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -123,6 +124,7 @@ export type Database = {
           email?: string | null;
           plan?: "free" | "pro";
           stripe_customer_id?: string | null;
+          is_lifetime?: boolean;
         };
         Update: Partial<Database["public"]["Tables"]["users"]["Insert"]>;
         Relationships: [];
