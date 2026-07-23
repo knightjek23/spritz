@@ -22,9 +22,11 @@ const nextConfig = {
     remotePatterns: [
       // Supabase storage for scan images + fragrance bottle thumbnails.
       { protocol: "https", hostname: "*.supabase.co" },
-      // Fragrantica CDN — bottle images during v1. Mirror to Supabase Storage in v1.5.
-      { protocol: "https", hostname: "fimgs.net" },
-      { protocol: "https", hostname: "*.fimgs.net" },
+      // fimgs.net (Fragrantica CDN) removed pre-launch: hotlinking their
+      // copyrighted bottle photos is legal exposure. The optimizer now
+      // refuses fimgs URLs; the app falls back to house initials until
+      // licensed (affiliate-feed) images backfill bottle_image_url.
+      // Add retailer/CDN hostnames here when those feeds are wired up.
     ],
   },
   experimental: {

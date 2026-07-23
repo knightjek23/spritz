@@ -21,7 +21,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { isPlaceholderBottleUrl } from "@/lib/bottle-image";
+import { cleanBottleImageUrl } from "@/lib/bottle-image";
 
 export function houseInitials(house: string): string {
   const words = house
@@ -52,7 +52,10 @@ export function BottleImage({
 }) {
   const [failed, setFailed] = useState(false);
 
-  const usable = src && !isPlaceholderBottleUrl(src) && !failed;
+  // cleanBottleImageUrl nulls placeholder graphics AND unlicensed sources
+  // (Fragrantica CDN + our mirror bucket), so those fall to the initials.
+  const cleaned = cleanBottleImageUrl(src);
+  const usable = cleaned && !failed;
 
   if (!usable) {
     return (
@@ -67,7 +70,7 @@ export function BottleImage({
 
   return (
     <Image
-      src={src}
+      src={cleaned}
       alt={`${house} ${name}`}
       fill
       sizes={sizes}

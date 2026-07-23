@@ -21,6 +21,16 @@ const PLACEHOLDER_PATTERNS: RegExp[] = [
   /default[_-]?bottle/i,
 ];
 
+// Unlicensed sources — mirror of lib/bottle-image.ts. fimgs.net is
+// Fragrantica's CDN (copyrighted bottle photos) and the bottle-images
+// bucket is our mirror of them. We no longer store either, so a scrape
+// records no bottle image and the app falls back to house initials until
+// licensed (affiliate-feed) images backfill the column.
+const BLOCKED_SOURCE_PATTERNS: RegExp[] = [
+  /(^|\.)fimgs\.net\//i,
+  /\/storage\/v1\/object\/public\/bottle-images\//i,
+];
+
 export function isPlaceholderBottleUrl(url: string | null | undefined): boolean {
   if (!url) return false;
   return PLACEHOLDER_PATTERNS.some((re) => re.test(url));
@@ -28,5 +38,7 @@ export function isPlaceholderBottleUrl(url: string | null | undefined): boolean 
 
 export function cleanBottleImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;
-  return isPlaceholderBottleUrl(url) ? null : url;
+  if (PLACEHOLDER_PATTERNS.some((re) => re.test(url))) return null;
+  if (BLOCKED_SOURCE_PATTERNS.some((re) => re.test(url))) return null;
+  return url;
 }

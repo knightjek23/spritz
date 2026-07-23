@@ -27,6 +27,20 @@ const PLACEHOLDER_PATTERNS: RegExp[] = [
   /default[_-]?bottle/i,
 ];
 
+// Unlicensed image SOURCES we must not serve pre-launch (legal exposure):
+//   - fimgs.net: Fragrantica's CDN. Hotlinking their/brands' copyrighted
+//     bottle photos.
+//   - the "bottle-images" Supabase Storage bucket: copies mirrored from
+//     Fragrantica by scraper/src/mirror-images.ts. Hosting the copies
+//     ourselves is worse, not better, so these are blocked too.
+// Blocked = treated as no image → the UI falls back to house initials.
+// When licensed images (affiliate feeds) land at their own URLs, they
+// won't match these patterns and will render normally.
+const BLOCKED_SOURCE_PATTERNS: RegExp[] = [
+  /(^|\.)fimgs\.net\//i,
+  /\/storage\/v1\/object\/public\/bottle-images\//i,
+];
+
 /**
  * True when a bottle_image_url points at a known placeholder graphic
  * rather than an actual bottle photo. Callers should treat a true
@@ -38,10 +52,23 @@ export function isPlaceholderBottleUrl(url: string | null | undefined): boolean 
 }
 
 /**
- * Normalises a scraped image URL: returns null for placeholders so the
- * column stays honestly empty instead of storing a fake photo.
+ * True when a URL points at an unlicensed source we must not serve
+ * (Fragrantica CDN or our mirror bucket of it). Kept separate from the
+ * placeholder check so the reason is clear at the call site.
+ */
+export function isBlockedImageSource(url: string | null | undefined): boolean {
+  if (!url) return false;
+  return BLOCKED_SOURCE_PATTERNS.some((re) => re.test(url));
+}
+
+/**
+ * Normalises a bottle image URL: returns null for placeholder graphics
+ * AND for unlicensed sources (Fragrantica CDN / our mirror of it), so
+ * the column reads as empty and the UI shows the house-initials
+ * fallback instead of a legally-exposed photo.
  */
 export function cleanBottleImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;
-  return isPlaceholderBottleUrl(url) ? null : url;
+  if (isPlaceholderBottleUrl(url) || isBlockedImageSource(url)) return null;
+  return url;
 }
