@@ -20,6 +20,7 @@ export const dynamic = "force-dynamic";
 const Body = z.object({ plan: z.enum(["monthly", "annual", "lifetime"]) });
 
 export async function POST(req: Request) {
+  try {
   const { userId } = auth();
   if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
@@ -41,6 +42,22 @@ export async function POST(req: Request) {
   // Look up or create Stripe customer
   const supabase = createAdminClient();
   let customerId = appUser.stripe_customer_id ?? null;
+
+  // Verify any stored customer actually exists in the CURRENT Stripe mode.
+  // Test and live are separate namespaces, so an ID created under one key
+  // 404s under the other ("No such customer … exists in live mode but a test
+  // mode key was used") — and the same happens if a customer was deleted in
+  // the dashboard. In any of those cases, drop the stale ID and mint a fresh
+  // one below so checkout self-heals instead of throwing.
+  if (customerId) {
+    try {
+      const existing = await stripe.customers.retrieve(customerId);
+      if ((existing as { deleted?: boolean }).deleted) customerId = null;
+    } catch {
+      customerId = null;
+    }
+  }
+
   if (!customerId) {
     const customer = await stripe.customers.create({
       email: email ?? undefined,
@@ -106,4 +123,18 @@ export async function POST(req: Request) {
   }
 
   return NextResponse.json({ url: session.url });
+  } catch (err) {
+    // Without this, any thrown error (missing STRIPE_SECRET_KEY, a Stripe
+    // "No such price" from a test/live mismatch, a Supabase failure, etc.)
+    // becomes an opaque empty 500 and the client dies on `res.json()`.
+    // Return the real message so it's visible in the Network tab.
+    console.error("[stripe checkout] failed:", err);
+    return NextResponse.json(
+      {
+        error: "checkout_failed",
+        message: err instanceof Error ? err.message : String(err),
+      },
+      { status: 500 },
+    );
+  }
 }

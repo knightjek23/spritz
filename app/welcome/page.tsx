@@ -20,6 +20,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { cleanBottleImageUrl } from "@/lib/bottle-image";
 import { useRouter } from "next/navigation";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { SearchAutocomplete } from "@/components/search-autocomplete";
@@ -198,10 +199,10 @@ function WelcomeInner() {
                 key={f.id}
                 className="flex items-center gap-3 px-3 py-2 rounded-xl border border-ink/10 bg-cream"
               >
-                {f.bottle_image_url ? (
+                {cleanBottleImageUrl(f.bottle_image_url) ? (
                   <div className="shrink-0 w-12 h-16 relative">
                     <Image
-                      src={f.bottle_image_url}
+                      src={cleanBottleImageUrl(f.bottle_image_url)!}
                       alt=""
                       fill
                       sizes="48px"

@@ -9,6 +9,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { cleanBottleImageUrl } from "@/lib/bottle-image";
 import type { DupeResult } from "@/lib/types";
 
 export function SimilarSection({ fragranceId }: { fragranceId: string }) {
@@ -67,10 +68,10 @@ export function SimilarSection({ fragranceId }: { fragranceId: string }) {
                   href={`/fragrance/${d.fragrance.id}`}
                   className="flex items-start gap-3 px-3 py-3 rounded-xl bg-paper border border-ink/10 hover:brightness-95 transition"
                 >
-                  {d.fragrance.bottle_image_url ? (
+                  {cleanBottleImageUrl(d.fragrance.bottle_image_url) ? (
                     <div className="shrink-0 w-12 h-16 relative">
                       <Image
-                        src={d.fragrance.bottle_image_url}
+                        src={cleanBottleImageUrl(d.fragrance.bottle_image_url)!}
                         alt=""
                         fill
                         sizes="48px"

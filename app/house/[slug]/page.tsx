@@ -20,6 +20,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { loadHouse, loadAllHouses } from "@/lib/houses";
 import { canonicalHouseSlug, slugsForCanonicalHouse } from "@/lib/slugs";
 import { FragranceScroller } from "@/components/fragrance-scroller";
+import { cleanBottleImageUrl } from "@/lib/bottle-image";
 import type { Fragrance } from "@/lib/types";
 
 export const revalidate = 300;
@@ -186,10 +187,10 @@ export default async function HousePage({ params }: { params: { slug: string } }
                   href={`/fragrance/${f.id}`}
                   className="flex items-center gap-3 px-3 py-2 rounded-xl bg-paper border border-ink/10 hover:brightness-95 transition"
                 >
-                  {f.bottle_image_url ? (
+                  {cleanBottleImageUrl(f.bottle_image_url) ? (
                     <div className="shrink-0 w-12 h-16 relative">
                       <Image
-                        src={f.bottle_image_url}
+                        src={cleanBottleImageUrl(f.bottle_image_url)!}
                         alt=""
                         fill
                         sizes="48px"

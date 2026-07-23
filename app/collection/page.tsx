@@ -11,6 +11,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { cleanBottleImageUrl } from "@/lib/bottle-image";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import type {
   CollectionItem,
@@ -174,14 +175,14 @@ function SignedInCollection() {
               href={`/fragrance/${it.fragrance.id}`}
               className="flex items-center gap-3 px-3 py-2 pr-14 rounded-xl bg-paper border border-ink/10 hover:brightness-95 transition"
             >
-              {it.fragrance.bottle_image_url ? (
+              {cleanBottleImageUrl(it.fragrance.bottle_image_url) ? (
                 // bg-paper + isolate + mix-blend-multiply trio: the multiply
                 // needs an opaque backdrop to blend into (without it, the
                 // white bottle background stays white). Matches the trending
                 // card thumbnail pattern.
                 <div className="shrink-0 w-12 h-16 relative isolate bg-paper rounded-md overflow-hidden">
                   <Image
-                    src={it.fragrance.bottle_image_url}
+                    src={cleanBottleImageUrl(it.fragrance.bottle_image_url)!}
                     alt=""
                     fill
                     sizes="48px"

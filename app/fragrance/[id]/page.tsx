@@ -7,6 +7,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { cleanBottleImageUrl } from "@/lib/bottle-image";
 import { SimilarSection } from "@/components/similar-section";
 import { SaveButtonsRow } from "@/components/save-buttons-row";
 import { NotesPyramid } from "@/components/notes-pyramid";
@@ -68,6 +69,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const f = await getFragrance(params.id);
   if (!f) return { title: "Fragrance not found" };
+  const bottleImage = cleanBottleImageUrl(f.bottle_image_url);
 
   const title = `${f.name} by ${f.house} — notes, longevity, dupes`;
   const family = (f.family ?? [])[0];
@@ -87,10 +89,10 @@ export async function generateMetadata({
       description,
       type: "website",
       url: `${SITE}/fragrance/${f.id}`,
-      ...(f.bottle_image_url ? { images: [{ url: f.bottle_image_url }] } : {}),
+      ...(bottleImage ? { images: [{ url: bottleImage }] } : {}),
     },
     twitter: {
-      card: f.bottle_image_url ? "summary_large_image" : "summary",
+      card: bottleImage ? "summary_large_image" : "summary",
     },
   };
 }
@@ -98,6 +100,7 @@ export async function generateMetadata({
 export default async function FragrancePage({ params }: { params: { id: string } }) {
   const f = await getFragrance(params.id);
   if (!f) notFound();
+  const bottleImage = cleanBottleImageUrl(f.bottle_image_url);
 
   // JSON-LD: Product + BreadcrumbList. The library's rich-result
   // eligibility (name, brand, image in search) comes from this.
@@ -108,7 +111,7 @@ export default async function FragrancePage({ params }: { params: { id: string }
         "@type": "Product",
         name: f.name,
         brand: { "@type": "Brand", name: f.house },
-        ...(f.bottle_image_url ? { image: f.bottle_image_url } : {}),
+        ...(bottleImage ? { image: bottleImage } : {}),
         ...(f.year ? { releaseDate: String(f.year) } : {}),
         url: `${SITE}/fragrance/${f.id}`,
         category: "Fragrance",
@@ -154,7 +157,7 @@ export default async function FragrancePage({ params }: { params: { id: string }
           the blend target non-uniform, leaving a visible white square
           around the bottle. Soft outer wash + border + shadow retain
           the depth that the glass effect used to give. */}
-      {f.bottle_image_url && (
+      {bottleImage && (
         <section className="mb-8 relative">
           {/* Backdrop wash — subtle color halo behind the card. */}
           <div
@@ -164,7 +167,7 @@ export default async function FragrancePage({ params }: { params: { id: string }
           <div className="rounded-3xl bg-cream border border-ink/5 shadow-sm py-8 px-6 flex items-center justify-center isolate">
             <div className="relative w-[200px] h-[267px]">
               <Image
-                src={f.bottle_image_url}
+                src={bottleImage}
                 alt={`${f.name} by ${f.house}`}
                 fill
                 sizes="(max-width: 768px) 200px, 280px"

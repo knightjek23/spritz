@@ -18,6 +18,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { cleanBottleImageUrl } from "@/lib/bottle-image";
 import type { Fragrance } from "@/lib/types";
 
 const DEBOUNCE_MS = 180;
@@ -293,10 +294,10 @@ export function SearchAutocomplete({
           {suggestions.map((f, idx) => {
             const inner = (
               <>
-                {f.bottle_image_url ? (
+                {cleanBottleImageUrl(f.bottle_image_url) ? (
                   <div className="shrink-0 w-10 h-14 relative">
                     <Image
-                      src={f.bottle_image_url}
+                      src={cleanBottleImageUrl(f.bottle_image_url)!}
                       alt=""
                       fill
                       sizes="40px"

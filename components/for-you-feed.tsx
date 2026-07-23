@@ -17,6 +17,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { cleanBottleImageUrl } from "@/lib/bottle-image";
 import type { Recommendations } from "@/lib/recommendations";
 import { houseSlug } from "@/lib/houses";
 import { TrendingSection } from "./trending-section";
@@ -97,10 +98,10 @@ export function ForYouFeed({ data }: { data: Recommendations }) {
                   href={`/fragrance/${f.id}`}
                   className="flex items-center gap-3 px-3 py-3 rounded-xl bg-paper border border-ink/10 hover:brightness-95 transition"
                 >
-                  {f.bottle_image_url ? (
+                  {cleanBottleImageUrl(f.bottle_image_url) ? (
                     <div className="shrink-0 w-12 h-16 relative">
                       <Image
-                        src={f.bottle_image_url}
+                        src={cleanBottleImageUrl(f.bottle_image_url)!}
                         alt=""
                         fill
                         sizes="48px"

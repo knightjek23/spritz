@@ -11,6 +11,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { cleanBottleImageUrl } from "@/lib/bottle-image";
 import { SearchAutocomplete } from "@/components/search-autocomplete";
 import type { Fragrance } from "@/lib/types";
 
@@ -99,10 +100,10 @@ function SearchPageInner() {
               href={`/fragrance/${f.id}`}
               className="flex items-center gap-3 px-3 py-2 rounded-xl bg-paper border border-ink/10 hover:brightness-95 transition"
             >
-              {f.bottle_image_url ? (
+              {cleanBottleImageUrl(f.bottle_image_url) ? (
                 <div className="shrink-0 w-12 h-16 relative">
                   <Image
-                    src={f.bottle_image_url}
+                    src={cleanBottleImageUrl(f.bottle_image_url)!}
                     alt=""
                     fill
                     sizes="48px"

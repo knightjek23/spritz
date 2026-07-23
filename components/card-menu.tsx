@@ -21,6 +21,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { cleanBottleImageUrl } from "@/lib/bottle-image";
 import type { Reaction } from "@/lib/types";
 
 interface CardMenuProps {
@@ -277,14 +278,14 @@ export function CardMenu({
                       user knows exactly which fragrance the menu is
                       operating on. */}
                   <div className="mx-4 mb-2 flex items-center gap-3 px-3 py-3 rounded-2xl bg-paper border border-ink/10">
-                    {fragrance.bottle_image_url ? (
+                    {cleanBottleImageUrl(fragrance.bottle_image_url) ? (
                       // Same bg-paper + isolate + mix-blend-multiply trio as
                       // the shelf row thumbnail so the preview's bottle
                       // dissolves into the card backdrop instead of sitting
                       // in a white box.
                       <div className="shrink-0 w-12 h-16 relative isolate bg-paper rounded-md overflow-hidden">
                         <Image
-                          src={fragrance.bottle_image_url}
+                          src={cleanBottleImageUrl(fragrance.bottle_image_url)!}
                           alt=""
                           fill
                           sizes="48px"
