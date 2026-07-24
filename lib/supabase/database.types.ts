@@ -190,6 +190,32 @@ export type Database = {
           },
         ];
       };
+      fragrance_photos: {
+        Row: {
+          id: string;
+          fragrance_id: string;
+          clerk_user_id: string;
+          storage_path: string;
+          status: "pending" | "approved" | "rejected";
+          created_at: string;
+          reviewed_at: string | null;
+        };
+        Insert: {
+          fragrance_id: string;
+          clerk_user_id: string;
+          storage_path: string;
+          status?: "pending" | "approved" | "rejected";
+        };
+        Update: Partial<Database["public"]["Tables"]["fragrance_photos"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "fragrance_photos_fragrance_id_fkey";
+            columns: ["fragrance_id"];
+            referencedRelation: "fragrances";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       scan_events: {
         Row: {
           id: string;

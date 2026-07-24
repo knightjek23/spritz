@@ -69,6 +69,17 @@ export function isBlockedImageSource(url: string | null | undefined): boolean {
  */
 export function cleanBottleImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;
-  if (isPlaceholderBottleUrl(url) || isBlockedImageSource(url)) return null;
+  // Placeholder graphics are always blocked (they just look broken).
+  if (isPlaceholderBottleUrl(url)) return null;
+  // Unlicensed sources (fimgs / mirror) are blocked EXCEPT during the
+  // temporary pre-launch window when NEXT_PUBLIC_SHOW_SCRAPED_IMAGES is
+  // "true" — that lets affiliate reviewers see a fully populated catalog.
+  // Default (unset/false) blocks them. TURN THIS OFF BEFORE PUBLIC LAUNCH.
+  if (
+    process.env.NEXT_PUBLIC_SHOW_SCRAPED_IMAGES !== "true" &&
+    isBlockedImageSource(url)
+  ) {
+    return null;
+  }
   return url;
 }
