@@ -39,6 +39,7 @@
     "node_modules",
     "scraper",
     "editorial",
-    "clerk-nextjs"
+    "clerk-nextjs",
+    "capacitor.config.ts"
   ]
 }
