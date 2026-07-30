@@ -61,6 +61,12 @@ export const metadata: Metadata = {
     description: "The fragrance library, in your pocket.",
     images: ["/icon-512.png"],
   },
+  // Affiliate network site-ownership verification. Rendered into <head> on
+  // every page (FlexOffers checks the home page). Safe to remove once the
+  // network shows the site as verified, but harmless to leave.
+  other: {
+    "fo-verify": "325b1f7f-146e-4fbd-90c6-12c94bcf614d",
+  },
 };
 
 export const viewport: Viewport = {
