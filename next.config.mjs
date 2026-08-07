@@ -29,6 +29,16 @@ const nextConfig = {
       // once licensed / user-uploaded images have backfilled the catalog.
       { protocol: "https", hostname: "fimgs.net" },
       { protocol: "https", hostname: "*.fimgs.net" },
+      // Licensed affiliate-feed image hosts. These are the images we DO
+      // have rights to display (via the CJ affiliate agreements), so they
+      // stay after fimgs.net is removed at launch. Add a hostname here
+      // whenever a new retailer feed is backfilled.
+      { protocol: "https", hostname: "www.fragranceshop.com" },
+      { protocol: "https", hostname: "fragranceshop.com" },
+      { protocol: "https", hostname: "*.perfumania.com" },
+      { protocol: "https", hostname: "perfumania.com" },
+      { protocol: "https", hostname: "*.jomashop.com" },
+      { protocol: "https", hostname: "jomashop.com" },
     ],
   },
   experimental: {
