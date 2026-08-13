@@ -82,6 +82,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <ClerkProvider appearance={spritzClerkAppearance}>
       <html lang="en" className={`${playfair.variable} ${roboto.variable}`}>
+	<head>
+          {/* Impact.com site verification. Must stay raw — Impact uses a
+              "value" attribute, and Next's metadata API only emits "content". */}
+          <meta
+            name="impact-site-verification"
+            value="e550c991-0845-4bc1-b011-eed13c9b978b"
+          />
+        </head>
         <body className="min-h-screen flex flex-col font-sans">
           {/* SVG <defs> for the liquid-glass displacement filters. Mounted
               once near the root so any <LiquidGlass> in the tree can
