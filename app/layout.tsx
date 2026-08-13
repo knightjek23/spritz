@@ -5,6 +5,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { spritzClerkAppearance } from "@/lib/clerk-appearance";
 import { Nav } from "@/components/nav";
 import { BottomNav } from "@/components/bottom-nav";
+import { Footer } from "@/components/footer";
 import { Analytics } from "@/components/analytics";
 import { LiquidGlassDefs } from "@/components/liquid-glass/LiquidGlass";
 import { PageTransition } from "@/components/page-transition";
@@ -98,6 +99,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 + slide in on navigation (iOS-app pattern). Tab-root
                 switches stay instant. */}
             <PageTransition>{children}</PageTransition>
+            {/* Sits inside <main> so the pb-28 bottom-nav clearance still
+                applies below it. Makes /legal/* reachable from every route,
+                which is what affiliate reviewers and App Store review check
+                for, and carries the one-line FTC disclosure. */}
+            <Footer />
           </main>
           <BottomNav />
           {/* PostHog — renders nothing unless NEXT_PUBLIC_POSTHOG_KEY is set. */}

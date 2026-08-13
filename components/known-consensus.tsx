@@ -163,9 +163,14 @@ export function KnownConsensus({ fragrance }: Props) {
             the "why" survives after the live progress UI disappears.
             The skill calls this out as critical for any AI output the
             user might later question. */}
+        {/* Source wording is deliberately generic. Naming specific sites in
+            user-facing copy credits a data source the project rule says to
+            keep private, and it is the first thing an affiliate-network
+            reviewer reads. "Community reviews and forum discussion" is both
+            accurate and non-attributing. */}
         <p className="font-mono text-[10px] uppercase tracking-wider text-slate">
           · AI generated · {generatedReceipt(consensus.generated_at)} ·
-          synthesized from Reddit, Fragrantica, and forum reviews
+          synthesized from community reviews and forum discussion
         </p>
       </section>
     );
@@ -185,7 +190,7 @@ export function KnownConsensus({ fragrance }: Props) {
       },
       {
         afterMs: 1500,
-        copy: "Cross-checking Reddit, Fragrantica, and forum reviews…",
+        copy: "Cross-checking community reviews and forum discussion…",
       },
       {
         afterMs: 3200,
@@ -221,7 +226,7 @@ export function KnownConsensus({ fragrance }: Props) {
     <section className="mb-10">
       <h2 className="font-display text-2xl mb-2">Community take</h2>
       <p className="text-sm text-slate mb-4">
-        AI-synthesized consensus from Reddit, Fragrantica, and forum reviews.
+        AI-synthesized consensus from community reviews and forum discussion.
         What users actually say, and whether it&apos;s worth the buy. Pro feature.
       </p>
       <Link

@@ -21,7 +21,12 @@ export async function PopularOnFragrantica({
   variant?: Variant;
 }) {
   const rows = await getPopularOnFragrantica(limit);
-  return <FragranceScroller title="Trending on Fragrantica" rows={rows} variant={variant} />;
+  // Heading deliberately does NOT name the data source. The export and RPC
+  // names keep "Fragrantica" because that's what the column means internally,
+  // but no user-facing string credits them (private scraper, no UI
+  // attribution). This renders on the home page in BOTH auth states, so it was
+  // the highest-exposure mention in the app.
+  return <FragranceScroller title="Most popular right now" rows={rows} variant={variant} />;
 }
 
 export async function NewThisYear({

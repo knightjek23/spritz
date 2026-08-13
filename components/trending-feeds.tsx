@@ -23,7 +23,12 @@ const DEFAULT_AREAS: AreaDef[] = [
   { area: "google_trends", title: "Most searched this week" },
   { area: "retailer_bestsellers", title: "Best sellers right now" },
   { area: "reddit", title: "What r/fragrance is talking about" },
-  { area: "fragrantica", title: "Trending on Fragrantica" },
+  // Title deliberately does NOT name the source. The `area` key stays
+  // "fragrantica" because it maps to data/trending-fragrantica.json, but no
+  // user-facing string credits them: the project rule is private scraper, no
+  // UI attribution, and a visible name here flags the data source to affiliate
+  // network reviewers as well as to Fragrantica.
+  { area: "fragrantica", title: "Climbing the charts" },
 ];
 
 async function AreaRow({

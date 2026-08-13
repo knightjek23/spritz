@@ -38,10 +38,14 @@ days to a couple of weeks for approvals.
 - Download the feed, drop it in `scraper/data/`, and run the backfill script
   (Part 3). Done.
 
-### Fallback: Amazon Associates
-- Amazon's Product Advertising API also gives licensed images with big
-  fragrance coverage. Catch: they require ~3 qualifying sales within 180 days
-  to keep API access, so it's a supplement, not your primary source early on.
+### Fallback: Amazon Associates — RULED OUT (August 2026)
+- Do not build on this. The Associates IP Licence states: "You will **not
+  store or cache Product Advertising Content consisting of an image**, but you
+  may store a link to Product Advertising Content consisting of an image **for
+  up to 24 hours**." Only ASINs may be retained. Every use must link to Amazon.
+  A persistent catalog is not compatible with those terms.
+- Separately, PA-API v5 is deprecated (returns 403) in favour of the Creators
+  API, and access still requires qualifying sales first.
 
 ---
 
@@ -70,10 +74,25 @@ days to a couple of weeks for approvals.
 
 ---
 
-## Part 1b: Target list (researched July 2026)
+## Part 1b: Target list (researched July 2026, CORRECTED August 2026)
 
-Rakuten is out (their $10M revenue floor). These are the networks and
-retailers that are actually reachable for a solo pre-revenue publisher.
+> **Corrections from the August 2026 deep dive** (full findings in
+> `IMAGE_SOURCING_RESEARCH.md`):
+>
+> 1. **Rakuten is NOT out.** The "$10M revenue floor" was wrong. Rakuten's own
+>    publisher requirements ask only for a live site with original content — no
+>    revenue or traffic minimum, free to join. The friction is at the
+>    *advertiser* level, which is probably where the rumour came from. Rakuten
+>    runs **Sephora, Ulta and FragranceNet**. Put it back on the list at #2.
+> 2. **Amazon Associates is dead for this purpose.** Their IP Licence forbids
+>    storing or caching images and caps stored image URLs at 24 hours. PA-API v5
+>    is also deprecated. Remove it as a fallback.
+> 3. **The Fragrance Shop's Awin program is closed.** Drop it.
+> 4. **Every network grant is promotion-scoped and revocable** — see the
+>    "license shape" note at the end of this section before building on feeds.
+
+These are the networks and retailers that are actually reachable for a solo
+pre-revenue publisher.
 
 ### Networks, ranked by how easily you get in
 
@@ -94,6 +113,49 @@ retailers that are actually reachable for a solo pre-revenue publisher.
 | **Scentbird** | Impact | up to 14% | You already have a `SCENTBIRD_AFFILIATE_ID` slot in your env. Check if that's a live relationship. |
 | **Notino** | Various | 4 to 10% | 30,000+ brands, good catalog coverage. |
 | **FragranceNet** | Rakuten | n/a | Blocked by the Rakuten floor. Skip for now. |
+
+### Awin deep dive: which advertisers actually solve the image problem
+
+Awin turned out to be the strongest option, for one reason that has nothing
+to do with commission rates.
+
+**Create-a-Feed is the unlock.** Awin has a publisher tool (Interface →
+Toolbox → Create-a-Feed) that builds a custom product feed filtered by
+category, advertiser, and brand, across *every advertiser you're approved
+for at once*. The feed includes a **`merchant_image_url`** field. So instead
+of juggling one feed per retailer, you generate a single fragrance-category
+feed and run it through `pnpm backfill:images`. The script already knows
+Awin's field names.
+
+Ranked by catalog coverage, which is what matters for filling 7,000 rows:
+
+> **SUPERSEDED August 2026.** This table has errors — see `AWIN_TARGETS.md`
+> for the verified list with live Awin merchant IDs. Key corrections:
+> **Notino is NOT on Awin** (it's CJ — Notino's own affiliate page says so),
+> **The Fragrance Shop's Awin programme is closed**, and "Perfume Price"
+> (ID 21605) is now **Paco Perfumerias**. The two biggest Awin fragrance
+> catalogs are actually **Douglas_DE (140,000+ articles)** and **Flaconi DE
+> (50,000+ products)**, neither of which appears below.
+
+| Advertiser | Catalog | Brands | Why it matters |
+| --- | --- | --- | --- |
+| ~~**Notino**~~ | ~22,000 products | 1,500 | ❌ **NOT ON AWIN — it's CJ.** Catalog figures plausible, network attribution wrong. |
+| **Fragrance Direct** | ~14,000 products | 600 | ✅ Confirmed, **Awin ID 9**. Hugo Boss, Paco Rabanne, Armani, YSL. 2 to 5%. PPC on brand terms prohibited. |
+| ~~**The Fragrance Shop**~~ | ~2,000 fragrances | 130 | ❌ **Programme closed** (Awin 8097). |
+| **The Fragrance Counter** | 150+ brands | n/a | ✅ **Awin ID 20978.** Direct brand relationships, at least daily feed. Niche depth. |
+| **Perfume Shopping / Perfume Price** | n/a | n/a | ⚠️ Perfume Shopping = **ID 5901**, no feed on profile. "Perfume Price" = **ID 21605**, now **Paco Perfumerias**. |
+| **Superdrug** | broad beauty | n/a | ⚠️ Network unconfirmed — their affiliate page names none. Low priority regardless. |
+
+Notino plus Fragrance Direct alone is roughly 36,000 products across 2,100
+brands, which should cover the overwhelming majority of your designer
+catalog. Niche houses will be thinner, and those are the rows most likely to
+keep the initials placeholder.
+
+**Note these are mostly UK retailers.** That doesn't hurt you. Designer
+fragrances are the same products worldwide, so a UK feed's Dior Sauvage
+image is the same bottle as a US one. It only matters if you later want the
+affiliate *links* to point at US storefronts for US buyers, which is a
+revenue question, not an image question.
 
 ### Order of operations
 
@@ -230,3 +292,65 @@ keep the house-initials placeholder.
 Before your first run, open your feed's header row and set `FEED_COLUMNS` at
 the top of `scraper/src/backfill-affiliate-images.ts` to match your column
 names. Every advertiser's export is a little different.
+
+---
+
+## Part 4: Mirroring, and what it is and isn't for
+
+`pnpm mirror:images` copies every fimgs.net bottle image into our own
+Supabase Storage bucket and repoints the DB row at it.
+
+**Be clear about which problem this solves.** It solves *reliability*: right
+now Fragrantica serves the bytes for the entire catalog, and a referrer block
+on their side blanks every card in the app with no warning and no recourse.
+Mirroring means we own the host, so that can't happen.
+
+It does **not** reduce legal exposure, it increases it. Hotlinking is them
+serving their bytes; mirroring is us distributing ~7,000 copies from our own
+bucket. That's why `lib/bottle-image.ts` lists the `bottle-images` bucket in
+`BLOCKED_SOURCE_PATTERNS` right next to fimgs.net. Mirroring is insurance for
+the pre-launch and affiliate-review window, not the launch answer. The launch
+answer is Parts 1 to 3 above.
+
+The two compose cleanly: `backfill-affiliate-images.ts` treats a bucket URL as
+unlicensed, so licensed feed images still overwrite mirrored rows later.
+Mirroring now costs you nothing later.
+
+### Runbook
+
+1. **Diagnose first.** Run `scripts/audit-mirror-readiness.sql` in the
+   Supabase SQL editor. Query 1 tells you how many rows are candidates;
+   query 3 flags any shared URL that's really a placeholder graphic and
+   should be added to `PLACEHOLDER_PATTERNS` before you start; query 5 sizes
+   the bucket.
+2. **Create the bucket** (one-time): Supabase dashboard, Storage, New bucket,
+   name `bottle-images`, set Public, confirm the public-read policy.
+3. **Dry run**, no downloads or writes:
+   ```bash
+   cd scraper
+   pnpm mirror:images --dry --limit=50
+   ```
+4. **Smoke test** 20 real images, then eyeball them in the Storage browser
+   and on a couple of fragrance pages:
+   ```bash
+   pnpm mirror:images --limit=20
+   ```
+5. **Full run.** Roughly 30 to 45 minutes for ~7,000 images at the default
+   pacing and `IMAGE_CONCURRENCY=3`. Safe to Ctrl-C and resume: only rows
+   still pointing at fimgs.net are candidates, so a re-run picks up exactly
+   what's left plus anything that failed.
+   ```bash
+   pnpm mirror:images
+   ```
+6. **Verify.** Re-run query 1 of the audit: `fimgs` should be near zero and
+   `supabase mirror` should hold the balance. Expect some failures; the
+   fimgs URLs were reconstructed from perfume ids by
+   `rewire-fragrantica-images.sql`, so a slice of them 404. Those rows keep
+   the house-initials placeholder, which is the correct outcome.
+
+### Before public launch
+
+Flip `BLOCK_UNLICENSED_SOURCES` to `true` in `lib/bottle-image.ts` and run
+`scripts/blank-unlicensed-images.sql`. That blocks fimgs URLs *and* the
+mirror bucket, falling everything back to house initials except the licensed
+images the affiliate backfill has landed.

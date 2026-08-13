@@ -36,8 +36,13 @@ const PLACEHOLDER_PATTERNS: RegExp[] = [
 // Blocked = treated as no image → the UI falls back to house initials.
 // When licensed images (affiliate feeds) land at their own URLs, they
 // won't match these patterns and will render normally.
+// NOTE on the leading char class: it must allow `/` as well as `.` and
+// start-of-string. `(^|\.)` alone did NOT match the most common form,
+// `https://fimgs.net/...` (the char before "fimgs" is a slash), so bare-domain
+// URLs — which is what scripts/rewire-fragrantica-images.sql writes into every
+// row — slipped through unblocked. `[.\/]` still rejects `notfimgs.net/`.
 const BLOCKED_SOURCE_PATTERNS: RegExp[] = [
-  /(^|\.)fimgs\.net\//i,
+  /(^|[.\/])fimgs\.net\//i,
   /\/storage\/v1\/object\/public\/bottle-images\//i,
 ];
 

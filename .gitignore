@@ -63,3 +63,11 @@ supabase/.temp
 scripts/*.log
 node_modules.old/
 node_modules.partial/
+
+# Affiliate product feeds — licensed third-party data, do not commit.
+# Regenerable from the network dashboards.
+scraper/data/productcatalog/
+scraper/data/*.txt
+scraper/data/*.csv
+scraper/data/*.zip
+scraper/data/*.gz

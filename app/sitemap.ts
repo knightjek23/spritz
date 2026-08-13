@@ -20,7 +20,11 @@ export const revalidate = 3600; // hourly
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-const STATIC_PATHS: Array<{ path: string; priority: number; changeFrequency: "weekly" | "daily" }> = [
+const STATIC_PATHS: Array<{
+  path: string;
+  priority: number;
+  changeFrequency: "weekly" | "daily" | "yearly";
+}> = [
   { path: "/",          priority: 1.0, changeFrequency: "daily" },
   { path: "/scan",      priority: 0.9, changeFrequency: "weekly" },
   { path: "/search",    priority: 0.8, changeFrequency: "weekly" },
@@ -28,6 +32,12 @@ const STATIC_PATHS: Array<{ path: string; priority: number; changeFrequency: "we
   { path: "/houses",    priority: 0.8, changeFrequency: "weekly" },
   { path: "/families",  priority: 0.8, changeFrequency: "weekly" },
   { path: "/pricing",   priority: 0.6, changeFrequency: "weekly" },
+  // Legal pages: low priority for ranking, but they must be crawlable and
+  // discoverable. Affiliate network reviewers and App Store review both look
+  // for them, and a page that only exists behind a footer link is easy to miss.
+  { path: "/legal/privacy",              priority: 0.3, changeFrequency: "yearly" },
+  { path: "/legal/terms",                priority: 0.3, changeFrequency: "yearly" },
+  { path: "/legal/affiliate-disclosure", priority: 0.3, changeFrequency: "yearly" },
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

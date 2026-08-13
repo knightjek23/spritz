@@ -26,8 +26,10 @@ const PLACEHOLDER_PATTERNS: RegExp[] = [
 // bucket is our mirror of them. We no longer store either, so a scrape
 // records no bottle image and the app falls back to house initials until
 // licensed (affiliate-feed) images backfill the column.
+// The leading class must include `/`: `(^|\.)` alone missed the bare-domain
+// form `https://fimgs.net/...`. See ../../lib/bottle-image.ts for the full note.
 const BLOCKED_SOURCE_PATTERNS: RegExp[] = [
-  /(^|\.)fimgs\.net\//i,
+  /(^|[.\/])fimgs\.net\//i,
   /\/storage\/v1\/object\/public\/bottle-images\//i,
 ];
 

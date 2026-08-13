@@ -55,8 +55,16 @@ export type Database = {
           consensus_generated_at: string | null;
           // Internal
           fragrantica_url: string | null;
+          // GTIN-14 normalized barcode learned from affiliate product feeds by
+          // scraper/src/backfill-affiliate-images.ts. Used to match feed rows whose
+          // titles are in a language the name matcher can't parse.
+          ean: string | null;
           avg_retail_price: number | null;
           price_tier: "budget" | "mid" | "designer" | "niche" | null;
+          // 0-10 float that popularity_rank is derived from. Added by
+          // 0015_popularity_score.sql — already existed in the DB but was missing
+          // from this type.
+          popularity_score: number | null;
           popularity_rank: number | null;
           created_at: string;
           updated_at: string;
@@ -100,8 +108,10 @@ export type Database = {
           consensus_confidence?: number | null;
           consensus_generated_at?: string | null;
           fragrantica_url?: string | null;
+          ean?: string | null;
           avg_retail_price?: number | null;
           price_tier?: "budget" | "mid" | "designer" | "niche" | null;
+          popularity_score?: number | null;
           popularity_rank?: number | null;
         };
         Update: Partial<Database["public"]["Tables"]["fragrances"]["Insert"]>;

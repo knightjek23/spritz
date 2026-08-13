@@ -40,6 +40,22 @@ import { createClient } from "@supabase/supabase-js";
 const FEED_COLUMNS = {
   name: ["title", "product_name", "productname", "name", "product_short_description"],
   brand: ["brand", "brand_name", "manufacturer", "brandname", "merchant_name"],
+  // Barcode. The single most valuable column in a foreign-language feed:
+  // Douglas_DE and Flaconi ship German titles that the name matcher cannot
+  // parse, but a GTIN is a GTIN. Awin calls this `ean`, Google Shopping and
+  // CJ call it `gtin`, Rakuten's publisher feed calls it "Universal Product
+  // Code". All of them are optional and none are validated by the network.
+  ean: [
+    "ean",
+    "gtin",
+    "product_gtin",
+    "upc",
+    "universal_product_code",
+    "barcode",
+    "ean13",
+    "gtin13",
+    "isbn",
+  ],
   imageUrl: [
     "image_link", // Google Shopping spec — CJ feeds use this
     "merchant_image_url", // Awin standard
@@ -116,10 +132,30 @@ function normHouse(h: string): string {
   if (aliased) return collapse(aliased);
   return stripHouseSuffix(key);
 }
-// Lowercase, drop punctuation and the word "and"/"&", collapse whitespace.
-function collapse(s: string): string {
+// Feeds ship raw HTML entities ("Dolce &amp; Gabbana", "L&#39;Eau"), which
+// would otherwise normalize to nonsense like "dolce amp gabbana" and never
+// match the catalog's "Dolce & Gabbana".
+function decodeEntities(s: string): string {
   return s
+    .replace(/&amp;/gi, "&")
+    .replace(/&#0?39;|&apos;|&rsquo;|&lsquo;/gi, "'")
+    .replace(/&quot;|&ldquo;|&rdquo;/gi, '"')
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&#(\d+);/g, (_, d) => String.fromCharCode(Number(d)));
+}
+
+// Lowercase, decode entities, fold accents, drop punctuation and the
+// word "and"/"&", collapse whitespace.
+//
+// Accent folding matters: the catalog stores "Hermès" and "Chloé" while
+// retailer feeds write "Hermes" and "Chloe". NFD splits a letter from its
+// diacritic so the combining marks can be stripped, leaving plain ASCII on
+// both sides.
+function collapse(s: string): string {
+  return decodeEntities(s)
     .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "") // strip combining diacritics
     .replace(/&/g, " ")
     .replace(/\band\b/g, " ")
     .replace(/[^\p{L}\p{N}\s]/gu, " ")
@@ -171,6 +207,49 @@ function looseNameKey(name: string): string {
 
 function looseMatchKey(house: string, name: string): string {
   return `${normHouse(house)}::~${looseNameKey(name)}`;
+}
+
+// ---- GTIN (barcode) normalization + validation ----
+//
+// Everything is normalized to GTIN-14 by left-padding with zeros, so a US
+// feed's UPC-12 and an EU feed's EAN-13 for the same physical product resolve
+// to the same key. Without that, the same bottle from allbeauty and from
+// Douglas would look like two different products.
+//
+// Validation matters more than usual here. Awin states plainly that it does
+// NOT validate ean/upc/gtin, and advertisers export junk constantly: empty
+// strings, "0", "N/A", "-", and Excel-truncated values that silently dropped a
+// leading zero. A wrong barcode is worse than a missing one, because it puts
+// the wrong bottle's photo on a fragrance page and then persists that mistake
+// into the catalog for every future run.
+
+/** Standard GTIN mod-10 check digit, valid for GTIN-8/12/13/14. */
+function hasValidGtinCheckDigit(digits: string): boolean {
+  const body = digits.slice(0, -1);
+  const check = Number(digits[digits.length - 1]);
+  let sum = 0;
+  // Weights alternate 3,1 from the rightmost body digit leftwards.
+  for (let i = 0; i < body.length; i++) {
+    const d = Number(body[body.length - 1 - i]);
+    sum += i % 2 === 0 ? d * 3 : d;
+  }
+  return (10 - (sum % 10)) % 10 === check;
+}
+
+/**
+ * Returns a GTIN-14 string, or null if the input isn't a plausible barcode.
+ * Rejects: non-numeric junk, wrong lengths, all-zero placeholders, and
+ * anything failing the check digit.
+ */
+function normalizeGtin(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  const digits = raw.replace(/\D/g, "");
+  // Real GTINs are 8, 12, 13 or 14 digits. Anything else is a SKU, an internal
+  // id, or a mangled export.
+  if (![8, 12, 13, 14].includes(digits.length)) return null;
+  if (/^0+$/.test(digits)) return null; // "0", "00000000", etc.
+  if (!hasValidGtinCheckDigit(digits)) return null;
+  return digits.padStart(14, "0");
 }
 
 // ---- Minimal CSV/TSV parser (handles quoted fields with embedded delims) ----
@@ -228,6 +307,19 @@ interface FeedProduct {
   imageUrl: string;
   /** Higher wins when several feed rows map to the same fragrance. */
   quality: number;
+  /** GTIN-14 normalized barcode, or null when the feed omitted/mangled it. */
+  ean: string | null;
+}
+
+interface LoadedFeed {
+  /** Exact and loose house+name keys -> product. */
+  byKey: Map<string, FeedProduct>;
+  /** GTIN-14 -> product. The language-proof path. */
+  byEan: Map<string, FeedProduct>;
+  /** How many feed rows carried a usable barcode (for the coverage report). */
+  withEan: number;
+  /** How many rows had something in the EAN column that failed validation. */
+  badEan: number;
 }
 
 // Retailer titles bundle the fragrance name with the product type and size:
@@ -282,7 +374,7 @@ function sniffDelimiter(text: string): string {
   return best;
 }
 
-async function loadFeed(feedPath: string): Promise<Map<string, FeedProduct>> {
+async function loadFeed(feedPath: string): Promise<LoadedFeed> {
   const raw = await fs.readFile(feedPath, "utf8");
   const delimiter = sniffDelimiter(raw);
   console.log(
@@ -295,6 +387,15 @@ async function loadFeed(feedPath: string): Promise<Map<string, FeedProduct>> {
   const nameIdx = pickColumn(header, FEED_COLUMNS.name);
   const brandIdx = pickColumn(header, FEED_COLUMNS.brand);
   const imageIdx = pickColumn(header, FEED_COLUMNS.imageUrl);
+  // Optional: a feed without a barcode column still works, it just can't
+  // teach us any EANs or match a foreign-language title.
+  const eanIdx = pickColumn(header, FEED_COLUMNS.ean);
+  if (eanIdx === -1) {
+    console.log(
+      `  ! no barcode column found (looked for: ${FEED_COLUMNS.ean.join(", ")})\n` +
+        `    Name matching only. If this is a non-English feed, expect a low match rate.`,
+    );
+  }
   if (nameIdx === -1 || brandIdx === -1 || imageIdx === -1) {
     throw new Error(
       `Could not find required columns in the feed header.\n` +
@@ -303,8 +404,11 @@ async function loadFeed(feedPath: string): Promise<Map<string, FeedProduct>> {
     );
   }
 
-  const lookup = new Map<string, FeedProduct>();
+  const byKey = new Map<string, FeedProduct>();
+  const byEan = new Map<string, FeedProduct>();
   let skippedKnockoff = 0;
+  let withEan = 0;
+  let badEan = 0;
   for (let i = 1; i < rows.length; i++) {
     const r = rows[i];
     const rawTitle = (r[nameIdx] ?? "").trim();
@@ -320,21 +424,40 @@ async function loadFeed(feedPath: string): Promise<Map<string, FeedProduct>> {
     const name = cleanFeedTitle(rawTitle);
     if (!name) continue;
 
+    const rawEan = eanIdx === -1 ? "" : (r[eanIdx] ?? "").trim();
+    const ean = normalizeGtin(rawEan);
+    if (ean) withEan++;
+    else if (rawEan) badEan++;
+
     const quality = productQuality(rawTitle);
+    const product: FeedProduct = { imageUrl, quality, ean };
+
     // Index under both the exact key and the loose (concentration-stripped)
     // key. Exact is tried first at match time, so loose only ever fills in
     // where exact found nothing.
     for (const key of [matchKey(brand, name), looseMatchKey(brand, name)]) {
-      const existing = lookup.get(key);
+      const existing = byKey.get(key);
       if (!existing || quality > existing.quality) {
-        lookup.set(key, { imageUrl, quality });
+        byKey.set(key, product);
+      }
+    }
+
+    if (ean) {
+      const existing = byEan.get(ean);
+      if (!existing || quality > existing.quality) {
+        byEan.set(ean, product);
       }
     }
   }
   if (skippedKnockoff > 0) {
     console.log(`  skipped ${skippedKnockoff} knockoff "type" oil products`);
   }
-  return lookup;
+  if (eanIdx !== -1) {
+    console.log(
+      `  barcodes: ${withEan} usable, ${badEan} rejected (bad check digit / placeholder / wrong length)`,
+    );
+  }
+  return { byKey, byEan, withEan, badEan };
 }
 
 const args = process.argv.slice(2);
@@ -355,6 +478,8 @@ interface CatalogRow {
   house: string;
   bottle_image_url: string | null;
   popularity_rank: number | null;
+  /** Learned from a previous feed run. Null until an English feed teaches it. */
+  ean: string | null;
 }
 
 // Raw match count is misleading: a 7,000-row catalog scraped from a
@@ -383,20 +508,26 @@ async function main() {
   if (DRY) console.log(`  (dry run, no DB writes)`);
 
   const feed = await loadFeed(FEED);
-  console.log(`  feed products indexed: ${feed.size}\n`);
+  console.log(`  feed products indexed: ${feed.byKey.size}\n`);
 
   // Set of normalized house names present in the feed, so we can tell a
   // "house isn't carried by this retailer" miss (unfixable, need another
   // feed) apart from a "house matches but the name didn't" miss (fixable
   // in the matcher).
   const feedHouses = new Set<string>();
-  for (const key of feed.keys()) feedHouses.add(key.split("::")[0]);
+  for (const key of feed.byKey.keys()) feedHouses.add(key.split("::")[0]);
 
   const diag = {
     houseMissing: 0,
     houseHitNameMiss: 0,
     houseMissSamples: new Map<string, number>(),
     nameMissSamples: [] as string[],
+    // How each match was made, and how many barcodes this run taught the
+    // catalog. eansLearned is the number to watch on an English feed: it is
+    // the size of the bridge the next German feed gets to walk across.
+    matchedByEan: 0,
+    matchedByName: 0,
+    eansLearned: 0,
     // [matched, total] per popularity band
     bands: POPULARITY_BANDS.map(() => [0, 0] as [number, number]),
   };
@@ -422,7 +553,7 @@ async function main() {
     if (LIMIT && scanned >= LIMIT) break;
     const { data, error } = await supabase
       .from("fragrances")
-      .select("id, name, house, bottle_image_url, popularity_rank")
+      .select("id, name, house, bottle_image_url, popularity_rank, ean")
       .order("id")
       .range(offset, offset + PAGE - 1)
       .returns<CatalogRow[]>();
@@ -436,16 +567,30 @@ async function main() {
       if (LIMIT && scanned >= LIMIT) break;
       scanned++;
 
-      // Skip rows that already carry a licensed image.
+      // Skip rows that already carry a licensed image. They still count as
+      // COVERED in the popularity bands, otherwise each successive run
+      // looks like a regression as previously-filled rows drop out of the
+      // denominator.
       if (!isBlockedOrEmpty(row.bottle_image_url)) {
         alreadyOk++;
+        recordBand(row.popularity_rank, true);
         continue;
       }
 
-      // Exact first, then the concentration-stripped fallback.
+      // Match order matters. Barcode first: it is exact, language-proof, and
+      // the only thing that works against Douglas_DE and Flaconi's German
+      // titles. Falls back to exact name+house, then the
+      // concentration-stripped loose key.
+      //
+      // row.ean is null until an English-language feed teaches it (see the
+      // write-back below), so the intended sequence is: run an English feed
+      // first to learn barcodes, then run the German feeds.
+      const byEanHit = row.ean ? feed.byEan.get(row.ean) : undefined;
       const hit =
-        feed.get(matchKey(row.house, row.name)) ??
-        feed.get(looseMatchKey(row.house, row.name));
+        byEanHit ??
+        feed.byKey.get(matchKey(row.house, row.name)) ??
+        feed.byKey.get(looseMatchKey(row.house, row.name));
+      const matchedBy: "ean" | "name" = byEanHit ? "ean" : "name";
       if (!hit) {
         recordBand(row.popularity_rank, false);
         // Classify the miss so we know whether the matcher or the feed is
@@ -468,15 +613,35 @@ async function main() {
       }
       recordBand(row.popularity_rank, true);
       matched++;
+      if (matchedBy === "ean") diag.matchedByEan++;
+      else diag.matchedByName++;
+
+      // Learn the barcode. When we matched by NAME against a feed row that
+      // carries a valid GTIN, persist it so a later run against a
+      // foreign-language feed can match this row without parsing its title.
+      // This is the whole reason the ean column exists: the catalog is
+      // scraped from a source that publishes no barcodes, so the only way to
+      // acquire them is to learn them from feeds we can already match.
+      const learnedEan =
+        matchedBy === "name" && hit.ean && hit.ean !== row.ean ? hit.ean : null;
+      if (learnedEan) diag.eansLearned++;
 
       if (DRY) {
-        console.log(`  [dry] ${row.house} — ${row.name} -> ${hit.imageUrl}`);
+        console.log(
+          `  [dry] ${row.house} — ${row.name} -> ${hit.imageUrl}` +
+            ` (via ${matchedBy}${learnedEan ? `, would learn ean ${learnedEan}` : ""})`,
+        );
         continue;
       }
 
+      const patch: { bottle_image_url: string; ean?: string } = {
+        bottle_image_url: hit.imageUrl,
+      };
+      if (learnedEan) patch.ean = learnedEan;
+
       const { error: upErr } = await supabase
         .from("fragrances")
-        .update({ bottle_image_url: hit.imageUrl })
+        .update(patch)
         .eq("id", row.id);
       if (upErr) {
         console.warn(`  ! ${row.house} — ${row.name}: ${upErr.message}`);
@@ -495,12 +660,27 @@ async function main() {
     `Done. scanned=${scanned} needed_image=${scanned - alreadyOk} matched=${matched} ${DRY ? "(dry)" : `updated=${updated}`}`,
   );
   console.log(
+    `  matched by barcode: ${diag.matchedByEan}   by name: ${diag.matchedByName}   barcodes learned this run: ${diag.eansLearned}`,
+  );
+  console.log(
     `Unmatched rows keep the house-initials placeholder. Re-run with a fuller feed to fill more.`,
   );
+  if (feed.withEan === 0) {
+    console.log(
+      `\n  ! This feed carried no usable barcodes, so nothing was learned for\n` +
+        `    future runs. Foreign-language feeds (Douglas_DE, Flaconi) will only\n` +
+        `    match rows whose barcode an English feed already taught us.`,
+    );
+  } else if (diag.eansLearned > 0) {
+    console.log(
+      `\n  ${diag.eansLearned} barcodes learned. A German-language feed can now match those rows directly.`,
+    );
+  }
 
   if (DIAGNOSE) {
     console.log("");
     console.log("--- Coverage where it matters (by popularity) ---");
+    console.log("    (counts images already licensed from earlier runs)");
     POPULARITY_BANDS.forEach((b, i) => {
       const [m, t] = diag.bands[i];
       const pct = t ? Math.round((100 * m) / t) : 0;
