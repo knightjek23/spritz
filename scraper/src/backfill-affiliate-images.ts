@@ -209,6 +209,85 @@ function looseMatchKey(house: string, name: string): string {
   return `${normHouse(house)}::~${looseNameKey(name)}`;
 }
 
+/** Both lookup keys for an ALREADY-normalized house, so a bridged house
+ *  (see bridgeHouse) can be substituted without re-normalizing. */
+function keysFor(houseNorm: string, name: string): string[] {
+  return [`${houseNorm}::${nameKey(name)}`, `${houseNorm}::~${looseNameKey(name)}`];
+}
+
+// ---- House tokens inside product names ----
+//
+// Retail feeds and the catalog disagree about whether the house belongs in
+// the product name, and they disagree in BOTH directions:
+//
+//   feed    "Hot Couture By Givenchy"      catalog "Hot Couture"
+//   feed    "Vetiver Guerlain"             catalog "Vetiver"
+//   feed    "Flora"                        catalog "Flora by Gucci"
+//   feed    "Al Haramain Gold Crystal"     catalog "Haramain Gold Crystal"
+//
+// Removing every house token (plus a stranded "by") from BOTH sides collapses
+// all four cases onto one key. The result is only ever tried as a FALLBACK
+// after the literal keys, and degenerate results are rejected, so a name that
+// is nothing but house tokens ("Gucci By Gucci") can never match everything in
+// its own house.
+function deHouseName(name: string, house: string): string | null {
+  const drop = new Set(normHouse(house).split(" "));
+  drop.add("by");
+  const words = collapse(name)
+    .split(" ")
+    .filter((w) => w && !drop.has(w));
+  const out = words.join(" ");
+  if (!out || out.length < 3) return null;
+  if (words.every((w) => CONCENTRATION_WORDS.has(w))) return null;
+  if (out === collapse(name)) return null; // nothing was removed
+  return out;
+}
+
+// ---- House bridging ----
+//
+// The catalog and the feed name the same house differently far more often
+// than an alias table can keep up with. Measured against this catalog and the
+// FragranceNet feed, 21 houses differ only by a leading or trailing token run:
+//
+//   catalog "Versace"            feed "Gianni Versace"
+//   catalog "Rabanne"            feed "Paco Rabanne"
+//   catalog "Mugler"             feed "Thierry Mugler"
+//   catalog "By Kilian"          feed "Kilian"
+//   catalog "Jo Malone London"   feed "Jo Malone"
+//   catalog "Arabiyat Prestige"  feed "Arabiyat"
+//
+// Deriving those at runtime beats hand-maintaining HOUSE_ALIASES per feed.
+//
+// Three guards keep it honest. The shorter name must be a CONTIGUOUS prefix or
+// suffix run of the longer one, so "My" never bridges to "Pardon My Fro". It
+// must contain a token of four or more characters, which rejects initialisms.
+// And the bridge must be UNIQUE — if two feed houses both look like candidates
+// we take neither. On top of all that, bridging only widens which house bucket
+// is searched; the product NAME still has to match on its own, so a wrong
+// bridge almost never produces a wrong image.
+
+/** true when `b` is a contiguous leading or trailing token run of `a`. */
+function isTokenRun(a: string, b: string): boolean {
+  const A = a.split(" ");
+  const B = b.split(" ");
+  if (B.length >= A.length) return false;
+  return (
+    A.slice(0, B.length).join(" ") === b || A.slice(A.length - B.length).join(" ") === b
+  );
+}
+
+function bridgeHouse(houseNorm: string, feedHouses: Set<string>): string | null {
+  if (feedHouses.has(houseNorm)) return null;
+  const hits: string[] = [];
+  for (const f of feedHouses) {
+    if (isTokenRun(f, houseNorm) || isTokenRun(houseNorm, f)) {
+      const shorter = f.split(" ").length < houseNorm.split(" ").length ? f : houseNorm;
+      if (shorter.split(" ").some((t) => t.length >= 4)) hits.push(f);
+    }
+  }
+  return hits.length === 1 ? hits[0] : null;
+}
+
 // ---- GTIN (barcode) normalization + validation ----
 //
 // Everything is normalized to GTIN-14 by left-padding with zeros, so a US
@@ -320,6 +399,9 @@ interface LoadedFeed {
   withEan: number;
   /** How many rows had something in the EAN column that failed validation. */
   badEan: number;
+  /** Every normalized house present in the feed, for miss classification and
+   *  for bridgeHouse to resolve against. */
+  houses: Set<string>;
 }
 
 // Retailer titles bundle the fragrance name with the product type and size:
@@ -406,9 +488,11 @@ async function loadFeed(feedPath: string): Promise<LoadedFeed> {
 
   const byKey = new Map<string, FeedProduct>();
   const byEan = new Map<string, FeedProduct>();
+  const houses = new Set<string>();
   let skippedKnockoff = 0;
   let withEan = 0;
   let badEan = 0;
+  let deHousedKeys = 0;
   for (let i = 1; i < rows.length; i++) {
     const r = rows[i];
     const rawTitle = (r[nameIdx] ?? "").trim();
@@ -432,10 +516,18 @@ async function loadFeed(feedPath: string): Promise<LoadedFeed> {
     const quality = productQuality(rawTitle);
     const product: FeedProduct = { imageUrl, quality, ean };
 
-    // Index under both the exact key and the loose (concentration-stripped)
-    // key. Exact is tried first at match time, so loose only ever fills in
-    // where exact found nothing.
-    for (const key of [matchKey(brand, name), looseMatchKey(brand, name)]) {
+    // Index under the exact key, the loose (concentration-stripped) key, and
+    // the de-housed variants of both. Exact is tried first at match time, so
+    // the wider keys only ever fill in where exact found nothing.
+    const houseNorm = normHouse(brand);
+    houses.add(houseNorm);
+    const keys = [matchKey(brand, name), looseMatchKey(brand, name)];
+    const deHoused = deHouseName(name, brand);
+    if (deHoused) {
+      keys.push(...keysFor(houseNorm, deHoused));
+      deHousedKeys++;
+    }
+    for (const key of keys) {
       const existing = byKey.get(key);
       if (!existing || quality > existing.quality) {
         byKey.set(key, product);
@@ -457,7 +549,10 @@ async function loadFeed(feedPath: string): Promise<LoadedFeed> {
       `  barcodes: ${withEan} usable, ${badEan} rejected (bad check digit / placeholder / wrong length)`,
     );
   }
-  return { byKey, byEan, withEan, badEan };
+  if (deHousedKeys > 0) {
+    console.log(`  ${deHousedKeys} feed rows also indexed with house tokens removed`);
+  }
+  return { byKey, byEan, withEan, badEan, houses };
 }
 
 const args = process.argv.slice(2);
@@ -514,12 +609,29 @@ async function main() {
   // "house isn't carried by this retailer" miss (unfixable, need another
   // feed) apart from a "house matches but the name didn't" miss (fixable
   // in the matcher).
-  const feedHouses = new Set<string>();
-  for (const key of feed.byKey.keys()) feedHouses.add(key.split("::")[0]);
+  const feedHouses = feed.houses;
+
+  // Memoized catalog-house -> feed-house bridge. Resolved lazily per house
+  // rather than up front, because the catalog is streamed in pages and we
+  // never hold the full house list at once.
+  const bridgeCache = new Map<string, string | null>();
+  function bridgeFor(houseNorm: string): string | null {
+    let b = bridgeCache.get(houseNorm);
+    if (b === undefined) {
+      b = bridgeHouse(houseNorm, feedHouses);
+      bridgeCache.set(houseNorm, b);
+    }
+    return b;
+  }
 
   const diag = {
     houseMissing: 0,
     houseHitNameMiss: 0,
+    /** Matches that only happened because house tokens were stripped out of
+     *  the catalog name. */
+    deHousedHits: 0,
+    /** Matches that only happened under a bridged house name. */
+    bridgedHits: 0,
     houseMissSamples: new Map<string, number>(),
     nameMissSamples: [] as string[],
     // How each match was made, and how many barcodes this run taught the
@@ -586,10 +698,37 @@ async function main() {
       // write-back below), so the intended sequence is: run an English feed
       // first to learn barcodes, then run the German feeds.
       const byEanHit = row.ean ? feed.byEan.get(row.ean) : undefined;
-      const hit =
-        byEanHit ??
-        feed.byKey.get(matchKey(row.house, row.name)) ??
-        feed.byKey.get(looseMatchKey(row.house, row.name));
+
+      // Widening order, cheapest and most literal first. Every step after the
+      // first two only ever runs when everything before it found nothing, so
+      // a precise match can never be displaced by a fuzzier one.
+      //
+      //   1. barcode
+      //   2. exact house + name, then concentration-stripped name
+      //   3. same, with house tokens stripped out of the catalog name
+      //   4. all of the above again under a bridged house name
+      const houseNorm = normHouse(row.house);
+      const bridged = bridgeFor(houseNorm);
+      const nameCands = [row.name];
+      const deHoused = deHouseName(row.name, row.house);
+      if (deHoused) nameCands.push(deHoused);
+
+      let nameHit: FeedProduct | undefined;
+      outer: for (const h of bridged ? [houseNorm, bridged] : [houseNorm]) {
+        for (const n of nameCands) {
+          for (const k of keysFor(h, n)) {
+            const f = feed.byKey.get(k);
+            if (f) {
+              nameHit = f;
+              if (h !== houseNorm) diag.bridgedHits++;
+              else if (n !== row.name) diag.deHousedHits++;
+              break outer;
+            }
+          }
+        }
+      }
+
+      const hit = byEanHit ?? nameHit;
       const matchedBy: "ean" | "name" = byEanHit ? "ean" : "name";
       if (!hit) {
         recordBand(row.popularity_rank, false);
@@ -597,7 +736,7 @@ async function main() {
         // the problem.
         // normHouse already lowercases, strips punctuation and applies
         // aliases, producing the same form used in the feed lookup keys.
-        if (feedHouses.has(normHouse(row.house))) {
+        if (feedHouses.has(houseNorm) || bridged) {
           diag.houseHitNameMiss++;
           if (diag.nameMissSamples.length < 25) {
             diag.nameMissSamples.push(`${row.house} — ${row.name}`);
@@ -661,6 +800,9 @@ async function main() {
   );
   console.log(
     `  matched by barcode: ${diag.matchedByEan}   by name: ${diag.matchedByName}   barcodes learned this run: ${diag.eansLearned}`,
+  );
+  console.log(
+    `  of the name matches, ${diag.deHousedHits} needed house tokens stripped out of the catalog name, ${diag.bridgedHits} needed a bridged house`,
   );
   console.log(
     `Unmatched rows keep the house-initials placeholder. Re-run with a fuller feed to fill more.`,
