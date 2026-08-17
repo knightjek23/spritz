@@ -240,7 +240,7 @@ async function main() {
   const best = new Map<string, Row>();
   let lines = 0, skippedHdr = 0, malformed = 0, noImage = 0, noName = 0;
   let withEan = 0, badEan = 0, demoted = 0;
-  let eponymous = 0;
+  let eponymous = 0, recoveredFromTitle = 0;
 
   for await (const line of rl) {
     if (!line.trim()) continue;
@@ -254,9 +254,29 @@ async function main() {
     const imageUrl = (f[F.imageUrl] ?? "").trim();
     if (!imageUrl) { noImage++; continue; }
 
-    const rawName = (f[F.fragranceName] ?? "").trim() || (f[F.title] ?? "").trim();
     const house = (f[F.house] ?? "").trim();
+    let rawName = (f[F.fragranceName] ?? "").trim() || (f[F.title] ?? "").trim();
     if (!rawName || !house) { noName++; continue; }
+
+    // Field 17 sometimes collapses to nothing but the house, which would make
+    // the product unmatchable. The retail title still carries the real name in
+    // front of " by <house>":
+    //
+    //   f17 "Byredo"       title "1996 Inez & Vinoodh Byredo by Byredo EAU DE PARFUM..."
+    //   f17 "Nino Cerruti" title "Cerruti 1881 by Nino Cerruti EDT SPRAY..."
+    //
+    // 224 wearable rows are recoverable this way. The guard matters: for a
+    // genuinely eponymous fragrance (Aramis by Aramis, Vera Wang by Vera Wang)
+    // the title segment IS the house, so the condition fails and the name is
+    // left alone. 458 rows are that case.
+    const houseKey = houseTokens(house).join(" ");
+    if (collapse(rawName) === houseKey) {
+      const fromTitle = (f[F.title] ?? "").split(" by ")[0].trim();
+      if (fromTitle && collapse(fromTitle) !== houseKey) {
+        rawName = fromTitle;
+        recoveredFromTitle++;
+      }
+    }
 
     const rawUpc = (f[F.upc] ?? "").trim();
     const ean = rawUpc ? normalizeGtin(rawUpc) : null;
@@ -320,6 +340,7 @@ async function main() {
   console.log(`  no name or house  ${noName}`);
   console.log(`  non-wearable      ${demoted}${KEEP_ALL ? " (kept, --keep-all)" : " (dropped)"}`);
   console.log(`  barcodes usable   ${withEan}  rejected ${badEan}  (~${eanPct}% of rows)`);
+  console.log(`  name recovered from title  ${recoveredFromTitle} (field 17 held only the house)`);
   console.log(`  eponymous kept    ${eponymous} (title == house, e.g. Aramis by Aramis — not stripped)`);
   console.log(`  house-prefix alias rows written  ${aliasTotal}${NO_ALIAS ? " (--no-alias)" : ""}`);
   console.log(`\n  wrote ${best.size} rows to ${OUT}`);

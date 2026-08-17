@@ -65,9 +65,20 @@ node_modules.old/
 node_modules.partial/
 
 # Affiliate product feeds — licensed third-party data, do not commit.
-# Regenerable from the network dashboards.
+# The affiliate licence covers using these to promote that advertiser; it does
+# not cover redistributing the feed, which is what pushing it to a repo does.
+# All of it is regenerable from the network dashboards.
+#
+# NOTE: the `**` matters. The old single-level patterns (scraper/data/*.txt)
+# did NOT cover scraper/data/rakuten/216_4736579_mp.txt — 28 MB of licensed
+# FragranceNet catalogue that was one `git add scraper/` away from being
+# published.
 scraper/data/productcatalog/
-scraper/data/*.txt
-scraper/data/*.csv
-scraper/data/*.zip
-scraper/data/*.gz
+scraper/data/rakuten/
+scraper/data/perfumania/
+scraper/data/**/*.txt
+scraper/data/**/*.csv
+scraper/data/**/*.tsv
+scraper/data/**/*.zip
+scraper/data/**/*.gz
+scraper/data/**/*.xml

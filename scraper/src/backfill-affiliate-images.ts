@@ -278,14 +278,54 @@ function isTokenRun(a: string, b: string): boolean {
 
 function bridgeHouse(houseNorm: string, feedHouses: Set<string>): string | null {
   if (feedHouses.has(houseNorm)) return null;
-  const hits: string[] = [];
+
+  // Rule 1 — contiguous token run. "Versace" / "Gianni Versace".
+  const runHits: string[] = [];
   for (const f of feedHouses) {
     if (isTokenRun(f, houseNorm) || isTokenRun(houseNorm, f)) {
       const shorter = f.split(" ").length < houseNorm.split(" ").length ? f : houseNorm;
-      if (shorter.split(" ").some((t) => t.length >= 4)) hits.push(f);
+      if (shorter.split(" ").some((t) => t.length >= 4)) runHits.push(f);
     }
   }
-  return hits.length === 1 ? hits[0] : null;
+  if (runHits.length === 1) return runHits[0];
+
+  // Rule 2 — the two sides disagree only about WHERE THE SPACES GO.
+  //   catalog "Montblanc"        feed "Mont Blanc"
+  //   catalog "ALREHAB PERFUMES" feed "Al Rehab"
+  //   catalog "DS Durga"         feed "D.S. & Durga"
+  // Requires exact equality once spaces are removed, so it is close to
+  // risk-free — two different houses almost never collide this way.
+  const squashed = houseNorm.replace(/ /g, "");
+  const sqHits: string[] = [];
+  for (const f of feedHouses) if (f.replace(/ /g, "") === squashed) sqHits.push(f);
+  if (sqHits.length === 1) return sqHits[0];
+
+  // Rule 3 — one side's tokens are a strict SUBSET of the other's, in any
+  // order and not necessarily contiguous. Rule 1 cannot see a word deleted
+  // from the middle:
+  //   catalog "Maison Martin Margiela"  feed "Maison Margiela"
+  //   catalog "Arabiyat Prestige"       feed "Arabiyat Prestige Gelato Raspberry Ripple"
+  // (that second one is a malformed brand field on the retailer's side, and
+  // it is worth 121 catalog rows on its own)
+  //
+  // Guards, because this is the loosest of the three: the smaller side needs
+  // at least two tokens, every one of them four or more characters, and the
+  // resolution must be unique. Without those, short generic words like "rose"
+  // or "no" would bridge unrelated houses.
+  const H = new Set(houseNorm.split(" "));
+  const subHits: string[] = [];
+  for (const f of feedHouses) {
+    const Fs = new Set(f.split(" "));
+    const smaller = Fs.size < H.size ? Fs : H;
+    const larger = Fs.size < H.size ? H : Fs;
+    if (smaller.size === larger.size || smaller.size < 2) continue;
+    let contained = true;
+    for (const t of smaller) {
+      if (!larger.has(t) || t.length < 4) { contained = false; break; }
+    }
+    if (contained) subHits.push(f);
+  }
+  return subHits.length === 1 ? subHits[0] : null;
 }
 
 // ---- GTIN (barcode) normalization + validation ----
@@ -402,6 +442,10 @@ interface LoadedFeed {
   /** Every normalized house present in the feed, for miss classification and
    *  for bridgeHouse to resolve against. */
   houses: Set<string>;
+  /** house -> the loose token set of every product that house sells. Used ONLY
+   *  by the miss audit, to answer "is this a matcher failure or does the
+   *  retailer simply not sell this bottle?" */
+  looseByHouse: Map<string, Set<string>[]>;
 }
 
 // Retailer titles bundle the fragrance name with the product type and size:
@@ -489,6 +533,7 @@ async function loadFeed(feedPath: string): Promise<LoadedFeed> {
   const byKey = new Map<string, FeedProduct>();
   const byEan = new Map<string, FeedProduct>();
   const houses = new Set<string>();
+  const looseByHouse = new Map<string, Set<string>[]>();
   let skippedKnockoff = 0;
   let withEan = 0;
   let badEan = 0;
@@ -521,6 +566,12 @@ async function loadFeed(feedPath: string): Promise<LoadedFeed> {
     // the wider keys only ever fill in where exact found nothing.
     const houseNorm = normHouse(brand);
     houses.add(houseNorm);
+    const loose = new Set(looseNameKey(name).split(" ").filter(Boolean));
+    if (loose.size) {
+      const pool = looseByHouse.get(houseNorm);
+      if (pool) pool.push(loose);
+      else looseByHouse.set(houseNorm, [loose]);
+    }
     const keys = [matchKey(brand, name), looseMatchKey(brand, name)];
     const deHoused = deHouseName(name, brand);
     if (deHoused) {
@@ -552,7 +603,47 @@ async function loadFeed(feedPath: string): Promise<LoadedFeed> {
   if (deHousedKeys > 0) {
     console.log(`  ${deHousedKeys} feed rows also indexed with house tokens removed`);
   }
-  return { byKey, byEan, withEan, badEan, houses };
+  return { byKey, byEan, withEan, badEan, houses, looseByHouse };
+}
+
+// ---- Miss audit ----
+//
+// The old diagnose split misses into "house missing" and "house OK, name
+// differs", and labelled the second one "matcher could be improved". That
+// label was wrong and it cost real time chasing phantom headroom.
+//
+// A name that differs is USUALLY a bottle the retailer doesn't sell, not a
+// bottle the matcher fumbled. This distinguishes the two by measuring the best
+// word overlap between the catalog name and everything that house actually
+// sells:
+//
+//   0.00        not one shared word. The product is absent. Nothing to fix.
+//   < 0.34      barely related. Almost always a different bottle.
+//   0.34-0.50   ambiguous.
+//   >= 0.50     genuinely close. THIS is the only bucket worth looking at.
+//
+// Measured on FragranceNet + FragranceShop against an 11,667-row catalog, the
+// >= 0.50 bucket held 1,478 rows, and hand-checking them showed they are
+// overwhelmingly real flanker distinctions the matcher SHOULD refuse:
+// "Club de Nuit Intense Man" vs "Club de Nuit Intense", "Ombre Leather 2018"
+// vs "Ombre Leather", "Journey Man" vs "Journey". Three further heuristics
+// (space-insensitive keys, house-initial stripping, collection-prefix
+// suffixing) recovered 42 rows between them out of 8,362 misses. That is the
+// ceiling, and it is why the answer to low coverage is more feeds, not more
+// matcher.
+function bestOverlap(name: string, pool: Set<string>[] | undefined): number {
+  if (!pool || !pool.length) return -1; // house not carried
+  const t = new Set(looseNameKey(name).split(" ").filter(Boolean));
+  if (!t.size) return -1;
+  let best = 0;
+  for (const p of pool) {
+    let inter = 0;
+    for (const w of t) if (p.has(w)) inter++;
+    if (!inter) continue;
+    const j = inter / (t.size + p.size - inter);
+    if (j > best) best = j;
+  }
+  return best;
 }
 
 const args = process.argv.slice(2);
@@ -632,6 +723,12 @@ async function main() {
     deHousedHits: 0,
     /** Matches that only happened under a bridged house name. */
     bridgedHits: 0,
+    /** Miss audit: best word overlap against what that house actually sells. */
+    overlapNone: 0,
+    overlapWeak: 0,
+    overlapMid: 0,
+    overlapClose: 0,
+    closeSamples: [] as string[],
     houseMissSamples: new Map<string, number>(),
     nameMissSamples: [] as string[],
     // How each match was made, and how many barcodes this run taught the
@@ -738,8 +835,18 @@ async function main() {
         // aliases, producing the same form used in the feed lookup keys.
         if (feedHouses.has(houseNorm) || bridged) {
           diag.houseHitNameMiss++;
-          if (diag.nameMissSamples.length < 25) {
-            diag.nameMissSamples.push(`${row.house} — ${row.name}`);
+          const pool =
+            feed.looseByHouse.get(houseNorm) ??
+            (bridged ? feed.looseByHouse.get(bridged) : undefined);
+          const j = bestOverlap(row.name, pool);
+          if (j === 0) diag.overlapNone++;
+          else if (j < 0.34) diag.overlapWeak++;
+          else if (j < 0.5) diag.overlapMid++;
+          else {
+            diag.overlapClose++;
+            if (diag.closeSamples.length < 15) {
+              diag.closeSamples.push(`${row.house} — ${row.name}`);
+            }
           }
         } else {
           diag.houseMissing++;
@@ -837,8 +944,31 @@ async function main() {
       `  house not in this feed : ${diag.houseMissing}  (${misses ? Math.round((100 * diag.houseMissing) / misses) : 0}%)  <- retailer doesn't carry it; need a different feed`,
     );
     console.log(
-      `  house OK, name differs : ${diag.houseHitNameMiss}  (${misses ? Math.round((100 * diag.houseHitNameMiss) / misses) : 0}%)  <- matcher could be improved`,
+      `  house OK, name differs : ${diag.houseHitNameMiss}  (${misses ? Math.round((100 * diag.houseHitNameMiss) / misses) : 0}%)`,
     );
+    // Break that second bucket down honestly. "Name differs" reads like a
+    // matcher fault; usually it means the retailer doesn't stock the bottle.
+    const nm = diag.houseHitNameMiss || 1;
+    const pct = (n: number) => `${Math.round((100 * n) / nm)}%`.padStart(4);
+    console.log("");
+    console.log("  Of those, best word overlap vs what that house ACTUALLY sells:");
+    console.log(
+      `    ${String(diag.overlapNone).padStart(5)} ${pct(diag.overlapNone)}  no shared words at all -> product absent, unfixable here`,
+    );
+    console.log(
+      `    ${String(diag.overlapWeak).padStart(5)} ${pct(diag.overlapWeak)}  <0.34, barely related -> almost certainly a different bottle`,
+    );
+    console.log(
+      `    ${String(diag.overlapMid).padStart(5)} ${pct(diag.overlapMid)}  0.34-0.50, ambiguous`,
+    );
+    console.log(
+      `    ${String(diag.overlapClose).padStart(5)} ${pct(diag.overlapClose)}  >=0.50, genuinely close  <- the ONLY matcher headroom`,
+    );
+    if (diag.closeSamples.length) {
+      console.log("");
+      console.log("  Closest misses (check these are real flankers, not matcher faults):");
+      for (const s of diag.closeSamples) console.log(`     ${s}`);
+    }
     console.log("");
     console.log("  Top houses in your catalog missing from this feed:");
     const topMissing = [...diag.houseMissSamples.entries()]
