@@ -36,8 +36,10 @@ export function BottlePlaceholder({
 }) {
   const initials = houseInitials(house);
   // Shrink the type as the initial count grows so 3 letters still sit
-  // comfortably inside the 107-wide bottle body.
-  const fontSize = initials.length >= 3 ? 26 : 32;
+  // comfortably inside the 107-wide bottle body. Playfair is a
+  // high-contrast serif and reads wider than the old mono, so these run a
+  // touch smaller than the equivalent mono sizes.
+  const fontSize = initials.length >= 3 ? 30 : 38;
 
   return (
     <svg
@@ -61,10 +63,13 @@ export function BottlePlaceholder({
         textAnchor="middle"
         dominantBaseline="central"
         fill="#114821"
-        fillOpacity="0.55"
+        fillOpacity="0.6"
         fontSize={fontSize}
-        fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace"
-        letterSpacing="1.5"
+        // Playfair Display, the app's display/heading face. Referenced via
+        // the CSS variable next/font sets on <html>, with the same fallback
+        // chain as tailwind's font-display token.
+        fontFamily='var(--font-playfair), "Playfair Display", Georgia, serif'
+        letterSpacing="1"
       >
         {initials}
       </text>
