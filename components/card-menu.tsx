@@ -22,6 +22,7 @@ import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { cleanBottleImageUrl } from "@/lib/bottle-image";
+import { BottlePlaceholder } from "@/components/bottle-placeholder";
 import type { Reaction } from "@/lib/types";
 
 interface CardMenuProps {
@@ -293,7 +294,9 @@ export function CardMenu({
                         />
                       </div>
                     ) : (
-                      <div className="shrink-0 w-12 h-16 rounded-md bg-ink/5" aria-hidden />
+                      <div className="shrink-0 w-12 h-16 rounded-md bg-ink/5 flex items-center justify-center p-0.5">
+                        <BottlePlaceholder house={fragrance.house} />
+                      </div>
                     )}
                     <div className="min-w-0 flex-1">
                       <div className="font-display text-lg leading-tight truncate">

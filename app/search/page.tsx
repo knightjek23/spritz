@@ -12,6 +12,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { cleanBottleImageUrl } from "@/lib/bottle-image";
+import { BottlePlaceholder } from "@/components/bottle-placeholder";
 import { SearchAutocomplete } from "@/components/search-autocomplete";
 import type { Fragrance } from "@/lib/types";
 
@@ -111,7 +112,9 @@ function SearchPageInner() {
                   />
                 </div>
               ) : (
-                <div className="shrink-0 w-12 h-16 rounded bg-paper" aria-hidden />
+                <div className="shrink-0 w-12 h-16 rounded bg-paper flex items-center justify-center p-0.5">
+                  <BottlePlaceholder house={f.house} />
+                </div>
               )}
               <div className="min-w-0 flex-1">
                 <div className="font-medium truncate">{f.name}</div>

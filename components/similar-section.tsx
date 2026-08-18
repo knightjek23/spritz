@@ -10,6 +10,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cleanBottleImageUrl } from "@/lib/bottle-image";
+import { BottlePlaceholder } from "@/components/bottle-placeholder";
 import type { DupeResult } from "@/lib/types";
 
 export function SimilarSection({ fragranceId }: { fragranceId: string }) {
@@ -79,7 +80,9 @@ export function SimilarSection({ fragranceId }: { fragranceId: string }) {
                       />
                     </div>
                   ) : (
-                    <div className="shrink-0 w-12 h-16 rounded bg-paper" aria-hidden />
+                    <div className="shrink-0 w-12 h-16 rounded bg-paper flex items-center justify-center p-0.5">
+                      <BottlePlaceholder house={d.fragrance.house} />
+                    </div>
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="font-medium truncate">{d.fragrance.name}</div>

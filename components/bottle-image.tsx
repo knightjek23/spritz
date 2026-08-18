@@ -22,20 +22,10 @@
 import { useState } from "react";
 import Image from "next/image";
 import { cleanBottleImageUrl } from "@/lib/bottle-image";
+import { BottlePlaceholder, houseInitials } from "@/components/bottle-placeholder";
 
-export function houseInitials(house: string): string {
-  const words = house
-    .replace(/[^\p{L}\p{N}\s]/gu, " ")
-    .split(/\s+/)
-    .filter(Boolean);
-  if (words.length === 0) return "?";
-  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-  return words
-    .slice(0, 3)
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase();
-}
+// Re-exported for callers that already imported it from here.
+export { houseInitials };
 
 export function BottleImage({
   src,
@@ -59,11 +49,8 @@ export function BottleImage({
 
   if (!usable) {
     return (
-      <div
-        className="absolute inset-0 flex items-center justify-center font-mono text-[11px] text-slate uppercase tracking-wider"
-        aria-hidden
-      >
-        {houseInitials(house)}
+      <div className="absolute inset-0 flex items-center justify-center p-2">
+        <BottlePlaceholder house={house} />
       </div>
     );
   }

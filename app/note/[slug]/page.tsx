@@ -13,6 +13,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { cleanBottleImageUrl } from "@/lib/bottle-image";
+import { BottlePlaceholder } from "@/components/bottle-placeholder";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { loadNote, loadAllNotes } from "@/lib/notes";
 import { resolveNoteQueries } from "@/lib/note-aliases";
@@ -156,7 +157,9 @@ export default async function NotePage({ params }: { params: { slug: string } })
                       />
                     </div>
                   ) : (
-                    <div className="shrink-0 w-12 h-16 rounded bg-paper" aria-hidden />
+                    <div className="shrink-0 w-12 h-16 rounded bg-paper flex items-center justify-center p-0.5">
+                      <BottlePlaceholder house={f.house} />
+                    </div>
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="font-medium truncate">{f.name}</div>

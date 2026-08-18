@@ -8,6 +8,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { cleanBottleImageUrl } from "@/lib/bottle-image";
+import { BottlePlaceholder } from "@/components/bottle-placeholder";
 import { SimilarSection } from "@/components/similar-section";
 import { SaveButtonsRow } from "@/components/save-buttons-row";
 import { NotesPyramid } from "@/components/notes-pyramid";
@@ -157,15 +158,18 @@ export default async function FragrancePage({ params }: { params: { id: string }
           the blend target non-uniform, leaving a visible white square
           around the bottle. Soft outer wash + border + shadow retain
           the depth that the glass effect used to give. */}
-      {bottleImage && (
-        <section className="mb-8 relative">
-          {/* Backdrop wash — subtle color halo behind the card. */}
-          <div
-            aria-hidden
-            className="absolute inset-0 -inset-x-6 rounded-3xl bg-gradient-to-br from-emerald/10 via-brass/10 to-paper/40 blur-xl -z-10"
-          />
-          <div className="rounded-3xl bg-cream border border-ink/5 shadow-sm py-8 px-6 flex items-center justify-center isolate">
-            <div className="relative w-[200px] h-[267px]">
+      {/* Hero always renders. When there's no licensed image the outlined
+          "photo coming soon" bottle stands in, so the page keeps its shape
+          instead of collapsing (most of the catalog has no image yet). */}
+      <section className="mb-8 relative">
+        {/* Backdrop wash — subtle color halo behind the card. */}
+        <div
+          aria-hidden
+          className="absolute inset-0 -inset-x-6 rounded-3xl bg-gradient-to-br from-emerald/10 via-brass/10 to-paper/40 blur-xl -z-10"
+        />
+        <div className="rounded-3xl bg-cream border border-ink/5 shadow-sm py-8 px-6 flex flex-col items-center justify-center isolate">
+          <div className="relative w-[200px] h-[267px]">
+            {bottleImage ? (
               <Image
                 src={bottleImage}
                 alt={`${f.name} by ${f.house}`}
@@ -174,10 +178,17 @@ export default async function FragrancePage({ params }: { params: { id: string }
                 className="object-contain mix-blend-multiply"
                 priority
               />
-            </div>
+            ) : (
+              <BottlePlaceholder house={f.house} />
+            )}
           </div>
-        </section>
-      )}
+          {!bottleImage && (
+            <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-slate">
+              Photo coming soon
+            </p>
+          )}
+        </div>
+      </section>
 
       {/* Title block — name + house + year + gender + concentration.
           Family lives below. House name links into the house
