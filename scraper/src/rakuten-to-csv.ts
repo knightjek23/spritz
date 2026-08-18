@@ -206,13 +206,42 @@ function deHouseName(name: string, house: string): string | null {
 // and gift sets that share a fragrance name. When several rows collapse to the
 // same (house, name) we keep the highest-ranked one, so the page gets a photo
 // of the bottle rather than a shower gel.
+// Retail vocabulary, in two languages. Rakuten's feed FORMAT is shared across
+// merchants; nothing about the wording is. FragranceNet writes English product
+// types in the title, Nicchia Luxury writes Italian ones and leaves the
+// secondary-category column empty entirely.
+//
+// The ambiguous Italian words are the reason these are phrases rather than bare
+// terms: "crema", "latte" and "olio" are non-wearable ONLY next to a body part
+// or "doccia". Matched bare they would throw away BDK's "Creme de Cuir Eau de
+// Parfum" and New Notes' "Latte Mimosa Extrait de Parfum", which are bottles.
+// Deliberately NOT extended with "hair mist" / "hand cream", even though those
+// are plainly not bottles. Measured: adding them cost 88 catalog matches,
+// because for some fragrances a hair mist is the ONLY listing FragranceNet
+// carries, and a hair-mist photo of the right scent beats a placeholder.
+const NON_WEARABLE_EN =
+  /\b(after ?shave|body (wash|spray|lotion|cream|oil)|shower gel|deodorant|balm|soap|shampoo|scrub)\b/i;
+const NON_WEARABLE_IT =
+  /\b(candel[ae]|diffusor[ei]|profumator[ei]|bagnoschiuma|doposole|sapon[ea]|shampoo|deodorante|scrub|intensificatore|cofanetto|spazzola|pettine|fondotinta|siero|struccante|tonico|cipria|mascara|rossetto|smalto)\b|profum[oi] per (ambiente|capelli)|\b(crema|creme|latte|lozione|olio|balsamo|gel|spray|burro|acqua|mousse|polvere)\s+(mani|corpo|viso|capelli|labbra|piedi|doccia|detergente|struccante|solare|profumato)\b|\bgel doccia\b|\bcontorno occhi\b|\bacqua micellare\b/i;
+const SET_LIKE = /\b(gift set|discovery set|set|collection|sampler|vial|decant)\b/i;
+const WEARABLE =
+  /\b(eau de (parfum|toilette|cologne)|extrait de parfum|edp|edt|edc|parfum spray|cologne spray|extrait|parfum|cologne)\b/i;
+
+// Wearable is tested FIRST, and that order is load-bearing. Testing
+// non-wearable first looks more correct and costs 88 catalog matches: a title
+// like "3 PIECE SET WITH BLACK SAFFRON & MOJAVE GHOST EDP" then reads as a set
+// rather than as a bottle, and for some fragrances that listing is the only one
+// the retailer carries.
+//
+// It is safe for the Italian side because Nicchia never writes a concentration
+// on a non-bottle: "Blanche crema mani" and "Divine Vanille Candela profumata"
+// carry no "eau de parfum" marker, so they fall straight through to the
+// non-wearable test below.
 function rank(title: string, secondaryCategory: string): number {
   const t = title.toLowerCase();
-  if (/\b(eau de (parfum|toilette|cologne)|edp|edt|extrait|parfum spray|cologne spray)\b/.test(t)) {
-    return /\btester\b/.test(t) ? 3 : 4;
-  }
-  if (/\b(after ?shave|body (wash|spray|lotion|cream|oil)|shower gel|deodorant|balm|soap|shampoo|scrub)\b/.test(t)) return 1;
-  if (/\b(gift set|set|collection|sampler|vial|decant)\b/.test(t)) return 1;
+  if (WEARABLE.test(t) || t.includes("eau intimit")) return /\btester\b/.test(t) ? 3 : 4;
+  if (NON_WEARABLE_IT.test(t) || NON_WEARABLE_EN.test(t)) return 1;
+  if (SET_LIKE.test(t)) return 1;
   if (/bath\s*&\s*body/i.test(secondaryCategory)) return 1;
   return 2;
 }
@@ -240,7 +269,7 @@ async function main() {
   const best = new Map<string, Row>();
   let lines = 0, skippedHdr = 0, malformed = 0, noImage = 0, noName = 0;
   let withEan = 0, badEan = 0, demoted = 0;
-  let eponymous = 0, recoveredFromTitle = 0;
+  let eponymous = 0, recoveredFromTitle = 0, unresolvedUrls = 0;
 
   for await (const line of rl) {
     if (!line.trim()) continue;
@@ -255,28 +284,36 @@ async function main() {
     if (!imageUrl) { noImage++; continue; }
 
     const house = (f[F.house] ?? "").trim();
-    let rawName = (f[F.fragranceName] ?? "").trim() || (f[F.title] ?? "").trim();
-    if (!rawName || !house) { noName++; continue; }
-
-    // Field 17 sometimes collapses to nothing but the house, which would make
-    // the product unmatchable. The retail title still carries the real name in
-    // front of " by <house>":
-    //
-    //   f17 "Byredo"       title "1996 Inez & Vinoodh Byredo by Byredo EAU DE PARFUM..."
-    //   f17 "Nino Cerruti" title "Cerruti 1881 by Nino Cerruti EDT SPRAY..."
-    //
-    // 224 wearable rows are recoverable this way. The guard matters: for a
-    // genuinely eponymous fragrance (Aramis by Aramis, Vera Wang by Vera Wang)
-    // the title segment IS the house, so the condition fails and the name is
-    // left alone. 458 rows are that case.
+    if (!house) { noName++; continue; }
     const houseKey = houseTokens(house).join(" ");
-    if (collapse(rawName) === houseKey) {
-      const fromTitle = (f[F.title] ?? "").split(" by ")[0].trim();
-      if (fromTitle && collapse(fromTitle) !== houseKey) {
-        rawName = fromTitle;
-        recoveredFromTitle++;
-      }
+    const title = (f[F.title] ?? "").trim();
+    const field17 = (f[F.fragranceName] ?? "").trim();
+
+    // Two merchants populate the same 38 fields completely differently:
+    //
+    //   FragranceNet  f2  "Chanel Gabrielle by Chanel BODY LOTION 6.8 OZ for WOMEN"
+    //                 f17 "Chanel Gabrielle"    <- retail title, house prefixed
+    //   Nicchia       f2  "Corfu Kumquat Eau de Parfum"
+    //                 f17 "Aedes de Venustas"   <- the HOUSE, in all 2,189 rows
+    //
+    // Neither field is reliably the name. Take both, throw away whichever
+    // collapses to the house, and let the alias machinery below do the rest.
+    // Titles only carry " by <house>" on FragranceNet; Nicchia has none, so the
+    // split is conditional rather than assumed.
+    const fromTitle = title.includes(" by ") ? title.split(" by ")[0].trim() : title;
+    const candidates = [field17, fromTitle].filter((c) => c && collapse(c) !== houseKey);
+
+    let rawName: string;
+    if (candidates.length) {
+      rawName = candidates[0];
+      if (field17 && collapse(field17) === houseKey) recoveredFromTitle++;
+    } else {
+      // Genuinely eponymous: Aramis by Aramis, Vera Wang by Vera Wang. Both
+      // fields ARE the house because the fragrance is named after it.
+      rawName = field17 || fromTitle;
+      eponymous++;
     }
+    if (!rawName) { noName++; continue; }
 
     const rawUpc = (f[F.upc] ?? "").trim();
     const ean = rawUpc ? normalizeGtin(rawUpc) : null;
@@ -287,6 +324,15 @@ async function main() {
     if (r <= 1) demoted++;
     if (r <= 1 && !KEEP_ALL) continue;
 
+    // Nicchia's _template.txt ships the tracking link with the publisher and
+    // offer IDs still as literal "<LSN EID>" / "<LSN OID>" placeholders. Only
+    // the .xml variant has them resolved. Never store a broken link — blank it
+    // and count it, so a later buy-link feature doesn't inherit rubbish.
+    const rawProductUrl = (f[F.productUrl] ?? "").trim();
+    const unresolved = rawProductUrl.includes("<LSN");
+    if (unresolved) unresolvedUrls++;
+    const safeProductUrl = unresolved ? "" : rawProductUrl;
+
     // Candidate names: the raw retail title, plus the house-stripped alias,
     // plus a city-stripped alias. Duplicates collapse in the Set.
     const names = new Set<string>([rawName]);
@@ -296,8 +342,6 @@ async function main() {
         names.add(stripped);
         const city = stripBrandLineCity(stripped);
         if (city) names.add(city);
-      } else if (collapse(rawName) === houseTokens(house).join(" ")) {
-        eponymous++;
       }
       // Catch-all for house tokens that sit at the END or in the middle.
       const deHoused = deHouseName(rawName, house);
@@ -314,7 +358,7 @@ async function main() {
           house,
           imageUrl,
           ean: ean ?? "",
-          productUrl: (f[F.productUrl] ?? "").trim(),
+          productUrl: safeProductUrl,
           rank: r,
           alias: !first,
         });
@@ -341,6 +385,7 @@ async function main() {
   console.log(`  non-wearable      ${demoted}${KEEP_ALL ? " (kept, --keep-all)" : " (dropped)"}`);
   console.log(`  barcodes usable   ${withEan}  rejected ${badEan}  (~${eanPct}% of rows)`);
   console.log(`  name recovered from title  ${recoveredFromTitle} (field 17 held only the house)`);
+  if (unresolvedUrls) console.log(`  affiliate links blanked    ${unresolvedUrls} (unresolved <LSN ...> placeholders)`);
   console.log(`  eponymous kept    ${eponymous} (title == house, e.g. Aramis by Aramis — not stripped)`);
   console.log(`  house-prefix alias rows written  ${aliasTotal}${NO_ALIAS ? " (--no-alias)" : ""}`);
   console.log(`\n  wrote ${best.size} rows to ${OUT}`);
