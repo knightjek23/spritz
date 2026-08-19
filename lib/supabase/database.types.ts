@@ -200,6 +200,36 @@ export type Database = {
           },
         ];
       };
+      fragrance_offers: {
+        Row: {
+          id: string;
+          fragrance_id: string;
+          retailer: string;
+          product_url: string;
+          price: number | null;
+          currency: string;
+          in_stock: boolean;
+          updated_at: string;
+        };
+        Insert: {
+          fragrance_id: string;
+          retailer: string;
+          product_url: string;
+          price?: number | null;
+          currency?: string;
+          in_stock?: boolean;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["fragrance_offers"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "fragrance_offers_fragrance_id_fkey";
+            columns: ["fragrance_id"];
+            referencedRelation: "fragrances";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       fragrance_photos: {
         Row: {
           id: string;

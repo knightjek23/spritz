@@ -9,6 +9,7 @@ import Image from "next/image";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { cleanBottleImageUrl } from "@/lib/bottle-image";
 import { BottlePlaceholder } from "@/components/bottle-placeholder";
+import { BuyOptions, type BuyOffer } from "@/components/buy-options";
 import { SimilarSection } from "@/components/similar-section";
 import { SaveButtonsRow } from "@/components/save-buttons-row";
 import { NotesPyramid } from "@/components/notes-pyramid";
@@ -63,6 +64,31 @@ const getFragrance = cache(async (id: string) => {
   return data;
 });
 
+// Retailer buy offers, cheapest first (nulls last so a priced offer always
+// outranks an unpriced one). Populated by the affiliate feed backfill; an
+// empty result just means no feed carries this bottle, and the CTA falls
+// back to the constructed affiliate link.
+const getOffers = cache(async (id: string): Promise<BuyOffer[]> => {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("fragrance_offers")
+    .select("retailer, product_url, price, currency")
+    .eq("fragrance_id", id)
+    .order("price", { ascending: true, nullsFirst: false });
+  if (error) {
+    // Offers are an enhancement; never let a missing table or a transient
+    // error take down the detail page.
+    console.warn("[offers] query failed:", error.message);
+    return [];
+  }
+  return (data ?? []).map((o) => ({
+    retailer: o.retailer,
+    productUrl: o.product_url,
+    price: o.price,
+    currency: o.currency ?? "USD",
+  }));
+});
+
 export async function generateMetadata({
   params,
 }: {
@@ -102,6 +128,7 @@ export default async function FragrancePage({ params }: { params: { id: string }
   const f = await getFragrance(params.id);
   if (!f) notFound();
   const bottleImage = cleanBottleImageUrl(f.bottle_image_url);
+  const offers = await getOffers(f.id);
 
   // JSON-LD: Product + BreadcrumbList. The library's rich-result
   // eligibility (name, brand, image in search) comes from this.
@@ -219,12 +246,12 @@ export default async function FragrancePage({ params }: { params: { id: string }
           client-side so this page can stay ISR-cached. */}
       <section className="grid grid-cols-2 gap-3 mb-10">
         <SaveButtonsRow fragranceId={f.id} />
-        <Link
-          href={`/api/buy/${f.id}`}
-          className="col-span-2 bg-emerald text-cream py-3 rounded-xl text-center font-medium hover:bg-emerald/90 transition"
-        >
-          Buy this fragrance
-        </Link>
+        <div className="col-span-2">
+          {/* One retailer links straight out; several expand into a picker
+              with prices. Falls back to the constructed affiliate link
+              (/api/buy/[id]) when no feed offers exist for this fragrance. */}
+          <BuyOptions offers={offers} fallbackUrl={`/api/buy/${f.id}`} />
+        </div>
       </section>
 
       {/* Family / accords — own section, clearly labeled. Not the same as

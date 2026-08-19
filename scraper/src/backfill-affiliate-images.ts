@@ -69,6 +69,10 @@ const FEED_COLUMNS = {
     "additional_image_link",
   ],
   productUrl: ["link", "aw_deep_link", "merchant_deep_link", "linkurl", "producturl", "product_url", "url"],
+  // Buy-CTA pricing. Google Shopping uses price / sale_price; Awin uses
+  // search_price / store_price; Rakuten's converted CSV uses retail_price.
+  price: ["price", "search_price", "retail_price", "regular_price", "listprice", "list_price"],
+  salePrice: ["sale_price", "saleprice", "store_price", "discount_price", "current_price"],
 };
 
 // ---- Unlicensed sources we're replacing (mirror of lib/bottle-image) ----
@@ -428,6 +432,20 @@ interface FeedProduct {
   quality: number;
   /** GTIN-14 normalized barcode, or null when the feed omitted/mangled it. */
   ean: string | null;
+  /** Deep link to the retailer's product page, for the Buy CTA. */
+  productUrl: string | null;
+  /** Price in the feed's currency (sale price preferred when present). */
+  price: number | null;
+}
+
+// Feed prices arrive as "129.99", "$129.99", "129.99 USD" or "1,299.00"
+// depending on the network. Pull the first number out; null when absent.
+export function parsePrice(raw: string | undefined | null): number | null {
+  if (!raw) return null;
+  const m = raw.replace(/,/g, "").match(/\d+(?:\.\d+)?/);
+  if (!m) return null;
+  const n = Number(m[0]);
+  return Number.isFinite(n) && n > 0 ? n : null;
 }
 
 interface LoadedFeed {
@@ -516,6 +534,13 @@ async function loadFeed(feedPath: string): Promise<LoadedFeed> {
   // Optional: a feed without a barcode column still works, it just can't
   // teach us any EANs or match a foreign-language title.
   const eanIdx = pickColumn(header, FEED_COLUMNS.ean);
+  // Optional: powers the Buy CTA. A feed without them still backfills images.
+  const urlIdx = pickColumn(header, FEED_COLUMNS.productUrl);
+  const priceIdx = pickColumn(header, FEED_COLUMNS.price);
+  const salePriceIdx = pickColumn(header, FEED_COLUMNS.salePrice);
+  if (urlIdx === -1) {
+    console.log("  ! no product-URL column found — offers won't be written for this feed.");
+  }
   if (eanIdx === -1) {
     console.log(
       `  ! no barcode column found (looked for: ${FEED_COLUMNS.ean.join(", ")})\n` +
@@ -559,7 +584,13 @@ async function loadFeed(feedPath: string): Promise<LoadedFeed> {
     else if (rawEan) badEan++;
 
     const quality = productQuality(rawTitle);
-    const product: FeedProduct = { imageUrl, quality, ean };
+    // Buy-CTA data. Sale price wins when the feed carries both, since that's
+    // what the shopper actually pays on arrival.
+    const productUrl = urlIdx === -1 ? null : (r[urlIdx] ?? "").trim() || null;
+    const price =
+      (salePriceIdx === -1 ? null : parsePrice(r[salePriceIdx])) ??
+      (priceIdx === -1 ? null : parsePrice(r[priceIdx]));
+    const product: FeedProduct = { imageUrl, quality, ean, productUrl, price };
 
     // Index under the exact key, the loose (concentration-stripped) key, and
     // the de-housed variants of both. Exact is tried first at match time, so
@@ -651,6 +682,12 @@ const FEED = args.find((a) => a.startsWith("--feed="))?.split("=")[1];
 const DRY = args.includes("--dry");
 const DIAGNOSE = args.includes("--diagnose");
 const LIMIT = Number(args.find((a) => a.startsWith("--limit="))?.split("=")[1] ?? "0");
+// Display name for the retailer this feed belongs to, e.g.
+//   --retailer="FragranceNet"
+// When set (and the feed carries a product-URL column), each match also
+// writes a row into fragrance_offers so the Buy CTA can list it with a
+// price. Omit it to backfill images only, exactly as before.
+const RETAILER = args.find((a) => a.startsWith("--retailer="))?.split("=")[1]?.trim();
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
@@ -757,6 +794,7 @@ async function main() {
   let matched = 0;
   let updated = 0;
   let alreadyOk = 0;
+  let offersWritten = 0;
 
   while (true) {
     if (LIMIT && scanned >= LIMIT) break;
@@ -776,14 +814,18 @@ async function main() {
       if (LIMIT && scanned >= LIMIT) break;
       scanned++;
 
-      // Skip rows that already carry a licensed image. They still count as
-      // COVERED in the popularity bands, otherwise each successive run
-      // looks like a regression as previously-filled rows drop out of the
-      // denominator.
-      if (!isBlockedOrEmpty(row.bottle_image_url)) {
+      // Whether this row still needs an image. Note we do NOT skip the row
+      // when it doesn't: a fragrance that already got its photo from feed A
+      // can still gain a BUY OFFER from feed B, and the whole point of the
+      // offers table is collecting every retailer that stocks a bottle.
+      // Image writes stay gated on this flag further down.
+      const needsImage = isBlockedOrEmpty(row.bottle_image_url);
+      if (!needsImage) {
         alreadyOk++;
+        // Still counts as COVERED in the popularity bands, otherwise each
+        // successive run looks like a regression as previously-filled rows
+        // drop out of the denominator.
         recordBand(row.popularity_rank, true);
-        continue;
       }
 
       // Match order matters. Barcode first: it is exact, language-proof, and
@@ -828,7 +870,9 @@ async function main() {
       const hit = byEanHit ?? nameHit;
       const matchedBy: "ean" | "name" = byEanHit ? "ean" : "name";
       if (!hit) {
-        recordBand(row.popularity_rank, false);
+        // Only count rows that still need an image; already-covered rows
+        // were recorded above and must not be double-counted.
+        if (needsImage) recordBand(row.popularity_rank, false);
         // Classify the miss so we know whether the matcher or the feed is
         // the problem.
         // normHouse already lowercases, strips punctuation and applies
@@ -857,7 +901,7 @@ async function main() {
         }
         continue;
       }
-      recordBand(row.popularity_rank, true);
+      if (needsImage) recordBand(row.popularity_rank, true);
       matched++;
       if (matchedBy === "ean") diag.matchedByEan++;
       else diag.matchedByName++;
@@ -874,26 +918,52 @@ async function main() {
 
       if (DRY) {
         console.log(
-          `  [dry] ${row.house} — ${row.name} -> ${hit.imageUrl}` +
-            ` (via ${matchedBy}${learnedEan ? `, would learn ean ${learnedEan}` : ""})`,
+          `  [dry] ${row.house} — ${row.name}` +
+            `${needsImage ? ` -> ${hit.imageUrl}` : " (image already set)"}` +
+            ` (via ${matchedBy}${learnedEan ? `, would learn ean ${learnedEan}` : ""})` +
+            `${hit.productUrl ? ` | offer ${hit.price != null ? `$${hit.price}` : "no price"}` : ""}`,
         );
         continue;
       }
 
-      const patch: { bottle_image_url: string; ean?: string } = {
-        bottle_image_url: hit.imageUrl,
-      };
+      // Image + learned barcode. Only touch bottle_image_url when the row
+      // still needs one, so a second feed can't overwrite a licensed image.
+      const patch: { bottle_image_url?: string; ean?: string } = {};
+      if (needsImage) patch.bottle_image_url = hit.imageUrl;
       if (learnedEan) patch.ean = learnedEan;
 
-      const { error: upErr } = await supabase
-        .from("fragrances")
-        .update(patch)
-        .eq("id", row.id);
-      if (upErr) {
-        console.warn(`  ! ${row.house} — ${row.name}: ${upErr.message}`);
-      } else {
-        updated++;
-        if (updated % 100 === 0) console.log(`  ✓ ${updated} images backfilled`);
+      if (Object.keys(patch).length > 0) {
+        const { error: upErr } = await supabase
+          .from("fragrances")
+          .update(patch)
+          .eq("id", row.id);
+        if (upErr) {
+          console.warn(`  ! ${row.house} — ${row.name}: ${upErr.message}`);
+        } else if (needsImage) {
+          updated++;
+          if (updated % 100 === 0) console.log(`  ✓ ${updated} images backfilled`);
+        }
+      }
+
+      // Buy offer. Written for EVERY match, including rows whose image came
+      // from an earlier feed — that's how a fragrance accumulates several
+      // retailers and earns the price picker on the detail page.
+      if (RETAILER && hit.productUrl) {
+        const { error: offErr } = await supabase.from("fragrance_offers").upsert(
+          {
+            fragrance_id: row.id,
+            retailer: RETAILER,
+            product_url: hit.productUrl,
+            price: hit.price,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "fragrance_id,retailer" },
+        );
+        if (offErr) {
+          console.warn(`  ! offer ${row.house} — ${row.name}: ${offErr.message}`);
+        } else {
+          offersWritten++;
+        }
       }
     }
 
@@ -905,6 +975,15 @@ async function main() {
   console.log(
     `Done. scanned=${scanned} needed_image=${scanned - alreadyOk} matched=${matched} ${DRY ? "(dry)" : `updated=${updated}`}`,
   );
+  if (RETAILER) {
+    console.log(
+      `  offers for "${RETAILER}": ${DRY ? "(dry run, none written)" : offersWritten}`,
+    );
+  } else {
+    console.log(
+      `  no --retailer= given, so no buy offers were written (images only).`,
+    );
+  }
   console.log(
     `  matched by barcode: ${diag.matchedByEan}   by name: ${diag.matchedByName}   barcodes learned this run: ${diag.eansLearned}`,
   );
