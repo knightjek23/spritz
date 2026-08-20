@@ -24,6 +24,7 @@
     "upload:new": "tsx src/upload-to-supabase.ts --new-only",
     "import:targets": "tsx src/import-targets.ts",
     "backfill:images": "tsx src/backfill-affiliate-images.ts",
+    "audit:images": "tsx src/audit-bottle-images.ts",
     "rakuten:xml": "tsx src/rakuten-xml-to-csv.ts",
     "compute-dupes": "tsx src/compute-dupe-pairs.ts",
     "mirror:images": "tsx src/mirror-images.ts",
