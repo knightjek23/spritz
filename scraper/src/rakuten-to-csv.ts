@@ -256,6 +256,8 @@ interface Row {
   imageUrl: string;
   ean: string;
   productUrl: string;
+  /** Retail price as a plain numeric string, or "" when the feed omitted it. */
+  price: string;
   rank: number;
   alias: boolean;
 }
@@ -333,6 +335,12 @@ async function main() {
     if (unresolved) unresolvedUrls++;
     const safeProductUrl = unresolved ? "" : rawProductUrl;
 
+    // Retail price (field 13). Emitted so the backfill can write a priced
+    // buy offer, which is what lets the detail page show a retailer picker
+    // with prices rather than a bare link.
+    const rawPrice = (f[F.retailPrice] ?? "").trim();
+    const price = /^\d+(\.\d+)?$/.test(rawPrice) && Number(rawPrice) > 0 ? rawPrice : "";
+
     // Candidate names: the raw retail title, plus the house-stripped alias,
     // plus a city-stripped alias. Duplicates collapse in the Set.
     const names = new Set<string>([rawName]);
@@ -359,6 +367,7 @@ async function main() {
           imageUrl,
           ean: ean ?? "",
           productUrl: safeProductUrl,
+          price,
           rank: r,
           alias: !first,
         });
@@ -369,9 +378,15 @@ async function main() {
 
   // Header names chosen to match FEED_COLUMNS in backfill-affiliate-images.ts
   // exactly, so that script needs no changes at all.
-  const out = [["product_name", "brand", "image_url", "ean", "product_url"].join(",")];
+  const out = [
+    ["product_name", "brand", "image_url", "ean", "product_url", "price"].join(","),
+  ];
   for (const r of best.values()) {
-    out.push([r.name, r.house, r.imageUrl, r.ean, r.productUrl].map(csvEscape).join(","));
+    out.push(
+      [r.name, r.house, r.imageUrl, r.ean, r.productUrl, r.price]
+        .map(csvEscape)
+        .join(","),
+    );
   }
   fs.writeFileSync(OUT!, out.join("\n") + "\n", "utf8");
 

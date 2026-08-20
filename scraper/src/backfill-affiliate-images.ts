@@ -73,6 +73,9 @@ const FEED_COLUMNS = {
   // search_price / store_price; Rakuten's converted CSV uses retail_price.
   price: ["price", "search_price", "retail_price", "regular_price", "listprice", "list_price"],
   salePrice: ["sale_price", "saleprice", "store_price", "discount_price", "current_price"],
+  // Currency matters: Nicchia (an Italian retailer) prices in EUR, so
+  // defaulting everything to USD would misprice the buy picker.
+  currency: ["currency", "currency_code", "price_currency"],
 };
 
 // ---- Unlicensed sources we're replacing (mirror of lib/bottle-image) ----
@@ -436,6 +439,8 @@ interface FeedProduct {
   productUrl: string | null;
   /** Price in the feed's currency (sale price preferred when present). */
   price: number | null;
+  /** ISO code from the feed; defaults to USD when the feed omits it. */
+  currency: string;
 }
 
 // Feed prices arrive as "129.99", "$129.99", "129.99 USD" or "1,299.00"
@@ -538,6 +543,7 @@ async function loadFeed(feedPath: string): Promise<LoadedFeed> {
   const urlIdx = pickColumn(header, FEED_COLUMNS.productUrl);
   const priceIdx = pickColumn(header, FEED_COLUMNS.price);
   const salePriceIdx = pickColumn(header, FEED_COLUMNS.salePrice);
+  const currencyIdx = pickColumn(header, FEED_COLUMNS.currency);
   if (urlIdx === -1) {
     console.log("  ! no product-URL column found — offers won't be written for this feed.");
   }
@@ -590,7 +596,9 @@ async function loadFeed(feedPath: string): Promise<LoadedFeed> {
     const price =
       (salePriceIdx === -1 ? null : parsePrice(r[salePriceIdx])) ??
       (priceIdx === -1 ? null : parsePrice(r[priceIdx]));
-    const product: FeedProduct = { imageUrl, quality, ean, productUrl, price };
+    const currency =
+      (currencyIdx === -1 ? "" : (r[currencyIdx] ?? "").trim().toUpperCase()) || "USD";
+    const product: FeedProduct = { imageUrl, quality, ean, productUrl, price, currency };
 
     // Index under the exact key, the loose (concentration-stripped) key, and
     // the de-housed variants of both. Exact is tried first at match time, so
@@ -955,6 +963,7 @@ async function main() {
             retailer: RETAILER,
             product_url: hit.productUrl,
             price: hit.price,
+            currency: hit.currency,
             updated_at: new Date().toISOString(),
           },
           { onConflict: "fragrance_id,retailer" },
