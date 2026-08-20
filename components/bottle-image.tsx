@@ -55,8 +55,12 @@ export function BottleImage({
   const usable = cleaned && !failed;
 
   if (!usable) {
+    // Thumbnails keep a little breathing room; the hero (the only caller
+    // that passes a caption) runs edge to edge so the bottle reads large.
     return (
-      <div className="absolute inset-0 flex items-center justify-center p-2">
+      <div
+        className={`absolute inset-0 flex items-center justify-center ${caption ? "p-0" : "p-2"}`}
+      >
         <BottlePlaceholder house={house} caption={caption} />
       </div>
     );

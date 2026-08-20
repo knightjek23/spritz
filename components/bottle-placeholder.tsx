@@ -47,7 +47,14 @@ export function BottlePlaceholder({
 
   const svg = (
     <svg
-      viewBox="0 0 219 219"
+      // Cropped to the bottle's own bounds rather than the exported
+      // 219x219 canvas. The drawing only spans x 56-163 / y 16-203, so the
+      // square canvas wasted roughly half its width and scaled the bottle
+      // down to fit. This window (with ~4 units of padding for the stroke)
+      // is portrait, matching the containers it sits in, so the bottle
+      // renders noticeably larger everywhere. Shape and text coordinates
+      // are untouched — only the visible window changed.
+      viewBox="52 12 115 195"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={`w-full h-full ${className}`}
