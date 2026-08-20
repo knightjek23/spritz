@@ -33,12 +33,19 @@ export function BottleImage({
   name,
   sizes = "140px",
   className = "object-contain p-2 mix-blend-multiply group-hover:scale-105 transition-transform",
+  priority = false,
+  caption,
 }: {
   src: string | null;
   house: string;
   name: string;
   sizes?: string;
   className?: string;
+  /** Above-the-fold images (the detail hero) should preload. */
+  priority?: boolean;
+  /** Shown under the placeholder when there's no usable image. Only worth
+   *  it where there's room, i.e. the hero — not on list thumbnails. */
+  caption?: string;
 }) {
   const [failed, setFailed] = useState(false);
 
@@ -50,7 +57,7 @@ export function BottleImage({
   if (!usable) {
     return (
       <div className="absolute inset-0 flex items-center justify-center p-2">
-        <BottlePlaceholder house={house} />
+        <BottlePlaceholder house={house} caption={caption} />
       </div>
     );
   }
@@ -62,6 +69,7 @@ export function BottleImage({
       fill
       sizes={sizes}
       className={className}
+      priority={priority}
       onError={() => setFailed(true)}
     />
   );

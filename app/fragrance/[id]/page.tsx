@@ -8,7 +8,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { cleanBottleImageUrl } from "@/lib/bottle-image";
-import { BottlePlaceholder } from "@/components/bottle-placeholder";
+import { BottleImage } from "@/components/bottle-image";
 import { BuyOptions, type BuyOffer } from "@/components/buy-options";
 import { SimilarSection } from "@/components/similar-section";
 import { SaveButtonsRow } from "@/components/save-buttons-row";
@@ -195,25 +195,22 @@ export default async function FragrancePage({ params }: { params: { id: string }
           className="absolute inset-0 -inset-x-6 rounded-3xl bg-gradient-to-br from-emerald/10 via-brass/10 to-paper/40 blur-xl -z-10"
         />
         <div className="rounded-3xl bg-cream border border-ink/5 shadow-sm py-8 px-6 flex flex-col items-center justify-center isolate">
+          {/* BottleImage (a client component) rather than a raw <Image>:
+              it owns the onError fallback. Feed image URLs go stale when a
+              retailer reorganises its CDN, and a Server Component can't
+              catch that — which is how a broken-image glyph ended up here
+              instead of the placeholder. */}
           <div className="relative w-[200px] h-[267px]">
-            {bottleImage ? (
-              <Image
-                src={bottleImage}
-                alt={`${f.name} by ${f.house}`}
-                fill
-                sizes="(max-width: 768px) 200px, 280px"
-                className="object-contain mix-blend-multiply"
-                priority
-              />
-            ) : (
-              <BottlePlaceholder house={f.house} />
-            )}
+            <BottleImage
+              src={bottleImage}
+              house={f.house}
+              name={f.name}
+              sizes="(max-width: 768px) 200px, 280px"
+              className="object-contain mix-blend-multiply"
+              priority
+              caption="Image coming soon"
+            />
           </div>
-          {!bottleImage && (
-            <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-slate">
-              Photo coming soon
-            </p>
-          )}
         </div>
       </section>
 

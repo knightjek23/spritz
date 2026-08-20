@@ -30,9 +30,13 @@ export function houseInitials(house: string): string {
 export function BottlePlaceholder({
   house,
   className = "",
+  caption,
 }: {
   house: string;
   className?: string;
+  /** Optional line under the bottle, e.g. "Image coming soon". Used on the
+   *  detail hero where there's room; omitted on small thumbnails. */
+  caption?: string;
 }) {
   const initials = houseInitials(house);
   // Shrink the type as the initial count grows so 3 letters still sit
@@ -41,14 +45,14 @@ export function BottlePlaceholder({
   // touch smaller than the equivalent mono sizes.
   const fontSize = initials.length >= 3 ? 30 : 38;
 
-  return (
+  const svg = (
     <svg
       viewBox="0 0 219 219"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={`w-full h-full ${className}`}
       role="img"
-      aria-label={`${house}. Photo coming soon.`}
+      aria-label={`${house}. ${caption ?? "Image coming soon"}.`}
     >
       {/* Cap */}
       <rect x="88" y="16" width="43" height="27" rx="1.5" stroke="#114821" />
@@ -74,5 +78,18 @@ export function BottlePlaceholder({
         {initials}
       </text>
     </svg>
+  );
+
+  if (!caption) return svg;
+
+  // Caption sits under the bottle. min-h-0 lets the SVG shrink inside a
+  // fixed-height parent instead of pushing the caption out of the box.
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center gap-2">
+      <div className="min-h-0 flex-1 w-full">{svg}</div>
+      <p className="font-mono text-[10px] uppercase tracking-widest text-slate shrink-0">
+        {caption}
+      </p>
+    </div>
   );
 }
