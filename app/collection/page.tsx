@@ -10,9 +10,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { cleanBottleImageUrl } from "@/lib/bottle-image";
-import { BottlePlaceholder } from "@/components/bottle-placeholder";
+import { BottleImage } from "@/components/bottle-image";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import type {
   CollectionItem,
@@ -176,16 +175,16 @@ function SignedInCollection() {
               href={`/fragrance/${it.fragrance.id}`}
               className="flex items-center gap-3 px-3 py-2 pr-14 rounded-xl bg-paper border border-ink/10 hover:brightness-95 transition"
             >
-              {cleanBottleImageUrl(it.fragrance.bottle_image_url) ? (
-                // bg-paper + isolate + mix-blend-multiply trio: the multiply
-                // needs an opaque backdrop to blend into (without it, the
-                // white bottle background stays white). Matches the trending
-                // card thumbnail pattern.
+              {/* bg-paper + isolate + mix-blend-multiply trio: the multiply
+                  needs an opaque backdrop to blend into (without it, the
+                  white bottle background stays white). Matches the trending
+                  card thumbnail pattern. */}
+              {
                 <div className="shrink-0 w-12 h-16 relative isolate bg-paper rounded-md overflow-hidden">
-                  <Image
-                    src={cleanBottleImageUrl(it.fragrance.bottle_image_url)!}
-                    alt=""
-                    fill
+                  <BottleImage
+                    src={it.fragrance.bottle_image_url}
+                    house={it.fragrance.house}
+                    name={it.fragrance.name}
                     sizes="48px"
                     className="object-contain mix-blend-multiply p-1"
                   />
@@ -194,12 +193,7 @@ function SignedInCollection() {
                       for liked, slate thumbs-down for disliked. */}
                   <ReactionBadge reaction={it.reaction} />
                 </div>
-              ) : (
-                <div className="shrink-0 w-12 h-16 relative rounded-md bg-paper flex items-center justify-center p-0.5">
-                  <BottlePlaceholder house={it.fragrance.house} />
-                  <ReactionBadge reaction={it.reaction} />
-                </div>
-              )}
+              }
               <div className="min-w-0 flex-1">
                 <div className="font-medium truncate">{it.fragrance.name}</div>
                 <div className="text-xs text-slate truncate">{it.fragrance.house}</div>

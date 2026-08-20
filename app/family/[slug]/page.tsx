@@ -9,12 +9,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { FAMILY_BLURB, familyName, familySlug } from "@/lib/families";
 import { FragranceScroller } from "@/components/fragrance-scroller";
 import { cleanBottleImageUrl } from "@/lib/bottle-image";
-import { BottlePlaceholder } from "@/components/bottle-placeholder";
+import { BottleImage } from "@/components/bottle-image";
 import type { Fragrance } from "@/lib/types";
 
 export const revalidate = 300;
@@ -124,21 +123,15 @@ export default async function FamilyPage({
                   href={`/fragrance/${f.id}`}
                   className="flex items-center gap-3 px-3 py-2 rounded-xl bg-paper border border-ink/10 hover:brightness-95 transition"
                 >
-                  {cleanBottleImageUrl(f.bottle_image_url) ? (
-                    <div className="shrink-0 w-12 h-16 relative">
-                      <Image
-                        src={cleanBottleImageUrl(f.bottle_image_url)!}
-                        alt=""
-                        fill
-                        sizes="48px"
-                        className="object-contain mix-blend-multiply"
-                      />
-                    </div>
-                  ) : (
-                    <div className="shrink-0 w-12 h-16 rounded bg-paper flex items-center justify-center p-0.5">
-                      <BottlePlaceholder house={f.house} />
-                    </div>
-                  )}
+                  <div className="shrink-0 w-12 h-16 relative">
+                    <BottleImage
+                      src={f.bottle_image_url}
+                      house={f.house}
+                      name={f.name}
+                      sizes="48px"
+                      className="object-contain mix-blend-multiply"
+                    />
+                  </div>
                   <div className="min-w-0 flex-1">
                     <div className="font-medium truncate">{f.name}</div>
                     {/* House rendered as plain text (not a nested Link)

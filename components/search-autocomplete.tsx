@@ -17,9 +17,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { cleanBottleImageUrl } from "@/lib/bottle-image";
-import { BottlePlaceholder } from "@/components/bottle-placeholder";
+import { BottleImage } from "@/components/bottle-image";
 import type { Fragrance } from "@/lib/types";
 
 const DEBOUNCE_MS = 180;
@@ -295,21 +294,15 @@ export function SearchAutocomplete({
           {suggestions.map((f, idx) => {
             const inner = (
               <>
-                {cleanBottleImageUrl(f.bottle_image_url) ? (
-                  <div className="shrink-0 w-10 h-14 relative">
-                    <Image
-                      src={cleanBottleImageUrl(f.bottle_image_url)!}
-                      alt=""
-                      fill
-                      sizes="40px"
-                      className="object-contain mix-blend-multiply"
-                    />
-                  </div>
-                ) : (
-                  <div className="shrink-0 w-10 h-14 rounded bg-paper border border-ink/5 flex items-center justify-center p-0.5">
-                    <BottlePlaceholder house={f.house} />
-                  </div>
-                )}
+                <div className="shrink-0 w-10 h-14 relative">
+                  <BottleImage
+                    src={f.bottle_image_url}
+                    house={f.house}
+                    name={f.name}
+                    sizes="40px"
+                    className="object-contain mix-blend-multiply"
+                  />
+                </div>
                 <div className="min-w-0 flex-1">
                   <div className="font-medium truncate text-ink">{f.name}</div>
                   <div className="text-xs text-slate truncate">

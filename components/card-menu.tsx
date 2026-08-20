@@ -20,9 +20,8 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { cleanBottleImageUrl } from "@/lib/bottle-image";
-import { BottlePlaceholder } from "@/components/bottle-placeholder";
+import { BottleImage } from "@/components/bottle-image";
 import type { Reaction } from "@/lib/types";
 
 interface CardMenuProps {
@@ -279,25 +278,19 @@ export function CardMenu({
                       user knows exactly which fragrance the menu is
                       operating on. */}
                   <div className="mx-4 mb-2 flex items-center gap-3 px-3 py-3 rounded-2xl bg-paper border border-ink/10">
-                    {cleanBottleImageUrl(fragrance.bottle_image_url) ? (
-                      // Same bg-paper + isolate + mix-blend-multiply trio as
-                      // the shelf row thumbnail so the preview's bottle
-                      // dissolves into the card backdrop instead of sitting
-                      // in a white box.
-                      <div className="shrink-0 w-12 h-16 relative isolate bg-paper rounded-md overflow-hidden">
-                        <Image
-                          src={cleanBottleImageUrl(fragrance.bottle_image_url)!}
-                          alt=""
-                          fill
-                          sizes="48px"
-                          className="object-contain mix-blend-multiply p-1"
-                        />
-                      </div>
-                    ) : (
-                      <div className="shrink-0 w-12 h-16 rounded-md bg-ink/5 flex items-center justify-center p-0.5">
-                        <BottlePlaceholder house={fragrance.house} />
-                      </div>
-                    )}
+                    {/* Same bg-paper + isolate + mix-blend-multiply trio as
+                        the shelf row thumbnail so the preview's bottle
+                        dissolves into the card backdrop instead of sitting
+                        in a white box. */}
+                    <div className="shrink-0 w-12 h-16 relative isolate bg-paper rounded-md overflow-hidden">
+                      <BottleImage
+                        src={fragrance.bottle_image_url}
+                        house={fragrance.house}
+                        name={fragrance.name}
+                        sizes="48px"
+                        className="object-contain mix-blend-multiply p-1"
+                      />
+                    </div>
                     <div className="min-w-0 flex-1">
                       <div className="font-display text-lg leading-tight truncate">
                         {fragrance.name}
