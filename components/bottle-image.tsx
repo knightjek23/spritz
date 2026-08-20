@@ -36,7 +36,10 @@ export function BottleImage({
   priority = false,
   caption,
 }: {
-  src: string | null;
+  // Accepts undefined as well as null: several callers type the field as
+  // optional (`bottle_image_url?: string | null`), and all three cases mean
+  // the same thing here — no usable image, show the placeholder.
+  src: string | null | undefined;
   house: string;
   name: string;
   sizes?: string;
