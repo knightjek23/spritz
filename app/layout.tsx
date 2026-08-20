@@ -65,9 +65,21 @@ export const metadata: Metadata = {
   // Affiliate network site-ownership verification. Rendered into <head> on
   // every page (FlexOffers checks the home page). Safe to remove once the
   // network shows the site as verified, but harmless to leave.
+  //
+  // These MUST go through the Metadata API. A hand-written <head> in an App
+  // Router root layout is unsupported: it silently fails to render, and the
+  // networks' own snippets use value="..." which is not a valid React prop on
+  // <meta> and fails the type check.
+  //
+  // The IDs are re-issued each time you re-add the site in the network's
+  // dashboard. If verification fails, compare the GUID in the dialog against
+  // what production is actually serving BEFORE debugging anything else — on
+  // 2026-08-17 Impact rejected a perfectly-rendered tag simply because it
+  // carried a superseded ID from an earlier attempt.
   other: {
     "fo-verify": "325b1f7f-146e-4fbd-90c6-12c94bcf614d",
-    "impact-site-verification": "e550c991-0845-4bc1-b011-eed13c9b978b",
+    // Re-issued 2026-08-17; replaced e550c991-0845-4bc1-b011-eed13c9b978b.
+    "impact-site-verification": "15430c52-c79f-4a74-99ed-cfffdc13ebb1",
   },
 };
 
