@@ -6,6 +6,14 @@
 
 import type { Note, DupeRecommendation, Reaction } from "../types";
 
+/** Per-candidate scores logged on scan_events for threshold calibration. */
+export interface ScanEventCandidate {
+  fragrance_id: string;
+  text_score: number | null;
+  visual_score: number | null;
+  fused: number;
+}
+
 export type Database = {
   // Required by @supabase/supabase-js >= 2.50 — the SDK looks for this on the
   // Database generic. The CLI generator emits the same shape.
@@ -271,6 +279,11 @@ export type Database = {
           user_reported_brand: string | null;
           user_reported_name: string | null;
           user_reported_at: string | null;
+          // scan v2 (migration 0023)
+          match_method: string | null;
+          candidates: ScanEventCandidate[] | null;
+          visual_provider: string | null;
+          web_lookup: boolean;
           created_at: string;
         };
         Insert: {
@@ -287,9 +300,44 @@ export type Database = {
           user_reported_brand?: string | null;
           user_reported_name?: string | null;
           user_reported_at?: string | null;
+          match_method?: string | null;
+          candidates?: ScanEventCandidate[] | null;
+          visual_provider?: string | null;
+          web_lookup?: boolean;
         };
         Update: Partial<Database["public"]["Tables"]["scan_events"]["Insert"]>;
         Relationships: [];
+      };
+      // scan v2 visual layer (migration 0023). One row per IMAGE, not per
+      // fragrance: approved user photos and affiliate images sit beside the
+      // catalog image and all vote for the same fragrance_id.
+      bottle_image_embeddings: {
+        Row: {
+          id: string;
+          fragrance_id: string;
+          source: "catalog" | "affiliate" | "user_photo";
+          image_url: string;
+          model: string;
+          embedding: number[];
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          fragrance_id: string;
+          source: "catalog" | "affiliate" | "user_photo";
+          image_url: string;
+          model: string;
+          embedding: number[];
+        };
+        Update: Partial<Database["public"]["Tables"]["bottle_image_embeddings"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "bottle_image_embeddings_fragrance_id_fkey";
+            columns: ["fragrance_id"];
+            referencedRelation: "fragrances";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       affiliate_clicks: {
         Row: {
@@ -349,6 +397,22 @@ export type Database = {
       };
       // Slim variant for /api/search (migration 0018) — same matching,
       // only the columns the search UI renders.
+      // scan v2: cosine kNN over bottle_image_embeddings, best image per
+      // fragrance, optionally scoped to one house (migration 0023).
+      match_bottle_images: {
+        Args: { p_embedding: number[]; p_limit?: number; p_house?: string | null };
+        Returns: Array<{
+          fragrance_id: string;
+          similarity: number;
+          name: string;
+          house: string;
+          bottle_image_url: string | null;
+        }>;
+      };
+      count_embedded_fragrances: {
+        Args: { p_model: string };
+        Returns: number;
+      };
       search_fragrances_lite: {
         Args: { p_brand: string; p_name: string; p_limit?: number };
         Returns: Array<{

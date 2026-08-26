@@ -1,103 +1,220 @@
 "use client";
 
-// /scan — full-screen camera takeover.
+// /scan — full-screen camera takeover (scan v2).
 //
-// In the default state, this page mounts the CameraCapture component
-// which renders a fixed-position, full-bleed camera UI (matching the
-// Figma design). The h1/subtitle that used to live above the camera are
-// gone: the camera IS the page.
+// The camera IS the page. On capture we POST to /api/scan with
+// `Accept: application/x-ndjson` and consume the stage frames as they
+// stream (lib/scan-stages.ts):
+//   - stage frames   → rows in the Dynamic Checklist overlay
+//   - candidates     → router.prefetch() on the top 3 detail pages, so the
+//                      final navigation lands on a warm route
+//   - result         → match: closing line, then push to /fragrance/[id]
+//                      (with ?scan=<event> for the audit-trail receipt)
+//                      miss:  the picker / catalog-gap panel below
+//   - error          → honest copy naming the real cause (errorCopy)
+// If the server answers with plain JSON (older deploy, proxy stripped the
+// body stream), the same handler falls back to parsing it whole.
 //
-// On a successful scan:
-//   - Match           → router.push(`/fragrance/${id}`) inside onCapture,
-//                       and CameraCapture is unmounted as the page navigates.
-//   - Disambiguation  → `result` is set with candidates; CameraCapture
-//                       unmounts and we show the picker beneath the page's
-//                       (now-visible) cream surface.
-//   - No match        → same picker UI, but the copy and the catalog-gap
-//                       report ("we missed this") take over.
+// `?event=<scan_event_id>` reopens a past scan's picker (linked from the
+// receipt on the detail page: "Not it? See N other close matches").
 //
 // CameraCapture stays mounted only while !result, so the live camera
 // indicator is properly torn down the moment a scan resolves.
 
-import { useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { SignedOut } from "@clerk/nextjs";
 import { ReportMiss } from "@/components/report-miss";
 import { CameraCapture } from "@/components/camera-capture";
+import { BottleImage } from "@/components/bottle-image";
+import {
+  errorCopy,
+  resultLine,
+  stageLine,
+  type ScanFrame,
+  type StageLine,
+} from "@/lib/scan-stages";
 import type { ScanResult } from "@/lib/types";
 
-// Server error slugs → human copy. Anything unrecognized falls back to a
-// generic line rather than leaking a raw code into the UI.
-function errorCopy(code: string): string {
-  switch (code) {
-    case "rate_limited":
-      return "You've hit today's scan limit. It resets at midnight UTC — or search by name below.";
-    case "invalid_body":
-      return "That photo didn't come through right. Try taking it again.";
-    case "scan_failed":
-    default:
-      return "Something went wrong reading the bottle. Give it another try.";
-  }
-}
+// How long the "Found it. Opening …" row stays on screen before the push.
+// Long enough to read, short enough that the prefetched page feels instant.
+const DONE_HOLD_MS = 450;
+const PREFETCH_TOP_N = 3;
 
 export default function ScanPage() {
+  return (
+    // useSearchParams needs a Suspense boundary on a client page or Next
+    // bails the whole route out to client rendering.
+    <Suspense fallback={null}>
+      <ScanPageInner />
+    </Suspense>
+  );
+}
+
+function ScanPageInner() {
   const router = useRouter();
+  const params = useSearchParams();
+  const reopenEventId = params.get("event");
+
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ScanResult | null>(null);
+  const [stages, setStages] = useState<StageLine[] | undefined>(undefined);
+  const [stagesDone, setStagesDone] = useState(false);
+  const prefetched = useRef(new Set<string>());
 
-  // Single capture handler — CameraCapture passes raw base64 (already
-  // stripped of the data: prefix), so we just POST and dispatch on the
-  // ScanResult shape.
+  const pushLine = useCallback((line: StageLine | null) => {
+    if (!line) return;
+    setStages((prev) => {
+      const list = prev ?? [];
+      // Same stage key twice (e.g. a second "matching" after a web
+      // fallback) replaces the row rather than stacking a duplicate.
+      const i = list.findIndex((l) => l.key === line.key);
+      if (i >= 0) {
+        const next = list.slice();
+        next[i] = line;
+        return next;
+      }
+      return [...list, line];
+    });
+  }, []);
+
+  const prefetch = useCallback(
+    (id: string) => {
+      if (prefetched.current.has(id)) return;
+      prefetched.current.add(id);
+      router.prefetch(`/fragrance/${id}`);
+    },
+    [router],
+  );
+
+  function handleFrame(frame: ScanFrame): ScanResult | null {
+    switch (frame.type) {
+      case "stage":
+        pushLine(stageLine(frame));
+        return null;
+      case "candidates":
+        frame.items.slice(0, PREFETCH_TOP_N).forEach((c) => prefetch(c.id));
+        return null;
+      case "result":
+        return frame.result;
+      case "error":
+        throw new ScanFailure(frame.code);
+    }
+  }
+
+  async function finish(r: ScanResult) {
+    pushLine(resultLine(r));
+    setStagesDone(true);
+    if (r.matched) {
+      prefetch(r.matched.id);
+      await new Promise((res) => setTimeout(res, DONE_HOLD_MS));
+      router.push(`/fragrance/${r.matched.id}?scan=${r.scan_event_id}`);
+      return;
+    }
+    // Miss → set result so the picker renders and the camera unmounts.
+    setResult(r);
+  }
+
   async function onCapture(base64: string) {
     setBusy(true);
     setError(null);
     setResult(null);
+    setStages([]);
+    setStagesDone(false);
+    prefetched.current.clear();
+
     try {
       const res = await fetch("/api/scan", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: {
+          "content-type": "application/json",
+          accept: "application/x-ndjson",
+        },
         body: JSON.stringify({ image: base64 }),
       });
-      // Defensive parse: a proxy-level 500/502 may have no JSON body, and
-      // the raw SyntaxError must never reach the error banner.
-      const data = (await res.json().catch(() => null)) as
-        | ScanResult
-        | { error: string }
-        | null;
 
-      if (!res.ok || !data) {
-        setError(errorCopy(data && "error" in data ? data.error : "scan_failed"));
+      const isStream = (res.headers.get("content-type") ?? "").includes("x-ndjson");
+
+      if (!res.ok || !isStream || !res.body) {
+        // Pre-pipeline rejections (400/429) and non-streaming servers
+        // answer with one JSON object. Defensive parse: a proxy-level 502
+        // may have no JSON body, and a SyntaxError must never reach the UI.
+        const data = (await res.json().catch(() => null)) as
+          | ScanResult
+          | { error: string }
+          | null;
+        if (!res.ok || !data) {
+          throw new ScanFailure(data && "error" in data ? data.error : "scan_failed");
+        }
+        if ("error" in data) throw new ScanFailure(data.error);
+        await finish(data);
         return;
       }
 
-      const r = data as ScanResult;
-      if (r.matched) {
-        // Direct hand-off to the library page. CameraCapture is
-        // unmounted as the navigation completes.
-        router.push(`/fragrance/${r.matched.id}`);
-        return;
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let final: ScanResult | null = null;
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let nl: number;
+        while ((nl = buffer.indexOf("\n")) >= 0) {
+          const line = buffer.slice(0, nl).trim();
+          buffer = buffer.slice(nl + 1);
+          if (!line) continue;
+          let frame: ScanFrame;
+          try {
+            frame = JSON.parse(line) as ScanFrame;
+          } catch {
+            continue;
+          }
+          final = handleFrame(frame) ?? final;
+        }
       }
-      // Miss → set result so the no-match panel renders and the camera
-      // unmounts cleanly.
-      setResult(r);
-    } catch {
-      // Network failure / offline — not a server error code.
-      setError("We couldn't reach the server. Check your connection and try again.");
+      if (!final) throw new ScanFailure("scan_failed");
+      await finish(final);
+    } catch (err) {
+      if (err instanceof ScanFailure) {
+        setError(errorCopy(err.code));
+      } else {
+        // Network failure / offline — not a server error code.
+        setError("We couldn’t reach the server. Check your connection and try again.");
+      }
+      setStages(undefined);
+      setStagesDone(false);
     } finally {
       setBusy(false);
     }
   }
 
+  // Reopen a past scan's picker from the detail-page receipt.
+  useEffect(() => {
+    if (!reopenEventId) return;
+    let cancelled = false;
+    (async () => {
+      const res = await fetch(`/api/scan/${reopenEventId}`);
+      const data = (await res.json().catch(() => null)) as ScanResult | null;
+      if (!cancelled && res.ok && data) setResult({ ...data, matched: null });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [reopenEventId]);
+
   // ============== Camera mode ==============
-  // While there's no result, the camera owns the whole screen. The error
-  // banner is overlaid as a sticky-bottom strip so the user can see it
-  // without leaving the camera surface.
   if (!result) {
     return (
       <>
-        <CameraCapture onCapture={onCapture} busy={busy} />
+        <CameraCapture
+          onCapture={onCapture}
+          busy={busy}
+          stages={stages}
+          stagesDone={stagesDone}
+        />
         {error && (
           <div className="fixed left-0 right-0 bottom-28 mx-auto max-w-sm z-[60] px-4">
             <div className="p-4 rounded-xl border border-burgundy/40 bg-cream shadow-lg">
@@ -112,10 +229,7 @@ export default function ScanPage() {
                   try again
                 </button>{" "}
                 or{" "}
-                <Link
-                  href="/search"
-                  className="text-emerald underline underline-offset-2"
-                >
+                <Link href="/search" className="text-emerald underline underline-offset-2">
                   search by name
                 </Link>
                 .
@@ -128,9 +242,10 @@ export default function ScanPage() {
   }
 
   // ============== Disambiguation / miss panel ==============
-  // Shown when the scan returned candidates but none auto-matched, OR
-  // when no candidates came back at all. The camera is unmounted at this
-  // point — this is a normal scrollable page.
+  const hasCandidates = result.candidates.length > 0;
+  const readSomething = !!(result.detected_brand || result.detected_name);
+  const labelUnreadable = result.partial === "label_unreadable";
+
   return (
     <div className="mx-auto max-w-md px-6 py-12">
       <header className="mb-6">
@@ -138,29 +253,55 @@ export default function ScanPage() {
           Scan result
         </p>
         <h1 className="font-display text-3xl">
-          {result.candidates.length > 0 ? "Pick the closest match" : "We didn’t catch that"}
+          {hasCandidates ? "Pick the one in your hand" : "Couldn’t place this one yet"}
         </h1>
       </header>
 
+      {/* What we actually got from the photo. Partial success is named as
+          such, so a shape-only shortlist never poses as a confident read. */}
       <p className="text-sm text-ink mb-4">
-        We read{" "}
-        <span className="font-medium">
-          &ldquo;{result.detected_brand} {result.detected_name}&rdquo;
-        </span>
-        .
+        {labelUnreadable ? (
+          <>
+            The label wasn’t readable, so these are the bottles whose{" "}
+            <span className="font-medium">shape and color</span> come closest.
+          </>
+        ) : readSomething ? (
+          <>
+            We read{" "}
+            <span className="font-medium">
+              &ldquo;{[result.detected_brand, result.detected_name].filter(Boolean).join(" ")}&rdquo;
+            </span>
+            {hasCandidates ? ", but no single bottle was a confident match." : "."}
+          </>
+        ) : (
+          <>We couldn’t read a label or recognise the bottle.</>
+        )}
       </p>
 
-      {result.candidates.length > 0 && (
+      {hasCandidates && (
         <ul className="space-y-2 mb-6">
           {result.candidates.map((c) => (
             <li key={c.fragrance.id}>
               <Link
-                href={`/fragrance/${c.fragrance.id}`}
-                className="block px-4 py-3 rounded-xl border border-ink/15 hover:bg-ink/5"
+                href={`/fragrance/${c.fragrance.id}?scan=${result.scan_event_id}`}
+                className="group flex items-center gap-4 px-4 py-3 rounded-xl border border-ink/15 hover:bg-ink/5"
               >
-                <div className="font-medium">{c.fragrance.name}</div>
-                <div className="text-xs text-slate">
-                  {c.fragrance.house} · {Math.round(c.confidence * 100)}% match
+                <div className="relative w-12 h-16 shrink-0">
+                  <BottleImage
+                    src={c.fragrance.bottle_image_url}
+                    house={c.fragrance.house}
+                    name={c.fragrance.name}
+                    sizes="48px"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <div className="font-medium truncate">{c.fragrance.name}</div>
+                  <div className="text-xs text-slate">
+                    {c.fragrance.house}
+                    {c.text_score == null && c.visual_score != null
+                      ? " · closest by bottle shape"
+                      : ` · ${Math.round(c.confidence * 100)}% match`}
+                  </div>
                 </div>
               </Link>
             </li>
@@ -172,14 +313,11 @@ export default function ScanPage() {
           Either way, give the user a graceful out. */}
       <div className="pt-6 border-t border-ink/10">
         <p className="text-sm text-ink mb-1 font-medium">
-          {result.candidates.length === 0
-            ? "Nothing close in our catalog yet."
-            : "Not the one?"}
+          {hasCandidates ? "Not the one?" : "Nothing close in our catalog yet."}
         </p>
         <p className="text-sm text-slate mb-4 leading-relaxed">
           We log every miss and use them to prioritize what to add next. In
-          the meantime, you can search by name in case the OCR misread
-          something.
+          the meantime, you can search by name in case the label was misread.
         </p>
         <div className="flex flex-col gap-2">
           <Link
@@ -195,6 +333,8 @@ export default function ScanPage() {
             onClick={() => {
               setResult(null);
               setError(null);
+              setStages(undefined);
+              if (reopenEventId) router.replace("/scan");
             }}
             className="text-center px-4 py-3 rounded-xl border border-ink/15 text-ink font-medium hover:bg-ink/5 transition"
           >
@@ -222,4 +362,10 @@ export default function ScanPage() {
       </div>
     </div>
   );
+}
+
+class ScanFailure extends Error {
+  constructor(public code: string) {
+    super(code);
+  }
 }

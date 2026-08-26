@@ -29,6 +29,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { prepareFromFile, prepareFromVideo } from "@/lib/image-prep";
+import { ScanChecklist } from "@/components/scan-checklist";
+import type { StageLine } from "@/lib/scan-stages";
 
 type State =
   | "intro"
@@ -46,6 +49,14 @@ interface Props {
   onCapture: (base64: string) => Promise<void> | void;
   /** When true, shows a processing overlay regardless of internal state. */
   busy?: boolean;
+  /**
+   * Scan v2: checklist rows fed by the server's stage frames. When
+   * present, the processing overlay renders the Dynamic Checklist instead
+   * of the single "Reading the label…" line.
+   */
+  stages?: StageLine[];
+  /** True once the result landed — freezes the checklist's current row. */
+  stagesDone?: boolean;
 }
 
 // `torch` isn't in the lib.dom.d.ts shape for MediaTrackCapabilities /
@@ -55,7 +66,12 @@ interface Props {
 type TorchCapabilities = MediaTrackCapabilities & { torch?: boolean };
 type TorchConstraint = MediaTrackConstraintSet & { torch?: boolean };
 
-export function CameraCapture({ onCapture, busy = false }: Props) {
+export function CameraCapture({
+  onCapture,
+  busy = false,
+  stages,
+  stagesDone = false,
+}: Props) {
   const router = useRouter();
   const [state, setState] = useState<State>("intro");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -168,20 +184,17 @@ export function CameraCapture({ onCapture, busy = false }: Props) {
   function capture() {
     const video = videoRef.current;
     if (!video) return;
-    if (!video.videoWidth || !video.videoHeight) return;
-    const canvas = canvasRef.current ?? document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
-    if (!dataUrl || dataUrl.length < 1000) return;
-    setCapturedDataUrl(dataUrl);
+    // Normalizes to ≤1024 px JPEG (lib/image-prep.ts) — the same shape the
+    // gallery path produces, so the server sees one payload size.
+    const prepared = prepareFromVideo(
+      video,
+      canvasRef.current ?? document.createElement("canvas"),
+    );
+    if (!prepared) return;
+    setCapturedDataUrl(prepared.dataUrl);
     setState("processing");
     video.pause();
-    const base64 = dataUrl.split(",")[1] ?? dataUrl;
-    void Promise.resolve(onCapture(base64)).catch(() => {
+    void Promise.resolve(onCapture(prepared.base64)).catch(() => {
       // Parent surfaces its own error; reset so the user can try again.
       setState("live");
       setCapturedDataUrl(null);
@@ -189,23 +202,28 @@ export function CameraCapture({ onCapture, busy = false }: Props) {
     });
   }
 
-  function handleFile(file: File) {
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const result = String(reader.result);
-      const base64 = result.split(",")[1] ?? result;
-      setCapturedDataUrl(result);
-      setState("processing");
-      try {
-        await onCapture(base64);
-        // Parent navigates on match. On miss, parent unmounts this
-        // component; either way nothing more to do.
-      } catch {
-        setState("intro");
-        setCapturedDataUrl(null);
-      }
-    };
-    reader.readAsDataURL(file);
+  async function handleFile(file: File) {
+    // Gallery photos used to go up at full resolution (a 12 MP JPEG is
+    // 4–7 MB as base64 and was often the slowest part of a scan on
+    // cellular). Downscale first, same as the camera path.
+    let prepared;
+    try {
+      prepared = await prepareFromFile(file);
+    } catch {
+      setErrorMessage("Couldn't read that photo. Try a different one.");
+      setState("error");
+      return;
+    }
+    setCapturedDataUrl(prepared.dataUrl);
+    setState("processing");
+    try {
+      await onCapture(prepared.base64);
+      // Parent navigates on match. On miss, parent unmounts this
+      // component; either way nothing more to do.
+    } catch {
+      setState("intro");
+      setCapturedDataUrl(null);
+    }
   }
 
   function openGallery() {
@@ -363,14 +381,19 @@ export function CameraCapture({ onCapture, busy = false }: Props) {
           </GlassCard>
         )}
 
-        {/* Processing — overlays the frozen capture with a status message. */}
-        {(state === "processing" || busy) && (
-          <div className="absolute inset-0 bg-ink/60 flex items-center justify-center backdrop-blur-sm">
-            <p className="text-cream font-display text-2xl animate-pulse">
-              Reading the label…
-            </p>
-          </div>
-        )}
+        {/* Processing — overlays the frozen capture. With server stage
+            frames (scan v2) this is the Dynamic Checklist; without them
+            (older callers) the single status line. */}
+        {(state === "processing" || busy) &&
+          (stages ? (
+            <ScanChecklist lines={stages} done={stagesDone} />
+          ) : (
+            <div className="absolute inset-0 bg-ink/60 flex items-center justify-center backdrop-blur-sm">
+              <p className="text-cream font-display text-2xl animate-pulse">
+                Reading the label…
+              </p>
+            </div>
+          ))}
 
         {/* Error — covers the viewport with a glass card explaining the
             failure and offering upload as a fallback. */}
@@ -474,7 +497,7 @@ export function CameraCapture({ onCapture, busy = false }: Props) {
           const f = e.target.files?.[0];
           // Clear so selecting the same file again still fires onChange.
           e.target.value = "";
-          if (f) handleFile(f);
+          if (f) void handleFile(f);
         }}
       />
 

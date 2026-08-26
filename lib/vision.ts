@@ -1,27 +1,75 @@
-// Vision adapter — Layer 1 of the scan architecture (PRD §7).
-// Reads brand + fragrance name from a bottle image.
-// GPT-4o is the primary; Google Vision is the cost fallback.
-// Q1 (Day 3 spike) decides the default.
+// Vision adapter — Layer 1 of the scan architecture (PRD §7, scan v2).
+// Reads brand + fragrance name from a bottle image, and (rarely) breaks a
+// tie between two near-identical catalog candidates by looking at them.
+//
+// Latency rules (SCAN_V2_DESIGN.md §2.2): every call has a hard timeout and
+// at most one retry. The SDK defaults are a 10-minute timeout and 2
+// retries, which is how one slow OpenAI response used to become three
+// attempts inside the route's 45 s budget while the user stared at
+// "Reading the label…".
 
 import OpenAI from "openai";
 import type { VisionProvider } from "./types";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY ?? "" });
-
-// OCR cost knobs. Defaults preserve current behavior (gpt-4o, auto detail).
-// Reading two words off a label is likely a gpt-4o-mini + detail:"low" job
-// (~10x cheaper per scan: "low" costs 85 input tokens flat vs high-detail
-// tiling) — run the accuracy eval, then flip these in env:
-//   SCAN_OCR_MODEL=gpt-4o-mini
-//   SCAN_OCR_DETAIL=low
-// The disambiguation pass below intentionally stays on full gpt-4o —
-// comparing bottle shapes/caps/labels is exactly what high detail is for.
+// OCR cost/speed knobs. The model is env-driven so the eval harness
+// (scripts/scan-eval.ts) can flip it without a deploy:
+//   SCAN_OCR_MODEL=gpt-4.1-mini | gpt-5.4-mini | gpt-5-nano | gpt-4o
+//   SCAN_OCR_DETAIL=low|high|auto      (auto → high at 1024 px, ~765 tokens)
+//   SCAN_OCR_REASONING=none|minimal|low (gpt-5.x only; default none/minimal)
+//   SCAN_OCR_TIMEOUT_MS=9000
+// The tiebreaker stays on full gpt-4o — comparing caps and label layouts
+// across images is exactly what high detail is for.
 const OCR_MODEL = process.env.SCAN_OCR_MODEL ?? "gpt-4o";
 const OCR_DETAIL = (["low", "high", "auto"] as const).includes(
   process.env.SCAN_OCR_DETAIL as "low" | "high" | "auto",
 )
   ? (process.env.SCAN_OCR_DETAIL as "low" | "high" | "auto")
   : "auto";
+const OCR_TIMEOUT_MS = parseInt(process.env.SCAN_OCR_TIMEOUT_MS ?? "9000", 10);
+const TIEBREAK_MODEL = process.env.SCAN_TIEBREAK_MODEL ?? "gpt-4o";
+const TIEBREAK_TIMEOUT_MS = parseInt(
+  process.env.SCAN_TIEBREAK_TIMEOUT_MS ?? "6000",
+  10,
+);
+// Hard cap on images sent to the tiebreaker. Each one is a separate
+// remote fetch on OpenAI's side; three is the most we can afford inside
+// the latency budget and it covers the real case (EDT vs EDP vs Elixir).
+export const TIEBREAK_MAX_CANDIDATES = 3;
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY ?? "",
+  timeout: OCR_TIMEOUT_MS,
+  maxRetries: 1,
+});
+
+// Reasoning-family models (gpt-5.x) reject `max_tokens` and `temperature`
+// but accept `reasoning_effort`; for a two-word label read we want the
+// reasoning budget at its floor. "none" exists on gpt-5.4+, "minimal" on
+// gpt-5 / gpt-5-mini / gpt-5-nano.
+function isReasoningModel(model: string): boolean {
+  return /^(gpt-5|o\d)/i.test(model);
+}
+
+function reasoningEffortFor(model: string): "none" | "minimal" | "low" {
+  const env = process.env.SCAN_OCR_REASONING;
+  if (env === "none" || env === "minimal" || env === "low") return env;
+  return /gpt-5\.[4-9]/i.test(model) ? "none" : "minimal";
+}
+
+export class VisionTimeoutError extends Error {
+  constructor(stage: "ocr" | "tiebreak") {
+    super(`vision ${stage} timed out`);
+    this.name = "VisionTimeoutError";
+  }
+}
+
+export function isVisionTimeout(err: unknown): boolean {
+  return (
+    err instanceof VisionTimeoutError ||
+    err instanceof OpenAI.APIConnectionTimeoutError ||
+    (err instanceof Error && /timed? ?out/i.test(err.message))
+  );
+}
 
 export interface VisionRead {
   brand: string | null;
@@ -29,6 +77,8 @@ export interface VisionRead {
   confidence: number; // 0–1
   provider: VisionProvider;
   raw_text?: string;
+  /** Token usage when the provider reports it (eval cost accounting). */
+  usage?: { input: number; output: number };
 }
 
 const READ_PROMPT = `You are reading a perfume / cologne bottle label.
@@ -39,31 +89,63 @@ Return STRICT JSON with this shape: {"brand": string | null, "name": string | nu
 - If the image is not a bottle, or you cannot read either field, set them to null and confidence to 0.
 - Return ONLY the JSON. No prose.`;
 
+export interface OcrOptions {
+  /** Override SCAN_OCR_MODEL (used by scripts/scan-eval.ts). */
+  model?: string;
+  detail?: "low" | "high" | "auto";
+}
+
 export async function readBottleWithGPT4o(
   imageBase64: string,
+  opts: OcrOptions = {},
 ): Promise<VisionRead> {
-  const response = await openai.chat.completions.create({
-    model: OCR_MODEL,
-    messages: [
+  const model = opts.model ?? OCR_MODEL;
+  const detail = opts.detail ?? OCR_DETAIL;
+  const reasoning = isReasoningModel(model);
+  let response: OpenAI.Chat.Completions.ChatCompletion;
+  try {
+    response = await openai.chat.completions.create(
       {
-        role: "user",
-        content: [
-          { type: "text", text: READ_PROMPT },
+        model,
+        messages: [
           {
-            type: "image_url",
-            image_url: {
-              url: `data:image/jpeg;base64,${imageBase64}`,
-              detail: OCR_DETAIL,
-            },
+            role: "user",
+            content: [
+              { type: "text", text: READ_PROMPT },
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:image/jpeg;base64,${imageBase64}`,
+                  detail,
+                },
+              },
+            ],
           },
         ],
+        response_format: { type: "json_object" },
+        // 120 tokens is ~3x the longest plausible {"brand","name","confidence"}.
+        ...(reasoning
+          ? {
+              max_completion_tokens: 120,
+              // "none" (gpt-5.4+) postdates this SDK's ReasoningEffort union;
+              // the API accepts it, so widen the type rather than pin the SDK.
+              reasoning_effort: reasoningEffortFor(
+                model,
+              ) as unknown as OpenAI.Chat.Completions.ChatCompletionCreateParams["reasoning_effort"],
+            }
+          : { max_tokens: 120 }),
       },
-    ],
-    response_format: { type: "json_object" },
-    max_tokens: 200,
-  });
+      { timeout: OCR_TIMEOUT_MS },
+    );
+  } catch (err) {
+    if (isVisionTimeout(err)) throw new VisionTimeoutError("ocr");
+    throw err;
+  }
 
   const content = response.choices[0]?.message?.content ?? "{}";
+  const usage = response.usage
+    ? { input: response.usage.prompt_tokens, output: response.usage.completion_tokens }
+    : undefined;
   try {
     const parsed = JSON.parse(content);
     return {
@@ -71,9 +153,10 @@ export async function readBottleWithGPT4o(
       name: parsed.name ?? null,
       confidence: typeof parsed.confidence === "number" ? parsed.confidence : 0,
       provider: "gpt4o",
+      usage,
     };
   } catch {
-    return { brand: null, name: null, confidence: 0, provider: "gpt4o" };
+    return { brand: null, name: null, confidence: 0, provider: "gpt4o", usage };
   }
 }
 
@@ -89,17 +172,16 @@ export async function readBottleWithGoogleVision(
 }
 
 // =====================================================================
-// Visual disambiguation pass — Layer 1b.
+// Visual tiebreaker — scan v2 §4.4 rule 4.
 //
-// Triggered when text OCR returns ambiguous candidates (top confidence
-// below VISUAL_DISAMBIGUATION_THRESHOLD in /api/scan). Sends the user's
-// photo and the top N candidate bottle images to GPT-4o, asks which is
-// the best visual match. Picks up shape, color, cap style, and label
-// layout signals that pure text OCR misses on minimalist or refractive
-// bottles.
+// Used to be the only visual signal ("Layer 1b", fired on any ambiguous
+// text read, 1 + 5 images, 4–8 s). The bottle-embedding index in
+// lib/image-embed.ts now carries the shape/color signal on every scan;
+// this pass is reserved for the case embeddings can't settle: the fused
+// top-2 are within a hair of each other AND from the same house (EDT vs
+// EDP vs Elixir in near-identical glass). ≤3 candidate images, 6 s cap.
 //
-// Cost: ~$0.02–0.04 per call (one prompt + 1 + N image inputs). Only
-// fires for ambiguous scans so most reads stay at the OCR-only cost.
+// Cost: ~$0.02 per call. Fires on a small fraction of scans.
 // =====================================================================
 
 export interface DisambiguateCandidate {
@@ -142,6 +224,9 @@ export async function disambiguateByImage(
   if (candidates.length === 0) {
     return { matchIndex: null, confidence: 0, reason: "no_candidates" };
   }
+  // Callers should already respect the cap; enforce it here so a future
+  // caller can't quietly send ten images through the slowest step we have.
+  candidates = candidates.slice(0, TIEBREAK_MAX_CANDIDATES);
 
   // Build the candidate list for the prompt. Index in this list = the
   // value GPT will return for match_index, which is also the candidate's
@@ -173,12 +258,15 @@ export async function disambiguateByImage(
   }
 
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [{ role: "user", content }],
-      response_format: { type: "json_object" },
-      max_tokens: 300,
-    });
+    const response = await openai.chat.completions.create(
+      {
+        model: TIEBREAK_MODEL,
+        messages: [{ role: "user", content }],
+        response_format: { type: "json_object" },
+        max_tokens: 200,
+      },
+      { timeout: TIEBREAK_TIMEOUT_MS },
+    );
 
     const raw = response.choices[0]?.message?.content ?? "{}";
     const parsed = JSON.parse(raw);
@@ -210,7 +298,8 @@ export async function disambiguateByImage(
 export async function readBottle(
   imageBase64: string,
   provider: VisionProvider = "gpt4o",
+  opts: OcrOptions = {},
 ): Promise<VisionRead> {
-  if (provider === "gpt4o") return readBottleWithGPT4o(imageBase64);
+  if (provider === "gpt4o") return readBottleWithGPT4o(imageBase64, opts);
   return readBottleWithGoogleVision(imageBase64);
 }

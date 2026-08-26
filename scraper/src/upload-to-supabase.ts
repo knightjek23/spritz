@@ -5,6 +5,24 @@
 // two URLs — usually re-releases or regional variants). Postgres rejects an
 // upsert batch when it contains two rows with the same conflict key, so we
 // dedup the in-memory batch by (name_lower, house_lower) before sending.
+//
+// ---------------------------------------------------------------------------
+// DANGER: the default (upsert) mode OVERWRITES enriched columns on rows that
+// already exist. The parser has no way to know about work done after scraping,
+// so it sends popularity_rank=null, longevity_score=null, house_history=null,
+// wear_guidance={}, notes_descriptions={} and a possibly-null bottle_image_url.
+// Upserting those over an existing row destroys:
+//   - the AI popularity backfill (popularity_rank / the ranking every
+//     "most popular" surface reads)
+//   - licensed affiliate bottle images
+//   - any generated performance / editorial content
+//
+// Use --new-only when EXPANDING the catalog (the normal case after a re-scrape).
+// It inserts only fragrances not already in the DB and never touches existing
+// rows. Run the enrichment scripts afterward to fill the new rows:
+//   pnpm popularity      (only fills NULL scores)
+//   pnpm backfill:images (only fills empty/unlicensed images)
+// ---------------------------------------------------------------------------
 
 import "dotenv/config";
 import { createClient } from "@supabase/supabase-js";
@@ -13,6 +31,10 @@ import path from "node:path";
 import type { ScrapedFragrance } from "./types";
 
 const PARSED_DIR = path.resolve("data/parsed");
+
+// Insert only fragrances that aren't already in the DB. Protects every
+// enriched column on existing rows. See the header warning.
+const NEW_ONLY = process.argv.includes("--new-only");
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
@@ -78,7 +100,48 @@ async function main() {
   console.log(`[upload] loaded=${loaded} unique=${byKey.size} duplicates_dropped=${dropped}\n`);
 
   // Now upload in batches, with the deduped working set.
-  const all = Array.from(byKey.values());
+  let all = Array.from(byKey.values());
+
+  // --new-only: drop anything already in the DB so existing rows (and all
+  // their enriched columns) are never written to. This is the safe mode for
+  // catalog expansion after a re-scrape.
+  if (NEW_ONLY) {
+    console.log("[upload] --new-only: fetching existing (name, house) keys…");
+    const existing = new Set<string>();
+    const PAGE_FETCH = 1000;
+    for (let from = 0; ; from += PAGE_FETCH) {
+      const { data, error } = await supabase
+        .from("fragrances")
+        .select("name, house")
+        .range(from, from + PAGE_FETCH - 1);
+      if (error) {
+        console.error("[upload] failed to read existing rows:", error.message);
+        process.exit(1);
+      }
+      if (!data || data.length === 0) break;
+      for (const r of data as Array<{ name: string; house: string }>) {
+        existing.add(
+          `${(r.name ?? "").toLowerCase().trim()}|${(r.house ?? "").toLowerCase().trim()}`,
+        );
+      }
+      if (data.length < PAGE_FETCH) break;
+    }
+    const before = all.length;
+    all = all.filter(
+      (f) =>
+        !existing.has(
+          `${(f.name || "").toLowerCase().trim()}|${(f.house || "").toLowerCase().trim()}`,
+        ),
+    );
+    console.log(
+      `[upload] existing_in_db=${existing.size} parsed=${before} new_to_insert=${all.length}\n`,
+    );
+    if (all.length === 0) {
+      console.log("[upload] nothing new to add. Done.");
+      return;
+    }
+  }
+
   let total = 0;
   const PAGE = 500;
   for (let off = 0; off < all.length; off += PAGE) {

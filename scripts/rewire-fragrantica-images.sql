@@ -2,38 +2,47 @@
 --
 -- TEMPORARY (pre-launch, affiliate-review window only).
 --
--- Most rows lost their bottle_image_url in the earlier removal, so the
--- cards show house-initials placeholders. This rebuilds the Fragrantica
--- thumbnail URL for every catalog row from the perfume id already stored
--- in fragrantica_url. Pattern (confirmed against currently-rendering rows):
+-- Rebuilds the Fragrantica thumbnail URL for EVERY catalog row from the
+-- perfume id already stored in fragrantica_url, overwriting whatever is
+-- there now (most rows point at a dead / mirror URL, which is why the
+-- cards show placeholders). Pattern (confirmed against rendering rows):
 --   fragrantica_url  ...-55805.html
 --   image            https://fimgs.net/mdimg/perfume-thumbs/375x500.55805.jpg
 --
--- Display is still gated by NEXT_PUBLIC_SHOW_SCRAPED_IMAGES in the app, so
--- with the flag OFF these URLs sit in the column but render as placeholders.
--- With the flag ON (review window), every card shows its bottle.
---
--- This re-introduces the fimgs hotlink exposure you chose to accept for the
--- review window. Before public launch: turn the flag off, and ideally clear
--- these again with scripts/blank-unlicensed-images.sql once user-uploaded /
--- affiliate images have backfilled the catalog.
+-- Display is controlled in code by BLOCK_UNLICENSED_SOURCES in
+-- lib/bottle-image.ts (currently false = shown). Before public launch:
+-- flip that to true and clear these URLs with blank-unlicensed-images.sql
+-- once user-uploaded / affiliate images have backfilled the catalog.
 --
 -- Run in the Supabase SQL editor.
 
--- 1. Preview: how many rows will get a reconstructed URL.
-select count(*) as rows_to_wire
+-- 1. Diagnostic: what's in the column right now, and how many rows have a
+--    usable Fragrantica id. (Run this first to understand the state.)
+select
+  case
+    when bottle_image_url is null then 'NULL'
+    when bottle_image_url ilike '%fimgs.net%' then 'fimgs.net'
+    when bottle_image_url ilike '%/bottle-images/%' then 'supabase mirror'
+    else 'other'
+  end as current_kind,
+  count(*) as rows
 from public.fragrances
-where fragrantica_url ~ '-\d+\.html'
-  and (bottle_image_url is null or bottle_image_url ilike '%fimgs.net%');
+group by 1
+order by 2 desc;
 
--- 2. The rewire. Uncomment and run once the preview looks right.
+select count(*) as rows_with_fragrantica_id
+from public.fragrances
+where fragrantica_url ~ '-\d+\.html';
+
+-- 2. The rewire: overwrite EVERY row that has a Fragrantica id. Uncomment
+--    and run once the diagnostic above looks right (rows_with_fragrantica_id
+--    should be most of the catalog).
 -- update public.fragrances
 -- set bottle_image_url =
 --   'https://fimgs.net/mdimg/perfume-thumbs/375x500.'
 --   || substring(fragrantica_url from '-(\d+)\.html')
 --   || '.jpg'
--- where fragrantica_url ~ '-\d+\.html'
---   and (bottle_image_url is null or bottle_image_url ilike '%fimgs.net%');
+-- where fragrantica_url ~ '-\d+\.html';
 
 -- 3. Confirm coverage (has_image should be close to total).
 -- select count(*) as total, count(bottle_image_url) as has_image

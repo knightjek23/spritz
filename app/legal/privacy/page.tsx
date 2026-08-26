@@ -29,10 +29,14 @@ export default function PrivacyPage() {
       </p>
       <p>
         <strong>Photos you scan.</strong> When you scan a bottle, the photo is
-        sent to an AI vision service to read the label. We store the image only
-        long enough to return a result and to debug failed scans. We do not use
-        your photos to train any model, and we do not share them with anyone
-        other than the vision provider processing that request.
+        sent to an AI vision service to read the label and to an image
+        embedding service to compare the bottle&apos;s shape and color against
+        our catalog. If neither can identify the bottle and you are signed in,
+        we may send the photo to a visual search provider (Google Lens via
+        SerpApi) to look it up on the web. We store the image only long enough
+        to return a result and to debug failed scans, never more than 30 days.
+        We do not use your photos to train any model, and we do not share them
+        with anyone other than the providers processing that request.
       </p>
       <p>
         <strong>Your collection.</strong> The fragrances you mark as owned,
@@ -79,6 +83,14 @@ export default function PrivacyPage() {
         <li>
           <strong>OpenAI and Google Cloud Vision</strong> — reading the label in
           a scanned photo
+        </li>
+        <li>
+          <strong>Voyage AI</strong> — comparing a scanned bottle&apos;s shape and
+          color against our catalog
+        </li>
+        <li>
+          <strong>SerpApi (Google Lens)</strong> — web image lookup when a
+          bottle can&apos;t be identified from our catalog
         </li>
         <li>
           <strong>Stripe</strong> — payment processing

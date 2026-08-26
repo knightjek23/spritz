@@ -1,0 +1,2657 @@
+[
+  {
+    "slug": "Dior",
+    "url": "https://www.fragrantica.com/designers/Dior.html",
+    "count": 316,
+    "inCatalogue": true,
+    "score": 23981,
+    "totalVotes": 66706,
+    "parsed": 302
+  },
+  {
+    "slug": "Room-1015",
+    "url": "https://www.fragrantica.com/designers/Room-1015.html",
+    "count": 18,
+    "inCatalogue": true,
+    "score": 20240,
+    "totalVotes": 36374,
+    "parsed": 18
+  },
+  {
+    "slug": "Nobile-1942",
+    "url": "https://www.fragrantica.com/designers/Nobile-1942.html",
+    "count": 74,
+    "inCatalogue": true,
+    "score": 20227,
+    "totalVotes": 138946,
+    "parsed": 74
+  },
+  {
+    "slug": "Casamorati-1888",
+    "url": "https://www.fragrantica.com/designers/Casamorati-1888.html",
+    "count": 20,
+    "inCatalogue": true,
+    "score": 20210,
+    "totalVotes": 40323,
+    "parsed": 20
+  },
+  {
+    "slug": "Yves-Saint-Laurent",
+    "url": "https://www.fragrantica.com/designers/Yves-Saint-Laurent.html",
+    "count": 284,
+    "inCatalogue": true,
+    "score": 18372,
+    "totalVotes": 45320,
+    "parsed": 273
+  },
+  {
+    "slug": "Versace",
+    "url": "https://www.fragrantica.com/designers/Versace.html",
+    "count": 87,
+    "inCatalogue": true,
+    "score": 18364,
+    "totalVotes": 29108,
+    "parsed": 85
+  },
+  {
+    "slug": "Mugler",
+    "url": "https://www.fragrantica.com/designers/Mugler.html",
+    "count": 177,
+    "inCatalogue": true,
+    "score": 18095,
+    "totalVotes": 33013,
+    "parsed": 175
+  },
+  {
+    "slug": "Tom-Ford",
+    "url": "https://www.fragrantica.com/designers/Tom-Ford.html",
+    "count": 143,
+    "inCatalogue": true,
+    "score": 17530,
+    "totalVotes": 42849,
+    "parsed": 142
+  },
+  {
+    "slug": "Chanel",
+    "url": "https://www.fragrantica.com/designers/Chanel.html",
+    "count": 168,
+    "inCatalogue": true,
+    "score": 16038,
+    "totalVotes": 42511,
+    "parsed": 148
+  },
+  {
+    "slug": "Jean-Paul-Gaultier",
+    "url": "https://www.fragrantica.com/designers/Jean-Paul-Gaultier.html",
+    "count": 187,
+    "inCatalogue": true,
+    "score": 15125,
+    "totalVotes": 26305,
+    "parsed": 182
+  },
+  {
+    "slug": "Lattafa-Perfumes",
+    "url": "https://www.fragrantica.com/designers/Lattafa-Perfumes.html",
+    "count": 385,
+    "inCatalogue": true,
+    "score": 14285,
+    "totalVotes": 46392,
+    "parsed": 282
+  },
+  {
+    "slug": "Parfums-de-Marly",
+    "url": "https://www.fragrantica.com/designers/Parfums-de-Marly.html",
+    "count": 46,
+    "inCatalogue": true,
+    "score": 13586,
+    "totalVotes": 24363,
+    "parsed": 46
+  },
+  {
+    "slug": "Giorgio-Armani",
+    "url": "https://www.fragrantica.com/designers/Giorgio-Armani.html",
+    "count": 257,
+    "inCatalogue": true,
+    "score": 13556,
+    "totalVotes": 37796,
+    "parsed": 250
+  },
+  {
+    "slug": "Creed",
+    "url": "https://www.fragrantica.com/designers/Creed.html",
+    "count": 112,
+    "inCatalogue": true,
+    "score": 13388,
+    "totalVotes": 23082,
+    "parsed": 109
+  },
+  {
+    "slug": "Dolce-Gabbana",
+    "url": "https://www.fragrantica.com/designers/Dolce-Gabbana.html",
+    "count": 157,
+    "inCatalogue": true,
+    "score": 13290,
+    "totalVotes": 29423,
+    "parsed": 152
+  },
+  {
+    "slug": "Prada",
+    "url": "https://www.fragrantica.com/designers/Prada.html",
+    "count": 113,
+    "inCatalogue": true,
+    "score": 11972,
+    "totalVotes": 21751,
+    "parsed": 106
+  },
+  {
+    "slug": "Maison-Francis-Kurkdjian",
+    "url": "https://www.fragrantica.com/designers/Maison-Francis-Kurkdjian.html",
+    "count": 67,
+    "inCatalogue": true,
+    "score": 11820,
+    "totalVotes": 17989,
+    "parsed": 64
+  },
+  {
+    "slug": "Maison-Martin-Margiela",
+    "url": "https://www.fragrantica.com/designers/Maison-Martin-Margiela.html",
+    "count": 49,
+    "inCatalogue": true,
+    "score": 11456,
+    "totalVotes": 17167,
+    "parsed": 48
+  },
+  {
+    "slug": "Burberry",
+    "url": "https://www.fragrantica.com/designers/Burberry.html",
+    "count": 105,
+    "inCatalogue": true,
+    "score": 10976,
+    "totalVotes": 20251,
+    "parsed": 104
+  },
+  {
+    "slug": "Guerlain",
+    "url": "https://www.fragrantica.com/designers/Guerlain.html",
+    "count": 579,
+    "inCatalogue": true,
+    "score": 10921,
+    "totalVotes": 50105,
+    "parsed": 551
+  },
+  {
+    "slug": "Lancome",
+    "url": "https://www.fragrantica.com/designers/Lancome.html",
+    "count": 213,
+    "inCatalogue": true,
+    "score": 10893,
+    "totalVotes": 21425,
+    "parsed": 198
+  },
+  {
+    "slug": "Rabanne",
+    "url": "https://www.fragrantica.com/designers/Rabanne.html",
+    "count": 155,
+    "inCatalogue": true,
+    "score": 9997,
+    "totalVotes": 22821,
+    "parsed": 151
+  },
+  {
+    "slug": "Calvin-Klein",
+    "url": "https://www.fragrantica.com/designers/Calvin-Klein.html",
+    "count": 205,
+    "inCatalogue": true,
+    "score": 9954,
+    "totalVotes": 23214,
+    "parsed": 202
+  },
+  {
+    "slug": "Armaf",
+    "url": "https://www.fragrantica.com/designers/Armaf.html",
+    "count": 366,
+    "inCatalogue": true,
+    "score": 9732,
+    "totalVotes": 14075,
+    "parsed": 193
+  },
+  {
+    "slug": "Britney-Spears",
+    "url": "https://www.fragrantica.com/designers/Britney-Spears.html",
+    "count": 47,
+    "inCatalogue": true,
+    "score": 9637,
+    "totalVotes": 13547,
+    "parsed": 40
+  },
+  {
+    "slug": "By-Kilian",
+    "url": "https://www.fragrantica.com/designers/By-Kilian.html",
+    "count": 106,
+    "inCatalogue": true,
+    "score": 9567,
+    "totalVotes": 17321,
+    "parsed": 104
+  },
+  {
+    "slug": "Hermes",
+    "url": "https://www.fragrantica.com/designers/Hermes.html",
+    "count": 140,
+    "inCatalogue": true,
+    "score": 9385,
+    "totalVotes": 23024,
+    "parsed": 132
+  },
+  {
+    "slug": "Ariana-Grande",
+    "url": "https://www.fragrantica.com/designers/Ariana-Grande.html",
+    "count": 30,
+    "inCatalogue": true,
+    "score": 9260,
+    "totalVotes": 10764,
+    "parsed": 23
+  },
+  {
+    "slug": "Mancera",
+    "url": "https://www.fragrantica.com/designers/Mancera.html",
+    "count": 97,
+    "inCatalogue": true,
+    "score": 8988,
+    "totalVotes": 17226,
+    "parsed": 97
+  },
+  {
+    "slug": "Kayali-Fragrances",
+    "url": "https://www.fragrantica.com/designers/Kayali-Fragrances.html",
+    "count": 43,
+    "inCatalogue": true,
+    "score": 8951,
+    "totalVotes": 13106,
+    "parsed": 41
+  },
+  {
+    "slug": "Viktor-Rolf",
+    "url": "https://www.fragrantica.com/designers/Viktor-Rolf.html",
+    "count": 107,
+    "inCatalogue": true,
+    "score": 8780,
+    "totalVotes": 11939,
+    "parsed": 95
+  },
+  {
+    "slug": "Amouage",
+    "url": "https://www.fragrantica.com/designers/Amouage.html",
+    "count": 154,
+    "inCatalogue": true,
+    "score": 8358,
+    "totalVotes": 26323,
+    "parsed": 127
+  },
+  {
+    "slug": "Xerjoff",
+    "url": "https://www.fragrantica.com/designers/Xerjoff.html",
+    "count": 187,
+    "inCatalogue": true,
+    "score": 8346,
+    "totalVotes": 16964,
+    "parsed": 179
+  },
+  {
+    "slug": "Lalique",
+    "url": "https://www.fragrantica.com/designers/Lalique.html",
+    "count": 104,
+    "inCatalogue": true,
+    "score": 8320,
+    "totalVotes": 11164,
+    "parsed": 97
+  },
+  {
+    "slug": "Gucci",
+    "url": "https://www.fragrantica.com/designers/Gucci.html",
+    "count": 137,
+    "inCatalogue": true,
+    "score": 8203,
+    "totalVotes": 21164,
+    "parsed": 136
+  },
+  {
+    "slug": "Givenchy",
+    "url": "https://www.fragrantica.com/designers/Givenchy.html",
+    "count": 292,
+    "inCatalogue": true,
+    "score": 7867,
+    "totalVotes": 22764,
+    "parsed": 285
+  },
+  {
+    "slug": "Diptyque",
+    "url": "https://www.fragrantica.com/designers/Diptyque.html",
+    "count": 103,
+    "inCatalogue": true,
+    "score": 7429,
+    "totalVotes": 14929,
+    "parsed": 100
+  },
+  {
+    "slug": "Montblanc",
+    "url": "https://www.fragrantica.com/designers/Montblanc.html",
+    "count": 46,
+    "inCatalogue": true,
+    "score": 7420,
+    "totalVotes": 10034,
+    "parsed": 46
+  },
+  {
+    "slug": "Narciso-Rodriguez",
+    "url": "https://www.fragrantica.com/designers/Narciso-Rodriguez.html",
+    "count": 74,
+    "inCatalogue": true,
+    "score": 7399,
+    "totalVotes": 11970,
+    "parsed": 72
+  },
+  {
+    "slug": "Carolina-Herrera",
+    "url": "https://www.fragrantica.com/designers/Carolina-Herrera.html",
+    "count": 229,
+    "inCatalogue": true,
+    "score": 7343,
+    "totalVotes": 15184,
+    "parsed": 214
+  },
+  {
+    "slug": "Le-Labo",
+    "url": "https://www.fragrantica.com/designers/Le-Labo.html",
+    "count": 65,
+    "inCatalogue": true,
+    "score": 7240,
+    "totalVotes": 11176,
+    "parsed": 61
+  },
+  {
+    "slug": "Byredo",
+    "url": "https://www.fragrantica.com/designers/Byredo.html",
+    "count": 99,
+    "inCatalogue": true,
+    "score": 6966,
+    "totalVotes": 13066,
+    "parsed": 91
+  },
+  {
+    "slug": "Afnan",
+    "url": "https://www.fragrantica.com/designers/Afnan.html",
+    "count": 135,
+    "inCatalogue": true,
+    "score": 6932,
+    "totalVotes": 10370,
+    "parsed": 86
+  },
+  {
+    "slug": "Louis-Vuitton",
+    "url": "https://www.fragrantica.com/designers/Louis-Vuitton.html",
+    "count": 59,
+    "inCatalogue": true,
+    "score": 6898,
+    "totalVotes": 10389,
+    "parsed": 56
+  },
+  {
+    "slug": "Bvlgari",
+    "url": "https://www.fragrantica.com/designers/Bvlgari.html",
+    "count": 152,
+    "inCatalogue": true,
+    "score": 6870,
+    "totalVotes": 18983,
+    "parsed": 149
+  },
+  {
+    "slug": "Valentino",
+    "url": "https://www.fragrantica.com/designers/Valentino.html",
+    "count": 77,
+    "inCatalogue": true,
+    "score": 6837,
+    "totalVotes": 13175,
+    "parsed": 77
+  },
+  {
+    "slug": "Initio-Parfums-Prives",
+    "url": "https://www.fragrantica.com/designers/Initio-Parfums-Prives.html",
+    "count": 28,
+    "inCatalogue": true,
+    "score": 6753,
+    "totalVotes": 8242,
+    "parsed": 28
+  },
+  {
+    "slug": "Etat-Libre-d-Orange",
+    "url": "https://www.fragrantica.com/designers/Etat-Libre-d-Orange.html",
+    "count": 58,
+    "inCatalogue": true,
+    "score": 6684,
+    "totalVotes": 13522,
+    "parsed": 58
+  },
+  {
+    "slug": "Juliette-Has-A-Gun",
+    "url": "https://www.fragrantica.com/designers/Juliette-Has-A-Gun.html",
+    "count": 43,
+    "inCatalogue": true,
+    "score": 6552,
+    "totalVotes": 10280,
+    "parsed": 43
+  },
+  {
+    "slug": "Nishane",
+    "url": "https://www.fragrantica.com/designers/Nishane.html",
+    "count": 55,
+    "inCatalogue": true,
+    "score": 6480,
+    "totalVotes": 10035,
+    "parsed": 55
+  },
+  {
+    "slug": "Issey-Miyake",
+    "url": "https://www.fragrantica.com/designers/Issey-Miyake.html",
+    "count": 121,
+    "inCatalogue": true,
+    "score": 6197,
+    "totalVotes": 10860,
+    "parsed": 118
+  },
+  {
+    "slug": "Jo-Malone-London",
+    "url": "https://www.fragrantica.com/designers/Jo-Malone-London.html",
+    "count": 221,
+    "inCatalogue": true,
+    "score": 6094,
+    "totalVotes": 14205,
+    "parsed": 216
+  },
+  {
+    "slug": "Chloe",
+    "url": "https://www.fragrantica.com/designers/Chloe.html",
+    "count": 76,
+    "inCatalogue": true,
+    "score": 6028,
+    "totalVotes": 9506,
+    "parsed": 74
+  },
+  {
+    "slug": "Marc-Jacobs",
+    "url": "https://www.fragrantica.com/designers/Marc-Jacobs.html",
+    "count": 131,
+    "inCatalogue": true,
+    "score": 5896,
+    "totalVotes": 10278,
+    "parsed": 129
+  },
+  {
+    "slug": "Montale",
+    "url": "https://www.fragrantica.com/designers/Montale.html",
+    "count": 167,
+    "inCatalogue": true,
+    "score": 5838,
+    "totalVotes": 14545,
+    "parsed": 166
+  },
+  {
+    "slug": "Serge-Lutens",
+    "url": "https://www.fragrantica.com/designers/Serge-Lutens.html",
+    "count": 113,
+    "inCatalogue": true,
+    "score": 5744,
+    "totalVotes": 14061,
+    "parsed": 111
+  },
+  {
+    "slug": "Estee-Lauder",
+    "url": "https://www.fragrantica.com/designers/Estee-Lauder.html",
+    "count": 157,
+    "inCatalogue": false,
+    "score": 5607,
+    "totalVotes": 12283,
+    "parsed": 144
+  },
+  {
+    "slug": "Juicy-Couture",
+    "url": "https://www.fragrantica.com/designers/Juicy-Couture.html",
+    "count": 58,
+    "inCatalogue": true,
+    "score": 5583,
+    "totalVotes": 7377,
+    "parsed": 54
+  },
+  {
+    "slug": "Cacharel",
+    "url": "https://www.fragrantica.com/designers/Cacharel.html",
+    "count": 87,
+    "inCatalogue": true,
+    "score": 5553,
+    "totalVotes": 7398,
+    "parsed": 78
+  },
+  {
+    "slug": "Hugo-Boss",
+    "url": "https://www.fragrantica.com/designers/Hugo-Boss.html",
+    "count": 156,
+    "inCatalogue": true,
+    "score": 5384,
+    "totalVotes": 14466,
+    "parsed": 155
+  },
+  {
+    "slug": "Kenzo",
+    "url": "https://www.fragrantica.com/designers/Kenzo.html",
+    "count": 171,
+    "inCatalogue": true,
+    "score": 5322,
+    "totalVotes": 10199,
+    "parsed": 164
+  },
+  {
+    "slug": "Elizabeth-Arden",
+    "url": "https://www.fragrantica.com/designers/Elizabeth-Arden.html",
+    "count": 117,
+    "inCatalogue": true,
+    "score": 5211,
+    "totalVotes": 9621,
+    "parsed": 105
+  },
+  {
+    "slug": "Davidoff",
+    "url": "https://www.fragrantica.com/designers/Davidoff.html",
+    "count": 111,
+    "inCatalogue": true,
+    "score": 5153,
+    "totalVotes": 7777,
+    "parsed": 109
+  },
+  {
+    "slug": "Rasasi",
+    "url": "https://www.fragrantica.com/designers/Rasasi.html",
+    "count": 426,
+    "inCatalogue": true,
+    "score": 5123,
+    "totalVotes": 7437,
+    "parsed": 147
+  },
+  {
+    "slug": "Ralph-Lauren",
+    "url": "https://www.fragrantica.com/designers/Ralph-Lauren.html",
+    "count": 117,
+    "inCatalogue": true,
+    "score": 5031,
+    "totalVotes": 12295,
+    "parsed": 112
+  },
+  {
+    "slug": "Azzaro",
+    "url": "https://www.fragrantica.com/designers/Azzaro.html",
+    "count": 0,
+    "inCatalogue": true,
+    "score": 4835,
+    "totalVotes": 8602,
+    "parsed": 100
+  },
+  {
+    "slug": "Aquolina",
+    "url": "https://www.fragrantica.com/designers/Aquolina.html",
+    "count": 43,
+    "inCatalogue": true,
+    "score": 4762,
+    "totalVotes": 5228,
+    "parsed": 31
+  },
+  {
+    "slug": "Moschino",
+    "url": "https://www.fragrantica.com/designers/Moschino.html",
+    "count": 31,
+    "inCatalogue": true,
+    "score": 4663,
+    "totalVotes": 6422,
+    "parsed": 31
+  },
+  {
+    "slug": "BDK-Parfums",
+    "url": "https://www.fragrantica.com/designers/BDK-Parfums.html",
+    "count": 28,
+    "inCatalogue": true,
+    "score": 4627,
+    "totalVotes": 6036,
+    "parsed": 27
+  },
+  {
+    "slug": "Lush",
+    "url": "https://www.fragrantica.com/designers/Lush.html",
+    "count": 237,
+    "inCatalogue": true,
+    "score": 4535,
+    "totalVotes": 10619,
+    "parsed": 192
+  },
+  {
+    "slug": "Zoologist-Perfumes",
+    "url": "https://www.fragrantica.com/designers/Zoologist-Perfumes.html",
+    "count": 53,
+    "inCatalogue": true,
+    "score": 4336,
+    "totalVotes": 9609,
+    "parsed": 53
+  },
+  {
+    "slug": "Nasomatto",
+    "url": "https://www.fragrantica.com/designers/Nasomatto.html",
+    "count": 15,
+    "inCatalogue": true,
+    "score": 4315,
+    "totalVotes": 4784,
+    "parsed": 14
+  },
+  {
+    "slug": "Sol-de-Janeiro",
+    "url": "https://www.fragrantica.com/designers/Sol-de-Janeiro.html",
+    "count": 36,
+    "inCatalogue": true,
+    "score": 4308,
+    "totalVotes": 5236,
+    "parsed": 34
+  },
+  {
+    "slug": "Cartier",
+    "url": "https://www.fragrantica.com/designers/Cartier.html",
+    "count": 129,
+    "inCatalogue": false,
+    "score": 4273,
+    "totalVotes": 8656,
+    "parsed": 123
+  },
+  {
+    "slug": "French-Avenue",
+    "url": "https://www.fragrantica.com/designers/French-Avenue.html",
+    "count": 146,
+    "inCatalogue": true,
+    "score": 4161,
+    "totalVotes": 8249,
+    "parsed": 144
+  },
+  {
+    "slug": "Imaginary-Authors",
+    "url": "https://www.fragrantica.com/designers/Imaginary-Authors.html",
+    "count": 39,
+    "inCatalogue": true,
+    "score": 3936,
+    "totalVotes": 6907,
+    "parsed": 39
+  },
+  {
+    "slug": "Jimmy-Choo",
+    "url": "https://www.fragrantica.com/designers/Jimmy-Choo.html",
+    "count": 48,
+    "inCatalogue": true,
+    "score": 3918,
+    "totalVotes": 5527,
+    "parsed": 48
+  },
+  {
+    "slug": "Acqua-di-Parma",
+    "url": "https://www.fragrantica.com/designers/Acqua-di-Parma.html",
+    "count": 108,
+    "inCatalogue": true,
+    "score": 3909,
+    "totalVotes": 8287,
+    "parsed": 102
+  },
+  {
+    "slug": "Al-Haramain-Perfumes",
+    "url": "https://www.fragrantica.com/designers/Al-Haramain-Perfumes.html",
+    "count": 372,
+    "inCatalogue": true,
+    "score": 3873,
+    "totalVotes": 5863,
+    "parsed": 137
+  },
+  {
+    "slug": "Orto-Parisi",
+    "url": "https://www.fragrantica.com/designers/Orto-Parisi.html",
+    "count": 10,
+    "inCatalogue": true,
+    "score": 3821,
+    "totalVotes": 3821,
+    "parsed": 10
+  },
+  {
+    "slug": "Jennifer-Lopez",
+    "url": "https://www.fragrantica.com/designers/Jennifer-Lopez.html",
+    "count": 38,
+    "inCatalogue": false,
+    "score": 3819,
+    "totalVotes": 5130,
+    "parsed": 37
+  },
+  {
+    "slug": "Elie-Saab",
+    "url": "https://www.fragrantica.com/designers/Elie-Saab.html",
+    "count": 40,
+    "inCatalogue": false,
+    "score": 3707,
+    "totalVotes": 4773,
+    "parsed": 40
+  },
+  {
+    "slug": "Salvatore-Ferragamo",
+    "url": "https://www.fragrantica.com/designers/Salvatore-Ferragamo.html",
+    "count": 120,
+    "inCatalogue": true,
+    "score": 3622,
+    "totalVotes": 7089,
+    "parsed": 114
+  },
+  {
+    "slug": "Katy-Perry",
+    "url": "https://www.fragrantica.com/designers/Katy-Perry.html",
+    "count": 10,
+    "inCatalogue": false,
+    "score": 3605,
+    "totalVotes": 3605,
+    "parsed": 10
+  },
+  {
+    "slug": "Joop",
+    "url": "https://www.fragrantica.com/designers/Joop.html",
+    "count": 53,
+    "inCatalogue": true,
+    "score": 3602,
+    "totalVotes": 4541,
+    "parsed": 49
+  },
+  {
+    "slug": "Glossier",
+    "url": "https://www.fragrantica.com/designers/Glossier.html",
+    "count": 8,
+    "inCatalogue": true,
+    "score": 3526,
+    "totalVotes": 3526,
+    "parsed": 8
+  },
+  {
+    "slug": "Van-Cleef-Arpels",
+    "url": "https://www.fragrantica.com/designers/Van-Cleef-Arpels.html",
+    "count": 81,
+    "inCatalogue": true,
+    "score": 3496,
+    "totalVotes": 6233,
+    "parsed": 81
+  },
+  {
+    "slug": "Zara",
+    "url": "https://www.fragrantica.com/designers/Zara.html",
+    "count": 1267,
+    "inCatalogue": true,
+    "score": 3462,
+    "totalVotes": 24293,
+    "parsed": 1122
+  },
+  {
+    "slug": "Lanvin",
+    "url": "https://www.fragrantica.com/designers/Lanvin.html",
+    "count": 79,
+    "inCatalogue": true,
+    "score": 3453,
+    "totalVotes": 4937,
+    "parsed": 73
+  },
+  {
+    "slug": "Rihanna",
+    "url": "https://www.fragrantica.com/designers/Rihanna.html",
+    "count": 11,
+    "inCatalogue": false,
+    "score": 3324,
+    "totalVotes": 3330,
+    "parsed": 11
+  },
+  {
+    "slug": "Penhaligon-s",
+    "url": "https://www.fragrantica.com/designers/Penhaligon-s.html",
+    "count": 116,
+    "inCatalogue": true,
+    "score": 3318,
+    "totalVotes": 10475,
+    "parsed": 113
+  },
+  {
+    "slug": "Rochas",
+    "url": "https://www.fragrantica.com/designers/Rochas.html",
+    "count": 84,
+    "inCatalogue": true,
+    "score": 3294,
+    "totalVotes": 5327,
+    "parsed": 79
+  },
+  {
+    "slug": "Paris-Hilton",
+    "url": "https://www.fragrantica.com/designers/Paris-Hilton.html",
+    "count": 32,
+    "inCatalogue": false,
+    "score": 3243,
+    "totalVotes": 4552,
+    "parsed": 32
+  },
+  {
+    "slug": "Bentley",
+    "url": "https://www.fragrantica.com/designers/Bentley.html",
+    "count": 27,
+    "inCatalogue": true,
+    "score": 3231,
+    "totalVotes": 3414,
+    "parsed": 26
+  },
+  {
+    "slug": "Bond-No-9",
+    "url": "https://www.fragrantica.com/designers/Bond-No-9.html",
+    "count": 175,
+    "inCatalogue": true,
+    "score": 3159,
+    "totalVotes": 8612,
+    "parsed": 156
+  },
+  {
+    "slug": "Phlur",
+    "url": "https://www.fragrantica.com/designers/Phlur.html",
+    "count": 48,
+    "inCatalogue": true,
+    "score": 3114,
+    "totalVotes": 5271,
+    "parsed": 49
+  },
+  {
+    "slug": "Nina-Ricci",
+    "url": "https://www.fragrantica.com/designers/Nina-Ricci.html",
+    "count": 113,
+    "inCatalogue": true,
+    "score": 3112,
+    "totalVotes": 5415,
+    "parsed": 109
+  },
+  {
+    "slug": "Escentric-Molecules",
+    "url": "https://www.fragrantica.com/designers/Escentric-Molecules.html",
+    "count": 28,
+    "inCatalogue": true,
+    "score": 3111,
+    "totalVotes": 3737,
+    "parsed": 28
+  },
+  {
+    "slug": "Maison-Crivelli",
+    "url": "https://www.fragrantica.com/designers/Maison-Crivelli.html",
+    "count": 23,
+    "inCatalogue": true,
+    "score": 3096,
+    "totalVotes": 4146,
+    "parsed": 23
+  },
+  {
+    "slug": "Nautica",
+    "url": "https://www.fragrantica.com/designers/Nautica.html",
+    "count": 32,
+    "inCatalogue": true,
+    "score": 3085,
+    "totalVotes": 3447,
+    "parsed": 31
+  },
+  {
+    "slug": "Victoria-s-Secret",
+    "url": "https://www.fragrantica.com/designers/Victoria-s-Secret.html",
+    "count": 1210,
+    "inCatalogue": true,
+    "score": 3049,
+    "totalVotes": 15000,
+    "parsed": 842
+  },
+  {
+    "slug": "Roja-Dove",
+    "url": "https://www.fragrantica.com/designers/Roja-Dove.html",
+    "count": 185,
+    "inCatalogue": true,
+    "score": 3047,
+    "totalVotes": 7420,
+    "parsed": 158
+  },
+  {
+    "slug": "Essential-Parfums",
+    "url": "https://www.fragrantica.com/designers/Essential-Parfums.html",
+    "count": 19,
+    "inCatalogue": true,
+    "score": 2961,
+    "totalVotes": 3236,
+    "parsed": 17
+  },
+  {
+    "slug": "Marc-Antoine-Barrois",
+    "url": "https://www.fragrantica.com/designers/Marc-Antoine-Barrois.html",
+    "count": 8,
+    "inCatalogue": true,
+    "score": 2943,
+    "totalVotes": 2943,
+    "parsed": 8
+  },
+  {
+    "slug": "PARIS-CORNER",
+    "url": "https://www.fragrantica.com/designers/PARIS-CORNER.html",
+    "count": 197,
+    "inCatalogue": true,
+    "score": 2905,
+    "totalVotes": 7837,
+    "parsed": 172
+  },
+  {
+    "slug": "Avon",
+    "url": "https://www.fragrantica.com/designers/Avon.html",
+    "count": 1373,
+    "inCatalogue": true,
+    "score": 2899,
+    "totalVotes": 16468,
+    "parsed": 900
+  },
+  {
+    "slug": "Goldfield-Banks-Australia",
+    "url": "https://www.fragrantica.com/designers/Goldfield-Banks-Australia.html",
+    "count": 19,
+    "inCatalogue": true,
+    "score": 2895,
+    "totalVotes": 3537,
+    "parsed": 19
+  },
+  {
+    "slug": "Matiere-Premiere",
+    "url": "https://www.fragrantica.com/designers/Matiere-Premiere.html",
+    "count": 20,
+    "inCatalogue": true,
+    "score": 2878,
+    "totalVotes": 3405,
+    "parsed": 20
+  },
+  {
+    "slug": "Memo-Paris",
+    "url": "https://www.fragrantica.com/designers/Memo-Paris.html",
+    "count": 78,
+    "inCatalogue": true,
+    "score": 2752,
+    "totalVotes": 4956,
+    "parsed": 75
+  },
+  {
+    "slug": "Commodity",
+    "url": "https://www.fragrantica.com/designers/Commodity.html",
+    "count": 55,
+    "inCatalogue": true,
+    "score": 2707,
+    "totalVotes": 4089,
+    "parsed": 46
+  },
+  {
+    "slug": "Billie-Eilish",
+    "url": "https://www.fragrantica.com/designers/Billie-Eilish.html",
+    "count": 6,
+    "inCatalogue": true,
+    "score": 2697,
+    "totalVotes": 2697,
+    "parsed": 6
+  },
+  {
+    "slug": "Giardini-Di-Toscana",
+    "url": "https://www.fragrantica.com/designers/Giardini-Di-Toscana.html",
+    "count": 20,
+    "inCatalogue": true,
+    "score": 2644,
+    "totalVotes": 2644,
+    "parsed": 10
+  },
+  {
+    "slug": "Coach",
+    "url": "https://www.fragrantica.com/designers/Coach.html",
+    "count": 42,
+    "inCatalogue": true,
+    "score": 2625,
+    "totalVotes": 3900,
+    "parsed": 42
+  },
+  {
+    "slug": "Bath-Body-Works",
+    "url": "https://www.fragrantica.com/designers/Bath-Body-Works.html",
+    "count": 853,
+    "inCatalogue": true,
+    "score": 2625,
+    "totalVotes": 20408,
+    "parsed": 746
+  },
+  {
+    "slug": "Comme-des-Garcons",
+    "url": "https://www.fragrantica.com/designers/Comme-des-Garcons.html",
+    "count": 108,
+    "inCatalogue": true,
+    "score": 2612,
+    "totalVotes": 5848,
+    "parsed": 107
+  },
+  {
+    "slug": "Clean",
+    "url": "https://www.fragrantica.com/designers/Clean.html",
+    "count": 105,
+    "inCatalogue": true,
+    "score": 2530,
+    "totalVotes": 4768,
+    "parsed": 99
+  },
+  {
+    "slug": "Aramis",
+    "url": "https://www.fragrantica.com/designers/Aramis.html",
+    "count": 40,
+    "inCatalogue": false,
+    "score": 2501,
+    "totalVotes": 3140,
+    "parsed": 38
+  },
+  {
+    "slug": "L-Artisan-Parfumeur",
+    "url": "https://www.fragrantica.com/designers/L-Artisan-Parfumeur.html",
+    "count": 132,
+    "inCatalogue": true,
+    "score": 2487,
+    "totalVotes": 7449,
+    "parsed": 126
+  },
+  {
+    "slug": "Chopard",
+    "url": "https://www.fragrantica.com/designers/Chopard.html",
+    "count": 73,
+    "inCatalogue": false,
+    "score": 2468,
+    "totalVotes": 3696,
+    "parsed": 70
+  },
+  {
+    "slug": "Tauer-Perfumes",
+    "url": "https://www.fragrantica.com/designers/Tauer-Perfumes.html",
+    "count": 45,
+    "inCatalogue": true,
+    "score": 2468,
+    "totalVotes": 3580,
+    "parsed": 43
+  },
+  {
+    "slug": "Kerosene",
+    "url": "https://www.fragrantica.com/designers/Kerosene.html",
+    "count": 28,
+    "inCatalogue": true,
+    "score": 2443,
+    "totalVotes": 3252,
+    "parsed": 28
+  },
+  {
+    "slug": "Vera-Wang",
+    "url": "https://www.fragrantica.com/designers/Vera-Wang.html",
+    "count": 31,
+    "inCatalogue": false,
+    "score": 2440,
+    "totalVotes": 3341,
+    "parsed": 31
+  },
+  {
+    "slug": "Coty",
+    "url": "https://www.fragrantica.com/designers/Coty.html",
+    "count": 127,
+    "inCatalogue": false,
+    "score": 2384,
+    "totalVotes": 3782,
+    "parsed": 97
+  },
+  {
+    "slug": "DS-Durga",
+    "url": "https://www.fragrantica.com/designers/DS-Durga.html",
+    "count": 122,
+    "inCatalogue": true,
+    "score": 2378,
+    "totalVotes": 4103,
+    "parsed": 91
+  },
+  {
+    "slug": "Roberto-Cavalli",
+    "url": "https://www.fragrantica.com/designers/Roberto-Cavalli.html",
+    "count": 86,
+    "inCatalogue": false,
+    "score": 2348,
+    "totalVotes": 3751,
+    "parsed": 83
+  },
+  {
+    "slug": "Ellis-Brooklyn",
+    "url": "https://www.fragrantica.com/designers/Ellis-Brooklyn.html",
+    "count": 44,
+    "inCatalogue": false,
+    "score": 2320,
+    "totalVotes": 3827,
+    "parsed": 44
+  },
+  {
+    "slug": "Vilhelm-Parfumerie",
+    "url": "https://www.fragrantica.com/designers/Vilhelm-Parfumerie.html",
+    "count": 36,
+    "inCatalogue": true,
+    "score": 2294,
+    "totalVotes": 2997,
+    "parsed": 34
+  },
+  {
+    "slug": "Lacoste-Fragrances",
+    "url": "https://www.fragrantica.com/designers/Lacoste-Fragrances.html",
+    "count": 79,
+    "inCatalogue": false,
+    "score": 2292,
+    "totalVotes": 4364,
+    "parsed": 77
+  },
+  {
+    "slug": "Beyonce",
+    "url": "https://www.fragrantica.com/designers/Beyonce.html",
+    "count": 16,
+    "inCatalogue": false,
+    "score": 2275,
+    "totalVotes": 2464,
+    "parsed": 16
+  },
+  {
+    "slug": "Maison-Alhambra",
+    "url": "https://www.fragrantica.com/designers/Maison-Alhambra.html",
+    "count": 300,
+    "inCatalogue": true,
+    "score": 2231,
+    "totalVotes": 7896,
+    "parsed": 264
+  },
+  {
+    "slug": "Jovoy-Paris",
+    "url": "https://www.fragrantica.com/designers/Jovoy-Paris.html",
+    "count": 34,
+    "inCatalogue": true,
+    "score": 2188,
+    "totalVotes": 2801,
+    "parsed": 33
+  },
+  {
+    "slug": "Les-Liquides-Imaginaires",
+    "url": "https://www.fragrantica.com/designers/Les-Liquides-Imaginaires.html",
+    "count": 45,
+    "inCatalogue": true,
+    "score": 2183,
+    "totalVotes": 2999,
+    "parsed": 44
+  },
+  {
+    "slug": "Ex-Nihilo",
+    "url": "https://www.fragrantica.com/designers/Ex-Nihilo.html",
+    "count": 83,
+    "inCatalogue": true,
+    "score": 2157,
+    "totalVotes": 3781,
+    "parsed": 70
+  },
+  {
+    "slug": "Alfred-Dunhill",
+    "url": "https://www.fragrantica.com/designers/Alfred-Dunhill.html",
+    "count": 45,
+    "inCatalogue": false,
+    "score": 2142,
+    "totalVotes": 3588,
+    "parsed": 43
+  },
+  {
+    "slug": "Sabrina-Carpenter",
+    "url": "https://www.fragrantica.com/designers/Sabrina-Carpenter.html",
+    "count": 6,
+    "inCatalogue": true,
+    "score": 2137,
+    "totalVotes": 2137,
+    "parsed": 6
+  },
+  {
+    "slug": "Khadlaj-Perfumes",
+    "url": "https://www.fragrantica.com/designers/Khadlaj-Perfumes.html",
+    "count": 117,
+    "inCatalogue": true,
+    "score": 2121,
+    "totalVotes": 3570,
+    "parsed": 88
+  },
+  {
+    "slug": "Histoires-de-Parfums",
+    "url": "https://www.fragrantica.com/designers/Histoires-de-Parfums.html",
+    "count": 51,
+    "inCatalogue": false,
+    "score": 2118,
+    "totalVotes": 3392,
+    "parsed": 48
+  },
+  {
+    "slug": "Oscar-de-la-Renta",
+    "url": "https://www.fragrantica.com/designers/Oscar-de-la-Renta.html",
+    "count": 76,
+    "inCatalogue": true,
+    "score": 2105,
+    "totalVotes": 3422,
+    "parsed": 72
+  },
+  {
+    "slug": "Guy-Laroche",
+    "url": "https://www.fragrantica.com/designers/Guy-Laroche.html",
+    "count": 15,
+    "inCatalogue": true,
+    "score": 2083,
+    "totalVotes": 2123,
+    "parsed": 15
+  },
+  {
+    "slug": "Caron",
+    "url": "https://www.fragrantica.com/designers/Caron.html",
+    "count": 134,
+    "inCatalogue": true,
+    "score": 2052,
+    "totalVotes": 3900,
+    "parsed": 129
+  },
+  {
+    "slug": "Michael-Kors",
+    "url": "https://www.fragrantica.com/designers/Michael-Kors.html",
+    "count": 63,
+    "inCatalogue": false,
+    "score": 2024,
+    "totalVotes": 3501,
+    "parsed": 61
+  },
+  {
+    "slug": "Zadig-Voltaire",
+    "url": "https://www.fragrantica.com/designers/Zadig-Voltaire.html",
+    "count": 41,
+    "inCatalogue": true,
+    "score": 2015,
+    "totalVotes": 2463,
+    "parsed": 39
+  },
+  {
+    "slug": "Akro",
+    "url": "https://www.fragrantica.com/designers/Akro.html",
+    "count": 17,
+    "inCatalogue": true,
+    "score": 1969,
+    "totalVotes": 2354,
+    "parsed": 16
+  },
+  {
+    "slug": "Tiziana-Terenzi",
+    "url": "https://www.fragrantica.com/designers/Tiziana-Terenzi.html",
+    "count": 128,
+    "inCatalogue": true,
+    "score": 1955,
+    "totalVotes": 4041,
+    "parsed": 121
+  },
+  {
+    "slug": "Rayhaan",
+    "url": "https://www.fragrantica.com/designers/Rayhaan.html",
+    "count": 39,
+    "inCatalogue": true,
+    "score": 1879,
+    "totalVotes": 2629,
+    "parsed": 36
+  },
+  {
+    "slug": "Yves-Rocher",
+    "url": "https://www.fragrantica.com/designers/Yves-Rocher.html",
+    "count": 304,
+    "inCatalogue": false,
+    "score": 1859,
+    "totalVotes": 8140,
+    "parsed": 263
+  },
+  {
+    "slug": "Mercedes-Benz",
+    "url": "https://www.fragrantica.com/designers/Mercedes-Benz.html",
+    "count": 50,
+    "inCatalogue": true,
+    "score": 1857,
+    "totalVotes": 2546,
+    "parsed": 49
+  },
+  {
+    "slug": "Tommy-Hilfiger",
+    "url": "https://www.fragrantica.com/designers/Tommy-Hilfiger.html",
+    "count": 96,
+    "inCatalogue": true,
+    "score": 1818,
+    "totalVotes": 2916,
+    "parsed": 94
+  },
+  {
+    "slug": "DedCool",
+    "url": "https://www.fragrantica.com/designers/DedCool.html",
+    "count": 16,
+    "inCatalogue": true,
+    "score": 1796,
+    "totalVotes": 1952,
+    "parsed": 15
+  },
+  {
+    "slug": "The-Body-Shop",
+    "url": "https://www.fragrantica.com/designers/The-Body-Shop.html",
+    "count": 189,
+    "inCatalogue": false,
+    "score": 1778,
+    "totalVotes": 5476,
+    "parsed": 146
+  },
+  {
+    "slug": "Profumum-Roma",
+    "url": "https://www.fragrantica.com/designers/Profumum-Roma.html",
+    "count": 47,
+    "inCatalogue": false,
+    "score": 1731,
+    "totalVotes": 3050,
+    "parsed": 41
+  },
+  {
+    "slug": "Clive-Christian",
+    "url": "https://www.fragrantica.com/designers/Clive-Christian.html",
+    "count": 94,
+    "inCatalogue": true,
+    "score": 1706,
+    "totalVotes": 2854,
+    "parsed": 79
+  },
+  {
+    "slug": "Swiss-Arabian",
+    "url": "https://www.fragrantica.com/designers/Swiss-Arabian.html",
+    "count": 253,
+    "inCatalogue": true,
+    "score": 1705,
+    "totalVotes": 2761,
+    "parsed": 92
+  },
+  {
+    "slug": "L-Occitane-en-Provence",
+    "url": "https://www.fragrantica.com/designers/L-Occitane-en-Provence.html",
+    "count": 228,
+    "inCatalogue": false,
+    "score": 1681,
+    "totalVotes": 4483,
+    "parsed": 209
+  },
+  {
+    "slug": "d-Annam",
+    "url": "https://www.fragrantica.com/designers/d-Annam.html",
+    "count": 26,
+    "inCatalogue": true,
+    "score": 1680,
+    "totalVotes": 2409,
+    "parsed": 26
+  },
+  {
+    "slug": "Sospiro-Perfumes",
+    "url": "https://www.fragrantica.com/designers/Sospiro-Perfumes.html",
+    "count": 58,
+    "inCatalogue": true,
+    "score": 1664,
+    "totalVotes": 2341,
+    "parsed": 55
+  },
+  {
+    "slug": "Floral-Street",
+    "url": "https://www.fragrantica.com/designers/Floral-Street.html",
+    "count": 19,
+    "inCatalogue": true,
+    "score": 1541,
+    "totalVotes": 1677,
+    "parsed": 14
+  },
+  {
+    "slug": "Ormonde-Jayne",
+    "url": "https://www.fragrantica.com/designers/Ormonde-Jayne.html",
+    "count": 96,
+    "inCatalogue": false,
+    "score": 1512,
+    "totalVotes": 3022,
+    "parsed": 90
+  },
+  {
+    "slug": "Abercrombie-Fitch",
+    "url": "https://www.fragrantica.com/designers/Abercrombie-Fitch.html",
+    "count": 81,
+    "inCatalogue": false,
+    "score": 1501,
+    "totalVotes": 2192,
+    "parsed": 74
+  },
+  {
+    "slug": "Bottega-Veneta",
+    "url": "https://www.fragrantica.com/designers/Bottega-Veneta.html",
+    "count": 51,
+    "inCatalogue": true,
+    "score": 1485,
+    "totalVotes": 2137,
+    "parsed": 50
+  },
+  {
+    "slug": "Atelier-des-Ors",
+    "url": "https://www.fragrantica.com/designers/Atelier-des-Ors.html",
+    "count": 31,
+    "inCatalogue": true,
+    "score": 1467,
+    "totalVotes": 2068,
+    "parsed": 30
+  },
+  {
+    "slug": "Mind-Games",
+    "url": "https://www.fragrantica.com/designers/Mind-Games.html",
+    "count": 28,
+    "inCatalogue": true,
+    "score": 1449,
+    "totalVotes": 2171,
+    "parsed": 26
+  },
+  {
+    "slug": "Perry-Ellis",
+    "url": "https://www.fragrantica.com/designers/Perry-Ellis.html",
+    "count": 70,
+    "inCatalogue": true,
+    "score": 1446,
+    "totalVotes": 2408,
+    "parsed": 59
+  },
+  {
+    "slug": "Snif",
+    "url": "https://www.fragrantica.com/designers/Snif.html",
+    "count": 44,
+    "inCatalogue": false,
+    "score": 1423,
+    "totalVotes": 2415,
+    "parsed": 41
+  },
+  {
+    "slug": "Ted-Lapidus",
+    "url": "https://www.fragrantica.com/designers/Ted-Lapidus.html",
+    "count": 46,
+    "inCatalogue": true,
+    "score": 1411,
+    "totalVotes": 2036,
+    "parsed": 43
+  },
+  {
+    "slug": "Stephane-Humbert-Lucas-777",
+    "url": "https://www.fragrantica.com/designers/Stephane-Humbert-Lucas-777.html",
+    "count": 33,
+    "inCatalogue": true,
+    "score": 1366,
+    "totalVotes": 2012,
+    "parsed": 33
+  },
+  {
+    "slug": "Fendi",
+    "url": "https://www.fragrantica.com/designers/Fendi.html",
+    "count": 38,
+    "inCatalogue": false,
+    "score": 1359,
+    "totalVotes": 1965,
+    "parsed": 37
+  },
+  {
+    "slug": "Jean-Patou",
+    "url": "https://www.fragrantica.com/designers/Jean-Patou.html",
+    "count": 57,
+    "inCatalogue": false,
+    "score": 1354,
+    "totalVotes": 1833,
+    "parsed": 53
+  },
+  {
+    "slug": "Fragrance-Du-Bois",
+    "url": "https://www.fragrantica.com/designers/Fragrance-Du-Bois.html",
+    "count": 59,
+    "inCatalogue": true,
+    "score": 1343,
+    "totalVotes": 2465,
+    "parsed": 58
+  },
+  {
+    "slug": "Parfum-d-Empire",
+    "url": "https://www.fragrantica.com/designers/Parfum-d-Empire.html",
+    "count": 26,
+    "inCatalogue": true,
+    "score": 1342,
+    "totalVotes": 1929,
+    "parsed": 23
+  },
+  {
+    "slug": "Loewe",
+    "url": "https://www.fragrantica.com/designers/Loewe.html",
+    "count": 133,
+    "inCatalogue": true,
+    "score": 1314,
+    "totalVotes": 3156,
+    "parsed": 123
+  },
+  {
+    "slug": "David-Beckham",
+    "url": "https://www.fragrantica.com/designers/David-Beckham.html",
+    "count": 43,
+    "inCatalogue": false,
+    "score": 1312,
+    "totalVotes": 1809,
+    "parsed": 41
+  },
+  {
+    "slug": "Trussardi",
+    "url": "https://www.fragrantica.com/designers/Trussardi.html",
+    "count": 74,
+    "inCatalogue": false,
+    "score": 1303,
+    "totalVotes": 2707,
+    "parsed": 73
+  },
+  {
+    "slug": "Houbigant",
+    "url": "https://www.fragrantica.com/designers/Houbigant.html",
+    "count": 88,
+    "inCatalogue": false,
+    "score": 1290,
+    "totalVotes": 1954,
+    "parsed": 52
+  },
+  {
+    "slug": "Missoni",
+    "url": "https://www.fragrantica.com/designers/Missoni.html",
+    "count": 17,
+    "inCatalogue": true,
+    "score": 1284,
+    "totalVotes": 1310,
+    "parsed": 16
+  },
+  {
+    "slug": "Toskovat",
+    "url": "https://www.fragrantica.com/designers/Toskovat.html",
+    "count": 28,
+    "inCatalogue": true,
+    "score": 1252,
+    "totalVotes": 1732,
+    "parsed": 28
+  },
+  {
+    "slug": "MAISON-ASRAR",
+    "url": "https://www.fragrantica.com/designers/MAISON-ASRAR.html",
+    "count": 113,
+    "inCatalogue": true,
+    "score": 1235,
+    "totalVotes": 1792,
+    "parsed": 88
+  },
+  {
+    "slug": "Papillon-Artisan-Perfumes",
+    "url": "https://www.fragrantica.com/designers/Papillon-Artisan-Perfumes.html",
+    "count": 9,
+    "inCatalogue": false,
+    "score": 1217,
+    "totalVotes": 1217,
+    "parsed": 9
+  },
+  {
+    "slug": "Halston",
+    "url": "https://www.fragrantica.com/designers/Halston.html",
+    "count": 17,
+    "inCatalogue": false,
+    "score": 1204,
+    "totalVotes": 1280,
+    "parsed": 17
+  },
+  {
+    "slug": "Heretic-Parfum",
+    "url": "https://www.fragrantica.com/designers/Heretic-Parfum.html",
+    "count": 70,
+    "inCatalogue": true,
+    "score": 1197,
+    "totalVotes": 1973,
+    "parsed": 66
+  },
+  {
+    "slug": "BORNTOSTANDOUT",
+    "url": "https://www.fragrantica.com/designers/BORNTOSTANDOUT.html",
+    "count": 51,
+    "inCatalogue": true,
+    "score": 1192,
+    "totalVotes": 2567,
+    "parsed": 51
+  },
+  {
+    "slug": "Fugazzi",
+    "url": "https://www.fragrantica.com/designers/Fugazzi.html",
+    "count": 44,
+    "inCatalogue": true,
+    "score": 1191,
+    "totalVotes": 1644,
+    "parsed": 39
+  },
+  {
+    "slug": "Fine-ry",
+    "url": "https://www.fragrantica.com/designers/Fine-ry.html",
+    "count": 40,
+    "inCatalogue": true,
+    "score": 1170,
+    "totalVotes": 1611,
+    "parsed": 34
+  },
+  {
+    "slug": "Carner-Barcelona",
+    "url": "https://www.fragrantica.com/designers/Carner-Barcelona.html",
+    "count": 36,
+    "inCatalogue": false,
+    "score": 1169,
+    "totalVotes": 1848,
+    "parsed": 36
+  },
+  {
+    "slug": "Molinard",
+    "url": "https://www.fragrantica.com/designers/Molinard.html",
+    "count": 128,
+    "inCatalogue": false,
+    "score": 1154,
+    "totalVotes": 2786,
+    "parsed": 117
+  },
+  {
+    "slug": "Skylar",
+    "url": "https://www.fragrantica.com/designers/Skylar.html",
+    "count": 73,
+    "inCatalogue": true,
+    "score": 1144,
+    "totalVotes": 1686,
+    "parsed": 69
+  },
+  {
+    "slug": "Ferrari",
+    "url": "https://www.fragrantica.com/designers/Ferrari.html",
+    "count": 37,
+    "inCatalogue": false,
+    "score": 1142,
+    "totalVotes": 1688,
+    "parsed": 36
+  },
+  {
+    "slug": "Masque-Milano",
+    "url": "https://www.fragrantica.com/designers/Masque-Milano.html",
+    "count": 30,
+    "inCatalogue": false,
+    "score": 1131,
+    "totalVotes": 1558,
+    "parsed": 30
+  },
+  {
+    "slug": "Lorenzo-Pazzaglia",
+    "url": "https://www.fragrantica.com/designers/Lorenzo-Pazzaglia.html",
+    "count": 37,
+    "inCatalogue": true,
+    "score": 1123,
+    "totalVotes": 1797,
+    "parsed": 37
+  },
+  {
+    "slug": "Celine",
+    "url": "https://www.fragrantica.com/designers/Celine.html",
+    "count": 23,
+    "inCatalogue": true,
+    "score": 1116,
+    "totalVotes": 1367,
+    "parsed": 21
+  },
+  {
+    "slug": "M-Micallef",
+    "url": "https://www.fragrantica.com/designers/M-Micallef.html",
+    "count": 192,
+    "inCatalogue": false,
+    "score": 1113,
+    "totalVotes": 2169,
+    "parsed": 74
+  },
+  {
+    "slug": "ALREHAB-PERFUMES",
+    "url": "https://www.fragrantica.com/designers/ALREHAB-PERFUMES.html",
+    "count": 309,
+    "inCatalogue": true,
+    "score": 1105,
+    "totalVotes": 1428,
+    "parsed": 94
+  },
+  {
+    "slug": "Antonio-Banderas",
+    "url": "https://www.fragrantica.com/designers/Antonio-Banderas.html",
+    "count": 101,
+    "inCatalogue": true,
+    "score": 1095,
+    "totalVotes": 1794,
+    "parsed": 84
+  },
+  {
+    "slug": "Arabiyat-Prestige",
+    "url": "https://www.fragrantica.com/designers/Arabiyat-Prestige.html",
+    "count": 123,
+    "inCatalogue": true,
+    "score": 1083,
+    "totalVotes": 1840,
+    "parsed": 102
+  },
+  {
+    "slug": "Emanuel-Ungaro",
+    "url": "https://www.fragrantica.com/designers/Emanuel-Ungaro.html",
+    "count": 78,
+    "inCatalogue": false,
+    "score": 1070,
+    "totalVotes": 1642,
+    "parsed": 68
+  },
+  {
+    "slug": "Jaguar",
+    "url": "https://www.fragrantica.com/designers/Jaguar.html",
+    "count": 42,
+    "inCatalogue": false,
+    "score": 1069,
+    "totalVotes": 1425,
+    "parsed": 42
+  },
+  {
+    "slug": "Miu-Miu",
+    "url": "https://www.fragrantica.com/designers/Miu-Miu.html",
+    "count": 17,
+    "inCatalogue": true,
+    "score": 1051,
+    "totalVotes": 1072,
+    "parsed": 17
+  },
+  {
+    "slug": "Henry-Rose",
+    "url": "https://www.fragrantica.com/designers/Henry-Rose.html",
+    "count": 21,
+    "inCatalogue": false,
+    "score": 1043,
+    "totalVotes": 1279,
+    "parsed": 21
+  },
+  {
+    "slug": "Zimaya",
+    "url": "https://www.fragrantica.com/designers/Zimaya.html",
+    "count": 115,
+    "inCatalogue": true,
+    "score": 1024,
+    "totalVotes": 2292,
+    "parsed": 107
+  },
+  {
+    "slug": "Ahmed-Al-Maghribi",
+    "url": "https://www.fragrantica.com/designers/Ahmed-Al-Maghribi.html",
+    "count": 99,
+    "inCatalogue": true,
+    "score": 997,
+    "totalVotes": 1538,
+    "parsed": 62
+  },
+  {
+    "slug": "Pacifica",
+    "url": "https://www.fragrantica.com/designers/Pacifica.html",
+    "count": 64,
+    "inCatalogue": false,
+    "score": 972,
+    "totalVotes": 1504,
+    "parsed": 40
+  },
+  {
+    "slug": "Floraiku",
+    "url": "https://www.fragrantica.com/designers/Floraiku.html",
+    "count": 39,
+    "inCatalogue": true,
+    "score": 963,
+    "totalVotes": 1325,
+    "parsed": 36
+  },
+  {
+    "slug": "Hiram-Green",
+    "url": "https://www.fragrantica.com/designers/Hiram-Green.html",
+    "count": 16,
+    "inCatalogue": true,
+    "score": 958,
+    "totalVotes": 1086,
+    "parsed": 16
+  },
+  {
+    "slug": "Filippo-Sorcinelli",
+    "url": "https://www.fragrantica.com/designers/Filippo-Sorcinelli.html",
+    "count": 84,
+    "inCatalogue": true,
+    "score": 939,
+    "totalVotes": 1753,
+    "parsed": 74
+  },
+  {
+    "slug": "Les-Indemodables",
+    "url": "https://www.fragrantica.com/designers/Les-Indemodables.html",
+    "count": 19,
+    "inCatalogue": true,
+    "score": 937,
+    "totalVotes": 1131,
+    "parsed": 19
+  },
+  {
+    "slug": "Aesop",
+    "url": "https://www.fragrantica.com/designers/Aesop.html",
+    "count": 18,
+    "inCatalogue": false,
+    "score": 934,
+    "totalVotes": 1078,
+    "parsed": 17
+  },
+  {
+    "slug": "Regime-des-Fleurs",
+    "url": "https://www.fragrantica.com/designers/Regime-des-Fleurs.html",
+    "count": 55,
+    "inCatalogue": true,
+    "score": 930,
+    "totalVotes": 1406,
+    "parsed": 51
+  },
+  {
+    "slug": "Paloma-Picasso",
+    "url": "https://www.fragrantica.com/designers/Paloma-Picasso.html",
+    "count": 6,
+    "inCatalogue": false,
+    "score": 922,
+    "totalVotes": 922,
+    "parsed": 5
+  },
+  {
+    "slug": "Ajmal",
+    "url": "https://www.fragrantica.com/designers/Ajmal.html",
+    "count": 364,
+    "inCatalogue": false,
+    "score": 903,
+    "totalVotes": 2801,
+    "parsed": 218
+  },
+  {
+    "slug": "Kylie-Cosmetics",
+    "url": "https://www.fragrantica.com/designers/Kylie-Cosmetics.html",
+    "count": 9,
+    "inCatalogue": true,
+    "score": 896,
+    "totalVotes": 896,
+    "parsed": 9
+  },
+  {
+    "slug": "La-Rive",
+    "url": "https://www.fragrantica.com/designers/La-Rive.html",
+    "count": 165,
+    "inCatalogue": false,
+    "score": 879,
+    "totalVotes": 1760,
+    "parsed": 80
+  },
+  {
+    "slug": "Indult",
+    "url": "https://www.fragrantica.com/designers/Indult.html",
+    "count": 8,
+    "inCatalogue": true,
+    "score": 873,
+    "totalVotes": 873,
+    "parsed": 8
+  },
+  {
+    "slug": "Oriflame",
+    "url": "https://www.fragrantica.com/designers/Oriflame.html",
+    "count": 423,
+    "inCatalogue": false,
+    "score": 865,
+    "totalVotes": 4851,
+    "parsed": 378
+  },
+  {
+    "slug": "Fragrance-World",
+    "url": "https://www.fragrantica.com/designers/Fragrance-World.html",
+    "count": 469,
+    "inCatalogue": true,
+    "score": 856,
+    "totalVotes": 3667,
+    "parsed": 348
+  },
+  {
+    "slug": "Kate-Spade",
+    "url": "https://www.fragrantica.com/designers/Kate-Spade.html",
+    "count": 25,
+    "inCatalogue": false,
+    "score": 856,
+    "totalVotes": 985,
+    "parsed": 24
+  },
+  {
+    "slug": "Alexandria-Fragrances",
+    "url": "https://www.fragrantica.com/designers/Alexandria-Fragrances.html",
+    "count": 248,
+    "inCatalogue": false,
+    "score": 842,
+    "totalVotes": 3147,
+    "parsed": 217
+  },
+  {
+    "slug": "Thomas-Kosmala",
+    "url": "https://www.fragrantica.com/designers/Thomas-Kosmala.html",
+    "count": 36,
+    "inCatalogue": true,
+    "score": 840,
+    "totalVotes": 1011,
+    "parsed": 31
+  },
+  {
+    "slug": "Gloria-Vanderbilt",
+    "url": "https://www.fragrantica.com/designers/Gloria-Vanderbilt.html",
+    "count": 17,
+    "inCatalogue": true,
+    "score": 840,
+    "totalVotes": 872,
+    "parsed": 15
+  },
+  {
+    "slug": "Maison-Louis-Marie",
+    "url": "https://www.fragrantica.com/designers/Maison-Louis-Marie.html",
+    "count": 22,
+    "inCatalogue": false,
+    "score": 838,
+    "totalVotes": 933,
+    "parsed": 16
+  },
+  {
+    "slug": "Arabian-Oud",
+    "url": "https://www.fragrantica.com/designers/Arabian-Oud.html",
+    "count": 327,
+    "inCatalogue": false,
+    "score": 827,
+    "totalVotes": 1333,
+    "parsed": 63
+  },
+  {
+    "slug": "Boadicea-the-Victorious",
+    "url": "https://www.fragrantica.com/designers/Boadicea-the-Victorious.html",
+    "count": 192,
+    "inCatalogue": true,
+    "score": 821,
+    "totalVotes": 2246,
+    "parsed": 144
+  },
+  {
+    "slug": "Sorce",
+    "url": "https://www.fragrantica.com/designers/Sorce.html",
+    "count": 81,
+    "inCatalogue": true,
+    "score": 817,
+    "totalVotes": 1544,
+    "parsed": 38
+  },
+  {
+    "slug": "Riiffs-Perfumes",
+    "url": "https://www.fragrantica.com/designers/Riiffs-Perfumes.html",
+    "count": 89,
+    "inCatalogue": true,
+    "score": 811,
+    "totalVotes": 1199,
+    "parsed": 74
+  },
+  {
+    "slug": "Ard-Al-Zaafaran",
+    "url": "https://www.fragrantica.com/designers/Ard-Al-Zaafaran.html",
+    "count": 115,
+    "inCatalogue": true,
+    "score": 781,
+    "totalVotes": 1183,
+    "parsed": 61
+  },
+  {
+    "slug": "Nikos",
+    "url": "https://www.fragrantica.com/designers/Nikos.html",
+    "count": 17,
+    "inCatalogue": true,
+    "score": 762,
+    "totalVotes": 773,
+    "parsed": 13
+  },
+  {
+    "slug": "Slumberhouse",
+    "url": "https://www.fragrantica.com/designers/Slumberhouse.html",
+    "count": 29,
+    "inCatalogue": false,
+    "score": 737,
+    "totalVotes": 926,
+    "parsed": 26
+  },
+  {
+    "slug": "Playboy",
+    "url": "https://www.fragrantica.com/designers/Playboy.html",
+    "count": 57,
+    "inCatalogue": false,
+    "score": 726,
+    "totalVotes": 1121,
+    "parsed": 45
+  },
+  {
+    "slug": "Jeanne-Arthes",
+    "url": "https://www.fragrantica.com/designers/Jeanne-Arthes.html",
+    "count": 254,
+    "inCatalogue": false,
+    "score": 721,
+    "totalVotes": 1896,
+    "parsed": 152
+  },
+  {
+    "slug": "Fragonard",
+    "url": "https://www.fragrantica.com/designers/Fragonard.html",
+    "count": 148,
+    "inCatalogue": false,
+    "score": 711,
+    "totalVotes": 2052,
+    "parsed": 109
+  },
+  {
+    "slug": "Benetton",
+    "url": "https://www.fragrantica.com/designers/Benetton.html",
+    "count": 110,
+    "inCatalogue": false,
+    "score": 704,
+    "totalVotes": 1506,
+    "parsed": 93
+  },
+  {
+    "slug": "The-Merchant-of-Venice",
+    "url": "https://www.fragrantica.com/designers/The-Merchant-of-Venice.html",
+    "count": 119,
+    "inCatalogue": false,
+    "score": 702,
+    "totalVotes": 1324,
+    "parsed": 68
+  },
+  {
+    "slug": "Dumont",
+    "url": "https://www.fragrantica.com/designers/Dumont.html",
+    "count": 41,
+    "inCatalogue": true,
+    "score": 698,
+    "totalVotes": 789,
+    "parsed": 26
+  },
+  {
+    "slug": "Police",
+    "url": "https://www.fragrantica.com/designers/Police.html",
+    "count": 107,
+    "inCatalogue": false,
+    "score": 693,
+    "totalVotes": 1484,
+    "parsed": 84
+  },
+  {
+    "slug": "Bortnikoff",
+    "url": "https://www.fragrantica.com/designers/Bortnikoff.html",
+    "count": 66,
+    "inCatalogue": false,
+    "score": 655,
+    "totalVotes": 1306,
+    "parsed": 62
+  },
+  {
+    "slug": "The-Different-Company",
+    "url": "https://www.fragrantica.com/designers/The-Different-Company.html",
+    "count": 41,
+    "inCatalogue": false,
+    "score": 627,
+    "totalVotes": 1139,
+    "parsed": 40
+  },
+  {
+    "slug": "Tory-Burch",
+    "url": "https://www.fragrantica.com/designers/Tory-Burch.html",
+    "count": 25,
+    "inCatalogue": false,
+    "score": 626,
+    "totalVotes": 773,
+    "parsed": 21
+  },
+  {
+    "slug": "Andrea-Maack",
+    "url": "https://www.fragrantica.com/designers/Andrea-Maack.html",
+    "count": 27,
+    "inCatalogue": false,
+    "score": 606,
+    "totalVotes": 823,
+    "parsed": 25
+  },
+  {
+    "slug": "Adidas",
+    "url": "https://www.fragrantica.com/designers/Adidas.html",
+    "count": 97,
+    "inCatalogue": false,
+    "score": 598,
+    "totalVotes": 1347,
+    "parsed": 84
+  },
+  {
+    "slug": "Boy-Smells",
+    "url": "https://www.fragrantica.com/designers/Boy-Smells.html",
+    "count": 38,
+    "inCatalogue": false,
+    "score": 579,
+    "totalVotes": 1039,
+    "parsed": 33
+  },
+  {
+    "slug": "Pearfat-Parfum",
+    "url": "https://www.fragrantica.com/designers/Pearfat-Parfum.html",
+    "count": 22,
+    "inCatalogue": true,
+    "score": 552,
+    "totalVotes": 632,
+    "parsed": 18
+  },
+  {
+    "slug": "Gulf-Orchid",
+    "url": "https://www.fragrantica.com/designers/Gulf-Orchid.html",
+    "count": 138,
+    "inCatalogue": true,
+    "score": 548,
+    "totalVotes": 1070,
+    "parsed": 88
+  },
+  {
+    "slug": "Etro",
+    "url": "https://www.fragrantica.com/designers/Etro.html",
+    "count": 41,
+    "inCatalogue": false,
+    "score": 539,
+    "totalVotes": 958,
+    "parsed": 39
+  },
+  {
+    "slug": "Shakira",
+    "url": "https://www.fragrantica.com/designers/Shakira.html",
+    "count": 54,
+    "inCatalogue": false,
+    "score": 532,
+    "totalVotes": 683,
+    "parsed": 44
+  },
+  {
+    "slug": "WIDIAN",
+    "url": "https://www.fragrantica.com/designers/WIDIAN.html",
+    "count": 38,
+    "inCatalogue": false,
+    "score": 523,
+    "totalVotes": 837,
+    "parsed": 36
+  },
+  {
+    "slug": "Ella-K-Parfums",
+    "url": "https://www.fragrantica.com/designers/Ella-K-Parfums.html",
+    "count": 19,
+    "inCatalogue": true,
+    "score": 519,
+    "totalVotes": 607,
+    "parsed": 19
+  },
+  {
+    "slug": "Yardley",
+    "url": "https://www.fragrantica.com/designers/Yardley.html",
+    "count": 121,
+    "inCatalogue": false,
+    "score": 495,
+    "totalVotes": 831,
+    "parsed": 53
+  },
+  {
+    "slug": "Bon-Parfumeur",
+    "url": "https://www.fragrantica.com/designers/Bon-Parfumeur.html",
+    "count": 53,
+    "inCatalogue": true,
+    "score": 465,
+    "totalVotes": 909,
+    "parsed": 51
+  },
+  {
+    "slug": "Hollister",
+    "url": "https://www.fragrantica.com/designers/Hollister.html",
+    "count": 92,
+    "inCatalogue": false,
+    "score": 462,
+    "totalVotes": 727,
+    "parsed": 57
+  },
+  {
+    "slug": "Naomi-Campbell",
+    "url": "https://www.fragrantica.com/designers/Naomi-Campbell.html",
+    "count": 27,
+    "inCatalogue": false,
+    "score": 448,
+    "totalVotes": 611,
+    "parsed": 27
+  },
+  {
+    "slug": "Pineward-Perfumes",
+    "url": "https://www.fragrantica.com/designers/Pineward-Perfumes.html",
+    "count": 54,
+    "inCatalogue": true,
+    "score": 437,
+    "totalVotes": 881,
+    "parsed": 34
+  },
+  {
+    "slug": "Al-Wataniah",
+    "url": "https://www.fragrantica.com/designers/Al-Wataniah.html",
+    "count": 74,
+    "inCatalogue": true,
+    "score": 427,
+    "totalVotes": 547,
+    "parsed": 50
+  },
+  {
+    "slug": "ZARKOPERFUME",
+    "url": "https://www.fragrantica.com/designers/ZARKOPERFUME.html",
+    "count": 27,
+    "inCatalogue": true,
+    "score": 419,
+    "totalVotes": 510,
+    "parsed": 25
+  },
+  {
+    "slug": "Worth",
+    "url": "https://www.fragrantica.com/designers/Worth.html",
+    "count": 18,
+    "inCatalogue": false,
+    "score": 394,
+    "totalVotes": 399,
+    "parsed": 13
+  },
+  {
+    "slug": "Gissah",
+    "url": "https://www.fragrantica.com/designers/Gissah.html",
+    "count": 117,
+    "inCatalogue": true,
+    "score": 393,
+    "totalVotes": 481,
+    "parsed": 53
+  },
+  {
+    "slug": "Rare-Beauty",
+    "url": "https://www.fragrantica.com/designers/Rare-Beauty.html",
+    "count": 5,
+    "inCatalogue": true,
+    "score": 383,
+    "totalVotes": 383,
+    "parsed": 3
+  },
+  {
+    "slug": "O-Boticario",
+    "url": "https://www.fragrantica.com/designers/O-Boticario.html",
+    "count": 624,
+    "inCatalogue": true,
+    "score": 367,
+    "totalVotes": 1958,
+    "parsed": 367
+  },
+  {
+    "slug": "Bujairami",
+    "url": "https://www.fragrantica.com/designers/Bujairami.html",
+    "count": 88,
+    "inCatalogue": true,
+    "score": 365,
+    "totalVotes": 542,
+    "parsed": 58
+  },
+  {
+    "slug": "Areej-Le-Dore",
+    "url": "https://www.fragrantica.com/designers/Areej-Le-Dore.html",
+    "count": 88,
+    "inCatalogue": false,
+    "score": 341,
+    "totalVotes": 1239,
+    "parsed": 86
+  },
+  {
+    "slug": "Alkemia-Perfumes",
+    "url": "https://www.fragrantica.com/designers/Alkemia-Perfumes.html",
+    "count": 282,
+    "inCatalogue": false,
+    "score": 327,
+    "totalVotes": 1053,
+    "parsed": 126
+  },
+  {
+    "slug": "Amouroud",
+    "url": "https://www.fragrantica.com/designers/Amouroud.html",
+    "count": 29,
+    "inCatalogue": false,
+    "score": 324,
+    "totalVotes": 471,
+    "parsed": 25
+  },
+  {
+    "slug": "Bruno-Banani",
+    "url": "https://www.fragrantica.com/designers/Bruno-Banani.html",
+    "count": 41,
+    "inCatalogue": false,
+    "score": 295,
+    "totalVotes": 412,
+    "parsed": 37
+  },
+  {
+    "slug": "The-Dua-Brand",
+    "url": "https://www.fragrantica.com/designers/The-Dua-Brand.html",
+    "count": 2034,
+    "inCatalogue": false,
+    "score": 268,
+    "totalVotes": 2830,
+    "parsed": 1005
+  },
+  {
+    "slug": "Granado",
+    "url": "https://www.fragrantica.com/designers/Granado.html",
+    "count": 74,
+    "inCatalogue": true,
+    "score": 249,
+    "totalVotes": 584,
+    "parsed": 70
+  },
+  {
+    "slug": "Oakcha",
+    "url": "https://www.fragrantica.com/designers/Oakcha.html",
+    "count": 147,
+    "inCatalogue": false,
+    "score": 240,
+    "totalVotes": 292,
+    "parsed": 23
+  },
+  {
+    "slug": "Bharara",
+    "url": "https://www.fragrantica.com/designers/Bharara.html",
+    "count": 41,
+    "inCatalogue": true,
+    "score": 220,
+    "totalVotes": 249,
+    "parsed": 20
+  },
+  {
+    "slug": "Natura",
+    "url": "https://www.fragrantica.com/designers/Natura.html",
+    "count": 548,
+    "inCatalogue": true,
+    "score": 218,
+    "totalVotes": 1444,
+    "parsed": 312
+  },
+  {
+    "slug": "Nabeel",
+    "url": "https://www.fragrantica.com/designers/Nabeel.html",
+    "count": 134,
+    "inCatalogue": false,
+    "score": 216,
+    "totalVotes": 297,
+    "parsed": 48
+  },
+  {
+    "slug": "Poesie",
+    "url": "https://www.fragrantica.com/designers/Poesie.html",
+    "count": 160,
+    "inCatalogue": false,
+    "score": 206,
+    "totalVotes": 335,
+    "parsed": 70
+  },
+  {
+    "slug": "Reef-Perfumes",
+    "url": "https://www.fragrantica.com/designers/Reef-Perfumes.html",
+    "count": 37,
+    "inCatalogue": true,
+    "score": 195,
+    "totalVotes": 240,
+    "parsed": 20
+  },
+  {
+    "slug": "Mexx",
+    "url": "https://www.fragrantica.com/designers/Mexx.html",
+    "count": 74,
+    "inCatalogue": false,
+    "score": 193,
+    "totalVotes": 405,
+    "parsed": 64
+  },
+  {
+    "slug": "Nike",
+    "url": "https://www.fragrantica.com/designers/Nike.html",
+    "count": 74,
+    "inCatalogue": false,
+    "score": 177,
+    "totalVotes": 281,
+    "parsed": 34
+  },
+  {
+    "slug": "Puma",
+    "url": "https://www.fragrantica.com/designers/Puma.html",
+    "count": 41,
+    "inCatalogue": false,
+    "score": 171,
+    "totalVotes": 293,
+    "parsed": 33
+  },
+  {
+    "slug": "Ensar-Oud",
+    "url": "https://www.fragrantica.com/designers/Ensar-Oud.html",
+    "count": 161,
+    "inCatalogue": false,
+    "score": 132,
+    "totalVotes": 155,
+    "parsed": 26
+  },
+  {
+    "slug": "Haute-Fragrance-Company-HFC",
+    "url": "https://www.fragrantica.com/designers/Haute-Fragrance-Company-HFC.html",
+    "count": 41,
+    "inCatalogue": true,
+    "score": 130,
+    "totalVotes": 216,
+    "parsed": 34
+  },
+  {
+    "slug": "Louis-Cardin",
+    "url": "https://www.fragrantica.com/designers/Louis-Cardin.html",
+    "count": 167,
+    "inCatalogue": false,
+    "score": 125,
+    "totalVotes": 158,
+    "parsed": 34
+  },
+  {
+    "slug": "DSH-Perfumes",
+    "url": "https://www.fragrantica.com/designers/DSH-Perfumes.html",
+    "count": 312,
+    "inCatalogue": false,
+    "score": 118,
+    "totalVotes": 385,
+    "parsed": 101
+  },
+  {
+    "slug": "Solstice-Scents",
+    "url": "https://www.fragrantica.com/designers/Solstice-Scents.html",
+    "count": 159,
+    "inCatalogue": false,
+    "score": 115,
+    "totalVotes": 203,
+    "parsed": 35
+  },
+  {
+    "slug": "Henry-Jacques",
+    "url": "https://www.fragrantica.com/designers/Henry-Jacques.html",
+    "count": 127,
+    "inCatalogue": false,
+    "score": 113,
+    "totalVotes": 227,
+    "parsed": 61
+  },
+  {
+    "slug": "Marchesa",
+    "url": "https://www.fragrantica.com/designers/Marchesa.html",
+    "count": 1,
+    "inCatalogue": false,
+    "score": 113,
+    "totalVotes": 113,
+    "parsed": 1
+  },
+  {
+    "slug": "Anfar-London",
+    "url": "https://www.fragrantica.com/designers/Anfar-London.html",
+    "count": 40,
+    "inCatalogue": false,
+    "score": 109,
+    "totalVotes": 144,
+    "parsed": 26
+  },
+  {
+    "slug": "Emper",
+    "url": "https://www.fragrantica.com/designers/Emper.html",
+    "count": 139,
+    "inCatalogue": true,
+    "score": 106,
+    "totalVotes": 138,
+    "parsed": 30
+  },
+  {
+    "slug": "Risala",
+    "url": "https://www.fragrantica.com/designers/Risala.html",
+    "count": 45,
+    "inCatalogue": true,
+    "score": 103,
+    "totalVotes": 161,
+    "parsed": 37
+  },
+  {
+    "slug": "STR8",
+    "url": "https://www.fragrantica.com/designers/STR8.html",
+    "count": 13,
+    "inCatalogue": false,
+    "score": 90,
+    "totalVotes": 90,
+    "parsed": 7
+  },
+  {
+    "slug": "Abdul-Samad-Al-Qurashi",
+    "url": "https://www.fragrantica.com/designers/Abdul-Samad-Al-Qurashi.html",
+    "count": 158,
+    "inCatalogue": false,
+    "score": 80,
+    "totalVotes": 113,
+    "parsed": 21
+  },
+  {
+    "slug": "Milton-Lloyd",
+    "url": "https://www.fragrantica.com/designers/Milton-Lloyd.html",
+    "count": 140,
+    "inCatalogue": false,
+    "score": 72,
+    "totalVotes": 72,
+    "parsed": 9
+  },
+  {
+    "slug": "Al-Jazeera-Perfumes",
+    "url": "https://www.fragrantica.com/designers/Al-Jazeera-Perfumes.html",
+    "count": 147,
+    "inCatalogue": false,
+    "score": 66,
+    "totalVotes": 151,
+    "parsed": 62
+  },
+  {
+    "slug": "Sultan-Pasha-Perfumes",
+    "url": "https://www.fragrantica.com/designers/Sultan-Pasha-Perfumes.html",
+    "count": 4,
+    "inCatalogue": false,
+    "score": 63,
+    "totalVotes": 63,
+    "parsed": 4
+  },
+  {
+    "slug": "Sucreabeille",
+    "url": "https://www.fragrantica.com/designers/Sucreabeille.html",
+    "count": 192,
+    "inCatalogue": false,
+    "score": 62,
+    "totalVotes": 99,
+    "parsed": 31
+  },
+  {
+    "slug": "Naseem",
+    "url": "https://www.fragrantica.com/designers/Naseem.html",
+    "count": 45,
+    "inCatalogue": false,
+    "score": 53,
+    "totalVotes": 59,
+    "parsed": 16
+  },
+  {
+    "slug": "Black-Phoenix-Alchemy-Lab",
+    "url": "https://www.fragrantica.com/designers/Black-Phoenix-Alchemy-Lab.html",
+    "count": 207,
+    "inCatalogue": false,
+    "score": 50,
+    "totalVotes": 58,
+    "parsed": 18
+  },
+  {
+    "slug": "Hamidi",
+    "url": "https://www.fragrantica.com/designers/Hamidi.html",
+    "count": 76,
+    "inCatalogue": false,
+    "score": 43,
+    "totalVotes": 85,
+    "parsed": 38
+  },
+  {
+    "slug": "Asgharali",
+    "url": "https://www.fragrantica.com/designers/Asgharali.html",
+    "count": 160,
+    "inCatalogue": false,
+    "score": 40,
+    "totalVotes": 44,
+    "parsed": 14
+  },
+  {
+    "slug": "My-Perfumes",
+    "url": "https://www.fragrantica.com/designers/My-Perfumes.html",
+    "count": 23,
+    "inCatalogue": false,
+    "score": 18,
+    "totalVotes": 18,
+    "parsed": 5
+  },
+  {
+    "slug": "Jaddid",
+    "url": "https://www.fragrantica.com/designers/Jaddid.html",
+    "count": 3,
+    "inCatalogue": true,
+    "score": 5,
+    "totalVotes": 5,
+    "parsed": 2
+  },
+  {
+    "slug": "Otoori",
+    "url": "https://www.fragrantica.com/designers/Otoori.html",
+    "count": 72,
+    "inCatalogue": false,
+    "score": 3,
+    "totalVotes": 3,
+    "parsed": 2
+  }
+]

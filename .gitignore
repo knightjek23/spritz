@@ -82,3 +82,7 @@ scraper/data/**/*.tsv
 scraper/data/**/*.zip
 scraper/data/**/*.gz
 scraper/data/**/*.xml
+
+# scan v2 eval set (your photos + labels, local only)
+eval/
+_to_delete/

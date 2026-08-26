@@ -563,10 +563,11 @@ async function runDiscoverSitemap() {
 
 const BRAND_INDEX_URLS: string[] = [
   "https://www.fragrantica.com/designers/",
-  // Per-letter indexes — Fragrantica uses numeric slugs (1=A, 2=B, ...,
-  // 26=Z, plus a separate slug for numerics/symbols). We try the full
-  // alphabetic range; non-existent ones 404 and get skipped.
-  ...Array.from({ length: 26 }, (_, i) => `https://www.fragrantica.com/designers-${i + 1}.html`),
+  // Per-letter indexes. NOTE (verified 2026-07-28): the path is
+  // `/designers-N/` WITH a trailing slash — `/designers-N.html` returns 404
+  // for every N, which is why this walker only ever saw the 120 brands on
+  // the /designers/ root. There are 11 index pages, not 26.
+  ...Array.from({ length: 11 }, (_, i) => `https://www.fragrantica.com/designers-${i + 1}/`),
 ];
 
 const BRAND_URL_REGEX = /\/designers\/[^/?#]+\.html/i;
@@ -576,13 +577,18 @@ const BRAND_URL_REGEX = /\/designers\/[^/?#]+\.html/i;
 // still ultimately caps the total.
 const BRAND_FETCH_MAX = Number(process.env.BRAND_FETCH_MAX ?? 800);
 
-// Curate the brand list and per-brand harvest to focus the catalog on
-// what users actually wear, not the long tail. Defaults: top 100 brands
-// (Fragrantica's /designers/ root returns them in popularity order,
-// verified against Tom Ford / Creed / Chanel hits) × top 30 fragrances
-// per brand (brand pages list perfumes in popularity order, mostly —
-// with a small boost for recent releases). 100 * 30 = 3000 dense,
-// high-signal entries instead of 5000+ filler.
+// Curate the brand list and per-brand harvest.
+//
+// ⚠ CORRECTION (verified 2026-07-28): the two claims this curation was built
+// on are both FALSE. `/designers/` is ALPHABETICAL, not popularity-ordered
+// (its "Some of The Most Popular Designers" heading describes the set, not
+// the sort). And brand pages list their fragrances ALPHABETICALLY too, so
+// FRAGRANCES_PER_BRAND_MAX=30 takes each brand's first 30 by NAME, not its
+// 30 most popular. Rows harvested by this path are alphabetically biased.
+//
+// For popularity-correct discovery use `discover:houses` → `rank:houses` →
+// `discover:top` in src/discover-houses.ts, which ranks by community vote
+// counts parsed off the brand pages. Keep this path only for bulk breadth.
 //
 // Set either to 0 to disable that cap (walk all brands, harvest all
 // fragrances per brand — recovers the original behavior).
@@ -970,6 +976,23 @@ async function loadQueue(): Promise<string[]> {
   return JSON.parse(raw);
 }
 
+/**
+ * A dead browser or context fails EVERY remaining URL with the same error.
+ * Without this the run burns through the whole queue logging identical
+ * failures — observed 2026-07-31, where the browser died partway and the
+ * scraper kept "working" to the end of the queue.
+ */
+function isFatalBrowserError(err: unknown): boolean {
+  return /Target (page|closed)|context or browser has been closed|Browser has been closed|browserContext\.close|Protocol error/i.test(
+    String(err),
+  );
+}
+
+let browserDead = false;
+
+// Stop after this many failures in a row, whatever the cause.
+const MAX_CONSECUTIVE_FAILURES = Number(process.env.MAX_CONSECUTIVE_FAILURES ?? 15);
+
 async function scrapeOne(page: Page, url: string): Promise<string | null> {
   try {
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45_000 });
@@ -1007,6 +1030,7 @@ async function scrapeOne(page: Page, url: string): Promise<string | null> {
 
     return await page.content();
   } catch (err) {
+    if (isFatalBrowserError(err)) browserDead = true;
     await appendLog(`[scrape] FAIL ${url}: ${String(err)}`);
     return null;
   }
@@ -1030,6 +1054,7 @@ async function runScrape(opts: { dryRun: boolean }) {
   const { browser, ctx } = await makeContext({ blockHeavy: false });
   const page = await ctx.newPage();
   let i = 0;
+  let consecutiveFailures = 0;
 
   try {
     for (const url of target) {
@@ -1047,6 +1072,17 @@ async function runScrape(opts: { dryRun: boolean }) {
       }
 
       const html = await scrapeOne(page, url);
+
+      // Stop the moment the browser is gone. Everything after this point would
+      // fail identically and get recorded as a bogus `page_too_small`.
+      if (browserDead) {
+        console.log(
+          `\n[scrape] ✗ ABORTING at ${i}/${target.length} — the browser or page died.`,
+        );
+        console.log(`  Nothing after this point was actually attempted.`);
+        console.log(`  Progress is saved; re-run \`npm run scrape\` to continue.`);
+        break;
+      }
       // A real Fragrantica detail page is 500KB+ (full content + reviews + similars).
       // Anything under 50KB is almost certainly a Cloudflare challenge or error page.
       // Anything containing a Cloudflare marker is blocked even if larger.
@@ -1059,6 +1095,7 @@ async function runScrape(opts: { dryRun: boolean }) {
       const ok = !tooSmall && !isCloudflare;
 
       if (ok && html) {
+        consecutiveFailures = 0;
         await fs.writeFile(file, html, "utf8");
         completed.add(url);
         state.completed.push(url);
@@ -1085,6 +1122,19 @@ async function runScrape(opts: { dryRun: boolean }) {
             `\n[scrape] ⚠ 5 consecutive Cloudflare challenges — aborting.`,
           );
           console.log(`  Wait 24h, increase DELAY_MIN/DELAY_MAX in .env (try 8 / 15), then resume.`);
+          break;
+        }
+
+        // Generic breaker. The Cloudflare check above only catches one failure
+        // mode; 15 failures in a row of ANY kind means something systemic is
+        // wrong and the rest of the queue is being wasted. Counted locally —
+        // `state.failed` accumulates across runs and can't measure a streak.
+        consecutiveFailures++;
+        if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+          console.log(
+            `\n[scrape] ✗ ABORTING — ${consecutiveFailures} consecutive failures (last: ${reason}).`,
+          );
+          console.log(`  Progress is saved; re-run \`npm run scrape\` to continue.`);
           break;
         }
       }

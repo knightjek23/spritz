@@ -161,24 +161,55 @@ export interface DupePair {
 }
 
 // API response shapes
+
+/**
+ * How a scan match was reached. Scan v2 (see SCAN_V2_DESIGN.md §4.4):
+ *   "text"        — OCR text alone was confident and the visual layer agreed
+ *                   (or wasn't available).
+ *   "text+visual" — text was ambiguous; fused text + bottle-embedding score
+ *                   picked the winner.
+ *   "visual"      — label unreadable; bottle shape/color embedding alone.
+ *   "tiebreak"    — fused top-2 were too close; GPT-4o compared the photo
+ *                   against those candidates' catalog images.
+ *   "web"         — nothing in-catalog was confident; a web visual lookup
+ *                   (Google Lens) named it and the name matched the catalog.
+ *   "none"        — no match.
+ */
+export type ScanMatchMethod =
+  | "text"
+  | "text+visual"
+  | "visual"
+  | "tiebreak"
+  | "web"
+  | "none";
+
+export interface ScanCandidate {
+  fragrance: Fragrance;
+  /** Final ranking score, 0–1. Fused when both signals exist. */
+  confidence: number;
+  /** Trigram score from search_fragrances, when the candidate came from text. */
+  text_score?: number;
+  /** Raw cosine similarity from the bottle-embedding index, when present. */
+  visual_score?: number;
+}
+
 export interface ScanResult {
   matched: Fragrance | null;
-  candidates: Array<{ fragrance: Fragrance; confidence: number }>;
+  candidates: ScanCandidate[];
   confidence: number;
   detected_brand: string | null;
   detected_name: string | null;
   scan_event_id: string;
-  /**
-   * How the match was reached:
-   *   "text"   — auto-matched on OCR text similarity alone (fast path).
-   *   "visual" — OCR was ambiguous; GPT-4o picked from candidates by
-   *              comparing the user photo against catalog bottle images.
-   *   "none"   — no match.
-   * Optional for back-compat with older clients; the route always sets it.
-   */
-  match_method?: "text" | "visual" | "none";
-  /** When match_method === "visual", a short human-readable reason. */
+  /** Optional for back-compat with older clients; the route always sets it. */
+  match_method?: ScanMatchMethod;
+  /** When match_method === "tiebreak", a short human-readable reason. */
   visual_reason?: string;
+  /**
+   * Set when the scan succeeded on a weaker path than usual, so the UI can
+   * say so instead of presenting a confident-looking answer:
+   *   "label_unreadable" — OCR returned nothing; the match is visual-only.
+   */
+  partial?: "label_unreadable";
 }
 
 export interface DupeResult {

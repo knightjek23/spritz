@@ -33,7 +33,8 @@
     "concentration": "tsx src/backfill-concentration.ts",
     "concentration:infer": "tsx src/infer-concentration.ts",
     "popularity": "tsx src/infer-popularity.ts",
-    "all": "npm run discover && npm run scrape && npm run parse && npm run vectorize && npm run upload && npm run compute-dupes"
+    "all": "npm run discover && npm run scrape && npm run parse && npm run vectorize && npm run upload && npm run compute-dupes",
+    "embed:images": "tsx src/embed-bottle-images.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",

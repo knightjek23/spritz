@@ -9,6 +9,7 @@ import Image from "next/image";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { cleanBottleImageUrl } from "@/lib/bottle-image";
 import { BottleImage } from "@/components/bottle-image";
+import { ScanReceipt } from "@/components/scan-receipt";
 import { BuyOptions, type BuyOffer } from "@/components/buy-options";
 import { SimilarSection } from "@/components/similar-section";
 import { SaveButtonsRow } from "@/components/save-buttons-row";
@@ -213,6 +214,11 @@ export default async function FragrancePage({ params }: { params: { id: string }
           </div>
         </div>
       </section>
+
+      {/* Scan audit trail — renders only when the URL carries ?scan=<id>,
+          i.e. the visitor arrived here from a scan. Client-side so the
+          ISR HTML stays identical for everyone else. */}
+      <ScanReceipt fragranceId={f.id} />
 
       {/* Title block — name + house + year + gender + concentration.
           Family lives below. House name links into the house
