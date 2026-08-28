@@ -30,6 +30,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { prepareFromFile, prepareFromVideo } from "@/lib/image-prep";
+import { SpritzLoader } from "./spritz-loader";
 import { ScanChecklist } from "@/components/scan-checklist";
 import type { StageLine } from "@/lib/scan-stages";
 
@@ -351,9 +352,15 @@ export function CameraCapture({
             <h1 className="font-display text-2xl text-ink leading-tight text-center">
               Use your camera
             </h1>
+            {/* This copy has to match what actually happens. Scan photos are
+                stored in a private bucket and kept, to diagnose bad matches
+                and, after review, to fill missing bottle images. Saying
+                "never sent anywhere" or naming a deletion window we don't
+                enforce would both be false. */}
             <p className="text-[13px] font-light text-ink/80 text-center leading-snug">
-              We&apos;ll ask for camera access. Only used while you&apos;re here,
-              never sent anywhere except as part of the scan.
+              We&apos;ll ask for camera access. Your photo is used to identify
+              the bottle, and we keep it to improve scanning. A clear bottle
+              shot may be added to the library.
             </p>
             <button
               type="button"
@@ -375,9 +382,7 @@ export function CameraCapture({
         {/* Starting — brief flash of state during getUserMedia. */}
         {state === "starting" && (
           <GlassCard>
-            <p className="text-sm font-light text-ink/70 animate-pulse">
-              Starting camera…
-            </p>
+            <SpritzLoader size={40} label="Starting camera" showLabel />
           </GlassCard>
         )}
 
@@ -388,8 +393,20 @@ export function CameraCapture({
           (stages ? (
             <ScanChecklist lines={stages} done={stagesDone} />
           ) : (
-            <div className="absolute inset-0 bg-ink/60 flex items-center justify-center backdrop-blur-sm">
-              <p className="text-cream font-display text-2xl animate-pulse">
+            <div
+              role="status"
+              aria-live="polite"
+              className="absolute inset-0 bg-ink/60 flex flex-col items-center justify-center gap-5 backdrop-blur-sm"
+            >
+              {/* Cream strokes on the dimmed viewfinder; the cap fill is
+                  set to ink so the collar stays opaque against the frozen
+                  frame behind it instead of flashing cream. */}
+              <SpritzLoader
+                size={72}
+                label=""
+                className="text-cream [--spritz-loader-cap-fill:#1A1A1A]"
+              />
+              <p className="text-cream font-display text-2xl">
                 Reading the label…
               </p>
             </div>

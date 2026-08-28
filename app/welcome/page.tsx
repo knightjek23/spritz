@@ -25,6 +25,7 @@ import { useRouter } from "next/navigation";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { SearchAutocomplete } from "@/components/search-autocomplete";
 import type { Fragrance } from "@/lib/types";
+import { SpritzLoader } from "@/components/spritz-loader";
 
 const TARGET_PICKS = 3;
 
@@ -134,9 +135,8 @@ function WelcomeInner() {
     // Brief skeleton while we check collection emptiness. Avoids flash of
     // onboarding UI for returning users.
     return (
-      <div className="mx-auto max-w-md px-6 py-16">
-        <div className="h-8 w-32 bg-paper rounded animate-pulse mb-4" />
-        <div className="h-14 w-full bg-paper rounded-xl animate-pulse" />
+      <div className="mx-auto max-w-md px-6 py-24 flex justify-center">
+        <SpritzLoader size={64} label="Getting things ready" showLabel />
       </div>
     );
   }

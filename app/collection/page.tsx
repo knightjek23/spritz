@@ -20,6 +20,7 @@ import type {
   Reaction,
 } from "@/lib/types";
 import { CardMenu } from "@/components/card-menu";
+import { SpritzLoader } from "@/components/spritz-loader";
 
 // The API now bundles the user's reaction (like/dislike/null) per item so
 // the shelf can render the small indicator overlay without a second
@@ -144,9 +145,9 @@ function SignedInCollection() {
       </div>
 
       {loading && (
-        <p className="font-mono text-xs uppercase tracking-widest text-slate">
-          Loading…
-        </p>
+        <div className="py-10 flex justify-center">
+          <SpritzLoader size={56} label="Loading your collection" showLabel />
+        </div>
       )}
 
       {!loading && items.length === 0 && (

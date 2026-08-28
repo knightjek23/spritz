@@ -22,6 +22,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { StageLine } from "@/lib/scan-stages";
+import { SpritzLoader } from "./spritz-loader";
 
 const MIN_HOLD_MS = 400;
 
@@ -61,8 +62,18 @@ export function ScanChecklist({ lines, done = false }: Props) {
     <div
       role="status"
       aria-live="polite"
-      className="absolute inset-0 bg-ink/60 backdrop-blur-sm flex items-end justify-center px-6 pb-8 scan-checklist"
+      className="absolute inset-0 bg-ink/60 backdrop-blur-sm flex flex-col items-center justify-end gap-6 px-6 pb-8 scan-checklist"
     >
+      {/* The mark sits above the rows so the overlay reads as Spritz
+          working, not just a stack of system messages. It carries no
+          label of its own — the checklist rows ARE the status text, and
+          the wrapper already announces them. */}
+      <SpritzLoader
+        size={56}
+        className="text-cream [--spritz-loader-cap-fill:#1A1A1A]"
+        label=""
+      />
+
       <ol className="w-full max-w-sm space-y-2">
         {shown.map((line, i) => {
           const isLast = i === shown.length - 1;

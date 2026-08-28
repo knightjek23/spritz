@@ -307,3 +307,97 @@ h1, h2, h3, h4 {
     animation: none;
   }
 }
+
+/* ===== Spritz loading mark (components/spritz-loader.tsx) =====
+   The brand bottle giving a little spray, on a 1.35s pump cycle:
+   cap presses 8 units down over the neck (0-10%), the liquid deepens,
+   spray lines fan out and fade (0-70%), droplets
+   trail a beat behind, then a beat of stillness before the next pump so
+   it reads as a deliberate spritz rather than a continuous hiss.
+
+   transform-box: view-box makes scale() pivot on the spout tip
+   (145, 28.5 in the SVG's own coordinates) instead of the element's
+   bounding box, so the fan opens outward from the nozzle. */
+@keyframes spritz-loader-press {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  10%,
+  45% {
+    transform: translateY(8px);
+  }
+  60% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes spritz-loader-puff {
+  0% {
+    opacity: 0;
+    transform: translateX(0) scale(0.5);
+  }
+  14% {
+    opacity: 1;
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: translateX(6px) scale(1.18);
+  }
+}
+
+.spritz-loader-cap {
+  animation: spritz-loader-press 1.35s cubic-bezier(0.32, 0.72, 0, 1) infinite;
+}
+
+.spritz-loader-spray,
+.spritz-loader-mist {
+  transform-box: view-box;
+  transform-origin: 145px 28.5px;
+  opacity: 0;
+  animation: spritz-loader-puff 1.35s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+/* Droplets lag the lines slightly and travel a touch further. */
+.spritz-loader-mist {
+  animation-delay: 120ms;
+}
+
+/* The liquid glows. fill-opacity is what animates, not fill, so the wash
+   stays in whatever emerald currentColor resolves to and simply deepens:
+   pale sage at rest, full emerald at the top of the cycle, back down
+   again. Animating the color instead would need two literal hexes and
+   would break the moment the mark sits on a non-cream surface. */
+@keyframes spritz-loader-glow {
+  0%,
+  100% {
+    fill-opacity: 0.18;
+  }
+  45% {
+    fill-opacity: 0.58;
+  }
+}
+
+.spritz-loader-liquid {
+  animation: spritz-loader-glow 1.35s ease-in-out infinite;
+}
+
+/* Reduced motion: hold the bottle mid-spray as a static mark. Callers
+   still get role="status" + the label, so the wait state is announced
+   either way. */
+@media (prefers-reduced-motion: reduce) {
+  .spritz-loader-cap {
+    animation: none;
+  }
+  .spritz-loader-liquid {
+    animation: none;
+    fill-opacity: 0.34;
+  }
+  .spritz-loader-spray,
+  .spritz-loader-mist {
+    animation: none;
+    opacity: 0.55;
+    transform: none;
+  }
+}

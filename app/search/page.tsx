@@ -14,6 +14,7 @@ import { cleanBottleImageUrl } from "@/lib/bottle-image";
 import { BottleImage } from "@/components/bottle-image";
 import { SearchAutocomplete } from "@/components/search-autocomplete";
 import type { Fragrance } from "@/lib/types";
+import { SpritzLoader } from "@/components/spritz-loader";
 
 export default function SearchPage() {
   return (
@@ -78,7 +79,10 @@ function SearchPageInner() {
       </div>
 
       {busy && submittedQ && (
-        <p className="text-slate text-sm mb-4">Searching…</p>
+        <div role="status" aria-live="polite" className="flex items-center gap-3 mb-4">
+          <SpritzLoader size={36} label="" />
+          <p className="text-slate text-sm">Searching…</p>
+        </div>
       )}
 
       {submittedQ && !busy && results.length > 0 && (
