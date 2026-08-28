@@ -37,6 +37,7 @@ import {
   type VisionRead,
 } from "@/lib/vision";
 import { embedImage, normalizeVisual, visualProvider } from "@/lib/image-embed";
+import { storeScanImage } from "@/lib/scan-image-store";
 import {
   lookupBottleOnWeb,
   webLookupEnabled,
@@ -360,10 +361,17 @@ async function runScan(ctx: Ctx, emit: (f: ScanFrame) => void): Promise<ScanResu
     fused: round(c.fused),
   }));
   const insert = (async () => {
+    // Retain the scan frame (private `scan-images` bucket, 30-day purge) so
+    // a bad match can be diagnosed later and a good bottle shot can be
+    // reviewed into the catalog. Runs inside waitUntil with the log write,
+    // so it never adds latency to the user's scan, and a failed upload just
+    // leaves image_url null rather than failing the whole event.
+    const imagePath = await storeScanImage(supabase, eventId, ctx.image);
     const { error } = await supabase.from("scan_events").insert({
       id: eventId,
       user_id: ctx.appUserId,
       ip_hash: ctx.ipHash,
+      image_url: imagePath,
       detected_brand: read.brand,
       detected_name: read.name,
       matched_fragrance_id: matched?.id ?? null,

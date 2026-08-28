@@ -5,7 +5,7 @@
 // the build. A plain module is unambiguous.
 
 /** Shown as the "Last updated" line on all three legal pages. */
-export const LEGAL_LAST_UPDATED = "August 10, 2026";
+export const LEGAL_LAST_UPDATED = "August 27, 2026";
 
 /** Contact address in all three documents. Set this alias up before launch. */
 export const LEGAL_CONTACT = "support@spritzofficial.app";

@@ -33,10 +33,24 @@ export default function PrivacyPage() {
         embedding service to compare the bottle&apos;s shape and color against
         our catalog. If neither can identify the bottle and you are signed in,
         we may send the photo to a visual search provider (Google Lens via
-        SerpApi) to look it up on the web. We store the image only long enough
-        to return a result and to debug failed scans, never more than 30 days.
-        We do not use your photos to train any model, and we do not share them
-        with anyone other than the providers processing that request.
+        SerpApi) to look it up on the web. We keep the photo so we can debug
+        scans that returned the wrong answer and improve how scanning works.
+        Stored photos are private and are not shown to other users. We do not
+        use your photos to train any model, and we do not share them with
+        anyone other than the providers processing that request. You can ask us
+        to delete your photos at any time, at{" "}
+        <a href={`mailto:${LEGAL_CONTACT}`}>{LEGAL_CONTACT}</a>.
+      </p>
+      <p>
+        <strong>Photos used in the library.</strong> Some bottles in our library
+        have no photo. If one of your scans is a clear shot of the bottle, we
+        may review it and use it as that fragrance&apos;s library image. Only
+        the bottle is relevant to us, so we do not use a photo that shows a
+        person, a face, or anything else identifying, and a photo we use is
+        never labeled with your name or account. If you would rather we did
+        not, email{" "}
+        <a href={`mailto:${LEGAL_CONTACT}`}>{LEGAL_CONTACT}</a> and we will
+        remove it and exclude your scans from this.
       </p>
       <p>
         <strong>Your collection.</strong> The fragrances you mark as owned,
@@ -117,10 +131,12 @@ export default function PrivacyPage() {
       <h2>How long we keep it</h2>
       <p>
         Account and collection data is kept while your account is open. Scan
-        photos are deleted within 30 days. Analytics data is retained in
-        aggregate. If you delete your account, we delete your personal data
-        within 30 days, other than anything we are required to keep for tax or
-        legal reasons.
+        photos are kept so we can keep improving scanning, and you can ask us
+        to delete yours at any time. Analytics data is retained in aggregate.
+        If you delete your account, we delete your personal data, including
+        your scan photos, within 30 days, other than anything we are required
+        to keep for tax or legal reasons, and any photo already reviewed into
+        the library.
       </p>
 
       <h2>Your rights</h2>

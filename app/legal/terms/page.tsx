@@ -111,6 +111,20 @@ export default function TermsPage() {
         Anything you submit stays yours. By submitting it you give us permission
         to store and display it in order to run the service.
       </p>
+      <p>
+        <strong>Photos you scan.</strong> When you scan a bottle we keep the
+        photo so we can debug scans that went wrong. Plenty of
+        bottles in our library have no picture, so if your scan is a clean shot
+        of one of them, we may review it and use it as that fragrance&apos;s
+        library image. You keep ownership of the photo. You are giving us a
+        worldwide, royalty-free, perpetual licence to use, display, and adapt it
+        for that purpose, and confirming you took it, or otherwise have the
+        right to give us that permission. We do not use photos that show a
+        person or anything else identifying, and we never attach your name to
+        one. If you would rather we did not use your photos this way, email{" "}
+        <a href={`mailto:${LEGAL_CONTACT}`}>{LEGAL_CONTACT}</a> and we will stop
+        and remove any we have already used.
+      </p>
 
       <h2>Accuracy</h2>
       <p>
