@@ -1,3 +1,35 @@
+// ============================================================================
+// RETIRED — DO NOT RUN. Kept only as the record of a bug.
+// ============================================================================
+//
+// This script filled ~93% of the catalog's concentration column and got
+// almost all of it wrong, labelling famous EDTs as EDP. Users saw EDP on
+// essentially every fragrance in the app.
+//
+// The cause is in the SYSTEM_PROMPT below. It tells the model that edp is
+// "the default for most modern niche and designer releases" and then asks it
+// to pick "the FLAGSHIP or MOST COMMON release format". gpt-4o-mini answered
+// edp at 0.9+ confidence nearly every time, which sailed straight through the
+// MIN_CONFIDENCE >= 0.7 gate. The gate only catches an uncertain model; this
+// one was confidently wrong, which is the failure mode a confidence floor
+// cannot detect.
+//
+// Ground truth from 34,480 real retailer SKU titles is a ~45/55 EDT/EDP
+// split. This script produced almost no EDT at all.
+//
+// Replaced by repair-concentration.ts, which derives concentration from
+// retailer SKU titles (a description of an actual bottle) and writes NULL
+// when it cannot resolve one. A blank field is strictly better than a
+// confident wrong answer, and the UI already hides it.
+//
+// If you ever revive an AI pass here, it must (a) drop the EDP-default line,
+// (b) be told Fragrantica names the ORIGINAL bare and only appends "Eau de
+// Parfum" to the later flanker, so a bare name skews EDT, and (c) be scored
+// against the ~45% EDT baseline before any write. Set concentration_source
+// = 'ai' so it stays wipeable.
+//
+// ----------------------------------------------------------------------------
+//
 // AI-infer concentration (EDT/EDP/Parfum/Extrait) for fragrances where
 // the name doesn't explicitly say. Runs after backfill-concentration.ts
 // (the name parser) to fill in the rows that stayed NULL.
@@ -128,6 +160,19 @@ async function inferOne(row: FragranceRow): Promise<AiInference | null> {
 }
 
 async function main() {
+  // Hard stop. This pass corrupted ~93% of the concentration column once
+  // already (see the header). Running it again would silently overwrite
+  // feed-derived values with model guesses.
+  if (!args.includes("--i-know-this-is-broken")) {
+    console.error("REFUSING TO RUN: this script is retired.");
+    console.error("");
+    console.error("  It labelled nearly the entire catalog EDP, including famous EDTs,");
+    console.error("  because its prompt asserts EDP is the modern default. See the");
+    console.error("  header of this file for the full write-up.");
+    console.error("");
+    console.error("  Use instead:  pnpm repair:concentration --dry");
+    process.exit(1);
+  }
   console.log("--- Spritz concentration inference (AI) ---");
   if (DRY) console.log("  (dry run — no DB writes)");
   if (LIMIT) console.log(`  limit: ${LIMIT}`);

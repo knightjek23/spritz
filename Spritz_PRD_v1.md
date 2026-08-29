@@ -445,3 +445,13 @@ For the *encyclopedia content layer* (perfumer credits, house history, note flav
 - Note flavor descriptions: original editorial work (best path) or licensed dictionary.
 
 Recommend Q2 resolution favors original editorial content for note descriptions — it's the smallest content set (~500 notes) and gives Spritz a defensible content moat that's not scraped from anyone.
+
+---
+
+## 17. Change History
+
+| Date | Change | Reason | Doc |
+|---|---|---|---|
+| 2026-08-29 | **Non-goal #3 (Section 3: "No Android-specific or native iOS app in v1") is retired.** Spritz is going to the Apple App Store and Google Play as a Capacitor native shell. This graduates the Section 6 P2 item "Native iOS / Android apps." | The PWA cannot do push notifications, which is both the strongest retention lever and the requirement Apple uses to distinguish an app from a repackaged website. Store search is also the natural discovery path for an audience that hears about the app on TikTok and Reddit. | `docs/build/launch-one-pager.md` |
+| 2026-08-29 | Section 12 revenue model gains a mobile path: web purchases stay on Stripe, mobile purchases go through RevenueCat (StoreKit / Play Billing). Both converge on the existing `users.plan = 'pro'` + `users.is_lifetime` entitlement. | Apple 3.1.1 requires in-app purchase for digital unlocks. Stripe must be hidden inside the native app. | `APP_STORE_LAUNCH.md` |
+| 2026-08-29 | **New requirement, not previously in this PRD: in-app account deletion.** Apple Guideline 5.1.1(v) requires it for any app supporting account creation; Google Play additionally requires a publicly reachable web deletion URL. | Hard rejection on both stores. Not currently built. | `docs/build/build-map.md` slice 4 |
