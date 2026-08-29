@@ -54,6 +54,8 @@ export type Database = {
           editorial_notes: string | null;
           dupes: DupeRecommendation[];
           concentration: "edt" | "edp" | "parfum" | "extrait" | null;
+          concentrations: Array<"edt" | "edp" | "parfum" | "extrait">;
+          concentration_source: "name" | "feed" | "ai" | null;
           // Community consensus (Pro feature)
           consensus_summary: string | null;
           consensus_verdict: string | null;
@@ -109,6 +111,8 @@ export type Database = {
           editorial_notes?: string | null;
           dupes?: DupeRecommendation[];
           concentration?: "edt" | "edp" | "parfum" | "extrait" | null;
+          concentrations?: Array<"edt" | "edp" | "parfum" | "extrait">;
+          concentration_source?: "name" | "feed" | "ai" | null;
           consensus_summary?: string | null;
           consensus_verdict?: string | null;
           consensus_pros?: string[] | null;

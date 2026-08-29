@@ -59,12 +59,44 @@ import { createClient } from "@supabase/supabase-js";
 const args = process.argv.slice(2);
 const DRY = args.includes("--dry");
 const KEEP_AI = args.includes("--keep-ai");
+/** Print each catalog row beside the feed title it matched. This is the real
+ *  precision check — read the pairings. Aggregate splits can't tell a false
+ *  positive from a population shift. */
+const AUDIT = args.includes("--audit");
+/** Skip the inferred house-prior pass; keep only retail-verified values. */
+const SKIP_PRIORS = args.includes("--no-priors");
+/** A house must be this consistent, over this many known releases, before an
+ *  unlabelled release of theirs inherits its strength. Tuned so houses with
+ *  genuinely mixed output (most designer houses) never qualify. */
+const PRIOR_AGREEMENT = 0.9;
+const PRIOR_MIN_SAMPLE = 5;
 const LIMIT = Number(args.find((a) => a.startsWith("--limit="))?.split("=")[1] ?? "0");
 
 const DATA_DIR = path.resolve(process.cwd(), "data");
 const PAGE_SIZE = 500;
 
 type Concentration = "edt" | "edp" | "parfum" | "extrait";
+
+/** Display order, lightest first. */
+const ORDER: Concentration[] = ["edt", "edp", "parfum", "extrait"];
+
+/**
+ * When a fragrance ships in several strengths, its Fragrantica siblings tell
+ * us which one the BARE entry refers to: the original. Polo Blue's feed set
+ * {edt,edp,parfum} minus what its named flankers claim {edp,parfum} leaves
+ * {edt}. Used only to fill the legacy scalar column; the full set is written
+ * either way.
+ */
+function deducedOriginal(
+  set: Concentration[],
+  siblings: Map<string, Set<Concentration>>,
+  row: { house: string; name: string },
+): Concentration | null {
+  const claimed = siblings.get(`${normHouse(row.house)}::${nameKey(row.name)}`);
+  if (!claimed) return null;
+  const remaining = set.filter((v) => !claimed.has(v));
+  return remaining.length === 1 ? remaining[0] : null;
+}
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
@@ -124,29 +156,69 @@ function houseBridge(h: string): string {
   return w[w.length - 1] ?? "";
 }
 
+/**
+ * Remove a LEADING or TRAILING run of house tokens from a product name.
+ *
+ * Retail feeds routinely glue the brand into the product name, in both
+ * directions, while the catalog does not:
+ *
+ *   feed "Creed Aventus by Creed"                      catalog "Aventus"
+ *   feed "Prada Luna Rossa by Prada"                   catalog "Luna Rossa"
+ *   feed "La Nuit De L'homme Yves Saint Laurent by ..." catalog "La Nuit de L'Homme"
+ *
+ * Without this, the matcher scored 3/20 on the most famous fragrances in the
+ * world. With it, 14/20.
+ *
+ * Deliberately an AFFIX strip, not a token filter: only runs at the start and
+ * end are removed, so the middle of a name can never be gutted, and a name
+ * that IS the house survives (never strips below one token / 3 chars).
+ */
+function stripHouseAffix(name: string, house: string): string | null {
+  const hw = new Set(normHouse(house).split(" ").filter(Boolean));
+  if (hw.size === 0) return null;
+  const words = collapse(name).split(" ").filter(Boolean);
+  const before = words.length;
+  while (words.length > 1 && hw.has(words[0])) words.shift();
+  while (words.length > 1 && hw.has(words[words.length - 1])) words.pop();
+  if (words.length === before) return null;
+  const out = words.join(" ");
+  return out.length >= 3 ? out : null;
+}
+
 // ---------------------------------------------------------------------------
-// MEASURED PRECISION (1,459-row catalog sample vs FragranceNet, Aug 2026).
-// Ground truth: the raw feed's own SKUs are ~45% EDT. A matcher that returns
-// a wildly different split is inventing matches, not finding them.
+// MEASURED COVERAGE (1,459-row catalog sample vs FragranceNet, Aug 2026)
 //
-//   strict name key only        5.4% coverage   51.7% EDT   precise
-//   + house bridge              6.1% coverage   45.6% EDT   precise  <- adopted
-//   + de-housed name           20.2% coverage   19.7% EDT   BROKEN
-//   + both                     22.1% coverage   18.8% EDT   BROKEN
+//   strict name key only        5.4%   famous:  -/20
+//   + house bridge              6.2%   famous:  3/20
+//   + house-affix strip        22.3%   famous: 14/20   <- adopted
 //
-// De-housing (stripping the house out of the product name, which the image
-// matcher does) quadruples coverage and destroys the result: the shortened
-// keys let distinct products collide, and because the feed carries 12,198 EDP
-// SKUs against 4,550 EDT, every collision resolves EDP. That would rebuild
-// the exact "everything is EDP" bug this script exists to fix, just with a
-// different mechanism. Do not add it back to chase a coverage number.
+// A NOTE ON THE PRECISION GUARD, because this was got wrong once already.
+//
+// An earlier version of this file rejected name de-housing on the grounds
+// that it dropped the EDT share of resolved rows from ~45% to ~19%, and
+// concluded the extra matches were false positives. That reasoning was
+// invalid, and it cost ~16 points of coverage.
+//
+// The ~45% EDT baseline is FragranceNet's overall SKU mix, which is dominated
+// by mass-market Western designer brands. Affix stripping unlocks a DIFFERENT
+// population: niche and Middle-Eastern houses (Afnan, Ajmal, Al Haramain,
+// Akro) that genuinely release almost nothing but EDP. Hand-auditing 18 rows
+// that match only under affix strip found 18/18 correct pairings. The EDT
+// share moved because the population moved, not because the matcher broke.
+//
+// So: EDT share is a population statistic, NOT a precision metric. Do not
+// gate this matcher on it. To check precision, print the catalog row beside
+// the feed title it matched and read them (see --audit).
 // ---------------------------------------------------------------------------
 function keysFor(house: string, name: string): string[] {
-  const n = nameKey(name);
-  if (!n) return [];
+  const names = [nameKey(name)];
+  const stripped = stripHouseAffix(name, house);
+  if (stripped) names.push(nameKey(stripped));
+
   const out = new Set<string>();
   for (const h of [normHouse(house), houseBridge(house)]) {
-    if (h) out.add(`${h}::${n}`);
+    if (!h) continue;
+    for (const n of names) if (n) out.add(`${h}::${n}`);
   }
   return [...out];
 }
@@ -168,12 +240,59 @@ function keysFor(house: string, name: string): string[] {
 // class of error this script exists to remove.
 function concentrationFromTitle(title: string): Concentration | null {
   const T = ` ${title.toUpperCase()} `;
+  // NOTE: plain \bEAU DE PARFUM\b already covers Lancome's "L'EAU DE PARFUM"
+  // spelling, because the apostrophe is a word boundary. An earlier attempt
+  // to "handle" it wrote L'? -- which means a literal L plus an OPTIONAL
+  // apostrophe, i.e. it REQUIRED an L. Every ordinary "EAU DE PARFUM" title
+  // then fell through to the PARFUM SPRAY branch and was tagged parfum:
+  // 12,198 EDP SKUs became 6. Do not add an L here. (L'EAU does matter in
+  // the house-strip regex in splitTitle, which is a different problem.)
   if (/\bEXTRAIT\b/.test(T)) return "extrait";
   if (/\bEAU\s+DE\s+PARFUM\b|\bEDP\b/.test(T)) return "edp";
   if (/\bEAU\s+DE\s+TOILETTE\b|\bEDT\b/.test(T)) return "edt";
   if (/\bEAU\s+DE\s+COLOGNE\b|\bEDC\b/.test(T)) return null;
   if (/\bPARFUM\s+SPRAY\b|\bPURE\s+PERFUME\b/.test(T)) return "parfum";
   return null;
+}
+
+// ---------------------------------------------------------------------------
+// Parser self-test.
+//
+// concentrationFromTitle has silently regressed twice, and both times the
+// damage was invisible in the summary line because the totals still looked
+// like plausible numbers. A wrong regex here does not crash, it quietly
+// relabels thousands of bottles. So the parser is checked against known
+// titles on every run and the script refuses to continue if any fail.
+// ---------------------------------------------------------------------------
+const PARSER_CASES: Array<[string, Concentration | null]> = [
+  ["MY BURBERRY BLUSH BY BURBERRY EAU DE PARFUM SPRAY 1.7 OZ", "edp"],
+  ["CERRUTI 1881 BY NINO CERRUTI EDT SPRAY 3.4 OZ FOR WOMEN", "edt"],
+  ["SAUVAGE BY CHRISTIAN DIOR EAU DE TOILETTE SPRAY 3.4 OZ", "edt"],
+  // Lancome's apostrophe spelling must still read as EDP.
+  ["LA VIE EST BELLE BY LANCOME L'EAU DE PARFUM SPRAY 2.5 OZ FOR WOMEN", "edp"],
+  ["AL HARAMAIN AMBER OUD BY AL HARAMAIN EXTRAIT DE PARFUM SPRAY 3 OZ", "extrait"],
+  ["BLACK ORCHID BY TOM FORD PARFUM SPRAY 1.7 OZ FOR WOMEN", "parfum"],
+  // Cologne is unusable: US retailers use it to mean "a men's fragrance".
+  ["BRUT BY FABERGE COLOGNE SPRAY 5 OZ FOR MEN", null],
+  ["4711 BY MAURER & WIRTZ EAU DE COLOGNE SPRAY 8.1 OZ", null],
+  ["POLO BLUE BY RALPH LAUREN AFTERSHAVE 4.2 OZ FOR MEN", null],
+];
+
+function selfTestParser(): void {
+  const failures: string[] = [];
+  for (const [title, expected] of PARSER_CASES) {
+    const got = concentrationFromTitle(title);
+    if (got !== expected) {
+      failures.push(`  expected ${expected ?? "null"}, got ${got ?? "null"}  <- "${title}"`);
+    }
+  }
+  if (failures.length > 0) {
+    console.error("PARSER SELF-TEST FAILED — refusing to run.\n");
+    failures.forEach((f) => console.error(f));
+    console.error("\nconcentrationFromTitle() is misreading retail titles. Writing now would");
+    console.error("relabel thousands of fragrances. Fix the regexes before re-running.");
+    process.exit(1);
+  }
 }
 
 /** FragranceNet-style titles: "<product> BY <house> <format> <size> FOR
@@ -185,7 +304,7 @@ function splitTitle(title: string): { name: string; house: string } | null {
   // House runs until the format/size noise starts.
   const houseRaw = m[2]
     .replace(
-      /\s+(EDT|EDP|EDC|EAU\s+DE\s+\w+|EXTRAIT|PARFUM|COLOGNE|AFTERSHAVE|DEODORANT|BODY|SHOWER|GIFT|MINI|VIAL|TESTER|SPRAY|SPLASH|LOTION|CREAM|OIL|\d).*$/i,
+      /\s+(L'?\s?EAU\s+DE\s+\w+|EDT|EDP|EDC|EAU\s+DE\s+\w+|EXTRAIT|PARFUM|COLOGNE|AFTERSHAVE|DEODORANT|BODY|SHOWER|GIFT|MINI|VIAL|TESTER|SPRAY|SPLASH|LOTION|CREAM|OIL|\d).*$/i,
       "",
     )
     .trim();
@@ -401,6 +520,7 @@ async function main() {
   }
 
   console.log("=== Spritz concentration repair ===");
+  selfTestParser();
   if (DRY) console.log("  (dry run — no writes)\n");
 
   const feed = buildFeedIndex();
@@ -462,16 +582,31 @@ async function main() {
   console.log("--- Step 3: derive from retail SKU titles ---");
   let processed = 0;
   let matched = 0;
-  let ambiguous = 0;
+  const ambiguous = 0; // retained: multi-strength is now an answer, not a skip
   let written = 0;
   let deduced = 0;
+  let multi = 0;
+  let auditShown = 0;
   const byType: Record<Concentration, number> = { edt: 0, edp: 0, parfum: 0, extrait: 0 };
   const conflicts: string[] = [];
   const deductions: string[] = [];
+  const examples: string[] = [];
+  /** Rows grouped by identical payload, flushed in Step 4. */
+  const batches = new Map<
+    string,
+    { set: Concentration[]; scalar: Concentration | null; ids: string[] }
+  >();
+  /** rowId -> strengths resolved this run. Feeds the house priors in Step 5,
+   *  and is populated in dry runs too so --dry previews the whole pipeline. */
+  const resolvedThisRun = new Map<string, Concentration[]>();
+  let priorWritten = 0;
 
   {
     for (const row of catalog) {
       processed++;
+      if (!AUDIT && processed % 2000 === 0) {
+        process.stdout.write(`\r  scanned ${processed}/${catalog.length}`);
+      }
       // A concentration stated in the fragrance's own name beats a retailer's.
       if (row.concentration_source === "name") continue;
 
@@ -479,85 +614,122 @@ async function main() {
       // disagree, that is a genuine ambiguity and must not be resolved by
       // key-precedence — treat it like any other conflict.
       const found = new Set<Concentration>();
+      let matchedTitle: string | null = null;
       for (const k of keysFor(row.house, row.name)) {
         const e = feed.get(k);
-        if (e) for (const v of e.values) found.add(v);
+        if (e) {
+          matchedTitle = e.sampleTitle;
+          for (const v of e.values) found.add(v);
+        }
       }
       if (found.size === 0) continue;
       matched++;
 
-      let value: Concentration;
-      let viaDeduction = false;
-
-      if (found.size > 1) {
-        // Subtract strengths already claimed by this fragrance's own named
-        // siblings. Accept only when exactly one candidate survives.
-        const claimed = siblings.get(`${normHouse(row.house)}::${nameKey(row.name)}`);
-        const remaining = claimed
-          ? [...found].filter((v) => !claimed.has(v))
-          : [...found];
-
-        if (remaining.length !== 1) {
-          ambiguous++;
-          if (conflicts.length < 15) {
-            conflicts.push(
-              `  ${row.house} — ${row.name}  (feed has ${[...found].join("/")}` +
-                (claimed ? `, siblings claim ${[...claimed].join("/")}` : "") +
-                `)`,
-            );
-          }
-          continue;
-        }
-        value = remaining[0];
-        viaDeduction = true;
-        deduced++;
-        if (deductions.length < 12) {
-          deductions.push(
-            `  ${row.house} — ${row.name}: ${[...found].join("/")} minus sibling ${[...(claimed as Set<Concentration>)].join("/")} → ${value}`,
-          );
-        }
-      } else {
-        value = [...found][0];
+      if (AUDIT && auditShown < 40) {
+        auditShown++;
+        console.log(`  catalog: ${row.house} — ${row.name}`);
+        console.log(`  feed:    ${matchedTitle?.slice(0, 76)}`);
+        console.log(`  -> ${[...found].join("/")}\n`);
       }
 
-      if (row.concentration === value && row.concentration_source === "feed") continue;
-      byType[value]++;
+      // Every strength the feed reports is written. A fragrance sold as an
+      // EDT, an EDP and a Parfum genuinely IS all three (migration 0025), so
+      // a multi-value result is an answer, not a failure. This is where the
+      // top-100 coverage comes from: the most famous fragrances are the most
+      // likely to be multi-strength.
+      let set = [...found];
+      let viaDeduction = false;
+
+      if (set.length > 1) {
+        multi++;
+        // Sibling subtraction still runs, but now only to decide whether we
+        // can ALSO fill the legacy scalar column. It never discards a row.
+        const claimed = siblings.get(`${normHouse(row.house)}::${nameKey(row.name)}`);
+        const remaining = claimed ? set.filter((v) => !claimed.has(v)) : set;
+        if (claimed && remaining.length === 1) {
+          viaDeduction = true;
+          deduced++;
+          if (deductions.length < 12) {
+            deductions.push(
+              `  ${row.house} — ${row.name}: ${set.join("/")} minus sibling ${[...claimed].join("/")} → ${remaining[0]} (original)`,
+            );
+          }
+        }
+        if (examples.length < 12) {
+          examples.push(`  ${row.house} — ${row.name}: available as ${set.join(", ")}`);
+        }
+      }
+
+      // Stable order so the UI reads EDT -> EDP -> Parfum -> Extrait.
+      set = ORDER.filter((c) => set.includes(c));
+      // Legacy scalar: only meaningful when there is exactly one strength,
+      // or when sibling subtraction identified the original.
+      const scalar: Concentration | null =
+        set.length === 1 ? set[0] : viaDeduction ? deducedOriginal(set, siblings, row) : null;
+
+      for (const v of set) byType[v]++;
+      resolvedThisRun.set(row.id, set);
 
       if (DRY) {
         if (written < 20) {
-          console.log(`  [dry] ${row.house} — ${row.name} → ${value}${viaDeduction ? " (deduced)" : ""}`);
+          console.log(
+            `  [dry] ${row.house} — ${row.name} → [${set.join(", ")}]${viaDeduction ? " (original deduced)" : ""}`,
+          );
         }
         written++;
         continue;
       }
 
-      const { error: upErr } = await supabase
-        .from("fragrances")
-        .update({ concentration: value, concentration_source: "feed" })
-        .eq("id", row.id);
-      if (upErr) console.warn(`  ! ${row.name}: ${upErr.message}`);
-      else written++;
+      // Queue rather than write. One UPDATE per row means thousands of
+      // sequential network round-trips, which took long enough with no
+      // output that it looked like a hang. Rows are grouped by identical
+      // payload below, which collapses ~2,700 requests into a few dozen.
+      const key = `${set.join(",")}|${scalar ?? ""}`;
+      const pending = batches.get(key);
+      if (pending) pending.ids.push(row.id);
+      else batches.set(key, { set, scalar, ids: [row.id] });
     }
   }
 
-  console.log("");
-  console.log(
-    `Done. scanned=${processed} feed_matched=${matched} ambiguous_skipped=${ambiguous} deduced_from_siblings=${deduced} written=${written}`,
-  );
-  console.log(`Resolved: EDT=${byType.edt} EDP=${byType.edp} Parfum=${byType.parfum} Extrait=${byType.extrait}`);
+  // ---- Step 4: flush ------------------------------------------------------
+  if (!DRY && batches.size > 0) {
+    const totalQueued = [...batches.values()].reduce((n, b) => n + b.ids.length, 0);
+    console.log(`\n--- Step 4: writing ${totalQueued} rows in ${batches.size} groups ---`);
+    const CHUNK = 200;
+    let done = 0;
+    for (const b of batches.values()) {
+      for (let i = 0; i < b.ids.length; i += CHUNK) {
+        const chunk = b.ids.slice(i, i + CHUNK);
+        const { error: upErr } = await supabase
+          .from("fragrances")
+          .update({
+            concentrations: b.set,
+            concentration: b.scalar,
+            concentration_source: "feed",
+          })
+          .in("id", chunk);
+        if (upErr) {
+          console.warn(`  ! [${b.set.join(",")}] chunk of ${chunk.length}: ${upErr.message}`);
+        } else {
+          written += chunk.length;
+          done += chunk.length;
+          process.stdout.write(`\r  ${done}/${totalQueued} written`);
+        }
+      }
+    }
+    process.stdout.write("\n");
+  }
 
   const totalResolved = byType.edt + byType.edp;
-  if (totalResolved > 50) {
+  if (totalResolved > 0) {
     const edtPct = (byType.edt / totalResolved) * 100;
-    console.log(`\nSanity check: EDT is ${edtPct.toFixed(1)}% of EDT+EDP writes.`);
-    // The retail ground-truth split is roughly 45/55. Anything near 0 or 100
-    // means the title parser regressed, not that the catalog is unusual.
-    if (edtPct < 15 || edtPct > 85) {
-      console.log("  ^ WARNING: that is far from the ~45% retail baseline. Inspect");
-      console.log("    concentrationFromTitle() before trusting this run.");
-    } else {
-      console.log("  Consistent with the ~45% retail baseline.");
-    }
+    // Reported, NOT gated on. This is a population statistic: mass-market
+    // designer houses run ~45% EDT, niche and Middle-Eastern houses run
+    // ~10%. A low number here means the run reached more niche houses, not
+    // that the matcher broke. See the note above keysFor(). To actually
+    // judge precision, run with --audit and read the pairings.
+    console.log(`\nEDT share of EDT+EDP writes: ${edtPct.toFixed(1)}% (population statistic, not a precision signal)`);
+    console.log(`Run with --audit to print catalog rows beside the feed titles they matched.`);
   }
 
   if (deductions.length) {
@@ -567,11 +739,145 @@ async function main() {
     if (deduced > deductions.length) console.log(`  ...and ${deduced - deductions.length} more.`);
   }
 
-  if (conflicts.length) {
-    console.log(`\nStill ambiguous (left NULL — more than one candidate survives):`);
-    conflicts.forEach((c) => console.log(c));
-    if (ambiguous > conflicts.length) console.log(`  ...and ${ambiguous - conflicts.length} more.`);
+  // ---- Step 5: house priors -----------------------------------------------
+  //
+  // Everything above is evidence about a specific bottle. This step is the
+  // only inference in the script, and it is deliberately a claim about a
+  // HOUSE rather than about a fragrance: if every Amouage release we can
+  // verify is an EDP, an unlabelled Amouage release is very likely an EDP.
+  //
+  // Self-limiting by construction: a house that actually makes both EDT and
+  // EDP never reaches the agreement threshold and is skipped, so this cannot
+  // manufacture a strength for a house with mixed output. Tagged
+  // 'house_prior' so it is auditable and removable in one statement.
+  if (!SKIP_PRIORS) {
+    console.log(`\n--- Step 5: house priors (>=${Math.round(PRIOR_AGREEMENT * 100)}% agreement, >=${PRIOR_MIN_SAMPLE} known) ---`);
+
+    // Evidence = anything resolved this run (step 3) plus anything the
+    // fragrance's own name already stated. Only SINGLE-strength rows count as
+    // evidence: a house that ships multi-strength bottles is exactly the kind
+    // of house whose prior we should not trust.
+    const known = new Map<string, Concentration[]>();
+    const unknown = new Map<string, Row[]>();
+    for (const row of rows) {
+      const h = normHouse(row.house);
+      const r =
+        resolvedThisRun.get(row.id) ??
+        (row.concentration_source === "name" && row.concentration ? [row.concentration] : null);
+
+      if (r && r.length === 1) {
+        const list = known.get(h);
+        if (list) list.push(r[0]);
+        else known.set(h, [r[0]]);
+      } else if (!r) {
+        const list = unknown.get(h);
+        if (list) list.push(row);
+        else unknown.set(h, [row]);
+      }
+    }
+
+    const priorBatches = new Map<Concentration, string[]>();
+    const priorLines: string[] = [];
+    let housesUsed = 0;
+    for (const [h, samples] of known) {
+      const targets = unknown.get(h);
+      if (!targets?.length || samples.length < PRIOR_MIN_SAMPLE) continue;
+      const counts = new Map<Concentration, number>();
+      for (const s of samples) counts.set(s, (counts.get(s) ?? 0) + 1);
+      const [top, n] = [...counts.entries()].sort((a, b) => b[1] - a[1])[0];
+      const agreement = n / samples.length;
+      if (agreement < PRIOR_AGREEMENT) continue;
+
+      housesUsed++;
+      const ids = priorBatches.get(top) ?? [];
+      for (const t of targets) ids.push(t.id);
+      priorBatches.set(top, ids);
+      if (priorLines.length < 15) {
+        priorLines.push(
+          `  ${h}: ${samples.length} known, ${Math.round(agreement * 100)}% ${top} → labelling ${targets.length}`,
+        );
+      }
+    }
+
+    const priorTotal = [...priorBatches.values()].reduce((n, ids) => n + ids.length, 0);
+    console.log(`  qualifying houses: ${housesUsed}   rows: ${priorTotal}`);
+    priorLines.forEach((l) => console.log(l));
+
+    if (!DRY && priorTotal > 0) {
+      const CHUNK = 200;
+      let done = 0;
+      for (const [value, ids] of priorBatches) {
+        for (let i = 0; i < ids.length; i += CHUNK) {
+          const chunk = ids.slice(i, i + CHUNK);
+          const { error: pErr } = await supabase
+            .from("fragrances")
+            .update({
+              concentrations: [value],
+              concentration: value,
+              concentration_source: "house_prior",
+            })
+            .in("id", chunk);
+          if (pErr) console.warn(`  ! prior ${value}: ${pErr.message}`);
+          else {
+            done += chunk.length;
+            process.stdout.write(`\r  ${done}/${priorTotal} written`);
+          }
+        }
+      }
+      process.stdout.write("\n");
+      priorWritten = done;
+    } else if (DRY) {
+      console.log(`  [dry] would label ${priorTotal} rows.`);
+    }
+    console.log(
+      `\n  These are INFERRED, not verified. Expect ~5-10% wrong. Remove with:`,
+    );
+    console.log(
+      `    update fragrances set concentrations='{}', concentration=null,`,
+    );
+    console.log(
+      `    concentration_source=null where concentration_source='house_prior';`,
+    );
   }
+
+  if (examples.length) {
+    console.log(`\nMulti-strength fragrances (previously dropped, now written as a set):`);
+    examples.forEach((e) => console.log(e));
+    if (multi > examples.length) console.log(`  ...and ${multi - examples.length} more.`);
+  }
+
+  // ---- Summary (last, so it can report every pass) ------------------------
+  // Label the count honestly. Printing "written=2723" after a --dry run once
+  // sent someone hunting for rows in the database that were never meant to
+  // be there.
+  console.log("");
+  console.log(
+    `Done. scanned=${processed} feed_matched=${matched} ` +
+      `${DRY ? `WOULD_WRITE=${written} (dry run — nothing was saved)` : `written=${written}`} ` +
+      `multi_strength=${multi} original_deduced=${deduced}` +
+      (priorWritten ? ` house_prior=${priorWritten}` : ""),
+  );
+  // This counts STRENGTH OCCURRENCES, not rows: a fragrance sold as both an
+  // EDT and an EDP adds to both tallies, so the total legitimately exceeds
+  // the row count. Labelled explicitly because reading it as a row count
+  // makes the arithmetic look broken.
+  const occurrences = byType.edt + byType.edp + byType.parfum + byType.extrait;
+  console.log(
+    `Strengths across the ${written} feed-matched rows: ` +
+      `EDT=${byType.edt} EDP=${byType.edp} Parfum=${byType.parfum} Extrait=${byType.extrait}` +
+      ` (${occurrences} occurrences; multi-strength rows counted once per strength)`,
+  );
+  if (priorWritten) {
+    console.log(`Plus ${priorWritten} rows labelled by house prior (inferred, not verified).`);
+  }
+  console.log(
+    `\nTOTAL ROWS LABELLED THIS RUN: ${written + priorWritten}` +
+      ` (${written} verified + ${priorWritten} inferred)`,
+  );
+  if (DRY) console.log(`\n  Nothing was written. Re-run without --dry to apply.`);
+
+  void ambiguous;
+  void conflicts;
 }
 
 main().catch((err) => {

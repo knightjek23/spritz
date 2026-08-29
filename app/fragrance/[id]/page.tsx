@@ -22,6 +22,8 @@ import {
   CONCENTRATION_LABEL,
   CONCENTRATION_SHORT,
   CONCENTRATION_DESCRIPTION,
+  concentrationSetLabel,
+  orderConcentrations,
 } from "@/lib/concentrations";
 import type { Fragrance } from "@/lib/types";
 
@@ -129,6 +131,13 @@ export default async function FragrancePage({ params }: { params: { id: string }
   const f = await getFragrance(params.id);
   if (!f) notFound();
   const bottleImage = cleanBottleImageUrl(f.bottle_image_url);
+
+  // Every strength this fragrance ships in (migration 0025). Falls back to
+  // the legacy scalar so the page still renders against a database where
+  // 0025 has not been applied yet.
+  const strengths = orderConcentrations(
+    f.concentrations?.length ? f.concentrations : f.concentration ? [f.concentration] : [],
+  );
   const offers = await getOffers(f.id);
 
   // JSON-LD: Product + BreadcrumbList. The library's rich-result
@@ -237,8 +246,8 @@ export default async function FragrancePage({ params }: { params: { id: string }
           </Link>
           {f.year && <span> · {f.year}</span>}
           {f.gender && <span> · {f.gender}</span>}
-          {f.concentration && (
-            <span> · {CONCENTRATION_SHORT[f.concentration]}</span>
+          {strengths.length > 0 && (
+            <span> · {strengths.map((c) => CONCENTRATION_SHORT[c]).join(" · ")}</span>
           )}
         </p>
         <h1 className="font-display text-5xl mt-2 leading-[0.95]">{f.name}</h1>
@@ -282,15 +291,33 @@ export default async function FragrancePage({ params }: { params: { id: string }
           the backfill parsed one from the fragrance name. Positioned
           before Known Dupes so users grasp the strength context before
           diving into performance and alternatives. */}
-      {f.concentration && (
+      {strengths.length > 0 && (
         <section className="mb-10">
           <h2 className="font-display text-2xl mb-3">Concentration</h2>
           <p className="text-ink font-medium mb-2">
-            {CONCENTRATION_LABEL[f.concentration]}
+            {concentrationSetLabel(strengths)}
           </p>
-          <p className="text-sm text-ink/85 leading-relaxed">
-            {CONCENTRATION_DESCRIPTION[f.concentration]}
-          </p>
+          {/* One explainer per strength when the fragrance ships in several,
+              since the whole point of naming them is that they wear
+              differently. Single-strength reads exactly as it did before. */}
+          {strengths.length === 1 ? (
+            <p className="text-sm text-ink/85 leading-relaxed">
+              {CONCENTRATION_DESCRIPTION[strengths[0]]}
+            </p>
+          ) : (
+            <dl className="space-y-3">
+              {strengths.map((c) => (
+                <div key={c}>
+                  <dt className="text-sm font-medium text-ink">
+                    {CONCENTRATION_LABEL[c]}
+                  </dt>
+                  <dd className="text-sm text-ink/85 leading-relaxed">
+                    {CONCENTRATION_DESCRIPTION[c]}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          )}
         </section>
       )}
 

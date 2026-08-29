@@ -60,6 +60,35 @@ export const CONCENTRATION_DESCRIPTION: Record<Concentration, string> = {
  * Word boundaries (\b) keep false positives out — "extraord..." can't
  * match "extrait", "parfumeur" can't match "parfum", etc.
  */
+/**
+ * Sort a set of strengths into display order (lightest first) and drop
+ * anything unrecognised.
+ */
+export function orderConcentrations(values: readonly string[]): Concentration[] {
+  return CONCENTRATION_ORDER.filter((c) => values.includes(c));
+}
+
+/**
+ * Label for a set of strengths.
+ *
+ *   ["edp"]                  -> "Eau de Parfum"
+ *   ["edt", "edp"]           -> "Available as EDT and EDP"
+ *   ["edt", "edp", "parfum"] -> "Available as EDT, EDP and Parfum"
+ *
+ * The multi-value case is the common one for popular fragrances, which ship
+ * in several strengths under a single catalog entry. Naming all of them is
+ * both the true answer and the useful one for somebody deciding which bottle
+ * to buy.
+ */
+export function concentrationSetLabel(values: readonly Concentration[]): string | null {
+  const ordered = orderConcentrations(values);
+  if (ordered.length === 0) return null;
+  if (ordered.length === 1) return CONCENTRATION_LABEL[ordered[0]];
+  const shorts = ordered.map((c) => CONCENTRATION_SHORT[c]);
+  const last = shorts.pop() as string;
+  return `Available as ${shorts.join(", ")} and ${last}`;
+}
+
 export function parseConcentrationFromName(name: string): Concentration | null {
   // Check longest / most-specific patterns first.
   if (/\beau\s+de\s+parfum\b/i.test(name)) return "edp";

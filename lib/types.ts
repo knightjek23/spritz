@@ -89,9 +89,12 @@ export interface Fragrance {
   bottle_image_url: string | null;
   editorial_notes: string | null;
   dupes: DupeRecommendation[];
-  // Concentration / strength (EDT / EDP / Parfum / Extrait). Parsed
-  // from the fragrance name when explicit ("Bleu de Chanel Eau de
-  // Parfum"); NULL when the name gives no clue. See lib/concentrations.ts.
+  // Every strength this fragrance is sold in. A fragrance is not one
+  // strength: Bleu de Chanel ships as EDT, EDP and Parfum. Empty array
+  // means unknown and the UI hides the field. See lib/concentrations.ts.
+  concentrations: Concentration[];
+  // LEGACY (migration 0025). Mirrors `concentrations` when it has exactly
+  // one member, else null. Read `concentrations` in new code.
   concentration: Concentration | null;
   // Community consensus (Pro feature) — null until first Pro user
   // requests generation, then cached forever. UI surfaces this in the
