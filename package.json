@@ -2,7 +2,7 @@
   "name": "spritz",
   "version": "0.1.0",
   "private": true,
-  "description": "Spritz — scan a bottle, know everything about it.",
+  "description": "Spritz \u2014 scan a bottle, know everything about it.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -15,7 +15,9 @@
     "db:reset": "npx supabase db reset",
     "screenshots:auth": "node scripts/screenshots/auth.mjs",
     "screenshots": "node scripts/screenshots/capture.mjs",
-    "eval:scan": "tsx scripts/scan-eval.ts"
+    "eval:scan": "tsx scripts/scan-eval.ts",
+    "test:purge": "tsx scripts/test-account-purge.ts",
+    "diag:infra": "tsx scripts/diag-storage-tables.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^5.7.0",

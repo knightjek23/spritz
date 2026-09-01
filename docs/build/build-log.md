@@ -59,3 +59,28 @@ What actually shipped per slice, what deviated from the plan and why, and anythi
 - **Verified:** parse and import-resolution clean across 13 files, no unused imports. Server-side rendered `/support`, `/support/delete-account`, and the Manage account section in the cloud container against the repo's real `tailwind.config.ts` and `globals.css`, screenshotted at 430px. Correct hierarchy, no horizontal overflow on any of the three.
 - **NOT verified, still owed:** a live end-to-end deletion against real Clerk, Stripe and Supabase. The purge is destructive and idempotent but has never been executed. Run it against a throwaway account before submission, and check that `users`, `collection_items`, `user_reactions` and the storage objects are actually gone.
 - **Affects:** Apple 5.1.1(v) is now satisfiable. `/legal/privacy` should get its in-app deletion wording back, since the control now exists.
+
+## Slice 4 — Purge verified, and two dead buckets found
+
+- **Date:** 2026-09-01
+- **Result:** `npm run test:purge` passes 9/9 with real data behind every assertion (`scanPhotosDeleted: 1`, `submittedPhotosDeleted: 1`, `libraryPhotosScrubbed: 1`, no warnings).
+- **Proven:** photo deletion happens before the users row (the ordering the whole design hinges on); `collection_items` and `user_reactions` cascade; `scan_events` survives with `user_id` and `image_url` both nulled; the storage object is really gone; unapproved `fragrance_photos` are deleted and approved ones are kept with the owner scrubbed.
+- **Still unproven:** the API route itself (auth gate, confirm phrase, Stripe cancellation, Clerk user deletion), the UI, and the Clerk webhook backstop. None of those can run until sign-in works, which needs either dev Clerk keys locally or a merge to production.
+
+### The find: two of three storage buckets never existed
+
+The first purge run failed to seed a photo. `listBuckets()` returned only `bottle-images`. `scan-images` and `user-bottle-images` were both absent, so three things had been silently broken in production, none of them related to account deletion:
+
+1. **Every scan photo failed to save.** `storeScanImage()` returns null on any failure by design so a scan never breaks, which is exactly why it never surfaced. `/legal/privacy` and the camera-permission copy both told users their photos were kept. None were. Scan v2 called that archive "the only bottle image source we can actually license."
+2. **The Google Lens fallback had never run once.** It needs a signed URL on `scan-images`. Real scan accuracy has been below the designed ceiling this whole time.
+3. **User photo submission could not store its file.**
+
+**Probable root cause:** the scan-v2 `supabase migration repair --status applied 0001…0022`, which marks migrations applied *without running them*. Anything in that range never actually executed is now permanently skipped by `db push`. The scan-v2 notes also record the `scan-images` bucket as "skipped by choice."
+
+**Fixed by** `supabase/migrations/0027_storage_buckets.sql`. `scan-images` private, `user-bottle-images` public.
+
+**Lesson worth keeping:** for migrations 0001-0022, a file existing in the repo is not evidence the migration ran. Verify the object exists before trusting a feature works.
+
+### Tooling added
+- `npm run test:purge` — seeds a throwaway user, runs the purge, asserts 9 outcomes, cleans up. Keyed to a generated `test-purge-*` id so it cannot touch real data.
+- `npm run diag:infra` — read-only check of which buckets and tables actually exist.
