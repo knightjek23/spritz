@@ -13,7 +13,7 @@ export function Footer() {
   return (
     <footer className="mt-16 px-6 pt-8 border-t border-ink/10">
       <nav
-        aria-label="Legal"
+        aria-label="Legal and support"
         className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-4"
       >
         <Link
@@ -33,6 +33,15 @@ export function Footer() {
           className="font-mono text-[10px] uppercase tracking-widest text-slate hover:text-ink transition-colors"
         >
           Affiliate Disclosure
+        </Link>
+        {/* Support has to be reachable from every route: Apple checks the
+            listing's Support URL resolves, and Play expects the deletion
+            page (linked from Support) to be publicly findable. */}
+        <Link
+          href="/support"
+          className="font-mono text-[10px] uppercase tracking-widest text-slate hover:text-ink transition-colors"
+        >
+          Support
         </Link>
       </nav>
 

@@ -11,6 +11,10 @@
 //   - Usage stats (collection size, scans this month)
 //   - Account info (email, member since)
 //   - Account actions (manage profile in Clerk, sign out)
+//   - Manage account: account deletion. Required IN-APP by App Store
+//     Guideline 5.1.1(v) for any app supporting account creation. The public
+//     page at /support/delete-account is Google Play's separate requirement
+//     and does not satisfy Apple's.
 //
 // What's intentionally NOT here:
 //   - Identity / password / 2FA — Clerk has a hosted page for that. We
@@ -21,7 +25,11 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { ManageSubscriptionButton, SignOutButton } from "@/components/account-actions";
+import {
+  ManageSubscriptionButton,
+  SignOutButton,
+  DeleteAccountSection,
+} from "@/components/account-actions";
 
 export const metadata: Metadata = {
   title: "Account",
@@ -201,17 +209,37 @@ export default async function AccountPage() {
         </p>
       </section>
 
-      {/* Actions */}
+      {/* Manage account */}
       <section className="mb-4">
         <p className="font-mono text-xs uppercase tracking-widest text-slate mb-3">
-          Session
+          Manage account
         </p>
-        <SignOutButton />
+        <div className="space-y-3">
+          <SignOutButton />
+          <DeleteAccountSection
+            isPro={plan === "pro"}
+            hasWebSubscription={hasStripeCustomer}
+          />
+        </div>
+        <p className="mt-3 text-xs text-slate leading-relaxed">
+          Deleting is permanent. What it covers, what we keep, and how long it
+          takes is on{" "}
+          <Link
+            href="/support/delete-account"
+            className="text-emerald underline underline-offset-2"
+          >
+            the deletion page
+          </Link>
+          .
+        </p>
       </section>
 
       {/* Footer note — feedback / support */}
       <p className="mt-10 text-center text-xs font-mono uppercase tracking-widest text-slate">
-        Questions? Email <a href="mailto:hi@spritz.app" className="text-emerald">hi@spritz.app</a>
+        Questions?{" "}
+        <Link href="/support" className="text-emerald">
+          Support
+        </Link>
       </p>
     </div>
   );

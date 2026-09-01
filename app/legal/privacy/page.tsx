@@ -150,8 +150,9 @@ export default function PrivacyPage() {
       </p>
       <p>
         To exercise any of these, email{" "}
-        <a href={`mailto:${LEGAL_CONTACT}`}>{LEGAL_CONTACT}</a>. You can also
-        delete your account from your profile page at any time.
+        <a href={`mailto:${LEGAL_CONTACT}`}>{LEGAL_CONTACT}</a>, or see{" "}
+        <a href="/support/delete-account">Delete your account</a> for what
+        deletion covers and how long it takes.
       </p>
 
       <h2>Security</h2>

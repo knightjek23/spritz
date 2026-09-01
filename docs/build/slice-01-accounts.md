@@ -10,7 +10,7 @@
 
 Creates the two developer accounts, signs the agreements, and gets the money plumbing to a state where in-app purchases can actually be tested. This is pure latency, not effort: perhaps two hours of form-filling spread across three to five days of waiting on Apple and Google. Every day it is not started is a day added to both launch dates.
 
-**Decisions already made:** app name is **Spritz: Fragrance Guide** (D5), Apple enrolls as **Individual** (D6), Play enrolls as a **personal account** (D2).
+**Decisions already made:** app name is **Spritz: Fragrance Guide** (D5), subtitle is **"Every fragrance, broken down."** (D7), Apple enrolls as **Individual** (D6), Play enrolls as a **personal account** (D2).
 
 ---
 

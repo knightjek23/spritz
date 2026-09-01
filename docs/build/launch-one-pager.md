@@ -91,11 +91,13 @@ Deliberately out of scope for this launch. Not a future ideas list.
 
 | # | Question | Owner | Status |
 |---|---|---|---|
-| Q1 | Is the name "Spritz" available on both stores? | Josh | Blocking slice 1 |
-| Q2 | Apple enrollment as Individual or Organization? Seller name is public either way. | Josh | Blocking slice 1 |
+| ~~Q1~~ | ~~Is the name "Spritz" available on both stores?~~ | Josh | **Resolved 2026-08-29:** "Spritz" alone is taken on iOS. Store name is **Spritz: Fragrance Guide** (D5). |
+| ~~Q2~~ | ~~Apple enrollment as Individual or Organization?~~ | Josh | **Resolved 2026-08-29:** Individual, accepting the permanent legal-name developer line (D6). |
 | Q3 | Does the App Store subscription carry the 7-day free trial that the web offers? | Josh | Blocking slice 7 |
 | Q4 | What is the first real push campaign? Wishlist sale alert requires price monitoring that does not exist yet. | Josh / Eng | Blocking slice 5 |
 | Q5 | Has the July Supabase key rotation been completed? | Josh | Blocking submission |
+| ~~Q6~~ | **Resolved 2026-09-01 (D9): encyclopedia leads, dupes named as a Pro feature.** ~~The live app contradicts PRD non-goal #1 (no dupe positioning).** Home subhead sells "which cheaper bottles smell almost the same"; the detail page has a "Known dupes" section; Pro sells "AI-generated dupes for any fragrance." The PRD says similar fragrances are buried, price-delta framing removed entirely. The store listing commits this positioning publicly. Which is true?~~ | Josh | Resolved. PRD non-goal #1 needs softening, not deleting. |
+| Q7 | **The live app names Fragrantica in the UI**, contradicting PRD non-goal #6 (no public-facing attribution, scraper stays private). Seen in a screen recording: a "Trending on Fragrantica" section header, and "AI-synthesized consensus from Reddit, Fragrantica, and forum reviews." An App Store preview autoplays this to anyone. | Josh | **Blocking slice 9/10.** Decide before any store asset shows those surfaces. |
 
 ## What changed since the July 21 runbook
 

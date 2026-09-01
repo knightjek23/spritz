@@ -6,7 +6,7 @@
 import { NextResponse } from "next/server";
 import { Webhook } from "svix";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { SCAN_IMAGE_BUCKET } from "@/lib/web-lookup";
+import { purgeAppUserData } from "@/lib/account-deletion";
 
 export const runtime = "nodejs";
 
@@ -69,43 +69,19 @@ export async function POST(req: Request) {
         .insert({ id: crypto.randomUUID(), clerk_user_id: clerkId, email, plan: "free" });
     }
   } else if (event.type === "user.deleted") {
-    // Order matters. scan_events.user_id is `on delete set null`, so once the
-    // users row goes, every photo that person ever scanned becomes unlinkable
-    // to them — and since scan photos are now retained indefinitely, that
-    // means permanently undeletable. Delete the photos FIRST, while we can
-    // still find them, or the deletion promise in /legal/privacy is a lie.
-    const { data: u } = await supabase
-      .from("users")
-      .select("id")
-      .eq("clerk_user_id", clerkId)
-      .maybeSingle();
-
-    if (u) {
-      const { data: scans } = await supabase
-        .from("scan_events")
-        .select("id, image_url")
-        .eq("user_id", u.id)
-        .not("image_url", "is", null)
-        .returns<Array<{ id: string; image_url: string }>>();
-
-      const paths = (scans ?? []).map((s) => s.image_url);
-      if (paths.length > 0) {
-        // Best effort, in batches. A storage failure must not block the
-        // account deletion itself.
-        for (let i = 0; i < paths.length; i += 100) {
-          const { error: rmErr } = await supabase.storage
-            .from(SCAN_IMAGE_BUCKET)
-            .remove(paths.slice(i, i + 100));
-          if (rmErr) console.error("[clerk] scan photo delete failed", rmErr.message);
-        }
-        await supabase
-          .from("scan_events")
-          .update({ image_url: null })
-          .eq("user_id", u.id);
-      }
+    // The purge lives in lib/account-deletion.ts so this webhook and the
+    // in-app control on /account can never drift apart. It is idempotent:
+    // the in-app path purges synchronously and THEN deletes the Clerk user,
+    // which fires this event, so a second run here is the normal case.
+    try {
+      const result = await purgeAppUserData(supabase, clerkId);
+      for (const w of result.warnings) console.error("[clerk] purge warning:", w);
+    } catch (err) {
+      // Returning non-200 makes Clerk retry, which is what we want: a failed
+      // purge is a compliance problem, not a cosmetic one.
+      console.error("[clerk] account purge failed", err);
+      return NextResponse.json({ error: "purge failed" }, { status: 500 });
     }
-
-    await supabase.from("users").delete().eq("clerk_user_id", clerkId);
   }
 
   return NextResponse.json({ received: true });

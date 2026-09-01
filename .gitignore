@@ -86,3 +86,6 @@ scraper/data/**/*.xml
 # scan v2 eval set (your photos + labels, local only)
 eval/
 _to_delete/
+
+# Local App Store capture assets — large binaries, not source
+spritz movs/
