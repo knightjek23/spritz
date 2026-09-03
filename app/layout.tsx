@@ -9,6 +9,7 @@ import { Footer } from "@/components/footer";
 import { Analytics } from "@/components/analytics";
 import { LiquidGlassDefs } from "@/components/liquid-glass/LiquidGlass";
 import { PageTransition } from "@/components/page-transition";
+import { NativeAuthBridge } from "@/components/native-auth-bridge";
 import "./globals.css";
 
 // Playfair Display — high-contrast serif for hero / section headings.
@@ -108,6 +109,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               reference url(#lg-glass-subtle) etc. by id. Component is
               client-only and renders nothing visible. */}
           <LiquidGlassDefs />
+          {/* Marks <html> as native-app inside the Capacitor shell and
+              completes system-browser OAuth when the app is opened by
+              URL. Renders nothing; no-op on the web. */}
+          <NativeAuthBridge />
           <Nav />
           {/* --nav-clearance reserves space for the floating-pill bottom
               nav: 72px pill + 24px bottom offset + 16px breathing room,

@@ -20,6 +20,8 @@
     "diag:infra": "tsx scripts/diag-storage-tables.ts"
   },
   "dependencies": {
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/browser": "^8.0.0",
     "@capacitor/core": "^8.5.1",
     "@capacitor/ios": "^8.5.1",
     "@clerk/nextjs": "^5.7.0",

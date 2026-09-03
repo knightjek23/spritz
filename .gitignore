@@ -89,3 +89,6 @@ _to_delete/
 
 # Local App Store capture assets — large binaries, not source
 spritz movs/
+
+# Cowork drops session deliverables here — previews, not source
+Claude outputs/

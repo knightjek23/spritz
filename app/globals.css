@@ -65,6 +65,21 @@ html, body {
   border-radius: 0 !important;
 }
 
+/* ---- Native shell ----
+   <html class="native-app"> is set by components/native-auth-bridge.tsx
+   when the page runs inside the Capacitor app. Clerk's built-in social
+   buttons run OAuth inside the webview, which Google refuses with
+   disallowed_useragent, so they are hidden there and replaced by
+   components/native-social-buttons.tsx, which goes through the system
+   browser. Web pages never carry the class, so nothing changes for them.
+   Slice 7 will add the Stripe / external-upgrade hides under the same
+   selector (Guideline 3.1.1). */
+.native-app .cl-socialButtons,
+.native-app .cl-socialButtonsRoot,
+.native-app .cl-dividerRow {
+  display: none !important;
+}
+
 body {
   font-family: theme(fontFamily.sans);
   font-weight: 300; /* Roboto Light is the default body weight per the Figma spec */

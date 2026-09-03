@@ -6,17 +6,22 @@
 // ClerkLoading/ClerkLoaded covers the cold-cache gap before Clerk's
 // widget mounts with the Spritz mark — see the sign-in page.
 
+//
+// Native shell: see the sign-in page. Same swap of social buttons.
+
 import { ClerkLoaded, ClerkLoading, SignUp } from "@clerk/nextjs";
 import { spritzClerkAppearance } from "@/lib/clerk-appearance";
 import { SpritzLoader } from "@/components/spritz-loader";
+import { NativeSocialButtons } from "@/components/native-social-buttons";
 
 export default function SignUpPage() {
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-6">
+    <div className="min-h-[80vh] flex flex-col items-center justify-center px-6">
       <ClerkLoading>
         <SpritzLoader size={72} label="Preparing sign-up" showLabel />
       </ClerkLoading>
       <ClerkLoaded>
+        <NativeSocialButtons mode="sign-up" />
         <SignUp
           appearance={spritzClerkAppearance}
           signInUrl="/sign-in"
