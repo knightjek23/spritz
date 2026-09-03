@@ -22,6 +22,9 @@ const config: CapacitorConfig = {
     url: "https://spritzofficial.app",
     // Never allow plaintext http in production shells.
     cleartext: false,
+    // Keep Clerk's hosted auth pages inside the webview instead of kicking
+    // them out to Safari. Without this, email sign-in dead-ends in the shell.
+    allowNavigation: ["spritzofficial.app", "*.spritzofficial.app"],
   },
   ios: {
     contentInset: "automatic",

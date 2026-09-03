@@ -2,7 +2,7 @@
   "name": "spritz",
   "version": "0.1.0",
   "private": true,
-  "description": "Spritz \u2014 scan a bottle, know everything about it.",
+  "description": "Spritz — scan a bottle, know everything about it.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -20,6 +20,8 @@
     "diag:infra": "tsx scripts/diag-storage-tables.ts"
   },
   "dependencies": {
+    "@capacitor/core": "^8.5.1",
+    "@capacitor/ios": "^8.5.1",
     "@clerk/nextjs": "^5.7.0",
     "@supabase/ssr": "^0.5.1",
     "@supabase/supabase-js": "^2.45.0",
@@ -34,6 +36,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.1",
     "@types/node": "^20.16.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
