@@ -133,3 +133,21 @@ Every Tier 1 and Tier 2 decision, with the options considered, the choice, who m
 - **Decided by:** Claude, with Josh's instruction to build both and use `josh.knight@spritzofficial.online`
 - **Why email rather than a form:** Play requires a way to *request* deletion, not an automated pipeline. A form would need an endpoint, spam handling, and identity verification, all to send an email that the account holder can send themselves. Requiring the mail to come from the account address is also stronger identity proof than an unauthenticated form field. Revisit if volume ever justifies it.
 - **Open, needs Josh:** the support address is on `spritzofficial.online` while the site is `spritzofficial.app`. Deliberate, or a typo? A support address that bounces is an App Review rejection cause, since review emails it.
+
+## D12 — (unlogged)
+
+- **Status:** referenced as part of "D1 through D12" in the 2026-09-02 session handoff, but never written into this file. The handoff's own list of locked decisions maps cleanly onto D1 through D11 plus "iOS before Android," which is the likely candidate. Number reserved rather than reused so nothing already referencing D12 shifts.
+- **Action:** Josh to confirm what D12 was, then fill this in.
+
+## D13 — iOS safe areas: full-bleed with token'd insets
+
+- **Date:** 2026-09-03
+- **Slice:** 2 (also settles part of slice 8)
+- **Tier:** 1
+- **Context:** The app had no `env(safe-area-inset-*)` anywhere and set no `viewport-fit`. On a notched iPhone the floating bottom-nav pill sat under the home indicator.
+- **Options:** (a) `viewportFit: "cover"` plus `env()` insets on every fixed element. (b) Leave `viewport-fit` unset and let WKWebView lay the page out inside the safe area. (c) Cover, but patch only the bottom nav.
+- **Choice:** (a) **Full-bleed with `env()` insets.**
+- **Decided by:** Josh
+- **Why:** (b) needs no CSS at all but paints theme-colored bands above and below the content on notched devices, which is exactly what a wrapped website looks like and exactly the impression Guideline 4.2 punishes. Given D3 already accepts a remote-load shell, the app cannot also afford to *look* like one. (c) fixes the reported bug with the smallest diff but leaves the top nav under the status bar and the `/scan` camera tray unresolved, both of which return in slice 8.
+- **Implementation shape:** insets are exposed as `--safe-top/bottom/left/right` in `globals.css` with `0px` fallbacks, plus `--nav-pill-offset` and `--nav-clearance` for the floating pill's geometry. Fixed elements use the tokens, never a raw `env()` and never a hardcoded offset, so there is one place to look when something sits wrong on a device.
+- **Consequence:** `--nav-clearance` resolves to exactly 112px when the inset is zero, which is what the old flat `pb-28` was, so the web layout is unchanged. Slice 8's "safe areas correct on notched devices" criterion is now largely met ahead of time; what remains there is the status-bar *style* and the launch flash.

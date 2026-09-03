@@ -84,3 +84,20 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
 ### Tooling added
 - `npm run test:purge` — seeds a throwaway user, runs the purge, asserts 9 outcomes, cleans up. Keyed to a generated `test-purge-*` id so it cannot touch real data.
 - `npm run diag:infra` — read-only check of which buckets and tables actually exist.
+
+## Slice 2 (in progress) — Capacitor iOS shell
+
+- **Opened:** 2026-09-02. Shell added, runs in the Simulator, email sign-in through Clerk works.
+- **Committed 2026-09-03:** `3028c4e` — `ios/`, `capacitor.config.ts`, `package.json`, `package-lock.json`. Capacitor 8.5.1.
+- **Found on commit: the `allowNavigation` fix was never in the repo.** The 2026-09-02 session verified that email sign-in works once `server.allowNavigation: ["spritzofficial.app", "*.spritzofficial.app"]` is set, but `capacitor.config.ts` at HEAD had no such key and there was no uncommitted diff on the file either. That session lost its device link before writing it. Restored from the handoff and included in `3028c4e`. **Re-verify sign-in in the Simulator against the committed config before trusting it.**
+- **Lesson worth keeping:** a fix that only ever existed in a running Simulator is not a fix. Commit the config change in the same session it is discovered.
+
+### 2.1 — Safe-area CSS (`cad2cde`)
+
+- **Shipped:** `viewportFit: "cover"` in `app/layout.tsx`; four inset tokens plus `--nav-pill-offset` and `--nav-clearance` in `app/globals.css`; token'd offsets in `components/bottom-nav.tsx`, `components/nav.tsx`, `components/camera-capture.tsx`, `app/scan/page.tsx`, `components/card-menu.tsx`, `components/family-pills.tsx`.
+- **Decision:** D13.
+- **Scope grew, deliberately.** The reported bug was the bottom nav only. Turning on `viewport-fit: cover` moves the whole page under the status bar too, so the top nav, the `/scan` camera takeover and its top control bar, and the two bottom sheets (`card-menu`, `family-pills`) all had to be brought along in the same change. Shipping cover without them would have traded one overlap bug for four.
+- **Verified:** all 7 changed `.tsx` files parse clean. Rendered in Chromium at 393x852 against the real `:root` block, once with no insets and once with the tokens forced to a 59px top and 34px bottom: clearance 112px flat and 146px notched, the pill keeps its 24px gap above the safe area in both, page content clears the pill in both, and the nav row never starts above y=0.
+- **NOT verified, still owed:** the real thing on a device. Chromium has no true `env()` values, so this proves the arithmetic and the layout response, not iOS's actual reported insets. Confirm in the Simulator and again on the iPhone 16 Pro (2.6).
+- **Tooling note:** `npx tsc --noEmit` does not finish on the Mac inside the Cowork mount, and background processes there do not survive the shell that started them. The mount's shell also has no network, so `npm run dev` fails trying to fetch `next-swc`. Full typecheck and dev server both have to run from a normal Terminal on the Mac.
+- **Affects:** slice 8's safe-area criterion is largely pre-satisfied. Any new fixed-position element from here uses the tokens.
