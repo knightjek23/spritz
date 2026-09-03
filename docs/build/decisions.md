@@ -151,3 +151,30 @@ Every Tier 1 and Tier 2 decision, with the options considered, the choice, who m
 - **Why:** (b) needs no CSS at all but paints theme-colored bands above and below the content on notched devices, which is exactly what a wrapped website looks like and exactly the impression Guideline 4.2 punishes. Given D3 already accepts a remote-load shell, the app cannot also afford to *look* like one. (c) fixes the reported bug with the smallest diff but leaves the top nav under the status bar and the `/scan` camera tray unresolved, both of which return in slice 8.
 - **Implementation shape:** insets are exposed as `--safe-top/bottom/left/right` in `globals.css` with `0px` fallbacks, plus `--nav-pill-offset` and `--nav-clearance` for the floating pill's geometry. Fixed elements use the tokens, never a raw `env()` and never a hardcoded offset, so there is one place to look when something sits wrong on a device.
 - **Consequence:** `--nav-clearance` resolves to exactly 112px when the inset is zero, which is what the old flat `pb-28` was, so the web layout is unchanged. Slice 8's "safe areas correct on notched devices" criterion is now largely met ahead of time; what remains there is the status-bar *style* and the launch flash.
+
+## D14 — Google OAuth in the native shell: system browser plus deep link
+
+- **Date:** 2026-09-03
+- **Slice:** 2
+- **Tier:** 1
+- **Context:** Google refuses OAuth inside embedded webviews (`disallowed_useragent`), so Clerk's `<SignIn />` Google button dead-ends in the shell. Cookies do not cross between Safari and WKWebView, so the session also has to be handed back explicitly.
+- **Options:** (a) System browser via `@capacitor/browser`, session handed back on a custom URL scheme as a Clerk sign-in token exchanged with the `ticket` strategy. (b) Native Google Sign-In SDK returning an idToken for Clerk to exchange. (c) Hide Google inside the app, offer email and Apple only.
+- **Choice:** (a) **System browser plus deep link.**
+- **Decided by:** Josh
+- **Why:** Both halves exist in the pinned SDK (`@clerk/backend` `signInTokens.createSignInToken`, `@clerk/types` `TicketStrategy`), it uses first-party Capacitor plugins only, and Apple rides the same round trip. (b) adds a native dependency, a GoogleService plist, an iOS client ID and a second separate path for Apple, plus another SDK for the privacy label. (c) locks out every user who signed up through Google, since those Clerk accounts have no password.
+- **Shape:** `/native-auth/start` (nonce cookie) → `/native-auth/go` (Clerk redirect) → `/native-auth/callback` (both force URLs on complete) → `/native-auth/complete` (60-second single-use token, 302 to `app.spritzofficial://sso-callback`) → `NativeAuthBridge` (nonce check, ticket exchange). Full design: `docs/superpowers/specs/2026-09-03-slice-2.2-native-oauth-design.md`.
+- **Accepted residual risk:** `@capacitor/browser` is `SFSafariViewController`, so the callback goes through the OS URL router rather than being delivered privately as `ASWebAuthenticationSession` would. Mitigated by the nonce and the 60-second token. Closing it fully is a plugin swap, not a protocol change.
+
+## D15 — Sign in with Apple: browser path now, native sheet later
+
+- **Date:** 2026-09-03
+- **Slice:** 2
+- **Tier:** 1
+- **Context:** Guideline 4.8 requires Sign in with Apple wherever Google is offered.
+- **Options:** (a) Native `ASAuthorizationController` sheet via a Capacitor plugin, Clerk exchanging the identity token. (b) The same browser round trip as Google with `oauth_apple`. (c) Upgrade Clerk first, then (a).
+- **First choice, then reversed:** Josh picked (a) on the recommendation. Checking the installed `@clerk/types` 4.26.0 showed `signIn.create` accepts oauth, ticket, google_one_tap, password, passkey and code strategies and nothing for an Apple identity token. Clerk ships native Apple token exchange only through its Expo hook (November 2025) and does not document the underlying strategy for other SDKs. Building (a) would mean calling an undocumented API from a 2024 SDK.
+- **Choice:** (b) **Browser path now**, native sheet logged as a revisit.
+- **Decided by:** Josh, on the corrected recommendation
+- **Why:** Works today on what is installed, about twenty lines on top of D14, and still satisfies 4.8: the requirement is that an equivalent privacy-preserving option is offered, not that it use the native sheet. (c) puts a major-version auth upgrade inside slice 2, touching sign-in, middleware, webhooks and the account-deletion route verified two days ago; it deserves its own slice.
+- **UI consequence:** Apple is listed first and styled identically to Google, per Apple's HIG on button prominence.
+- **Revisit:** when Clerk is upgraded. Pre-req that still needs Josh: Apple must be enabled as a social connection in the Clerk dashboard with a Services ID and key, which the web flow needs regardless.

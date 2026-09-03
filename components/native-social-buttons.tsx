@@ -16,14 +16,25 @@ import {
   NATIVE_AUTH_EVENT,
   beginNativeOAuth,
   type NativeAuthEventDetail,
+  type NativeOAuthStrategy,
 } from "@/lib/native-auth";
 
 type Phase = "idle" | "started" | "exchanging" | "error";
+
+// Apple first. Guideline 4.8 requires Sign in with Apple wherever a
+// third-party login is offered, and Apple's HIG asks that it not be
+// visually subordinate to the alternatives. Both run through the same
+// browser round trip; see D15 for why Apple is not a native sheet yet.
+const PROVIDERS: { strategy: NativeOAuthStrategy; name: string; icon: string }[] = [
+  { strategy: "oauth_apple", name: "Apple", icon: "https://img.clerk.com/static/apple.svg" },
+  { strategy: "oauth_google", name: "Google", icon: "https://img.clerk.com/static/google.svg" },
+];
 
 export function NativeSocialButtons({ mode }: { mode: "sign-in" | "sign-up" }) {
   const [native, setNative] = useState(false);
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [active, setActive] = useState<NativeOAuthStrategy | null>(null);
 
   useEffect(() => {
     setNative(isNativeApp());
@@ -64,25 +75,45 @@ export function NativeSocialButtons({ mode }: { mode: "sign-in" | "sign-up" }) {
   const busy = phase === "started" || phase === "exchanging";
   const verb = mode === "sign-in" ? "Continue" : "Sign up";
 
+  function label(p: (typeof PROVIDERS)[number]) {
+    if (active !== p.strategy) return `${verb} with ${p.name}`;
+    if (phase === "started") return `Opening ${p.name}…`;
+    if (phase === "exchanging") return "Signing you in…";
+    return `${verb} with ${p.name}`;
+  }
+
   return (
     <div className="w-full max-w-sm mb-6">
-      <button
-        type="button"
-        disabled={busy}
-        onClick={() => beginNativeOAuth("oauth_google")}
-        className="w-full h-11 flex items-center justify-center gap-3 border border-ink/20 bg-cream text-ink text-sm font-normal disabled:opacity-60"
-      >
-        {/* Clerk serves the provider marks it uses in its own buttons. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="https://img.clerk.com/static/google.svg" alt="" width={18} height={18} aria-hidden />
-        <span>
-          {phase === "started"
-            ? "Opening Google…"
-            : phase === "exchanging"
-              ? "Signing you in…"
-              : `${verb} with Google`}
-        </span>
-      </button>
+      <div className="flex flex-col gap-3">
+        {PROVIDERS.map((p) => (
+          <button
+            key={p.strategy}
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              setActive(p.strategy);
+              beginNativeOAuth(p.strategy);
+            }}
+            className="w-full h-11 flex items-center justify-center gap-3 border border-ink/20 bg-cream text-ink text-sm font-normal disabled:opacity-60"
+          >
+            {/* Clerk serves the provider marks it uses in its own buttons.
+                If one ever 404s the button degrades to text only rather
+                than showing a broken-image glyph. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={p.icon}
+              alt=""
+              width={18}
+              height={18}
+              aria-hidden
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+            <span>{label(p)}</span>
+          </button>
+        ))}
+      </div>
       {error && (
         <p role="alert" className="mt-3 text-sm text-burgundy">
           {error}
