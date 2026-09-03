@@ -191,3 +191,23 @@ Every Tier 1 and Tier 2 decision, with the options considered, the choice, who m
 - **Decided by:** Josh
 - **Why:** The icon is what home-screen PWA users already have, so the native app and the web shortcut read as one product; the brass dot is the only detail separating it from every other green-square-white-letter icon. The splash matches the cream the app paints behind every page, so launch screen to first page is one continuous color, which is most of what slice 8 means by "no white flash." Emerald would hard-cut to cream a second later.
 - **Also done in passing:** the storyboard background was `systemBackgroundColor`, which is white in light mode and black in dark mode, and flashes for a frame against the cream image either way. Now a fixed cream. `capacitor.config.ts` gains `backgroundColor: "#F4EFE6"` for the webview itself, for the same reason.
+
+## D17 — Camera purpose string
+
+- **Date:** 2026-09-03
+- **Slice:** 2
+- **Tier:** 1
+- **Options:** (a) "Spritz uses the camera to scan fragrance bottles and identify them." (b) "Spritz needs camera access so you can scan a bottle's label to look it up." (c) "Scan a bottle to identify it and see its notes, perfumer, and how it wears."
+- **Choice:** (a).
+- **Decided by:** Josh
+- **Why:** Feature plus benefit in one sentence, agreeing with the in-app primer the user has just read. (b) reads as a demand; (c) sells the feature without explaining the permission.
+- **Why it matters now, not in slice 6:** the shell's camera is still `getUserMedia` inside WKWebView, which hard-crashes the app if `NSCameraUsageDescription` is absent. Slice 6's native camera will reuse the same string.
+
+## D18 — iPhone orientation: portrait only
+
+- **Date:** 2026-09-03
+- **Slice:** 2
+- **Tier:** 2
+- **Choice:** `UISupportedInterfaceOrientations` trimmed to portrait on iPhone. iPad list left as generated.
+- **Decided by:** Claude
+- **Why:** Capacitor's template allows landscape by default; that was never a product choice. `public/manifest.webmanifest` already declares `"orientation": "portrait"` for the PWA, the whole app is laid out at `max-w-md`, and the `/scan` camera takeover assumes a portrait frame. Locking the shell to portrait makes the native app match the web app's existing decision rather than expanding it. Reversible in one line if iPad or landscape ever becomes a goal.
