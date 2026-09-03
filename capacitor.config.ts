@@ -26,6 +26,12 @@ const config: CapacitorConfig = {
     // them out to Safari. Without this, email sign-in dead-ends in the shell.
     allowNavigation: ["spritzofficial.app", "*.spritzofficial.app"],
   },
+  // Painted behind the webview before the first page renders, and behind
+  // any over-scroll. Cream, matching app/globals.css --bg-base and the
+  // launch screen, so launch -> splash -> first page is one continuous
+  // color. Without it the default is white, which is the "white flash on
+  // launch" slice 8 lists.
+  backgroundColor: "#F4EFE6",
   ios: {
     contentInset: "automatic",
   },

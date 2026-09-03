@@ -178,3 +178,16 @@ Every Tier 1 and Tier 2 decision, with the options considered, the choice, who m
 - **Why:** Works today on what is installed, about twenty lines on top of D14, and still satisfies 4.8: the requirement is that an equivalent privacy-preserving option is offered, not that it use the native sheet. (c) puts a major-version auth upgrade inside slice 2, touching sign-in, middleware, webhooks and the account-deletion route verified two days ago; it deserves its own slice.
 - **UI consequence:** Apple is listed first and styled identically to Google, per Apple's HIG on button prominence.
 - **Revisit:** when Clerk is upgraded. Pre-req that still needs Josh: Apple must be enabled as a social connection in the Clerk dashboard with a Services ID and key, which the web flow needs regardless.
+
+## D16 — App icon and launch screen
+
+- **Date:** 2026-09-03
+- **Slice:** 2 (pre-satisfies part of slice 8)
+- **Tier:** 1
+- **Icon options:** (a) `public/icon-512.png`, the S with the brass dot. (b) `public/icon-maskable-512.png`, plain S. (c) `brand/spritz-pfp-monogram.png`, lowercase serif s.
+- **Icon choice:** (a) **S with brass dot**, rendered at 1024 on an opaque emerald field (Apple rejects alpha in the store icon).
+- **Splash options:** (a) Cream `#F4EFE6` field with the serif wordmark centered. (b) Emerald field with the S mark.
+- **Splash choice:** (a) **Cream with wordmark.**
+- **Decided by:** Josh
+- **Why:** The icon is what home-screen PWA users already have, so the native app and the web shortcut read as one product; the brass dot is the only detail separating it from every other green-square-white-letter icon. The splash matches the cream the app paints behind every page, so launch screen to first page is one continuous color, which is most of what slice 8 means by "no white flash." Emerald would hard-cut to cream a second later.
+- **Also done in passing:** the storyboard background was `systemBackgroundColor`, which is white in light mode and black in dark mode, and flashes for a frame against the cream image either way. Now a fixed cream. `capacitor.config.ts` gains `backgroundColor: "#F4EFE6"` for the webview itself, for the same reason.
