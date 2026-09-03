@@ -101,3 +101,24 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
 - **NOT verified, still owed:** the real thing on a device. Chromium has no true `env()` values, so this proves the arithmetic and the layout response, not iOS's actual reported insets. Confirm in the Simulator and again on the iPhone 16 Pro (2.6).
 - **Tooling note:** `npx tsc --noEmit` does not finish on the Mac inside the Cowork mount, and background processes there do not survive the shell that started them. The mount's shell also has no network, so `npm run dev` fails trying to fetch `next-swc`. Full typecheck and dev server both have to run from a normal Terminal on the Mac.
 - **Affects:** slice 8's safe-area criterion is largely pre-satisfied. Any new fixed-position element from here uses the tokens.
+
+### 2.2 — Google OAuth via system browser (`3bf2008`), 2.3 — Sign in with Apple (`a8a2d9c`)
+
+- **Shipped:** `lib/native.ts` (`isNativeApp()`, the html `native-app` class), `lib/native-auth.ts`, `lib/native-auth-cookie.ts`, `app/native-auth/{start,go,callback,complete}`, `components/native-auth-bridge.tsx`, `components/native-social-buttons.tsx`, sign-in and sign-up pages, `Info.plist` URL scheme `app.spritzofficial`, deps `@capacitor/app` 8.1.1 and `@capacitor/browser` 8.0.4.
+- **Decisions:** D14 (browser + deep link + Clerk sign-in token), D15 (Apple via the same path; native sheet reversed after the pinned SDK turned out not to support it). Design: `docs/superpowers/specs/2026-09-03-slice-2.2-native-oauth-design.md`.
+- **Verified:** parse-clean; the client half exercised in Node against a stubbed Browser plugin: nonce shape, foreign URLs dropped, mismatched nonce dropped silently (AC 3), happy path `create(ticket)` → `setActive` → `Browser.close` (AC 2), replay dropped, expired ticket surfaces a recoverable error (AC 4). Info.plist validates.
+- **NOT verified, owed:** the browser leg against real Clerk and Google, the sign-in-to-sign-up transfer for a first-time Google account, the `Open in Spritz?` prompt cost, and the deep link on a device (AC 1, 2, 5). Web unchanged (AC 6) is by construction (`.native-app` gate) but needs one browser pass after deploy.
+- **Needs Josh:** Apple enabled as a Clerk social connection (Services ID + key). `npm install && npx cap sync ios`.
+- **Near miss:** `3bf2008` changed `package.json` without the lockfile and was pushed. Vercel's `npm ci` refuses out-of-sync lockfiles, so production deploys were broken from that push until `6aba544`. Lesson: a dependency change is not committable from the Cowork mount alone, since it has no network to run `npm install`; generate the lockfile in the container and commit both together.
+- **Affects:** slice 7 now has `isNativeApp()` and the `.native-app` CSS gate to hide Stripe behind. Slice 6's native camera reuses the purpose string from D17.
+
+### 2.4 — Icon and splash (`2c6c85c`), 2.5 — Info.plist (`f8b651b`)
+
+- **Shipped:** 1024 opaque icon from `public/icon-512.png`; 2732 cream splash with the wordmark; storyboard and webview backgrounds fixed to cream; `ITSAppUsesNonExemptEncryption=false`; `NSCameraUsageDescription`; portrait-only on iPhone. D16, D17, D18.
+- **Verified:** PNGs are RGB with no alpha at the required sizes; storyboard and plist parse.
+- **NOT verified:** any of it rendered on a device. Needs `npx cap sync ios` and a rebuild.
+- **Affects:** slice 8's "no white flash on launch" and "safe areas correct" are both largely done; what remains there is status-bar style, the Android back button and the offline screen.
+
+### Slice 2 remaining
+
+2.6 physical iPhone run (signing Team), plus everything above marked "NOT verified." Then the Android half.
