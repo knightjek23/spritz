@@ -16,6 +16,29 @@
   --accent-secondary: #C9A961; /* Brass */
   --accent-line: #5A85C5;    /* Periwinkle accent stripe */
   --status-error: #8B3A3A;
+
+  /* ---- Safe areas ----
+     app/layout.tsx sets viewportFit: "cover", so the page runs edge to
+     edge and system UI (status bar, home indicator, notch) overlaps it.
+     These four mirror the env() values with a 0px fallback so they are
+     safe to use in calc() on every browser, including ones where env()
+     is unsupported and the raw function would invalidate the whole
+     declaration. Use the tokens, not env(), so there is one place to
+     look when a fixed element sits wrong on a device. */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+
+  /* Floating bottom-nav geometry, in one place. The pill is 72px tall
+     (Figma node 58:12) and floats 24px above the bottom edge; 16px of
+     breathing room sits above it. --nav-clearance is what page content
+     must keep clear, and it resolves to exactly 112px (the old flat
+     pb-28) on a device with no home indicator. Anything fixed to the
+     bottom of the viewport uses these, never a hardcoded offset. */
+  --nav-pill-height: 72px;
+  --nav-pill-offset: calc(24px + var(--safe-bottom));
+  --nav-clearance: calc(var(--nav-pill-height) + var(--nav-pill-offset) + 16px);
 }
 
 html, body {

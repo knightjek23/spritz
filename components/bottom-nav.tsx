@@ -108,11 +108,18 @@ export function BottomNav() {
       edgeColor="242, 237, 228"
       role="navigation"
       aria-label="Primary"
-      // Floating placement: 16px from each side, 24px from bottom edge.
-      // On phones with home indicators (iOS), the pill sits comfortably
-      // above the system gesture area — no need for the old
-      // home-indicator strip.
-      style={{ position: "fixed", bottom: 24, left: 16, right: 16 }}
+      // Floating placement: 16px from each side, 24px above the bottom
+      // edge. Under viewportFit: "cover" the viewport now extends beneath
+      // the home indicator, so the offset is measured from the safe area,
+      // not the glass — --nav-pill-offset is 24px + the bottom inset.
+      // Side offsets pick up the left/right insets too, which are zero in
+      // portrait and non-zero in landscape on notched phones.
+      style={{
+        position: "fixed",
+        bottom: "var(--nav-pill-offset)",
+        left: "calc(16px + var(--safe-left))",
+        right: "calc(16px + var(--safe-right))",
+      }}
       className="z-40"
     >
       {/* Row is 72px tall per Figma. 8px horizontal padding, no vertical

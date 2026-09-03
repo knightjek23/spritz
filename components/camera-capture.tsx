@@ -290,14 +290,24 @@ export function CameraCapture({
   const shutterDisabled = !shutterAction || state === "starting";
 
   return (
-    // Camera takeover ends at bottom-28 (112px) so the floating nav pill
-    // (24px from bottom + ~80px tall = ~104px occupied) stays visible
-    // and tappable while scanning. Earlier this was `inset-0` and the
-    // nav self-hid on /scan; new behavior keeps the nav accessible so
-    // users can bail to another tab mid-scan without backing out first.
-    <div className="fixed inset-x-0 top-0 bottom-28 z-50 bg-cream flex flex-col">
-      {/* Top bar — solid cream, X left, flash right. Flash only when live + supported. */}
-      <header className="flex items-center justify-between px-6 py-2 bg-cream shrink-0">
+    // Camera takeover stops at --nav-clearance so the floating nav pill
+    // stays visible and tappable while scanning. Earlier this was
+    // `inset-0` and the nav self-hid on /scan; new behavior keeps the nav
+    // accessible so users can bail to another tab mid-scan without backing
+    // out first. The token replaces a flat bottom-28 (112px), which is what
+    // it still resolves to when there is no home-indicator inset.
+    <div
+      className="fixed inset-x-0 top-0 z-50 bg-cream flex flex-col"
+      style={{ bottom: "var(--nav-clearance)" }}
+    >
+      {/* Top bar — solid cream, X left, flash right. Flash only when live +
+          supported. Padded by the status-bar inset: this surface is fixed to
+          top-0 and the page runs under the status bar, so without it the X
+          and flash controls sit beneath the clock. */}
+      <header
+        className="flex items-center justify-between px-6 py-2 bg-cream shrink-0"
+        style={{ paddingTop: "calc(0.5rem + var(--safe-top))" }}
+      >
         <button
           type="button"
           onClick={close}

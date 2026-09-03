@@ -216,7 +216,10 @@ function ScanPageInner() {
           stagesDone={stagesDone}
         />
         {error && (
-          <div className="fixed left-0 right-0 bottom-28 mx-auto max-w-sm z-[60] px-4">
+          <div
+            className="fixed left-0 right-0 mx-auto max-w-sm z-[60] px-4"
+            style={{ bottom: "var(--nav-clearance)" }}
+          >
             <div className="p-4 rounded-xl border border-burgundy/40 bg-cream shadow-lg">
               <p className="text-burgundy text-sm mb-1">{error}</p>
               <p className="text-sm text-ink">

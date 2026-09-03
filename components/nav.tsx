@@ -41,7 +41,19 @@ export function Nav() {
         shadow={false}
         className="border-b border-ink/10"
       >
-        <div className="mx-auto max-w-md px-6 h-14 flex items-center justify-between">
+        {/* Under viewportFit: "cover" the page starts behind the status
+            bar, so the bar's height is added as padding and folded into
+            the row height. The glass panel therefore extends up under the
+            status bar and the 56px row of controls still sits below it,
+            rather than the clock overlapping the wordmark. Both terms are
+            zero on a device with no top inset, leaving the old h-14. */}
+        <div
+          className="mx-auto max-w-md px-6 flex items-center justify-between"
+          style={{
+            height: "calc(3.5rem + var(--safe-top))",
+            paddingTop: "var(--safe-top)",
+          }}
+        >
           {/* NavBrand is a client sub-component that swaps between the
               "spritz" wordmark (on tab-root routes) and a back button
               (on any sub-route). Client-only so it can read the
