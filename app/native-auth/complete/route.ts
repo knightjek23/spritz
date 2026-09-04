@@ -16,7 +16,12 @@
 
 import { NextResponse, type NextRequest } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import { NONCE_COOKIE, NONCE_COOKIE_PATH, NONCE_PATTERN } from "@/lib/native-auth-cookie";
+import {
+  NONCE_COOKIE,
+  NONCE_COOKIE_PATH,
+  NONCE_PATTERN,
+  PENDING_COOKIE,
+} from "@/lib/native-auth-cookie";
 import { NATIVE_URL_SCHEME } from "@/lib/native";
 
 export const runtime = "nodejs";
@@ -57,5 +62,6 @@ export async function GET(req: NextRequest) {
   // One flow, one nonce. Clearing it means a replayed /complete request
   // in the same browser cannot mint a second token for the same nonce.
   res.cookies.set(NONCE_COOKIE, "", { path: NONCE_COOKIE_PATH, maxAge: 0 });
+  res.cookies.set(PENDING_COOKIE, "", { path: "/", maxAge: 0 });
   return res;
 }

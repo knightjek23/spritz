@@ -13,7 +13,10 @@
 //   2. /native-auth/start      server    stores the nonce in a cookie,
 //                                        sends the browser into Clerk's
 //                                        OAuth redirect
-//   3. /native-auth/callback   browser   Clerk finishes the OAuth leg
+//   3. /sign-in/sso-callback   browser   Clerk finishes the OAuth leg (the
+//                                        same callback the website uses);
+//                                        NativeReturnGuard catches any
+//                                        other landing page
 //   4. /native-auth/complete   server    signed-in now; mints a 60-second
 //                                        sign-in token, redirects to
 //                                        app.spritzofficial://sso-callback

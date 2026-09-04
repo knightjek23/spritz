@@ -10,6 +10,7 @@ import { Analytics } from "@/components/analytics";
 import { LiquidGlassDefs } from "@/components/liquid-glass/LiquidGlass";
 import { PageTransition } from "@/components/page-transition";
 import { NativeAuthBridge } from "@/components/native-auth-bridge";
+import { NativeReturnGuard } from "@/components/native-return-guard";
 import "./globals.css";
 
 // Playfair Display — high-contrast serif for hero / section headings.
@@ -113,6 +114,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               completes system-browser OAuth when the app is opened by
               URL. Renders nothing; no-op on the web. */}
           <NativeAuthBridge />
+          {/* In the system browser during a native sign-in, sends any
+              signed-in landing page on to /native-auth/complete. */}
+          <NativeReturnGuard />
           <Nav />
           {/* --nav-clearance reserves space for the floating-pill bottom
               nav: 72px pill + 24px bottom offset + 16px breathing room,

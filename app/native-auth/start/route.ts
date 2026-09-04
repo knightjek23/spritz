@@ -10,16 +10,18 @@
 // and a query param would not survive a sign-in-to-sign-up transfer.
 
 import { NextResponse, type NextRequest } from "next/server";
-import { NONCE_COOKIE, NONCE_COOKIE_PATH, NONCE_PATTERN } from "@/lib/native-auth-cookie";
+import {
+  COOKIE_MAX_AGE_SECONDS,
+  NONCE_COOKIE,
+  NONCE_COOKIE_PATH,
+  NONCE_PATTERN,
+  PENDING_COOKIE,
+} from "@/lib/native-auth-cookie";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const ALLOWED_STRATEGIES = new Set(["oauth_google", "oauth_apple"]);
-
-// Five minutes is generous for a Google account chooser and tight enough
-// that a stale cookie cannot be picked up by a later, unrelated flow.
-const COOKIE_MAX_AGE_SECONDS = 5 * 60;
 
 export function GET(req: NextRequest) {
   const strategy = req.nextUrl.searchParams.get("strategy") ?? "";
@@ -33,11 +35,20 @@ export function GET(req: NextRequest) {
   next.searchParams.set("strategy", strategy);
 
   const res = NextResponse.redirect(next, 302);
+  // Five minutes is generous for a Google account chooser and tight enough
+  // that a stale cookie cannot be picked up by a later, unrelated flow.
   res.cookies.set(NONCE_COOKIE, nonce, {
     httpOnly: true,
     secure: true,
     sameSite: "lax",
     path: NONCE_COOKIE_PATH,
+    maxAge: COOKIE_MAX_AGE_SECONDS,
+  });
+  res.cookies.set(PENDING_COOKIE, "1", {
+    httpOnly: false,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
     maxAge: COOKIE_MAX_AGE_SECONDS,
   });
   return res;

@@ -17,7 +17,14 @@ import { useSearchParams } from "next/navigation";
 import { SpritzLoader } from "@/components/spritz-loader";
 
 const COMPLETE_PATH = "/native-auth/complete";
-const CALLBACK_PATH = "/native-auth/callback";
+// Clerk's <SignIn /> serves this under the /sign-in/[[...sign-in]] catch-all
+// and finishes OAuth there, including the transfer to sign-up for a
+// first-time Google account. It is the same callback the website's own
+// Google button uses, so it is known to work in this browser. A separate
+// /native-auth/callback page with <AuthenticateWithRedirectCallback /> was
+// tried first and came back from Google unable to find the sign-in, which
+// bounced the browser to Clerk's hosted Account Portal.
+const CALLBACK_PATH = "/sign-in/sso-callback";
 
 export function NativeAuthGo() {
   const { isLoaded: authLoaded, isSignedIn } = useAuth();
