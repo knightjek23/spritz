@@ -122,3 +122,13 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
 ### Slice 2 remaining
 
 2.6 physical iPhone run (signing Team), plus everything above marked "NOT verified." Then the Android half.
+
+### 2.6 — Physical iPhone run, Google sign-in verified (2026-09-03)
+
+- **Device:** iPhone 16 Pro, signing Team set, Developer Mode on. App installs and runs.
+- **Google sign-in through the system browser works end to end on the device** after `af277f8`. The first attempt failed: the custom `/native-auth/callback` page with `<AuthenticateWithRedirectCallback />` came back from Google unable to find the sign-in, bounced to Clerk's hosted Account Portal, and the Account Portal's own Google button then failed with `authorization_invalid`. Google on the website worked in the same Safari, which isolated the fault to that page. Fix: finish OAuth on `/sign-in/sso-callback`, the callback `<SignIn />` already uses, plus `NativeReturnGuard` for any other landing page.
+- **Also observed:** the signed-in shortcut in `/native-auth/go` works (a browser that already holds a Spritz session goes straight to the handoff), and the `Open this page in "Spritz"?` prompt is a real one-tap cost on every sign-in. Universal Links would remove it; logged as a revisit, not a blocker.
+- **Vercel:** `NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in` and `NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up` added so Clerk never falls back to the Account Portal.
+- **Lesson:** Clerk's control components assume the sign-in resource is exactly where `<SignIn />` left it. A hand-rolled callback page is not equivalent to the one inside the catch-all route, even with the same props. Reuse the catch-all.
+- **Still owed on device:** Sign in with Apple (needs the Clerk connection enabled first), the first-time-Google-account path (sign-up transfer plus the return guard), safe areas and the splash by eye, and a camera scan to confirm the purpose string prompt.
+- **Housekeeping:** the Google OAuth client secret was pasted into chat during debugging. Regenerate it in Google Cloud and update Clerk.
