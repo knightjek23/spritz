@@ -27,12 +27,21 @@ export function PushPrimer({ fragranceName }: { fragranceName: string }) {
   const [state, setState] = useState<State>("hidden");
 
   useEffect(() => {
+    // Every early exit logs its reason, so "the card never appeared" can be
+    // read off the Xcode console instead of guessed at.
     if (!isNativeApp()) return;
-    if (primerDismissCount() >= PRIMER_DISMISS_CAP) return;
+    const dismissed = primerDismissCount();
+    if (dismissed >= PRIMER_DISMISS_CAP) {
+      console.log(`[push-primer] hidden: dismissed ${dismissed} times`);
+      return;
+    }
     let cancelled = false;
-    getPushPermission().then((p) => {
-      if (!cancelled && p === "prompt") setState("offer");
-    });
+    getPushPermission()
+      .then((p) => {
+        console.log(`[push-primer] permission: ${p}`);
+        if (!cancelled && p === "prompt") setState("offer");
+      })
+      .catch((e) => console.warn("[push-primer] permission check failed", e));
     return () => {
       cancelled = true;
     };
