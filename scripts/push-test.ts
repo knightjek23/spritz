@@ -62,9 +62,27 @@ async function main() {
     process.exit(2);
   }
 
+  // The anon key returns empty results under RLS instead of an error, which
+  // looks exactly like an empty table. Refuse anything but the service role.
+  const serviceKey = need("SUPABASE_SERVICE_ROLE_KEY");
+  try {
+    const claims = JSON.parse(Buffer.from(serviceKey.split(".")[1], "base64url").toString());
+    if (claims.role !== "service_role") {
+      console.error(
+        `SUPABASE_SERVICE_ROLE_KEY has role "${claims.role}", not "service_role". ` +
+          "That is the anon key. Use the service_role key from Supabase > Settings > API.",
+      );
+      process.exit(1);
+    }
+    console.log(`Supabase project ref: ${claims.ref}  url: ${need("NEXT_PUBLIC_SUPABASE_URL")}`);
+  } catch {
+    console.error("SUPABASE_SERVICE_ROLE_KEY is not a JWT. Copy the service_role key again.");
+    process.exit(1);
+  }
+
   const supabase = createClient<Database>(
     need("NEXT_PUBLIC_SUPABASE_URL"),
-    need("SUPABASE_SERVICE_ROLE_KEY"),
+    serviceKey,
     { auth: { persistSession: false, autoRefreshToken: false } },
   );
 
@@ -80,11 +98,13 @@ async function main() {
   }
   if (!user) {
     console.error(`No users row for ${userArg ?? email}. Most recent users:`);
-    const { data: recent } = await supabase
+    const { data: recent, error: recentErr, count } = await supabase
       .from("users")
-      .select("id, email, clerk_user_id, created_at")
+      .select("id, email, clerk_user_id, created_at", { count: "exact" })
       .order("created_at", { ascending: false })
       .limit(8);
+    if (recentErr) console.error(`  (users read failed: ${recentErr.message})`);
+    console.error(`  users table row count: ${count ?? "unknown"}`);
     for (const u of recent ?? []) {
       console.error(`  ${u.id}  ${u.email ?? "(no email)"}  ${u.clerk_user_id}  ${u.created_at}`);
     }
