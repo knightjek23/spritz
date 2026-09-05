@@ -92,3 +92,5 @@ spritz movs/
 
 # Cowork drops session deliverables here — previews, not source
 Claude outputs/
+
+.env*
