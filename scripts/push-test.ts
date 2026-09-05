@@ -104,8 +104,25 @@ async function main() {
     const r = await supabase.from("users").select("id, email").eq("id", userArg).maybeSingle();
     user = r.data ?? null;
   } else if (email) {
-    const r = await supabase.from("users").select("id, email").ilike("email", email).maybeSingle();
-    user = r.data ?? null;
+    // The same email can own more than one users row (two Clerk accounts
+    // over time). Prefer the one that has a push token, then the newest.
+    const { data: rows } = await supabase
+      .from("users")
+      .select("id, email, created_at")
+      .ilike("email", email)
+      .order("created_at", { ascending: false });
+    if (rows && rows.length > 1) {
+      const { data: toks } = await supabase
+        .from("push_tokens")
+        .select("user_id")
+        .in("user_id", rows.map((r) => r.id))
+        .eq("enabled", true);
+      const withToken = new Set((toks ?? []).map((t) => t.user_id));
+      user = rows.find((r) => withToken.has(r.id)) ?? rows[0];
+      console.log(`${rows.length} users rows share ${email}; using ${user.id}`);
+    } else {
+      user = rows?.[0] ?? null;
+    }
   }
   if (!user) {
     console.error(`No users row for ${userArg ?? email}. Most recent users:`);
