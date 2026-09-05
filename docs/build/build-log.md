@@ -132,3 +132,17 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
 - **Lesson:** Clerk's control components assume the sign-in resource is exactly where `<SignIn />` left it. A hand-rolled callback page is not equivalent to the one inside the catch-all route, even with the same props. Reuse the catch-all.
 - **Still owed on device:** Sign in with Apple (needs the Clerk connection enabled first), the first-time-Google-account path (sign-up transfer plus the return guard), safe areas and the splash by eye, and a camera scan to confirm the purpose string prompt.
 - **Housekeeping:** the Google OAuth client secret was pasted into chat during debugging. Regenerate it in Google Cloud and update Clerk.
+
+## Slice 5 (iOS half) — Push notifications
+
+- **Built:** `e524e0d` plus follow-ups through `3c90032`. Design: `docs/superpowers/specs/2026-09-04-slice-5-push-ios-design.md`. D19 to D23.
+- **Verified on the iPhone 16 Pro, 2026-09-05:** app launch registers with APNs and the token lands in `push_tokens`; `npm run push:test` sends a real scan follow-up for the latest matched scan and it arrives on the device (APNs 200, notification delivered). AC 2 and AC 4 met on device.
+- **What it took to get there, all environment, none of it the design:**
+  - `.env.local` did not exist on the Mac. `vercel env pull` writes `[SENSITIVE]` placeholders for sensitive variables, so the seven values the script needs had to be filled by hand; a second `env pull` wiped them again. Do not run `env pull` on this machine without refilling `APNS_*` and the Supabase pair afterwards.
+  - The Supabase project has legacy JWT keys disabled. The service key is `sb_secret_…`, not a JWT. The script now accepts it and refuses `sb_publishable_…`.
+  - Two `users` rows share `knightjek23@gmail.com` (two Clerk accounts over time). The script prefers the one with a token.
+  - Migrations 0024 to 0027 had been applied by hand and were not in the remote migration history; `db push` re-applied them (all idempotent) and recorded them. 0028 failed on `uuid_generate_v4()`, which is off the CLI's search path on Supabase; switched to `gen_random_uuid()`.
+  - The primer never showed because iOS already held the permission from an earlier grant, and the token was only sent on the primer's Yes tap. Fixed: the bridge registers on every launch when permission is granted (`d1f4f9a`).
+  - The private key was written into `.env.local` across six lines twice; the script's one-line env reader took only the header. Now one line with literal `\n`, verified with `importPKCS8` before use.
+- **Still owed:** AC 5 (tap opens the bottle, `opened_at` set), AC 6 (Account toggle off stops the next send), AC 1 and AC 3 (primer on a fresh install, Not-now cap), AC 7 (dead token disabled; will happen naturally as the stale reinstall token gets rejected), AC 8 (`npm run test:purge`), and the daily cron firing on its own tomorrow at 10:00 Pacific. Foreground banners need the `3c90032` rebuild.
+- **Lesson:** every one of tonight's failures was diagnosable from an error the tooling had swallowed: `Tokens: []` hid a missing table, `[SENSITIVE]` looked like a value, a multi-line key looked like a key. The script now surfaces each. Verify the artifact the way the consumer reads it, not the way it was written.
