@@ -86,7 +86,9 @@ export function NativeAuthBridge() {
 
       handles.push(
         await PushNotifications.addListener("registration", ({ value }) => {
-          saveTokenToServer(value).catch(() => {});
+          saveTokenToServer(value)
+            .then((ok) => console.log(`[push] token ${ok ? "saved" : "NOT saved (signed out?)"}`))
+            .catch((e) => console.warn("[push] token save failed", e));
         }),
       );
       handles.push(
@@ -104,7 +106,21 @@ export function NativeAuthBridge() {
         }),
       );
 
-      if (cancelled) handles.forEach((h) => h.remove());
+      if (cancelled) {
+        handles.forEach((h) => h.remove());
+        return;
+      }
+
+      // Permission already granted (an earlier Yes, or iOS carrying the
+      // grant across a reinstall of the same bundle ID): register now so the
+      // token reaches the server, and re-register on every launch after,
+      // since APNs rotates tokens. register() never shows a prompt; only
+      // requestPermissions() does, and that stays with the primer.
+      const { receive } = await PushNotifications.checkPermissions();
+      if (receive === "granted") {
+        console.log("[push] permission granted, registering for a token");
+        await PushNotifications.register();
+      }
     })();
 
     return () => {
