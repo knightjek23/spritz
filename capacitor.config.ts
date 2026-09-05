@@ -35,6 +35,15 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: "automatic",
   },
+  plugins: {
+    PushNotifications: {
+      // Show the banner even when the app is in the foreground. Without
+      // this iOS delivers the notification silently to Notification Center
+      // while the app is on screen, which during testing looks exactly like
+      // "nothing arrived".
+      presentationOptions: ["badge", "sound", "alert"],
+    },
+  },
 };
 
 export default config;
