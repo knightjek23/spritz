@@ -18,6 +18,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { matchMethodLabel } from "@/lib/scan-stages";
 import type { ScanResult } from "@/lib/types";
+import { PushPrimer } from "./push-primer";
 
 export function ScanReceipt({ fragranceId }: { fragranceId: string }) {
   return (
@@ -51,6 +52,10 @@ function ScanReceiptInner({ fragranceId }: { fragranceId: string }) {
   const wasMatch = event.matched?.id === fragranceId;
 
   return (
+    <>
+    {/* Native shell only (renders nothing on the web): the notification
+        primer, offered at the moment of a successful match. D21. */}
+    {wasMatch && event.matched && <PushPrimer fragranceName={event.matched.name} />}
     <p className="-mt-4 mb-8 text-xs text-slate text-center leading-relaxed">
       {wasMatch ? (
         <>Matched from your scan by {matchMethodLabel(event.match_method)}.</>
@@ -70,5 +75,6 @@ function ScanReceiptInner({ fragranceId }: { fragranceId: string }) {
         </>
       )}
     </p>
+    </>
   );
 }

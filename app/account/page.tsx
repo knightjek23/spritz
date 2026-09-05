@@ -25,6 +25,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { PushSettings } from "@/components/push-settings";
 import {
   ManageSubscriptionButton,
   SignOutButton,
@@ -208,6 +209,9 @@ export default async function AccountPage() {
           of any page (powered by Clerk).
         </p>
       </section>
+
+      {/* Notifications — native shell only, renders nothing on the web */}
+      <PushSettings />
 
       {/* Manage account */}
       <section className="mb-4">

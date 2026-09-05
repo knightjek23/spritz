@@ -211,3 +211,52 @@ Every Tier 1 and Tier 2 decision, with the options considered, the choice, who m
 - **Choice:** `UISupportedInterfaceOrientations` trimmed to portrait on iPhone. iPad list left as generated.
 - **Decided by:** Claude
 - **Why:** Capacitor's template allows landscape by default; that was never a product choice. `public/manifest.webmanifest` already declares `"orientation": "portrait"` for the PWA, the whole app is laid out at `max-w-md`, and the `/scan` camera takeover assumes a portrait frame. Locking the shell to portrait makes the native app match the web app's existing decision rather than expanding it. Reversible in one line if iPad or landscape ever becomes a goal.
+
+## D19 — Push sending: direct to APNs from Vercel
+
+- **Date:** 2026-09-04
+- **Slice:** 5
+- **Tier:** 1
+- **Options:** (a) Vercel route to APNs over HTTP/2 with a token-signed JWT, `@capacitor/push-notifications` as the only client dependency. (b) OneSignal or Firebase Cloud Messaging. (c) Supabase Edge Function to APNs.
+- **Choice:** (a).
+- **Decided by:** Josh
+- **Why:** No third-party SDK in the app, so nothing new on the App Privacy label or the Play Data Safety form; no vendor account; the send path is small. (b) is faster to a first campaign and brings a dashboard, but adds an SDK that collects device identifiers, and OneSignal reads as ad-tech to reviewers. (c) is the same design in a second runtime for one function.
+- **Consequence:** `lib/apns.ts`, `lib/push-scan-followup.ts`, `push_tokens` + `push_sends` in migration 0028, one Vercel cron. Android gets an FCM sender of the same shape.
+
+## D20 — First push campaign: scan follow-up, next day
+
+- **Date:** 2026-09-04
+- **Slice:** 5 (closes one-pager Q4)
+- **Tier:** 1
+- **Options:** (a) Day-after scan follow-up landing on the scanned bottle. (b) Weekly trending digest from the trends snapshot. (c) "A wishlist bottle is trending."
+- **Choice:** (a).
+- **Decided by:** Josh
+- **Why:** Tied to something the person did, one per scan, so it reads as service rather than marketing; the primer gets an honest, specific promise at the moment of highest intent; the data already exists. (b) is the same message to everyone, which is the kind people mute. (c) fires for too few people early on. Both logged as later campaigns. The wishlist sale alert the one-pager mentioned needs price monitoring that does not exist and is out for launch.
+
+## D21 — Primer moment: first scan result
+
+- **Date:** 2026-09-04
+- **Slice:** 5
+- **Tier:** 1
+- **Options:** (a) Inline card on the scan receipt at the first native match. (b) Full-screen primer on first launch after sign-in. (c) Settings toggle only.
+- **Choice:** (a), with "Not now" re-offering on later scans up to three times, then never.
+- **Decided by:** Josh
+- **Why:** iOS grants one shot at the system prompt; the primer's job is to make sure only someone who will say yes ever sees it. The promise is concrete right after a match. (b) has the worst documented opt-in rates because the promise is abstract. (c) exists anyway as the opt-out surface on Account but cannot reach the 60% target alone.
+
+## D22 — Primer copy
+
+- **Date:** 2026-09-04
+- **Slice:** 5
+- **Tier:** 1
+- **Choice:** Title "Want a follow-up on {fragrance} tomorrow?" Body "One notification, the day after each scan, with how it wears and what to compare it to." Buttons "Yes, notify me" / "Not now".
+- **Decided by:** Josh
+- **Why:** Names the bottle, states the frequency, describes the content; nothing to be surprised by later. Alternatives considered: a shorter forgetting-framed version ("Remember this one?") and a minimal "Turn on notifications", which is the phrase people have learned to decline.
+
+## D23 — Follow-up frequency cap and deep link
+
+- **Date:** 2026-09-04
+- **Slice:** 5
+- **Tier:** 2 (proposed in the brief, not objected to)
+- **Choice:** One push per user per day, most recent match wins; nothing for scans older than 48 hours; job at 17:00 UTC (10:00 Pacific); a tap lands on `/fragrance/{id}`. Notification copy: title "{Fragrance} by {House}", body "Here's how it wears, and what to compare it to."
+- **Decided by:** Claude
+- **Why:** The cap is what keeps a transactional notification from becoming three a day for a heavy scanner. The 48-hour floor means a job that missed a day never sends a stale batch. The landing page is the only place the message makes sense.
