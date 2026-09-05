@@ -140,11 +140,18 @@ async function main() {
     process.exit(1);
   }
 
-  const { data: tokens } = await supabase
+  const { data: tokens, error: tokErr } = await supabase
     .from("push_tokens")
     .select("platform, enabled, last_seen")
     .eq("user_id", user.id);
   console.log(`User ${user.id}`);
+  if (tokErr) {
+    console.error(`push_tokens read failed: ${tokErr.message}`);
+    if (/does not exist|schema cache/i.test(tokErr.message)) {
+      console.error("The push tables are missing. Run: npm run db:migrate");
+    }
+    process.exit(1);
+  }
   console.log(`Tokens: ${JSON.stringify(tokens ?? [])}`);
   if (!tokens?.some((t) => t.enabled)) {
     console.error("No enabled token. Open the app, scan a bottle, tap Yes on the primer.");
