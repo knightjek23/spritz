@@ -54,9 +54,11 @@ function need(name: string): string {
 
 async function main() {
   const email = arg("email");
+  const userArg = arg("user");
   const dry = process.argv.includes("--dry");
-  if (!email) {
+  if (!email && !userArg) {
     console.error("usage: npm run push:test -- --email you@example.com [--dry]");
+    console.error("       npm run push:test -- --user <users.id uuid>   [--dry]");
     process.exit(2);
   }
 
@@ -66,13 +68,27 @@ async function main() {
     { auth: { persistSession: false, autoRefreshToken: false } },
   );
 
-  const { data: user } = await supabase
-    .from("users")
-    .select("id, email")
-    .eq("email", email)
-    .maybeSingle();
+  // Email on the users row comes from the Clerk webhook and can be null
+  // or differ in case, so match loosely and, on a miss, show what exists.
+  let user: { id: string; email: string | null } | null = null;
+  if (userArg) {
+    const r = await supabase.from("users").select("id, email").eq("id", userArg).maybeSingle();
+    user = r.data ?? null;
+  } else if (email) {
+    const r = await supabase.from("users").select("id, email").ilike("email", email).maybeSingle();
+    user = r.data ?? null;
+  }
   if (!user) {
-    console.error(`No users row with email ${email}`);
+    console.error(`No users row for ${userArg ?? email}. Most recent users:`);
+    const { data: recent } = await supabase
+      .from("users")
+      .select("id, email, clerk_user_id, created_at")
+      .order("created_at", { ascending: false })
+      .limit(8);
+    for (const u of recent ?? []) {
+      console.error(`  ${u.id}  ${u.email ?? "(no email)"}  ${u.clerk_user_id}  ${u.created_at}`);
+    }
+    console.error("Re-run with --user <id> for the right one.");
     process.exit(1);
   }
 
