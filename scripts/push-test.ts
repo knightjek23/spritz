@@ -62,23 +62,34 @@ async function main() {
     process.exit(2);
   }
 
-  // The anon key returns empty results under RLS instead of an error, which
-  // looks exactly like an empty table. Refuse anything but the service role.
+  // Two key formats exist. Legacy JWT keys carry a `role` claim; this
+  // project has them disabled ("Legacy API keys are disabled"). The current
+  // format is a plain string: sb_secret_... is the service-role equivalent,
+  // sb_publishable_... is the anon equivalent and returns empty results
+  // under RLS instead of an error, which looks exactly like an empty table.
   const serviceKey = need("SUPABASE_SERVICE_ROLE_KEY");
-  try {
-    const claims = JSON.parse(Buffer.from(serviceKey.split(".")[1], "base64url").toString());
-    if (claims.role !== "service_role") {
-      console.error(
-        `SUPABASE_SERVICE_ROLE_KEY has role "${claims.role}", not "service_role". ` +
-          "That is the anon key. Use the service_role key from Supabase > Settings > API.",
-      );
-      process.exit(1);
-    }
-    console.log(`Supabase project ref: ${claims.ref}  url: ${need("NEXT_PUBLIC_SUPABASE_URL")}`);
-  } catch {
-    console.error("SUPABASE_SERVICE_ROLE_KEY is not a JWT. Copy the service_role key again.");
+  if (serviceKey.startsWith("sb_publishable_")) {
+    console.error(
+      "SUPABASE_SERVICE_ROLE_KEY is a publishable key. Use the sb_secret_... key from " +
+        "Supabase > Settings > API keys.",
+    );
     process.exit(1);
   }
+  if (serviceKey.startsWith("eyJ")) {
+    try {
+      const claims = JSON.parse(Buffer.from(serviceKey.split(".")[1], "base64url").toString());
+      if (claims.role !== "service_role") {
+        console.error(`Legacy key has role "${claims.role}", not "service_role". Use the sb_secret_... key.`);
+        process.exit(1);
+      }
+    } catch {
+      /* not a JWT after all; let Supabase decide */
+    }
+  } else if (!serviceKey.startsWith("sb_secret_")) {
+    console.error("SUPABASE_SERVICE_ROLE_KEY is neither a legacy JWT nor an sb_secret_ key.");
+    process.exit(1);
+  }
+  console.log(`Supabase url: ${need("NEXT_PUBLIC_SUPABASE_URL")}  key: ${serviceKey.slice(0, 10)}…`);
 
   const supabase = createClient<Database>(
     need("NEXT_PUBLIC_SUPABASE_URL"),
