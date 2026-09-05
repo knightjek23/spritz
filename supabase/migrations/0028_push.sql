@@ -9,10 +9,15 @@
 -- what makes two things real that would otherwise be vibes: the one-per-
 -- user-per-day cap (the job reads it) and the "push -> session" metric in
 -- the one-pager (the open handler stamps opened_at on it).
+--
+-- gen_random_uuid(), not uuid_generate_v4(): the latter lives in the
+-- `extensions` schema on Supabase and is not on the search path when the
+-- CLI applies migrations. Earlier migrations only got away with it because
+-- they were pasted into the dashboard.
 -- =====================================================================
 
 create table if not exists public.push_tokens (
-  id          uuid primary key default uuid_generate_v4(),
+  id          uuid primary key default gen_random_uuid(),
   user_id     uuid not null references public.users(id) on delete cascade,
   token       text not null unique,
   platform    text not null check (platform in ('ios', 'android')),
@@ -25,7 +30,7 @@ create index if not exists push_tokens_user_enabled_idx
   on public.push_tokens (user_id) where enabled;
 
 create table if not exists public.push_sends (
-  id             uuid primary key default uuid_generate_v4(),
+  id             uuid primary key default gen_random_uuid(),
   user_id        uuid not null references public.users(id) on delete cascade,
   token_id       uuid references public.push_tokens(id) on delete set null,
   campaign       text not null,
