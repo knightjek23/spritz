@@ -2,7 +2,7 @@
 
 // Native-shell bridge. Mounted once in the root layout, renders nothing.
 //
-// Three jobs, all no-ops on the web:
+// Five jobs, all no-ops on the web:
 //   1. Mirror isNativeApp() onto <html class="native-app"> so CSS and
 //      server-rendered markup can branch on it after hydration. This is
 //      how the sign-in pages hide Clerk's own social buttons on native
@@ -12,6 +12,9 @@
 //   3. Own the push-notification listeners: store the APNs token whenever
 //      iOS issues or rotates one, and on a notification tap navigate to the
 //      path in the payload and record the open (slice 5).
+//   4. Style the status bar for the cream canvas (slice 8).
+//   5. Open external links in the in-app browser sheet instead of kicking
+//      the person out to Safari (slice 8, D27).
 //
 // The exchange needs clerk-js's signIn resource and setActive, which only
 // exist inside Clerk's React context. That is why this lives in a
@@ -128,6 +131,49 @@ export function NativeAuthBridge() {
       handles.forEach((h) => h.remove());
     };
   }, [router]);
+
+  // Status bar: dark glyphs on the cream canvas. Style.Light means "light
+  // background", i.e. dark text. Set once per launch; the shell never shows
+  // a dark screen the bar would need to invert for.
+  useEffect(() => {
+    if (!isNativeApp()) return;
+    (async () => {
+      const { StatusBar, Style } = await import("@capacitor/status-bar");
+      await StatusBar.setStyle({ style: Style.Light }).catch(() => {});
+    })();
+  }, []);
+
+  // External links (Buy, house websites, Apple/Google subscription pages)
+  // open in the Browser plugin's Safari sheet with a Done button, so the
+  // person lands back exactly where they were. Capacitor's default is to
+  // hand them to the Safari app, which is a full context switch. One
+  // capturing listener covers every <a target="_blank"> and every
+  // off-origin http(s) link without touching the components.
+  useEffect(() => {
+    if (!isNativeApp()) return;
+    function onClick(e: MouseEvent) {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey) return;
+      const a = (e.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null;
+      if (!a) return;
+      let url: URL;
+      try {
+        url = new URL(a.href, window.location.href);
+      } catch {
+        return;
+      }
+      if (url.protocol !== "http:" && url.protocol !== "https:") return;
+      const external = url.origin !== window.location.origin;
+      if (!external && a.target !== "_blank") return;
+      e.preventDefault();
+      import("@capacitor/browser")
+        .then(({ Browser }) => Browser.open({ url: url.toString(), presentationStyle: "popover" }))
+        .catch(() => {
+          window.location.href = url.toString();
+        });
+    }
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, []);
 
   return null;
 }

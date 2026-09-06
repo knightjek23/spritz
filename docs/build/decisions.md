@@ -281,3 +281,32 @@ Every Tier 1 and Tier 2 decision, with the options considered, the choice, who m
 - **Choice:** (a).
 - **Decided by:** Josh
 - **Why:** iOS only reverses a denied camera permission in Settings, so without the link most people never find it; the gallery keeps scanning usable for someone who said no. (c) removes a working path from a person who just declined, which is the shape of a one-star review and close to what 5.1.1 calls out. Same wording as the web path.
+
+## D26 — Offline screen: wordmark, one line, Try again
+
+- **Date:** 2026-09-06
+- **Slice:** 8
+- **Tier:** 1
+- **Options:** (a) Static cream page with the wordmark, "You're offline. Spritz needs a connection to look things up." and a Try again button. (b) Same plus auto-reload when the connection returns. (c) Cache recently viewed pages and offer them offline.
+- **Choice:** (a).
+- **Decided by:** Josh
+- **Why:** Honest about what the app is without a network. Bundled into the app through Capacitor's `server.errorPath`, so it renders with zero requests. (b) needs a backoff against reload loops on flaky signal for a small gain. (c) is a service-worker layer on a server-rendered app and a future slice, not polish.
+
+## D27 — External links open in the in-app browser sheet
+
+- **Date:** 2026-09-06
+- **Slice:** 8
+- **Tier:** 1
+- **Options:** (a) `@capacitor/browser` Safari sheet over the app, Done returns to the same place. (b) Capacitor's default: hand the link to the Safari app.
+- **Choice:** (a), for every `target="_blank"` link and every off-origin http(s) link, in one capturing click listener in `NativeAuthBridge`.
+- **Decided by:** Josh
+- **Why:** Buy is the one action that leaves the app; keeping the person inside it is what retention wants and what every shopping app does. Affiliate tracking is unaffected (it is a real Safari view). (b) is a full context switch and makes the repackaged-website impression worse.
+
+## D28 — Status bar style
+
+- **Date:** 2026-09-06
+- **Slice:** 8
+- **Tier:** 2
+- **Choice:** `@capacitor/status-bar`, `Style.Light` (dark glyphs) set once per launch.
+- **Decided by:** Claude
+- **Why:** The canvas is cream everywhere; light glyphs would be invisible. The bar already sits over the app's own top inset from slice 2.1.

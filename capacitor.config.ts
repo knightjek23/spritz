@@ -22,6 +22,10 @@ const config: CapacitorConfig = {
     url: "https://spritzofficial.app",
     // Never allow plaintext http in production shells.
     cleartext: false,
+    // Shown when the live site cannot be loaded (no network, DNS failure).
+    // Relative to webDir, so public/offline.html, bundled into the app at
+    // `cap sync`. Without it WKWebView paints its own error text on white.
+    errorPath: "offline.html",
     // Keep Clerk's hosted auth pages inside the webview instead of kicking
     // them out to Safari. Without this, email sign-in dead-ends in the shell.
     allowNavigation: ["spritzofficial.app", "*.spritzofficial.app"],
