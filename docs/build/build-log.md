@@ -146,3 +146,13 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
   - The private key was written into `.env.local` across six lines twice; the script's one-line env reader took only the header. Now one line with literal `\n`, verified with `importPKCS8` before use.
 - **Still owed:** AC 5 (tap opens the bottle, `opened_at` set), AC 6 (Account toggle off stops the next send), AC 1 and AC 3 (primer on a fresh install, Not-now cap), AC 7 (dead token disabled; will happen naturally as the stale reinstall token gets rejected), AC 8 (`npm run test:purge`), and the daily cron firing on its own tomorrow at 10:00 Pacific. Foreground banners need the `3c90032` rebuild.
 - **Lesson:** every one of tonight's failures was diagnosable from an error the tooling had swallowed: `Tokens: []` hid a missing table, `[SENSITIVE]` looked like a value, a multi-line key looked like a key. The script now surfaces each. Verify the artifact the way the consumer reads it, not the way it was written.
+
+## Slice 6 — Native camera scan
+
+- **Built:** `38cb9a0` plus `dc6018c` (project rename back to App.xcodeproj) and `7faee71` (third plist string). Design: `docs/superpowers/specs/2026-09-05-slice-6-native-camera-design.md`. D24, D25.
+- **Verified on the iPhone 16 Pro, 2026-09-06:** shutter opens Apple's camera sheet, the photo scans and lands on the match page. AC 1 met on device.
+- **Two things that blocked the first run, both environment:**
+  - Xcode had renamed the project to `spritz.xcodeproj`. Capacitor's CLI hardcodes `ios/App/App.xcodeproj`, so `cap sync` failed while writing `Package.swift` and quietly left the camera plugin out of the build. Renamed back. The visible app name comes from `CFBundleDisplayName`, not the project file; keep the project named `App`.
+  - `@capacitor/camera` refuses to open the camera unless `NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription` and `NSPhotoLibraryAddUsageDescription` all exist, even with `saveToGallery: false`. The third was missing; the error surfaced in the app as the generic "Camera blocked" card, with the real reason only in the Xcode console.
+- **Still owed:** AC 2 (same bottle via Safari and via the app, compare `scan_events` top-1 and `latency_ms`), AC 3 (native Photos picker), AC 4 (denied path; the `app-settings:` deep link is the one unverified assumption), AC 5 (cancel returns to intro). Screen recording of a native scan for the 4.2 reviewer notes.
+- **Affects:** slice 9's privacy declarations now cover camera and photo library access.
