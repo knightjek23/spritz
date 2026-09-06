@@ -156,3 +156,9 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
   - `@capacitor/camera` refuses to open the camera unless `NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription` and `NSPhotoLibraryAddUsageDescription` all exist, even with `saveToGallery: false`. The third was missing; the error surfaced in the app as the generic "Camera blocked" card, with the real reason only in the Xcode console.
 - **Still owed:** AC 2 (same bottle via Safari and via the app, compare `scan_events` top-1 and `latency_ms`), AC 3 (native Photos picker), AC 4 (denied path; the `app-settings:` deep link is the one unverified assumption), AC 5 (cancel returns to intro). Screen recording of a native scan for the 4.2 reviewer notes.
 - **Affects:** slice 9's privacy declarations now cover camera and photo library access.
+
+## Slice 8 (iOS half) — Native polish
+
+- **Built:** `4482292`. D26 (offline screen), D27 (external links in the in-app browser sheet), D28 (status bar). Safe areas and the launch flash were already done in slice 2 (D13, D16).
+- **Verified:** typecheck clean; `public/offline.html` renders headless with zero network requests; `capacitor.config.ts` evaluates with `errorPath`, background and push presentation options.
+- **Owed on device:** offline page in airplane mode, Buy tap opens the Safari sheet, status bar dark on cream. Android back button waits for the Android shell.
