@@ -119,6 +119,17 @@ TBD — typically "2026 <legal name>".
 
 ---
 
+### Screenshot captions — 6 screens, 6.9-inch (1320×2868), designed in Figma (D29)
+
+Order follows D9: encyclopedia first, scan as the way in, dupes as the Pro payoff. Captions are short enough to sit above a device frame at store thumbnail size. Sentence case, no em dashes.
+
+1. Fragrance page, notes pyramid. **Every fragrance, broken down.**
+2. Scan intro on a bottle. **Point at the label. That's it.**
+3. Match page with the scan receipt. **Found it. Notes, perfumer, how it wears.**
+4. Library, Most popular right now. **Browse by house, note, or family.**
+5. Shelf, Own / Tried / Wishlist. **Your bottles, in one place.**
+6. Known dupes on a Pro account. **Smells like this, costs less. Pro.**
+
 ## Google Play
 
 Play's fields differ, so these are not a copy-paste of the above.

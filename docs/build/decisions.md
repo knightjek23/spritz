@@ -310,3 +310,14 @@ Every Tier 1 and Tier 2 decision, with the options considered, the choice, who m
 - **Choice:** `@capacitor/status-bar`, `Style.Light` (dark glyphs) set once per launch.
 - **Decided by:** Claude
 - **Why:** The canvas is cream everywhere; light glyphs would be invisible. The bar already sits over the app's own top inset from slice 2.1.
+
+## D29 — App Store screenshots: Josh designs them in Figma from simulator captures
+
+- **Date:** 2026-09-06
+- **Slice:** 9
+- **Tier:** 1
+- **Options:** (a) Simulator captures at 6.9-inch, framed and captioned by Josh in Figma. (b) An HTML template on the brand tokens rendered headless. (c) Raw captures.
+- **Choice:** (a).
+- **Decided by:** Josh
+- **Why:** The store page is the first brand touchpoint and Josh is the designer. (b) would be competent and get redone; (c) undercuts the D9 story the listing copy leans on. Caption drafts live in `store-listing-copy.md`.
+- **Also:** `TARGETED_DEVICE_FAMILY` set to iPhone only, so no iPad screenshot set and no iPad review surface for a portrait, `max-w-md` app.
