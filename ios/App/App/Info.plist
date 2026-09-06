@@ -39,6 +39,8 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Spritz uses the camera to scan fragrance bottles and identify them.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Spritz uses your photos to identify a fragrance bottle you've already photographed.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

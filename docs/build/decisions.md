@@ -260,3 +260,24 @@ Every Tier 1 and Tier 2 decision, with the options considered, the choice, who m
 - **Choice:** One push per user per day, most recent match wins; nothing for scans older than 48 hours; job at 17:00 UTC (10:00 Pacific); a tap lands on `/fragrance/{id}`. Notification copy: title "{Fragrance} by {House}", body "Here's how it wears, and what to compare it to."
 - **Decided by:** Claude
 - **Why:** The cap is what keeps a transactional notification from becoming three a day for a heavy scanner. The 48-hour floor means a job that missed a day never sends a stale batch. The landing page is the only place the message makes sense.
+
+## D24 — Native camera: the iOS camera sheet via @capacitor/camera
+
+- **Date:** 2026-09-05
+- **Slice:** 6
+- **Tier:** 1
+- **Options:** (a) Apple's camera UI through `@capacitor/camera`, keeping the branded intro screen and dropping the web viewfinder while shooting. (b) A community camera-preview plugin rendering the live camera under the webview so the existing viewfinder survives. (c) Keep `getUserMedia` and use the plugin only for the Photos picker.
+- **Choice:** (a).
+- **Decided by:** Josh
+- **Why:** Unmistakably native to a reviewer, a still photo instead of a video frame as matcher input, first-party plugin, gallery picker included, about a day. (b) is the best-looking result but a non-first-party plugin with its own privacy manifest, transparent-webview plumbing that fights the cream background and the safe-area work, and roughly three days, for a result reviewers cannot distinguish from the web viewfinder. (c) leaves the second 4.2 pillar empty.
+- **Consequence:** `lib/native-camera.ts`, `prepareFromDataUrl()` in `lib/image-prep.ts`, native branches in `components/camera-capture.tsx`, `NSPhotoLibraryUsageDescription` in Info.plist. Server and scan schema untouched. Flash and camera-switch are the sheet's own.
+
+## D25 — Camera permission denied: gallery plus a Settings link
+
+- **Date:** 2026-09-05
+- **Slice:** 6
+- **Tier:** 1
+- **Options:** (a) Existing denied message with "Choose from Photos" and "Open Settings" (deep link to the app's iOS settings page). (b) Gallery only. (c) Block scanning until camera is granted.
+- **Choice:** (a).
+- **Decided by:** Josh
+- **Why:** iOS only reverses a denied camera permission in Settings, so without the link most people never find it; the gallery keeps scanning usable for someone who said no. (c) removes a working path from a person who just declined, which is the shape of a one-star review and close to what 5.1.1 calls out. Same wording as the web path.

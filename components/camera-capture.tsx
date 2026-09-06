@@ -29,7 +29,14 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { prepareFromFile, prepareFromVideo } from "@/lib/image-prep";
+import { prepareFromDataUrl, prepareFromFile, prepareFromVideo } from "@/lib/image-prep";
+import { isNativeApp } from "@/lib/native";
+import {
+  openAppSettings,
+  pickNativePhoto,
+  takeNativePhoto,
+  type NativePhotoResult,
+} from "@/lib/native-camera";
 import { SpritzLoader } from "./spritz-loader";
 import { ScanChecklist } from "@/components/scan-checklist";
 import type { StageLine } from "@/lib/scan-stages";
@@ -76,6 +83,13 @@ export function CameraCapture({
   const router = useRouter();
   const [state, setState] = useState<State>("intro");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // Inside the Capacitor shell the iOS camera sheet replaces the web
+  // viewfinder (D24). Set after mount so SSR and first paint agree.
+  const [native, setNative] = useState(false);
+  const [nativeDenied, setNativeDenied] = useState(false);
+  useEffect(() => {
+    setNative(isNativeApp());
+  }, []);
   const [capturedDataUrl, setCapturedDataUrl] = useState<string | null>(null);
   const [facingMode, setFacingMode] = useState<FacingMode>("environment");
   const [flashOn, setFlashOn] = useState(false);
@@ -89,6 +103,7 @@ export function CameraCapture({
   // Detect API support once on mount. SSR-friendly: first paint is always
   // "intro"; the fallback flip happens after hydration.
   useEffect(() => {
+    if (isNativeApp()) return;
     if (
       typeof navigator === "undefined" ||
       !navigator.mediaDevices?.getUserMedia
@@ -143,7 +158,50 @@ export function CameraCapture({
     setFlashSupported(Boolean(caps.torch));
   }, []);
 
+  // Native: hand the result of the camera sheet or the Photos picker into
+  // the same normalise-and-upload path the file picker uses.
+  async function handleNativeResult(r: NativePhotoResult) {
+    if (r.kind === "cancelled") {
+      setState("intro");
+      return;
+    }
+    if (r.kind === "denied") {
+      setNativeDenied(true);
+      setErrorMessage("Camera permission was denied. You can still upload a photo.");
+      setState("error");
+      return;
+    }
+    if (r.kind !== "photo") {
+      setErrorMessage("Couldn't start the camera. Upload a photo instead.");
+      setState("error");
+      return;
+    }
+    let prepared;
+    try {
+      prepared = await prepareFromDataUrl(r.dataUrl);
+    } catch {
+      setErrorMessage("Couldn't read that photo. Try again.");
+      setState("error");
+      return;
+    }
+    setCapturedDataUrl(prepared.dataUrl);
+    setState("processing");
+    try {
+      await onCapture(prepared.base64);
+    } catch {
+      setState("intro");
+      setCapturedDataUrl(null);
+    }
+  }
+
   async function startCamera() {
+    if (native) {
+      setState("starting");
+      setErrorMessage(null);
+      setNativeDenied(false);
+      await handleNativeResult(await takeNativePhoto());
+      return;
+    }
     setState("starting");
     setErrorMessage(null);
     try {
@@ -228,6 +286,13 @@ export function CameraCapture({
   }
 
   function openGallery() {
+    if (native) {
+      void (async () => {
+        setState("starting");
+        await handleNativeResult(await pickNativePhoto());
+      })();
+      return;
+    }
     fileInputRef.current?.click();
   }
 
@@ -432,20 +497,47 @@ export function CameraCapture({
             <p className="text-[13px] font-light text-ink/80 text-center leading-snug max-w-[260px]">
               {errorMessage}
             </p>
-            <button
-              type="button"
-              onClick={startCamera}
-              className="px-6 py-2.5 rounded-md border border-ink/20 text-ink text-sm font-light hover:bg-ink/5 transition"
-            >
-              Try the camera again
-            </button>
-            <button
-              type="button"
-              onClick={openGallery}
-              className="text-[13px] font-light uppercase tracking-wider text-ink hover:text-emerald transition"
-            >
-              Or upload a photo
-            </button>
+            {nativeDenied ? (
+              <>
+                {/* D25: iOS only reverses a denied camera permission in
+                    Settings, so link straight to the app's page there and
+                    keep the gallery as the path that needs no permission. */}
+                <button
+                  type="button"
+                  onClick={openGallery}
+                  className="px-6 py-2.5 rounded-md border border-ink/20 text-ink text-sm font-light hover:bg-ink/5 transition"
+                >
+                  Choose from Photos
+                </button>
+                <button
+                  type="button"
+                  onClick={openAppSettings}
+                  className="text-[13px] font-light uppercase tracking-wider text-ink hover:text-emerald transition"
+                >
+                  Open Settings
+                </button>
+                <p className="text-[11px] font-light text-ink/60 text-center leading-snug max-w-[240px]">
+                  Settings › Spritz › Camera
+                </p>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={startCamera}
+                  className="px-6 py-2.5 rounded-md border border-ink/20 text-ink text-sm font-light hover:bg-ink/5 transition"
+                >
+                  Try the camera again
+                </button>
+                <button
+                  type="button"
+                  onClick={openGallery}
+                  className="text-[13px] font-light uppercase tracking-wider text-ink hover:text-emerald transition"
+                >
+                  Or upload a photo
+                </button>
+              </>
+            )}
           </GlassCard>
         )}
 
@@ -494,7 +586,7 @@ export function CameraCapture({
             <ShutterButton
               onActivate={shutterAction}
               disabled={shutterDisabled}
-              label={state === "live" ? "Capture" : "Enable camera"}
+              label={state === "live" ? "Capture" : native ? "Open camera" : "Enable camera"}
             />
           </div>
 
