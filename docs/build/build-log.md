@@ -162,3 +162,10 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
 - **Built:** `4482292`. D26 (offline screen), D27 (external links in the in-app browser sheet), D28 (status bar). Safe areas and the launch flash were already done in slice 2 (D13, D16).
 - **Verified:** typecheck clean; `public/offline.html` renders headless with zero network requests; `capacitor.config.ts` evaluates with `errorPath`, background and push presentation options.
 - **Owed on device:** offline page in airplane mode, Buy tap opens the Safari sheet, status bar dark on cream. Android back button waits for the Android shell.
+
+## Slice 10 — TestFlight build 1
+
+- **Brief:** `docs/superpowers/specs/2026-09-06-slice-10-testflight-design.md` (`2a4bae6`). Started ahead of slice 7 because banking is still pending; build 2 follows purchases.
+- **2026-09-06:** archive from `Any iOS Device (arm64)` and upload via Organizer succeeded first time: **App 1.0 (1) uploaded**. Privacy manifest, icon set, entitlements and `ITSAppUsesNonExemptEncryption=false` all passed upload validation.
+- **Detour:** the Xcode Cloud onboarding sheet was mistaken for the archive flow; eight cloud builds queued and failed (no Node step, so Capacitor packages in `node_modules` are missing on Apple's runner). Harmless. Local archive is the only pipeline; delete the Xcode Cloud workflow to stop per-push failures.
+- **Next:** `APNS_ENV=production` in Vercel before installing from TestFlight; internal tester group; the device checklist in the brief.
