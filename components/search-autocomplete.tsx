@@ -252,8 +252,8 @@ export function SearchAutocomplete({
           spellCheck={false}
           className={
             compact
-              ? "w-full px-4 py-2 pr-11 text-sm rounded-none border border-ink/20 bg-cream focus:outline-none focus:border-ink"
-              : "w-full px-4 py-3 pr-11 rounded-none border border-ink/20 bg-cream focus:outline-none focus:border-ink"
+              ? "w-full pl-9 pr-11 py-2 text-sm rounded-none border border-ink/20 bg-cream focus:outline-none focus:border-ink"
+              : "w-full pl-9 pr-11 py-3 rounded-none border border-ink/20 bg-cream focus:outline-none focus:border-ink"
           }
         />
         {/* Right-side affordance — clear-X when the user has typed
@@ -293,14 +293,15 @@ export function SearchAutocomplete({
           // Idle: Josh's magnifier (Downloads/Search Icon.svg), re-boxed
           // from its 64-unit canvas so the glyph fills the 12px slot, with
           // the stroke scaled to ~1.3px on screen to match the clear-X.
-          // Decorative only; the input itself is the control.
+          // Sits 16px in from the left; text starts at 36px (pl-9) so
+          // there is an 8px gap after the 12px glyph. Decorative only.
           <svg
             aria-hidden
             width="12"
             height="12"
             viewBox="8 9.6 48 48"
             fill="none"
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate pointer-events-none"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate pointer-events-none"
           >
             <path
               d="M52.7999 54.4L40.3416 41.9417M45.3333 29.8667C45.3333 39.2924 37.6923 46.9334 28.2666 46.9334C18.841 46.9334 11.2 39.2924 11.2 29.8667C11.2 20.4411 18.841 12.8 28.2666 12.8C37.6923 12.8 45.3333 20.4411 45.3333 29.8667Z"
