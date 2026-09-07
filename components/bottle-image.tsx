@@ -27,6 +27,49 @@ import { BottlePlaceholder, houseInitials } from "@/components/bottle-placeholde
 // Re-exported for callers that already imported it from here.
 export { houseInitials };
 
+// Hosts that must be fetched by the visitor's browser rather than by Vercel's
+// image optimizer.
+//
+// 2026-09-07: FragranceNet and FragranceShop return 403 to the optimizer's
+// fetch (Vercel datacenter IPs), so /_next/image answered 502
+// OPTIMIZED_EXTERNAL_IMAGE_REQUEST_UNAUTHORIZED and ~40% of the catalog
+// rendered as house initials. Nothing was wrong with the URLs or the DB: the
+// same images returned 200 to a real browser on a residential connection,
+// which is why scraper/src/audit-bottle-images.ts reported them all healthy.
+// That script runs on a laptop, so it can never see this failure mode.
+//
+// unoptimized makes next/image emit the raw src, so the request comes from the
+// visitor's own IP carrying the app's referer. That is the exact request these
+// hosts already answer with a 200. Cost is no WebP/resize on these rows, which
+// is close to nothing here: FragranceNet serves 250x250 and we display at 256.
+//
+// A visitor behind a VPN, corporate proxy, or datacenter IP range may still be
+// refused. That falls through to onError below and shows the placeholder,
+// which is the same thing they see today.
+//
+// Hotlinking is also the licensed behaviour: Rakuten's publisher agreement
+// grants "use without modification", and FragranceNet's own terms require
+// written permission to reproduce. Mirroring these to our own storage needs
+// that permission first. See AFFILIATE_IMAGE_PLAYBOOK.md.
+//
+// ADD A HOSTNAME HERE when a retailer starts 502-ing. The tell is
+// /_next/image returning 502 while the bare image URL loads fine in a tab.
+const DIRECT_FETCH_HOSTS = new Set([
+  "www.fragrancenet.com",
+  "fragrancenet.com",
+  "www.fragranceshop.com",
+  "fragranceshop.com",
+]);
+
+function needsDirectFetch(url: string): boolean {
+  try {
+    return DIRECT_FETCH_HOSTS.has(new URL(url).host);
+  } catch {
+    // Malformed URL: let the optimizer have it, onError covers the fallout.
+    return false;
+  }
+}
+
 export function BottleImage({
   src,
   house,
@@ -77,6 +120,7 @@ export function BottleImage({
       sizes={sizes}
       className={className}
       priority={priority}
+      unoptimized={needsDirectFetch(cleaned)}
       onError={() => setFailed(true)}
     />
   );
