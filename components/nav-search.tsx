@@ -22,7 +22,7 @@ export function NavSearch() {
     // avatar off the row on narrow phones.
     <div className="flex-1 min-w-0">
       <SearchAutocomplete
-        placeholder="Search fragrances, notes…"
+        placeholder="Fragrances, notes…"
         autoFocus={false}
         compact
       />

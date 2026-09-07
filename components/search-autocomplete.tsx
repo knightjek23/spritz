@@ -250,11 +250,14 @@ export function SearchAutocomplete({
           autoFocus={autoFocus}
           autoComplete="off"
           spellCheck={false}
-          className={
-            compact
-              ? "w-full pl-9 pr-11 py-2 text-sm rounded-none border border-ink/20 bg-cream focus:outline-none focus:border-ink"
-              : "w-full pl-9 pr-11 py-3 rounded-none border border-ink/20 bg-cream focus:outline-none focus:border-ink"
-          }
+          // Right padding reserves the clear-X slot only once there is
+          // text to clear; idle, the placeholder gets that room back so
+          // it is not truncated in the narrow nav slot.
+          className={[
+            "w-full pl-9 rounded-none border border-ink/20 bg-cream focus:outline-none focus:border-ink",
+            compact ? "py-2 text-sm" : "py-3",
+            q.length > 0 ? "pr-11" : "pr-4",
+          ].join(" ")}
         />
         {/* Right-side affordance — clear-X when the user has typed
             anything, otherwise the loading pulse (only visible in the
