@@ -193,18 +193,23 @@ export function SearchAutocomplete({
     };
   }, [q]);
 
-  // ---- Click outside closes the dropdown ----
+  // ---- Tap outside closes the dropdown, and collapses the nav when
+  // the field is expanded (same as the back chevron). pointerdown, not
+  // mousedown: iOS only synthesises mouse events for taps on elements
+  // it considers clickable, so a tap on plain page content would never
+  // arrive as mousedown. ----
   useEffect(() => {
-    function handler(e: MouseEvent) {
+    function handler(e: PointerEvent) {
       if (!containerRef.current) return;
       if (!containerRef.current.contains(e.target as Node)) {
         setOpen(false);
         setFocused(false);
+        if (leading === "back") onLeadingClick?.();
       }
     }
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
+    document.addEventListener("pointerdown", handler);
+    return () => document.removeEventListener("pointerdown", handler);
+  }, [leading, onLeadingClick]);
 
   function remember() {
     if (!recentSearches) return;
