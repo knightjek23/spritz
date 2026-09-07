@@ -354,3 +354,72 @@ Flip `BLOCK_UNLICENSED_SOURCES` to `true` in `lib/bottle-image.ts` and run
 `scripts/blank-unlicensed-images.sql`. That blocks fimgs URLs *and* the
 mirror bucket, falling everything back to house initials except the licensed
 images the affiliate backfill has landed.
+
+
+
+## Part 5: Retailer CDNs vs the Vercel image optimizer (Sept 2026)
+
+**Symptom.** Roughly 40% of the catalog rendered as house initials while the
+database looked perfectly healthy and `pnpm audit:images` reported every URL
+alive.
+
+**Cause.** `/_next/image` returned 502 with
+`OPTIMIZED_EXTERNAL_IMAGE_REQUEST_UNAUTHORIZED`. FragranceNet and
+FragranceShop answer 403 to Vercel's optimizer, which fetches from datacenter
+IPs, while serving the identical URL 200 to a real visitor on a residential
+connection.
+
+**Why the audit script cannot catch this.** `audit-bottle-images.ts` runs on a
+laptop, so its requests come from a residential IP. It will report `ok` on
+every image that is invisible to every actual user. When images look broken in
+the app but the audit says they are fine, read the network tab, not the
+database.
+
+**Diagnosis, one minute.** Open a page, filter network requests for
+`_next/image`, and compare status by host. A clean split (one host all 200,
+another all 502) is this bug. Confirm by loading the bare image URL in a tab:
+if it renders, the origin is fine and the optimizer is the problem.
+
+**Fix.** `DIRECT_FETCH_HOSTS` in `components/bottle-image.tsx`. Hosts listed
+there get `unoptimized`, so next/image emits the raw src and the browser
+fetches from the visitor's own IP. Add a hostname whenever a retailer starts
+502-ing. Every bottle on the site renders through that one component, so it is
+the only place this needs to change.
+
+**Cost.** No WebP conversion or resizing on those rows. Negligible here:
+FragranceNet serves 250x250 and we display at 256. Visitors on a VPN,
+corporate proxy, or datacenter range may still get a 403, which falls through
+to `onError` and the house-initials placeholder.
+
+### Can we just mirror the affiliate images instead?
+
+Not without written permission. Researched September 2026:
+
+- **Rakuten Publisher Membership Agreement** grants the right to "use without
+  modification any Supplier Tools". No reproduction verb. "Supplier Tools" is
+  defined to *exclude* Qualifying Links provided by Advertisers, so the network
+  grant does not reach FragranceNet's images at all. §2.1 makes each
+  advertiser's own terms controlling.
+- **Rakuten's Master Services Agreement** (Rakuten to advertiser) does carry a
+  "reproduce, modify, distribute, and publicly display" right, sublicensable to
+  Publisher Partners. But we are not a party to it, and the publisher agreement
+  never passes that sublicense through. The chain has a gap.
+- **FragranceNet Terms of Use**: content, expressly including photographs, "may
+  not be copied, distributed, modified, reproduced, published or used" except
+  as "authorized or approved in writing by us". They also reserve rights to "us
+  and our licensors", so some bottle photography is brand-owned and FragranceNet
+  may not be able to grant mirroring rights on it at all.
+- **Nicchia**: "All images on NicchiaLuxury.com are the property of Nicchia
+  Luxury S.r.l."
+- **CJ Publisher Service Agreement** §4(a) grants the right to "display and
+  Link to", and separately requires publishers to "refrain from copying or
+  modifying any icons, buttons, banners, graphics files". Caveat: the reachable
+  copies are 2007 and 2012 SEC/Justia filings; the current PSA is behind login.
+
+**So hotlinking is the licensed behaviour**, which is what the `unoptimized`
+fix does. The written-permission clause is also the cure: FragranceNet's terms
+condition reproduction on written approval rather than banning it, so asking
+the affiliate manager is a well-defined and normal request. Get it per merchant,
+in writing, and keep the record before mirroring anything.
+
+Not legal advice. This is a reading of the documents, not a lawyer's opinion.
