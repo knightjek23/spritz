@@ -20,6 +20,12 @@ import Link from "next/link";
 import { cleanBottleImageUrl } from "@/lib/bottle-image";
 import { BottleImage } from "@/components/bottle-image";
 import type { Fragrance } from "@/lib/types";
+import {
+  addRecentSearch,
+  clearRecentSearches,
+  getRecentSearches,
+  removeRecentSearch,
+} from "@/lib/recent-searches";
 
 const DEBOUNCE_MS = 180;
 const MAX_SUGGESTIONS = 8;
@@ -57,11 +63,31 @@ interface Props {
    */
   clearOnPick?: boolean;
   /**
-   * Compact variant for the top nav: 40px tall (py-2, text-sm) so it sits
-   * in a 56px row with 8px above and below. Default (48px) stays for
-   * /search and onboarding. Both are square-cornered.
+   * Compact variant for the top nav: 40px tall so it sits in a 56px row
+   * with 8px above and below. Default (48px) stays for /search and
+   * onboarding. Both are square-cornered. Text stays 16px in both: iOS
+   * zooms the page when a focused input is smaller than that.
    */
   compact?: boolean;
+  /**
+   * Leading glyph. "search" is the decorative magnifier; "back" is a
+   * button that calls onLeadingClick (the nav uses it to collapse the
+   * expanded field). The two cross-fade in place.
+   */
+  leading?: "search" | "back";
+  onLeadingClick?: () => void;
+  /** Fires when the input gains focus (the nav expands on this). */
+  onFocus?: () => void;
+  /**
+   * Show the per-device recent-searches list while the field is focused
+   * and empty. Queries are recorded on submit and on picking a suggestion.
+   */
+  recentSearches?: boolean;
+  /**
+   * Bump to clear the field from outside without focusing it (the nav
+   * does this when it collapses).
+   */
+  resetKey?: number;
 }
 
 export function SearchAutocomplete({
@@ -73,18 +99,48 @@ export function SearchAutocomplete({
   onPick,
   clearOnPick = false,
   compact = false,
+  leading = "search",
+  onLeadingClick,
+  onFocus,
+  recentSearches = false,
+  resetKey = 0,
 }: Props) {
   const router = useRouter();
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [q, setQ] = useState(initialQuery);
   const [suggestions, setSuggestions] = useState<Fragrance[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [highlight, setHighlight] = useState(0);
+  // Recents: `focused` gates the list (only while the field is active and
+  // empty); the list itself is read from localStorage after mount so the
+  // server render and the first client render agree.
+  const [focused, setFocused] = useState(false);
+  const [recents, setRecents] = useState<string[]>([]);
+  useEffect(() => {
+    if (recentSearches) setRecents(getRecentSearches());
+  }, [recentSearches]);
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // External reset (nav collapse): wipe without refocusing. Skips the
+  // initial mount so a fresh /search?q= page keeps its initialQuery.
+  const lastResetKey = useRef(resetKey);
+  useEffect(() => {
+    if (resetKey === lastResetKey.current) return;
+    lastResetKey.current = resetKey;
+    setQ("");
+    setSuggestions([]);
+    setOpen(false);
+    setHighlight(0);
+    setFocused(false);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    abortRef.current?.abort();
+    onQueryChange?.("");
+    inputRef.current?.blur();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetKey]);
 
   // ---- Debounced fetch ----
   useEffect(() => {
@@ -143,11 +199,19 @@ export function SearchAutocomplete({
       if (!containerRef.current) return;
       if (!containerRef.current.contains(e.target as Node)) {
         setOpen(false);
+        setFocused(false);
       }
     }
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  function remember() {
+    if (!recentSearches) return;
+    const trimmed = q.trim();
+    if (trimmed.length < MIN_QUERY_LEN) return;
+    setRecents(addRecentSearch(trimmed));
+  }
 
   function commit(fragrance?: Fragrance) {
     if (fragrance) {
@@ -164,12 +228,14 @@ export function SearchAutocomplete({
         }
         return;
       }
+      remember();
       router.push(`/fragrance/${fragrance.id}`);
       setOpen(false);
       return;
     }
     const trimmed = q.trim();
     if (trimmed.length < MIN_QUERY_LEN) return;
+    remember();
     if (onSubmit) {
       onSubmit(trimmed);
     } else {
@@ -195,7 +261,9 @@ export function SearchAutocomplete({
       commit(target);
     } else if (e.key === "Escape") {
       setOpen(false);
+      setFocused(false);
       inputRef.current?.blur();
+      if (leading === "back") onLeadingClick?.();
     }
   }
 
@@ -216,6 +284,20 @@ export function SearchAutocomplete({
 
   const showDropdown =
     open && q.trim().length >= MIN_QUERY_LEN && (loading || suggestions.length > 0);
+  const showRecents =
+    recentSearches && focused && q.trim().length === 0 && recents.length > 0;
+
+  function runRecent(query: string) {
+    setRecents(addRecentSearch(query));
+    setFocused(false);
+    if (onSubmit) {
+      setQ(query);
+      onQueryChange?.(query);
+      onSubmit(query);
+    } else {
+      router.push(`/search?q=${encodeURIComponent(query)}`);
+    }
+  }
 
   return (
     <div ref={containerRef} className="relative w-full">
@@ -241,6 +323,8 @@ export function SearchAutocomplete({
             if (v.trim().length >= MIN_QUERY_LEN) setOpen(true);
           }}
           onFocus={() => {
+            setFocused(true);
+            onFocus?.();
             if (q.trim().length >= MIN_QUERY_LEN && suggestions.length > 0) {
               setOpen(true);
             }
@@ -254,8 +338,8 @@ export function SearchAutocomplete({
           // text to clear; idle, the placeholder gets that room back so
           // it is not truncated in the narrow nav slot.
           className={[
-            "w-full pl-9 rounded-none border border-ink/20 bg-cream focus:outline-none focus:border-ink",
-            compact ? "py-2 text-sm" : "py-3",
+            "w-full pl-9 text-base rounded-none border border-ink/20 bg-cream focus:outline-none focus:border-ink",
+            compact ? "h-10 py-0" : "py-3",
             q.length > 0 ? "pr-11" : "pr-4",
           ].join(" ")}
         />
@@ -292,19 +376,23 @@ export function SearchAutocomplete({
             aria-hidden
             className="absolute right-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-emerald animate-pulse"
           />
-        ) : (
-          // Idle: Josh's magnifier (Downloads/Search Icon.svg), re-boxed
-          // from its 64-unit canvas so the glyph fills the 12px slot, with
-          // the stroke scaled to ~1.3px on screen to match the clear-X.
-          // Sits 16px in from the left; text starts at 36px (pl-9) so
-          // there is an 8px gap after the 12px glyph. Decorative only.
+        ) : null}
+        {/* Leading slot, 16px in from the left, text starts at 36px (pl-9)
+            so there is an 8px gap after the 12px glyph. Two glyphs share
+            the slot and cross-fade (150ms): Josh's magnifier (decorative,
+            from Downloads/Search Icon.svg re-boxed from its 64-unit canvas
+            with the stroke scaled to ~1.3px) and a back chevron that is a
+            real button when the nav is expanded. */}
+        <span className="absolute left-4 top-1/2 -translate-y-1/2 w-3 h-3 text-slate">
           <svg
             aria-hidden
             width="12"
             height="12"
             viewBox="8 9.6 48 48"
             fill="none"
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate pointer-events-none"
+            className={`absolute inset-0 transition-opacity duration-150 ${
+              leading === "search" ? "opacity-100" : "opacity-0"
+            }`}
           >
             <path
               d="M52.7999 54.4L40.3416 41.9417M45.3333 29.8667C45.3333 39.2924 37.6923 46.9334 28.2666 46.9334C18.841 46.9334 11.2 39.2924 11.2 29.8667C11.2 20.4411 18.841 12.8 28.2666 12.8C37.6923 12.8 45.3333 20.4411 45.3333 29.8667Z"
@@ -313,8 +401,94 @@ export function SearchAutocomplete({
               strokeLinecap="round"
             />
           </svg>
-        )}
+          <button
+            type="button"
+            aria-label="Close search"
+            tabIndex={leading === "back" ? 0 : -1}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={onLeadingClick}
+            className={`absolute -inset-3 flex items-center justify-center text-ink transition-opacity duration-150 ${
+              leading === "back" ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden>
+              <path
+                d="M7.5 1.5 3 6l4.5 4.5"
+                stroke="currentColor"
+                strokeWidth="1.3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        </span>
       </div>
+
+      {/* Recent searches: focused + empty. Rows preventDefault on
+          mousedown so the input keeps focus until the click lands. */}
+      {showRecents && !showDropdown && (
+        <div className="absolute left-0 right-0 mt-2 bg-cream border border-ink/10 rounded-none shadow-lg overflow-hidden z-20">
+          <div className="flex items-center justify-between px-4 pt-3 pb-1">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-slate">
+              Recent
+            </span>
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => setRecents(clearRecentSearches())}
+              className="font-mono text-[10px] uppercase tracking-wider text-slate hover:text-ink transition"
+            >
+              Clear
+            </button>
+          </div>
+          <ul>
+            {recents.map((r) => (
+              <li key={r} className="flex items-center">
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => runRecent(r)}
+                  className="flex-1 min-w-0 flex items-center gap-3 px-4 py-2.5 text-left text-ink hover:bg-paper transition"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    aria-hidden
+                    className="shrink-0 text-slate"
+                  >
+                    <circle cx="8" cy="8" r="6.3" stroke="currentColor" strokeWidth="1.2" />
+                    <path
+                      d="M8 4.5V8l2.3 1.6"
+                      stroke="currentColor"
+                      strokeWidth="1.2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <span className="truncate">{r}</span>
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Remove ${r} from recent searches`}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => setRecents(removeRecentSearch(r))}
+                  className="shrink-0 w-10 h-10 flex items-center justify-center text-ink/50 hover:text-ink transition"
+                >
+                  <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden>
+                    <path
+                      d="M4 4L12 12M12 4L4 12"
+                      stroke="currentColor"
+                      strokeWidth="1.4"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Dropdown */}
       {showDropdown && (

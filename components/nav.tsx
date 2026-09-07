@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
-import { NavSearch } from "./nav-search";
+import { NavRow } from "./nav-row";
 import { LiquidGlass } from "./liquid-glass/LiquidGlass";
 import { NavBrand } from "./nav-brand";
 import { NavScrollWrapper } from "./nav-scroll-wrapper";
@@ -40,46 +40,30 @@ export function Nav() {
         shadow={false}
         className="border-b border-ink/10"
       >
-        {/* Under viewportFit: "cover" the page starts behind the status
-            bar, so the bar's height is added as padding and folded into
-            the row height. The glass panel therefore extends up under the
-            status bar and the 56px row of controls still sits below it,
-            rather than the clock overlapping the wordmark. Both terms are
-            zero on a device with no top inset, leaving the old h-14. */}
-        <div
-          className="mx-auto max-w-md px-6 flex items-center gap-4"
-          style={{
-            height: "calc(3.5rem + var(--safe-top))",
-            paddingTop: "var(--safe-top)",
-          }}
-        >
-          {/* NavBrand is a client sub-component that swaps between the
-              "spritz" wordmark (on tab-root routes) and a back button
-              (on any sub-route). Client-only so it can read the
-              pathname; keeps Nav itself a Server Component so Clerk's
-              SignedIn/SignedOut/UserButton stay server-rendered. */}
-          <NavBrand />
-          {/* Inline search, takes the remaining width. Shelf and Account
-              links used to live here; the bottom nav owns both
-              destinations, so the row is brand · search · account. */}
-          <NavSearch />
-          <div className="flex items-center text-sm shrink-0">
-            <SignedIn>
-              {/* Clerk's UserButton stays for quick sign-out + identity
-                  (email/password) management — those live in Clerk's hosted
-                  surface, not in our /account page. */}
-              <UserButton afterSignOutUrl="/" />
-            </SignedIn>
-            <SignedOut>
-              <Link
-                href="/sign-in"
-                className="text-emerald font-medium hover:underline underline-offset-4"
-              >
-                Sign in
-              </Link>
-            </SignedOut>
-          </div>
-        </div>
+        {/* NavRow (client) owns the expanding-search state and the row
+            layout; NavBrand and the account cluster are passed in so this
+            file stays a Server Component. */}
+        <NavRow
+          brand={<NavBrand />}
+          trailing={
+            <div className="flex items-center text-sm">
+              <SignedIn>
+                {/* Clerk's UserButton stays for quick sign-out + identity
+                    (email/password) management — those live in Clerk's
+                    hosted surface, not in our /account page. */}
+                <UserButton afterSignOutUrl="/" />
+              </SignedIn>
+              <SignedOut>
+                <Link
+                  href="/sign-in"
+                  className="text-emerald font-medium hover:underline underline-offset-4"
+                >
+                  Sign in
+                </Link>
+              </SignedOut>
+            </div>
+          }
+        />
       </LiquidGlass>
     </NavScrollWrapper>
   );

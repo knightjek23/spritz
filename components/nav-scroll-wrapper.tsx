@@ -44,7 +44,12 @@ export function NavScrollWrapper({ children }: { children: ReactNode }) {
         const y = window.scrollY;
         const delta = y - lastScrollY.current;
 
-        if (y < HIDE_THRESHOLD_PX) {
+        if (document.documentElement.dataset.navSearch === "open") {
+          // Search field is expanded (NavRow sets the flag): the keyboard
+          // sliding up fires scroll events, and hiding the nav would take
+          // the field with it. Stay put.
+          setHidden(false);
+        } else if (y < HIDE_THRESHOLD_PX) {
           // Near the top — always show, regardless of direction.
           setHidden(false);
         } else if (delta > DIRECTION_DELTA_PX) {
