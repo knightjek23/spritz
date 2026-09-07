@@ -381,8 +381,9 @@ export function SearchAutocomplete({
             so there is an 8px gap after the 12px glyph. Two glyphs share
             the slot and cross-fade (150ms): Josh's magnifier (decorative,
             from Downloads/Search Icon.svg re-boxed from its 64-unit canvas
-            with the stroke scaled to ~1.3px) and a back chevron that is a
-            real button when the nav is expanded. */}
+            with the stroke scaled to ~1.3px) and the app's back chevron
+            (BackButton's drawing) as a real button when the nav is
+            expanded. */}
         <span className="absolute left-4 top-1/2 -translate-y-1/2 w-3 h-3 text-slate">
           <svg
             aria-hidden
@@ -411,11 +412,21 @@ export function SearchAutocomplete({
               leading === "back" ? "opacity-100" : "opacity-0 pointer-events-none"
             }`}
           >
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden>
+            {/* Same double-chevron drawing as BackButton / public/icons/
+                back.svg, so the nav's back affordance is one glyph
+                everywhere. 20px here (24 in the nav brand slot). */}
+            <svg width="20" height="20" viewBox="0 0 32 32" fill="none" aria-hidden>
               <path
-                d="M7.5 1.5 3 6l4.5 4.5"
+                d="M23 6L9 16L23 26"
                 stroke="currentColor"
-                strokeWidth="1.3"
+                strokeWidth="0.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M22.9999 8.54443L13.3076 16.0001L22.9999 23.4557"
+                stroke="currentColor"
+                strokeWidth="0.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
