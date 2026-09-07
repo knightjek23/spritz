@@ -7,10 +7,9 @@ import { NavScrollWrapper } from "./nav-scroll-wrapper";
 
 export function Nav() {
   return (
-    // NavScrollWrapper handles sticky positioning for the whole top area
-    // (LiquidGlass nav + NavSearch below) and hides both as a unit when
-    // the user scrolls down, restoring them the instant they scroll back
-    // up. Transform-only animation, GPU-composited, 280ms ease-out-quart.
+    // NavScrollWrapper handles sticky positioning for the top nav and
+    // hides it when the user scrolls down, restoring it the instant they
+    // scroll back up. Transform-only animation, GPU-composited, 280ms ease-out-quart.
     <NavScrollWrapper>
       {/* Liquid-glass top nav. Preset 'nav' = radius 0 (full-width edge to
           edge), 2px backdrop blur, subtle displacement filter, rim
@@ -48,7 +47,7 @@ export function Nav() {
             rather than the clock overlapping the wordmark. Both terms are
             zero on a device with no top inset, leaving the old h-14. */}
         <div
-          className="mx-auto max-w-md px-6 flex items-center justify-between"
+          className="mx-auto max-w-md px-6 flex items-center gap-4"
           style={{
             height: "calc(3.5rem + var(--safe-top))",
             paddingTop: "var(--safe-top)",
@@ -60,23 +59,18 @@ export function Nav() {
               pathname; keeps Nav itself a Server Component so Clerk's
               SignedIn/SignedOut/UserButton stay server-rendered. */}
           <NavBrand />
-          <div className="flex items-center gap-4 text-sm">
+          {/* Inline search, takes the remaining width. Shelf and Account
+              links used to live here; the bottom nav owns both
+              destinations, so the row is brand · search · account. */}
+          <NavSearch />
+          <div className="flex items-center text-sm shrink-0">
             <SignedIn>
-              <Link href="/collection" className="text-slate hover:text-ink">
-                Shelf
-              </Link>
-              <Link href="/account" className="text-slate hover:text-ink">
-                Account
-              </Link>
               {/* Clerk's UserButton stays for quick sign-out + identity
                   (email/password) management — those live in Clerk's hosted
                   surface, not in our /account page. */}
               <UserButton afterSignOutUrl="/" />
             </SignedIn>
             <SignedOut>
-              <Link href="/pricing" className="text-slate hover:text-ink">
-                Pro
-              </Link>
               <Link
                 href="/sign-in"
                 className="text-emerald font-medium hover:underline underline-offset-4"
@@ -87,10 +81,6 @@ export function Nav() {
           </div>
         </div>
       </LiquidGlass>
-      {/* Second row: typeahead search. Sits directly beneath the nav
-          and hides/shows with it via the shared NavScrollWrapper.
-          Self-hides on /search so we don't double up. */}
-      <NavSearch />
     </NavScrollWrapper>
   );
 }

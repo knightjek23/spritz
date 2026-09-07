@@ -56,6 +56,13 @@ interface Props {
    * "pick multiple in a row" interfaces like onboarding.
    */
   clearOnPick?: boolean;
+  /**
+   * Compact variant for the top nav: 40px tall (py-2, text-sm) so it sits
+   * in a 56px row with 8px above and below, and square corners to match
+   * the rest of the chrome. Default (48px, rounded) stays for /search and
+   * onboarding.
+   */
+  compact?: boolean;
 }
 
 export function SearchAutocomplete({
@@ -66,6 +73,7 @@ export function SearchAutocomplete({
   onSubmit,
   onPick,
   clearOnPick = false,
+  compact = false,
 }: Props) {
   const router = useRouter();
   const [q, setQ] = useState(initialQuery);
@@ -243,7 +251,11 @@ export function SearchAutocomplete({
           autoFocus={autoFocus}
           autoComplete="off"
           spellCheck={false}
-          className="w-full px-4 py-3 pr-11 rounded-xl border border-ink/20 bg-cream focus:outline-none focus:border-ink"
+          className={
+            compact
+              ? "w-full px-4 py-2 pr-11 text-sm rounded-none border border-ink/20 bg-cream focus:outline-none focus:border-ink"
+              : "w-full px-4 py-3 pr-11 rounded-xl border border-ink/20 bg-cream focus:outline-none focus:border-ink"
+          }
         />
         {/* Right-side affordance — clear-X when the user has typed
             anything, otherwise the loading pulse (only visible in the
@@ -286,7 +298,7 @@ export function SearchAutocomplete({
         <ul
           id="search-suggestions"
           role="listbox"
-          className="absolute left-0 right-0 mt-2 bg-cream border border-ink/10 rounded-xl shadow-lg overflow-hidden z-20"
+          className={`absolute left-0 right-0 mt-2 bg-cream border border-ink/10 shadow-lg overflow-hidden z-20 ${compact ? "rounded-none" : "rounded-xl"}`}
         >
           {suggestions.length === 0 && loading && (
             <li className="px-4 py-3 text-sm text-slate">Searching…</li>
