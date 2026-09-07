@@ -291,13 +291,13 @@ export function SearchAutocomplete({
           />
         ) : (
           // Idle: Josh's magnifier (Downloads/Search Icon.svg), re-boxed
-          // from its 64-unit canvas so the glyph fills the 20px slot, with
-          // the stroke scaled to ~1.4px on screen to match the clear-X.
+          // from its 64-unit canvas so the glyph fills the 12px slot, with
+          // the stroke scaled to ~1.3px on screen to match the clear-X.
           // Decorative only; the input itself is the control.
           <svg
             aria-hidden
-            width="20"
-            height="20"
+            width="12"
+            height="12"
             viewBox="8 9.6 48 48"
             fill="none"
             className="absolute right-4 top-1/2 -translate-y-1/2 text-slate pointer-events-none"
@@ -305,7 +305,7 @@ export function SearchAutocomplete({
             <path
               d="M52.7999 54.4L40.3416 41.9417M45.3333 29.8667C45.3333 39.2924 37.6923 46.9334 28.2666 46.9334C18.841 46.9334 11.2 39.2924 11.2 29.8667C11.2 20.4411 18.841 12.8 28.2666 12.8C37.6923 12.8 45.3333 20.4411 45.3333 29.8667Z"
               stroke="currentColor"
-              strokeWidth="3.2"
+              strokeWidth="5.2"
               strokeLinecap="round"
             />
           </svg>
