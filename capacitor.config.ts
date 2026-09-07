@@ -37,7 +37,12 @@ const config: CapacitorConfig = {
   // launch" slice 8 lists.
   backgroundColor: "#F4EFE6",
   ios: {
-    contentInset: "automatic",
+    // "never": the page handles the status bar itself (viewportFit cover
+    // plus the --safe-* tokens, D13). "automatic" made WKWebView add the
+    // status-bar height as a scrollable inset on top of that, so the nav
+    // sat too low, the page had two resting positions, and pulling down
+    // scrolled into a blank cream band above the nav.
+    contentInset: "never",
   },
   plugins: {
     PushNotifications: {
