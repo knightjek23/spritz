@@ -42,6 +42,31 @@ Singular only, since Apple matches plurals itself. No spaces after the commas, e
 
 **The 11 spare bytes are intentional.** Keyword changes need a version submission, so they are cheap to make alongside any update but not on their own. Leave room to react to whatever the first month of search data shows.
 
+### App encryption / export compliance
+```
+ITSAppUsesNonExemptEncryption = false
+```
+Goes in `ios/App/App/Info.plist` (slice 2, once the Capacitor iOS project exists), NOT answered through the App Store Connect web form. Declaring it in the binary stops ASC asking the encryption questions on every submission; answering on the web means re-answering every release, which is how the wrong option eventually gets clicked in a hurry.
+
+**Why false applies here.** Apple: *"Set the value to NO if your app — including any third-party libraries it links against — doesn't use encryption, or if it only uses forms of encryption that are exempt"*, and *"the use of encryption that's built into the operating system — for example, when your app makes HTTPS connections using URLSession — is exempt... whereas the use of proprietary encryption is not."* Spritz uses HTTPS to its own API, Clerk for authentication, and Supabase / Stripe / RevenueCat over standard TLS. No proprietary or custom cryptography. Capacitor's WebView uses the OS networking layer and adds nothing.
+
+**Separate obligation that is easy to miss.** Apple: *"If your app uses exempt forms of encryption, you might alternatively be required to submit a year-end self-classification report to the U.S. government."* That is a BIS filing, annual, not handled by Apple. https://www.bis.doc.gov/index.php/policy-guidance/encryption/4-reports-and-reviews/a-annual-self-classification
+
+**Caveats:** this is a legal declaration Josh signs, not advice. Read the on-screen options. App Store Connect has historically also asked a France-specific encryption question in some flows; unverified whether it still appears.
+
+Source: https://developer.apple.com/documentation/security/complying-with-encryption-export-regulations
+
+### Category — indexed by App Store search
+```
+Primary:   Reference
+Secondary: Lifestyle
+```
+D11. Reference is where **Parfumo** sits (231k fragrances, collection tracking, notes, photo and barcode search — the closest functional analogue to Spritz). PERFUMIST, which is a taste-profile recommender rather than a reference, sits in Lifestyle. That split maps exactly onto D9's encyclopedia-vs-discovery fork.
+
+Reference is also far smaller than Lifestyle, so charting is plausible rather than theoretical. Lifestyle as secondary keeps browse reach without diluting the primary signal.
+
+**Play equivalent, decided later:** Play's taxonomy differs and includes a `Beauty` category that Apple has no equivalent for. Do not assume a straight copy of Reference.
+
 ### Description — 4,000 chars · NOT indexed by Apple search, so this is conversion copy, not ASO
 ```
 Point your camera at the label. Spritz reads it, finds the bottle, and puts the whole thing on one screen. What's in it, who made it, and how it actually wears.
@@ -91,13 +116,13 @@ Spritz is built for the moment you pick up a bottle and want a real answer. Not 
 ```
 https://spritzofficial.app/support
 ```
-Built 2026-09-01. Covers scan failures, missing fragrances, collections, Pro billing (including the "cancel where you subscribed" rule), data rights, and the contact address.
+**VERIFIED LIVE 2026-09-01.** Covers scan failures, missing fragrances, collections, Pro billing (including the "cancel where you subscribed" rule), data rights, and the contact address.
 
 ### Account deletion URL — required by Google Play as a standalone public page
 ```
 https://spritzofficial.app/support/delete-account
 ```
-Built 2026-09-01. Reachable with no app installed and no sign-in, which is Play's requirement. Lists exactly what is deleted, what is retained and why, the 30-day timeline, and that store subscriptions must be cancelled separately. This is the URL to paste into Play's Data safety form.
+**VERIFIED LIVE 2026-09-01**, confirmed reachable with no app installed and no sign-in, which is Play's requirement. Lists exactly what is deleted, what is retained and why, the 30-day timeline, and that store subscriptions must be cancelled separately. This is the URL to paste into Play's Data safety form.
 
 Apple's separate requirement under Guideline 5.1.1(v) is an **in-app** deletion path. That is still slice 4 and is NOT satisfied by this page.
 

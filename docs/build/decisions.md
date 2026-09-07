@@ -133,3 +133,29 @@ Every Tier 1 and Tier 2 decision, with the options considered, the choice, who m
 - **Decided by:** Claude, with Josh's instruction to build both and use `josh.knight@spritzofficial.online`
 - **Why email rather than a form:** Play requires a way to *request* deletion, not an automated pipeline. A form would need an endpoint, spam handling, and identity verification, all to send an email that the account holder can send themselves. Requiring the mail to come from the account address is also stronger identity proof than an unauthenticated form field. Revisit if volume ever justifies it.
 - **Open, needs Josh:** the support address is on `spritzofficial.online` while the site is `spritzofficial.app`. Deliberate, or a typo? A support address that bounces is an App Review rejection cause, since review emails it.
+
+## D11 — App Store category
+
+- **Date:** 2026-09-01
+- **Slice:** 9
+- **Tier:** 1
+- **Options:** (a) Reference primary, Lifestyle secondary. (b) Lifestyle primary, Reference secondary.
+- **Choice:** (a) **Reference primary, Lifestyle secondary.**
+- **Decided by:** Josh
+- **Why:** Grounded in what comparable apps actually do rather than intuition. **Parfumo** — a perfume encyclopedia with 231,000 fragrances, collection tracking, notes, similar scents and photo/barcode search, which is the closest functional analogue Spritz has — is categorized **Reference**. **PERFUMIST**, a taste-profile recommendation engine, is **Lifestyle**. The split falls exactly along D9's encyclopedia-vs-discovery line, and Spritz chose encyclopedia.
+- **Second reason:** category is indexed by App Store search, and Apple now also generates LLM-based app tags from submitted metadata. Reference makes the name, subtitle, description, keywords and category all tell one story instead of pulling apart.
+- **Third reason:** Lifestyle is among the largest categories on the store, so charting there is not realistic. Reference is small enough that a well-made app can place.
+- **Note:** Google Play's taxonomy is different and includes a `Beauty` category with no Apple equivalent. Decide Play's separately rather than copying this.
+
+## D12 — Slice 2 platform order: iOS first
+
+- **Date:** 2026-09-01
+- **Slice:** 2
+- **Tier:** 1
+- **Context:** Slice 2 splits across two machines. iOS needs the Mac and Xcode 26; Android builds on the Windows box Josh works from daily. The build map treated slice 2 as a single unit, which hid this.
+- **Options:** (a) Android first on Windows, starting slice 3's 14-day tester clock days earlier. (b) iOS first on the Mac. (c) Both platforms added in one pass.
+- **Choice:** (b) **iOS first.**
+- **Decided by:** Josh (against the recommendation, which was Android first)
+- **Recommendation and its reasoning, recorded for the record:** Android first would start the closed-test clock sooner, and that clock is the longest uncompressible wait in the launch (14 days continuous + up to 7 days production review). Every day it is not running adds a day to the Android date.
+- **Why (b) is defensible anyway:** Apple-first has been the plan since the July runbook and is what D2 assumed. Apple is the harder review, and a Guideline 4.2 rejection is the highest-severity risk on the launch, so finding it early has real value.
+- **Mitigation, agreed:** register the Play Console account NOW in parallel. It carries its own identity and payment verification wait of up to 5 days, is slice 1 work rather than slice 2, and doing it during the iOS build means the tester clock can start the moment an Android build exists instead of 5 days later.

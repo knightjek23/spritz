@@ -84,3 +84,12 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
 ### Tooling added
 - `npm run test:purge` — seeds a throwaway user, runs the purge, asserts 9 outcomes, cleans up. Keyed to a generated `test-purge-*` id so it cannot touch real data.
 - `npm run diag:infra` — read-only check of which buckets and tables actually exist.
+
+## Slice 4 — CLOSED
+
+- **Closed:** 2026-09-01
+- Merged to main and deployed. Josh confirmed the in-app deletion works end to end on production, and the support page renders.
+- `https://spritzofficial.app/support` and `https://spritzofficial.app/support/delete-account` both verified live and publicly reachable with no sign-in.
+- **Apple Guideline 5.1.1(v) satisfied.** Google Play's separate public-deletion-URL requirement satisfied.
+- **Left open deliberately:** the Stripe cancellation branch is still unexercised, because testing it needs a real live-mode subscription. Its failure mode is safe by construction (hard stop, 502, nothing deleted), but it has never run.
+- **Follow-up owed:** `/legal/privacy` should get its in-app deletion wording back, since the control now exists. It currently points at the web page only.
