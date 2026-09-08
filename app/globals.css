@@ -441,3 +441,24 @@ h1, h2, h3, h4 {
     transform: none;
   }
 }
+
+/* ===== Clerk's spinner → the Spritz bottle =====
+   Clerk renders its wait states (sign-in submit, OAuth handoff, sign-out)
+   with a border spinner on `.cl-spinner`. With the brand's borderRadius: 0
+   that spinner degenerates into a rotating corner. Replace it with the
+   same bottle-and-spray mark as components/spritz-loader.tsx, as a
+   self-contained animated SVG (its keyframes travel inside the data URI,
+   so it animates as a background image). Emerald strokes, paper cap fill
+   to match the Clerk card surface. Keep this in step with the loader. */
+.cl-spinner {
+  width: 28px !important;
+  height: 40px !important;
+  border: none !important;
+  border-radius: 0 !important;
+  animation: none !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2248 -3 148 214%22 fill=%22none%22%3E %3Cstyle%3E @keyframes press{0%25,100%25{transform:translateY(0)}10%25,45%25{transform:translateY(8px)}60%25{transform:translateY(0)}} @keyframes puff{0%25{opacity:0;transform:translateX(0) scale(.5)}14%25{opacity:1}70%25,100%25{opacity:0;transform:translateX(6px) scale(1.18)}} @keyframes glow{0%25,100%25{fill-opacity:.18}45%25{fill-opacity:.58}} .cap{animation:press 1.35s cubic-bezier(.32,.72,0,1) infinite} .spray,.mist{transform-box:view-box;transform-origin:145px 28.5px;opacity:0;animation:puff 1.35s cubic-bezier(.22,1,.36,1) infinite} .mist{animation-delay:120ms} .liquid{animation:glow 1.35s ease-in-out infinite} %3C/style%3E %3Cg stroke=%22%231F3F2E%22 stroke-width=%225%22%3E %3Cpath class=%22liquid%22 d=%22M57 148 H162 V198 A4 4 0 0 1 158 202 H61 A4 4 0 0 1 57 198 Z%22 fill=%22%231F3F2E%22 fill-opacity=%22.2%22 stroke=%22none%22/%3E %3Crect x=%2256%22 y=%2260%22 width=%22107%22 height=%22143%22 rx=%227.5%22/%3E %3Crect x=%2298%22 y=%2244%22 width=%2223%22 height=%2215%22/%3E %3Cg class=%22cap%22%3E%3Crect x=%2288%22 y=%2216%22 width=%2243%22 height=%2227%22 rx=%221.5%22 fill=%22%23F0EADE%22/%3E%3Crect x=%22131%22 y=%2224%22 width=%2212%22 height=%229%22 rx=%221.5%22 fill=%22%23F0EADE%22/%3E%3C/g%3E %3Cg class=%22spray%22 stroke-linecap=%22round%22%3E%3Cpath d=%22M150.5 20 L169.3 13.2%22/%3E%3Cpath d=%22M152 28.5 L172 28.5%22/%3E%3Cpath d=%22M150.5 37 L169.3 43.8%22/%3E%3C/g%3E %3Cg class=%22mist%22 fill=%22%231F3F2E%22 stroke=%22none%22%3E%3Ccircle cx=%22177.8%22 cy=%2210.1%22 r=%222.8%22/%3E%3Ccircle cx=%22180%22 cy=%2228.5%22 r=%222.8%22/%3E%3Ccircle cx=%22177.8%22 cy=%2246.9%22 r=%222.8%22/%3E%3C/g%3E %3C/g%3E %3C/svg%3E") center / contain no-repeat !important;
+  color: transparent !important;
+}
+.cl-spinner > * {
+  display: none !important;
+}
