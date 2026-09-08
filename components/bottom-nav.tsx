@@ -111,7 +111,8 @@ export function BottomNav() {
       // Floating placement: 16px from each side, 24px above the bottom
       // edge. Under viewportFit: "cover" the viewport now extends beneath
       // the home indicator, so the offset is measured from the safe area,
-      // not the glass — --nav-pill-offset is 24px + the bottom inset.
+      // not the glass — --nav-pill-offset is 8px above the home indicator,
+      // or 24px from the edge on phones without one (globals.css).
       // Side offsets pick up the left/right insets too, which are zero in
       // portrait and non-zero in landscape on notched phones.
       style={{
