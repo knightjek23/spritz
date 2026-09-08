@@ -56,7 +56,7 @@ export function Nav() {
               <SignedOut>
                 <Link
                   href="/sign-in"
-                  className="text-emerald font-medium hover:underline underline-offset-4"
+                  className="text-emerald font-medium whitespace-nowrap hover:underline underline-offset-4"
                 >
                   Sign in
                 </Link>
