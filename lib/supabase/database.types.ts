@@ -494,6 +494,30 @@ export type Database = {
           match_score: number;
         }>;
       };
+      // Keyword search across notes and families (migration 0029). p_terms
+      // is the resolved term list from lib/search-terms.ts.
+      find_fragrances_by_terms: {
+        Args: {
+          p_terms: Array<{
+            key: string;
+            names: string[];
+            pattern: string | null;
+            family: string | null;
+          }>;
+          p_limit?: number;
+        };
+        Returns: Array<{
+          id: string;
+          name: string;
+          house: string;
+          family: string[] | null;
+          year: number | null;
+          bottle_image_url: string | null;
+          popularity_rank: number | null;
+          matched: string[];
+          match_count: number;
+        }>;
+      };
       find_similar_fragrances: {
         Args: { p_id: string; p_limit?: number };
         Returns: Array<

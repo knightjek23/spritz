@@ -14,12 +14,13 @@
 // Backed by the existing /api/search route (trigram on name + house).
 // We slice down to 8 in the UI to keep the dropdown scannable.
 
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { cleanBottleImageUrl } from "@/lib/bottle-image";
 import { BottleImage } from "@/components/bottle-image";
 import type { Fragrance } from "@/lib/types";
+import type { SearchResponse, SearchTerm } from "@/lib/search-terms";
 import {
   addRecentSearch,
   clearRecentSearches,
@@ -29,7 +30,16 @@ import {
 
 const DEBOUNCE_MS = 180;
 const MAX_SUGGESTIONS = 8;
+// When the query is all notes/families, the dropdown splits: most popular
+// by those terms first, then name matches.
+const MAX_BY_TERMS = 5;
+const MAX_NAMES_WITH_TERMS = 3;
 const MIN_QUERY_LEN = 2;
+
+// One dropdown row. `matched` is set on keyword hits (which terms the
+// fragrance carries) and absent on name hits; that is also how rows are
+// grouped into the two sections.
+type Row = Fragrance & { matched?: string[]; match_count?: number };
 
 interface Props {
   /** Optional initial value when landing on /search?q=… */
@@ -111,7 +121,8 @@ export function SearchAutocomplete({
   const abortRef = useRef<AbortController | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [q, setQ] = useState(initialQuery);
-  const [suggestions, setSuggestions] = useState<Fragrance[]>([]);
+  const [suggestions, setSuggestions] = useState<Row[]>([]);
+  const [terms, setTerms] = useState<SearchTerm[] | null>(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [highlight, setHighlight] = useState(0);
@@ -149,6 +160,7 @@ export function SearchAutocomplete({
     const trimmed = q.trim();
     if (trimmed.length < MIN_QUERY_LEN) {
       setSuggestions([]);
+      setTerms(null);
       setLoading(false);
       // Cancel anything in flight from a prior longer query.
       abortRef.current?.abort();
@@ -171,8 +183,17 @@ export function SearchAutocomplete({
           setSuggestions([]);
           return;
         }
-        const data = await res.json();
-        const hits: Fragrance[] = (data.results ?? []).slice(0, MAX_SUGGESTIONS);
+        const data = (await res.json()) as SearchResponse;
+        const names = (data.results ?? []) as unknown as Row[];
+        const byTerms = (data.byTerms ?? []) as unknown as Row[];
+        const keyword = data.terms && byTerms.length > 0;
+        const hits: Row[] = keyword
+          ? [
+              ...byTerms.slice(0, MAX_BY_TERMS),
+              ...names.slice(0, MAX_NAMES_WITH_TERMS),
+            ]
+          : names.slice(0, MAX_SUGGESTIONS);
+        setTerms(keyword ? data.terms : null);
         setSuggestions(hits);
         setHighlight(0);
         setOpen(true);
@@ -517,6 +538,10 @@ export function SearchAutocomplete({
             <li className="px-4 py-3 text-sm text-slate">Searching…</li>
           )}
           {suggestions.map((f, idx) => {
+            const isTerm = Array.isArray(f.matched);
+            const firstTerm = isTerm && idx === 0;
+            const firstName =
+              !isTerm && terms !== null && (idx === 0 || Array.isArray(suggestions[idx - 1]?.matched));
             const inner = (
               <>
                 <div className="shrink-0 w-10 h-14 relative">
@@ -535,19 +560,45 @@ export function SearchAutocomplete({
                     {f.year ? ` · ${f.year}` : ""}
                   </div>
                 </div>
-                {Array.isArray(f.family) && f.family[0] && (
-                  <span className="hidden sm:inline-block font-mono text-[10px] uppercase tracking-wider text-slate shrink-0">
-                    {f.family[0]}
+                {isTerm && terms && terms.length > 1 ? (
+                  // "2/3": how many of the typed terms this bottle carries.
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-slate shrink-0">
+                    {f.match_count}/{terms.length}
                   </span>
+                ) : (
+                  Array.isArray(f.family) &&
+                  f.family[0] && (
+                    <span className="hidden sm:inline-block font-mono text-[10px] uppercase tracking-wider text-slate shrink-0">
+                      {f.family[0]}
+                    </span>
+                  )
                 )}
               </>
             );
+            const header = firstTerm ? (
+              <li
+                key="h-terms"
+                className="px-4 pt-3 pb-1 font-mono text-[10px] uppercase tracking-wider text-slate truncate"
+                aria-hidden
+              >
+                Most popular with {terms!.map((t) => t.label).join(" · ")}
+              </li>
+            ) : firstName ? (
+              <li
+                key="h-names"
+                className="px-4 pt-3 pb-1 font-mono text-[10px] uppercase tracking-wider text-slate border-t border-ink/5"
+                aria-hidden
+              >
+                Fragrances
+              </li>
+            ) : null;
             const itemClass = `flex items-center gap-3 px-3 py-2.5 transition ${
               idx === highlight ? "bg-paper" : "bg-transparent"
             }`;
             return (
+              <Fragment key={`${isTerm ? "t" : "n"}-${f.id}`}>
+              {header}
               <li
-                key={f.id}
                 id={`search-suggestion-${f.id}`}
                 role="option"
                 aria-selected={idx === highlight}
@@ -572,6 +623,7 @@ export function SearchAutocomplete({
                   </Link>
                 )}
               </li>
+              </Fragment>
             );
           })}
           {/* "See all results" footer only makes sense in link mode —
