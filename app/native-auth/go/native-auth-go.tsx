@@ -51,20 +51,27 @@ export function NativeAuthGo() {
       return;
     }
 
-    (async () => {
-      if (isSignedIn) {
-        // Stale session from a previous native sign-in; see header. No
-        // redirect: stay on this page and start the provider right after.
-        await clerk.signOut();
-      }
-      // clerk.client.signIn rather than the hook's copy, so a sign-out a
-      // moment ago cannot leave us holding a stale resource.
-      const resource = clerk.client?.signIn ?? signIn;
-      await resource?.authenticateWithRedirect({
+    // clerk.client.signIn rather than the hook's copy, so a sign-out a
+    // moment ago cannot leave us holding a stale resource.
+    const start = () =>
+      (clerk.client?.signIn ?? signIn)?.authenticateWithRedirect({
         strategy,
         redirectUrl: CALLBACK_PATH,
         redirectUrlComplete: COMPLETE_PATH,
       });
+
+    (async () => {
+      if (isSignedIn) {
+        // Stale session from a previous native sign-in; see header. The
+        // callback form of signOut runs `start` after the session is gone
+        // and, unlike the options form, does not navigate to
+        // afterSignOutUrl first (which sent the sheet to the landing page).
+        await clerk.signOut(async () => {
+          await start();
+        });
+        return;
+      }
+      await start();
     })().catch(() => setError("Couldn't start sign-in. Go back to the app and try again."));
   }, [authLoaded, signInLoaded, isSignedIn, signIn, clerk, params]);
 

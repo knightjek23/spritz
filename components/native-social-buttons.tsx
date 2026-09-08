@@ -11,6 +11,8 @@
 // and first client render agree and there is no hydration mismatch.
 
 import { useEffect, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import { isNativeApp } from "@/lib/native";
 import {
   NATIVE_AUTH_EVENT,
@@ -32,6 +34,8 @@ const PROVIDERS: { strategy: NativeOAuthStrategy; name: string; icon: string }[]
 
 export function NativeSocialButtons({ mode }: { mode: "sign-in" | "sign-up" }) {
   const [native, setNative] = useState(false);
+  const { isLoaded: authLoaded, isSignedIn } = useAuth();
+  const router = useRouter();
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string | null>(null);
   const [active, setActive] = useState<NativeOAuthStrategy | null>(null);
@@ -70,7 +74,22 @@ export function NativeSocialButtons({ mode }: { mode: "sign-in" | "sign-up" }) {
     return () => document.removeEventListener("visibilitychange", onVisible);
   }, [native, phase]);
 
+  // Once the deep link has activated the session, Clerk's <SignIn /> below
+  // unmounts itself and this page is just two buttons over blank space.
+  // The bridge already routes to Home or Welcome; this is the fallback for
+  // the render that lands before that navigation commits.
+  useEffect(() => {
+    if (native && authLoaded && isSignedIn) router.replace("/");
+  }, [native, authLoaded, isSignedIn, router]);
+
   if (!native) return null;
+  if (authLoaded && isSignedIn) {
+    return (
+      <p className="font-mono text-xs uppercase tracking-widest text-slate mb-6">
+        Signed in
+      </p>
+    );
+  }
 
   const busy = phase === "started" || phase === "exchanging";
   const verb = mode === "sign-in" ? "Continue" : "Sign up";
