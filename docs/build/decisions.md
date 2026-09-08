@@ -322,14 +322,14 @@ Every Tier 1 and Tier 2 decision, with the options considered, the choice, who m
 - **Why:** The store page is the first brand touchpoint and Josh is the designer. (b) would be competent and get redone; (c) undercuts the D9 story the listing copy leans on. Caption drafts live in `store-listing-copy.md`.
 - **Also:** `TARGETED_DEVICE_FAMILY` set to iPhone only, so no iPad screenshot set and no iPad review surface for a portrait, `max-w-md` app.
 
-## D30 — Native sign-in keeps the signed-in shortcut
+## D30 — Native sign-in always runs the tapped provider (shortcut removed)
 
 - **Date:** 2026-09-08
 - **Slice:** 2 (revisit)
 - **Tier:** 2
-- **Context:** The native sign-in handoff runs in Safari. If Safari already holds a Spritz session, `/native-auth/go` hands it back to the app without running the provider the user tapped. Surfaced when testing Sign in with Apple on a phone whose Safari was signed in with Google: the Apple button "worked" but returned the Google account.
-- **Options:** (a) Keep the shortcut. (b) Always run the tapped provider.
-- **Choice:** (a) **Keep the shortcut.**
-- **Decided by:** Josh
-- **Why:** Real users overwhelmingly have one account, and the shortcut makes native sign-in a single tap with no OAuth round trip and no "Open in Spritz?" prompt. (b) is more literal but slower for everyone to serve a rare case.
-- **Consequence:** testing a second provider on a device means signing out in Safari first. Documented in the build log; worth a line in the reviewer notes so App Review's tester isn't confused if their Safari holds a session.
+- **Context:** The native sign-in handoff runs in an `SFSafariViewController`. `/native-auth/go` used to short-circuit when that browser already held a Spritz session, on the assumption it was sharing the Safari app's session. It is not: since iOS 11 the view controller has its own cookie store, so the only session it can hold is one the app itself created on an earlier sign-in. Surfaced when Sign in with Apple kept returning the Google account even after signing out of Safari and the app.
+- **Options:** (a) Keep the shortcut. (b) Always run the tapped provider, signing the stale session out first.
+- **Choice:** (b). Josh first chose (a) on the Safari-sharing premise; reversed the same day once the cookie isolation was established.
+- **Decided by:** Josh (initial), corrected by Claude with the new fact and confirmed in the build log.
+- **Why:** With isolated storage the shortcut only ever fires for a user who signed out and is signing back in, and in that case it silently hands back the old account whichever button they tap. Nobody could switch accounts. (b) costs the OAuth round trip only at sign-in, which is rare.
+- **Consequence:** `native-auth-go.tsx` calls `clerk.signOut()` when it finds a session, then `authenticateWithRedirect` with the requested strategy. Already-installed builds pick this up on next launch (web page). The one-time workaround before the deploy is deleting and reinstalling the app, which wipes the sheet's storage.
