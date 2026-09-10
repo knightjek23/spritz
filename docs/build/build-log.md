@@ -191,3 +191,9 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
 - **Tooling notes:** `git status` from the Linux side of the device shell shows ~630 modified files in this clone; that is CRLF on disk seen by a git with no `autocrlf`, not real changes. Windows git is the source of truth for this clone. `adb exec-out screencap -p > file.png` through PowerShell corrupts the PNG (text re-encoding); use `adb shell screencap -p /sdcard/x.png` then `adb pull`.
 - **Still owed for Android parity, none of it blocking slice 3:** status bar icons are white on the cream background (slice 8 Android half, needs `StatusBar.setStyle` dark on Android or `windowLightStatusBar` in the theme); Android push (FCM, slice 5 half); native camera on Android (slice 6 half); offline page in airplane mode.
 - **Next:** slice 3. Sign a release AAB, upload to a closed track, invite 14+ testers, record day 1 of 14.
+
+## Cross-platform rules from here (2026-09-10)
+
+- Two native shells now share `capacitor.config.ts`. Any change to it, or a plugin add/upgrade, needs `npx cap sync ios` on the Mac **and** `npx cap sync android` on the Windows clone (`C:\dev\spritz`), each followed by that platform's rebuild. Web changes still deploy via Vercel with no sync on either side.
+- iOS-only keys (`ios.contentInset`) and Android-only files (`android/`) are ignored by the other platform's sync; no coordination needed for those beyond pulling.
+- The Mac clone is the place for web and iOS work; the Windows clone for Android. Both push to `main`; pull before starting on either machine.
