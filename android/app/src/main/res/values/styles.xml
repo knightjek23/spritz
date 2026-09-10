@@ -17,6 +17,10 @@
 
 
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <!-- Android 12+ system splash: cream behind the launcher icon, matching
+             capacitor.config.ts backgroundColor (#F4EFE6) so launch -> first
+             page is one continuous colour. Pre-12 devices use @drawable/splash. -->
+        <item name="windowSplashScreenBackground">#F4EFE6</item>
         <item name="android:background">@drawable/splash</item>
     </style>
 </resources>
