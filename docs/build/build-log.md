@@ -197,3 +197,9 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
 - Two native shells now share `capacitor.config.ts`. Any change to it, or a plugin add/upgrade, needs `npx cap sync ios` on the Mac **and** `npx cap sync android` on the Windows clone (`C:\dev\spritz`), each followed by that platform's rebuild. Web changes still deploy via Vercel with no sync on either side.
 - iOS-only keys (`ios.contentInset`) and Android-only files (`android/`) are ignored by the other platform's sync; no coordination needed for those beyond pulling.
 - The Mac clone is the place for web and iOS work; the Windows clone for Android. Both push to `main`; pull before starting on either machine.
+
+## Slice 7 (iOS) — Native purchases
+
+- **Built 2026-09-11.** Design: `docs/superpowers/specs/2026-09-11-slice-7-purchases-design.md`. D31–D33. Apple banking read Clear the same day.
+- **Verified before push:** typecheck clean; `lib/native/purchases.ts` exercised against a stubbed SDK (configure / user switch / logout, store-priced plans with the trial read from the intro offer, purchase → sync, cancel, purchase-without-entitlement error, empty offerings → unavailable, restore → sync).
+- **Owed:** migration 0030; App Store Connect products; RevenueCat project + webhook; three Vercel env vars; In-App Purchase capability; build 3; sandbox run through the acceptance criteria; App Privacy purchase-history row; reviewer-notes purchases line.

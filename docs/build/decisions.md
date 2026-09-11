@@ -333,3 +333,34 @@ Every Tier 1 and Tier 2 decision, with the options considered, the choice, who m
 - **Decided by:** Josh (initial), corrected by Claude with the new fact and confirmed in the build log.
 - **Why:** With isolated storage the shortcut only ever fires for a user who signed out and is signing back in, and in that case it silently hands back the old account whichever button they tap. Nobody could switch accounts. (b) costs the OAuth round trip only at sign-in, which is rare.
 - **Consequence:** `native-auth-go.tsx` calls `clerk.signOut()` when it finds a session, then `authenticateWithRedirect` with the requested strategy. Already-installed builds pick this up on next launch (web page). The one-time workaround before the deploy is deleting and reinstalling the app, which wipes the sheet's storage.
+
+## D31 — App Store monthly carries the 7-day free trial
+
+- **Date:** 2026-09-11
+- **Slice:** 7
+- **Tier:** 1
+- **Context:** One-pager Q3. The web offers 7 days free on monthly (not annual) via Stripe.
+- **Options:** (a) Match the web: 7-day Introductory Offer on `spritz_pro_monthly` only. (b) No trial on the App Store.
+- **Choice:** (a).
+- **Decided by:** Josh
+- **Why:** Same pricing story on both platforms, the App Store listing shows the trial, and the one-pager's conversion guardrail compares like with like. Configured on the Apple product, not in code; the pricing page reads the store's intro offer and shows whatever is configured.
+
+## D32 — A Stripe-Pro user inside the app sees "managed on the web", nothing else
+
+- **Date:** 2026-09-11
+- **Slice:** 7
+- **Tier:** 1
+- **Options:** (a) Pro badge plus a line that the subscription is managed at spritzofficial.app; no portal button, no purchase offer. (b) A Manage button that opens the Stripe portal in Safari.
+- **Choice:** (a).
+- **Decided by:** Josh
+- **Why:** Apple's multiplatform rule permits honoring a subscription bought elsewhere as long as no purchase link-out is shown; (b) is the exact surface reviewers flag under 3.1.1. Backed by a new `users.pro_source` column so a store expiration never downgrades a web subscriber.
+
+## D33 — Restore purchases on /pricing and on Account
+
+- **Date:** 2026-09-11
+- **Slice:** 7
+- **Tier:** 1
+- **Options:** (a) Text link under the pricing CTA plus the same link in the Account plan card for free users. (b) Pricing page only.
+- **Choice:** (a).
+- **Decided by:** Josh
+- **Why:** Apple requires a restore path for the non-consumable lifetime tier and looks for it on the paywall; a reinstalling user who opens Account first should not have to hunt for it.

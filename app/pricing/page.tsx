@@ -8,8 +8,16 @@
 // Plan toggle is local state (no URL param) — keeping the page server-stable
 // avoids a flash of the wrong plan card on initial paint.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useClerk, useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { isNativeApp } from "@/lib/native";
+import {
+  getNativePlans,
+  purchasePro,
+  restorePro,
+  type NativePlanInfo,
+} from "@/lib/native/purchases";
 
 type Plan = "monthly" | "annual" | "lifetime";
 
@@ -109,7 +117,7 @@ const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: "Do you sell my data?",
-    a: "No. We don't sell or share scan history, collection contents, or preferences with anyone. The only data leaving Spritz is what's needed to process payments (Stripe) and authentication (Clerk).",
+    a: "No. We don't sell or share scan history, collection contents, or preferences with anyone. The only data leaving Spritz is what's needed to process payments and authentication (Clerk).",
   },
   {
     q: "What if I scan something you don't have?",
@@ -120,8 +128,34 @@ const FAQ: Array<{ q: string; a: string }> = [
 export default function PricingPage() {
   const { isLoaded, isSignedIn, user } = useUser();
   const clerk = useClerk();
+  const router = useRouter();
   const [selected, setSelected] = useState<Plan>("annual");
   const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  // Native shell (slice 7): purchases go through the App Store / Play via
+  // RevenueCat and prices come from the store, localized. Stripe is never
+  // reachable from here (Guideline 3.1.1). Detected after mount so the
+  // server render and first client render agree.
+  const [native, setNative] = useState(false);
+  const [nativePlans, setNativePlans] = useState<Record<Plan, NativePlanInfo> | null>(null);
+  useEffect(() => {
+    setNative(isNativeApp());
+  }, []);
+  useEffect(() => {
+    if (!native || !isSignedIn) return;
+    let cancelled = false;
+    getNativePlans()
+      .then((plans) => {
+        if (!cancelled) setNativePlans(plans);
+      })
+      .catch(() => {
+        if (!cancelled) setNativePlans(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [native, isSignedIn]);
 
   // Optimistic check — server is authoritative, but no point showing
   // "Upgrade" to someone who's already Pro.
@@ -130,6 +164,12 @@ export default function PricingPage() {
   async function upgrade(plan: Plan) {
     if (!isLoaded) return; // wait for Clerk; prevents hydration races
     if (!isSignedIn) {
+      if (native) {
+        // Clerk's modal would render inside the webview with the social
+        // buttons hidden; the sign-up page carries the native buttons.
+        router.push(`/sign-up?redirect_url=${encodeURIComponent("/pricing")}`);
+        return;
+      }
       // Modal sign-up — keeps the user on /pricing so they can complete
       // the upgrade right after signing up. Session 01 root cause: the
       // silent redirect to /sign-up dropped the upgrade intent on the
@@ -137,6 +177,26 @@ export default function PricingPage() {
       clerk.openSignUp({
         redirectUrl: typeof window !== "undefined" ? window.location.href : "/pricing",
       });
+      return;
+    }
+    if (native) {
+      setBusy(true);
+      setNotice(null);
+      try {
+        const outcome = await purchasePro(plan);
+        if (outcome.status === "purchased") {
+          await user?.reload(); // publicMetadata.plan mirrors the grant
+          router.push("/collection?upgraded=1");
+          router.refresh();
+        } else if (outcome.status === "unavailable") {
+          setNotice("Purchases aren't available right now. Try again in a moment.");
+        } else if (outcome.status === "error") {
+          setNotice(outcome.message);
+        }
+        // cancelled: the user closed the sheet, nothing to say.
+      } finally {
+        setBusy(false);
+      }
       return;
     }
     setBusy(true);
@@ -158,7 +218,43 @@ export default function PricingPage() {
     }
   }
 
-  const plan = PLANS[selected];
+  async function restore() {
+    setBusy(true);
+    setNotice(null);
+    try {
+      const { restored } = await restorePro();
+      if (restored) {
+        await user?.reload();
+        router.push("/account");
+        router.refresh();
+      } else {
+        setNotice("No previous purchase found for this Apple ID.");
+      }
+    } catch {
+      setNotice("Couldn't reach the store. Try again in a moment.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // On native, the store's localized price replaces the hardcoded one and
+  // the trial line reflects the store's own introductory offer.
+  const web = PLANS[selected];
+  const storePlan = nativePlans?.[selected] ?? null;
+  const plan = storePlan
+    ? {
+        ...web,
+        price: storePlan.priceString,
+        sub:
+          selected === "monthly"
+            ? storePlan.trial
+              ? `${storePlan.trial.replace(/^(\d+) (day|week|month)s?$/, "$1-$2")} free trial, then ${storePlan.priceString}/mo. Cancel anytime.`
+              : `${storePlan.priceString}/mo. Cancel anytime.`
+            : selected === "annual"
+              ? `Billed annually at ${storePlan.priceString}. Cancel anytime.`
+              : web.sub,
+      }
+    : web;
 
   return (
     <div className="mx-auto max-w-md px-6 py-12">
@@ -185,7 +281,9 @@ export default function PricingPage() {
             You&apos;re already Pro.
           </p>
           <p className="text-sm text-ink">
-            Manage your subscription from your account menu.
+            {native
+              ? "See your plan under Profile."
+              : "Manage your subscription from your account menu."}
           </p>
         </div>
       )}
@@ -240,8 +338,27 @@ export default function PricingPage() {
         )}
 
         <p className="mt-3 text-center font-mono text-xs uppercase tracking-widest text-slate">
-          {isSignedIn ? "Secure checkout via Stripe" : "Sign up first. Takes 30 seconds."}
+          {!isSignedIn
+            ? "Sign up first. Takes 30 seconds."
+            : native
+              ? "Billed through the App Store"
+              : "Secure checkout via Stripe"}
         </p>
+        {notice && (
+          <p className="mt-3 text-center text-sm text-burgundy">{notice}</p>
+        )}
+        {/* Restore purchases: Apple requires it for the lifetime product
+            (non-consumable). Native only; the web has nothing to restore. */}
+        {native && isSignedIn && !isAlreadyPro && (
+          <button
+            type="button"
+            onClick={restore}
+            disabled={busy}
+            className="mt-4 w-full text-center font-mono text-xs uppercase tracking-widest text-slate underline underline-offset-4 disabled:opacity-60"
+          >
+            Restore purchases
+          </button>
+        )}
       </div>
 
       {/* Comparison table */}

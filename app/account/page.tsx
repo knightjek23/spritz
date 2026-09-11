@@ -26,11 +26,8 @@ import Link from "next/link";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PushSettings } from "@/components/push-settings";
-import {
-  ManageSubscriptionButton,
-  SignOutButton,
-  DeleteAccountSection,
-} from "@/components/account-actions";
+import { SignOutButton, DeleteAccountSection } from "@/components/account-actions";
+import { PlanActions } from "@/components/plan-actions";
 
 export const metadata: Metadata = {
   title: "Account",
@@ -52,7 +49,7 @@ export default async function AccountPage() {
   // App user record — the source of truth for plan + stripe linkage.
   const { data: appUser } = await supabase
     .from("users")
-    .select("id, plan, stripe_customer_id, is_lifetime, created_at")
+    .select("id, plan, stripe_customer_id, is_lifetime, pro_source, created_at")
     .eq("clerk_user_id", userId)
     .maybeSingle();
 
@@ -60,6 +57,7 @@ export default async function AccountPage() {
   const isLifetime = appUser?.is_lifetime ?? false;
   const memberSince = appUser?.created_at ?? null;
   const hasStripeCustomer = !!appUser?.stripe_customer_id;
+  const proSource = appUser?.pro_source ?? null;
 
   // Usage stats — collection size + scans in the trailing 30 days. Both
   // are cheap count queries; index-served at our scale.
@@ -118,18 +116,12 @@ export default async function AccountPage() {
                 AI-generated dupes, full editorial library, expanded
                 similar-fragrance results, and unlimited collection.
               </p>
-              {isLifetime ? (
-                <p className="text-sm text-slate italic">
-                  You have Lifetime access — paid once, yours forever. Nothing to
-                  manage or renew.
-                </p>
-              ) : hasStripeCustomer ? (
-                <ManageSubscriptionButton />
-              ) : (
-                <p className="text-sm text-slate italic">
-                  Subscription managed externally. Contact support to make changes.
-                </p>
-              )}
+              <PlanActions
+                plan="pro"
+                isLifetime={isLifetime}
+                proSource={proSource}
+                hasStripeCustomer={hasStripeCustomer}
+              />
             </>
           ) : (
             <>
@@ -137,12 +129,12 @@ export default async function AccountPage() {
                 You&apos;re on the free plan. Pro unlocks AI dupes, full
                 library depth, and an unlimited collection.
               </p>
-              <Link
-                href="/pricing"
-                className="block w-full bg-emerald text-cream py-3 rounded-xl font-medium text-center hover:bg-emerald/90 transition"
-              >
-                Go Pro
-              </Link>
+              <PlanActions
+                plan="free"
+                isLifetime={false}
+                proSource={proSource}
+                hasStripeCustomer={hasStripeCustomer}
+              />
             </>
           )}
         </div>

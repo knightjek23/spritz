@@ -137,6 +137,8 @@ export type Database = {
           plan: "free" | "pro";
           stripe_customer_id: string | null;
           is_lifetime: boolean;
+          // Which billing system granted Pro (migration 0030). NULL = legacy.
+          pro_source: "stripe" | "apple" | "play" | null;
           created_at: string;
           updated_at: string;
         };
@@ -147,6 +149,7 @@ export type Database = {
           plan?: "free" | "pro";
           stripe_customer_id?: string | null;
           is_lifetime?: boolean;
+          pro_source?: "stripe" | "apple" | "play" | null;
         };
         Update: Partial<Database["public"]["Tables"]["users"]["Insert"]>;
         Relationships: [];

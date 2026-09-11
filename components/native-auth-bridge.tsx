@@ -21,11 +21,12 @@
 // component rather than in lib/native-auth.ts itself.
 
 import { useEffect, useRef } from "react";
-import { useClerk, useSignIn } from "@clerk/nextjs";
+import { useAuth, useClerk, useSignIn } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { NATIVE_HTML_CLASS, isNativeApp } from "@/lib/native";
 import { handleNativeAuthUrl } from "@/lib/native-auth";
 import { reportPushOpened, saveTokenToServer } from "@/lib/push";
+import { configurePurchases, logOutPurchases } from "@/lib/native/purchases";
 
 // A user whose account is younger than this when they land is treated as
 // brand new and sent to first-run onboarding, matching what the web
@@ -35,7 +36,20 @@ const NEW_ACCOUNT_WINDOW_MS = 5 * 60 * 1000;
 export function NativeAuthBridge() {
   const clerk = useClerk();
   const { signIn, setActive } = useSignIn();
+  const { isLoaded: authLoaded, userId } = useAuth();
   const router = useRouter();
+
+  // RevenueCat identity follows the Clerk session (slice 7): configure the
+  // SDK with the Clerk user id so store events map to users.clerk_user_id,
+  // and forget it on sign-out so the next account starts clean.
+  useEffect(() => {
+    if (!isNativeApp() || !authLoaded) return;
+    if (userId) {
+      configurePurchases(userId).catch((e) => console.warn("[purchases] configure failed", e));
+    } else {
+      logOutPurchases().catch(() => {});
+    }
+  }, [authLoaded, userId]);
 
   // The listener is registered once but must always see the latest
   // Clerk objects, which arrive after load. Refs avoid re-registering.
