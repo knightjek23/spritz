@@ -5,7 +5,7 @@
 // the build. A plain module is unambiguous.
 
 /** Shown as the "Last updated" line on the legal and support pages. */
-export const LEGAL_LAST_UPDATED = "September 1, 2026";
+export const LEGAL_LAST_UPDATED = "September 13, 2026";
 
 /**
  * Contact address in every legal and support document, and the address given
