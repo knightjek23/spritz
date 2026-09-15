@@ -11,11 +11,11 @@
 // denied, the toggle cannot help and the row says so.
 
 import { useEffect, useState } from "react";
-import { isNativeApp } from "@/lib/native";
 import {
   disablePush,
   getPushPermission,
   isPushEnabledOnServer,
+  isPushSupported,
   requestPushAndRegister,
   type PushPermission,
 } from "@/lib/push";
@@ -27,7 +27,8 @@ export function PushSettings() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (!isNativeApp()) return;
+    // Hidden on the web and, until Android has Firebase, on Android too.
+    if (!isPushSupported()) return;
     setNative(true);
     (async () => {
       const [p, e] = await Promise.all([getPushPermission(), isPushEnabledOnServer()]);

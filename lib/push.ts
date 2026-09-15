@@ -13,12 +13,26 @@ import { isNativeApp, nativePlatform } from "./native";
 
 export type PushPermission = "prompt" | "granted" | "denied" | "unavailable";
 
+/**
+ * Push is wired for iOS (APNs) only. The Android project has no Firebase
+ * yet (no google-services.json, no FCM send path), and on Android the
+ * plugin's register() throws "Default FirebaseApp is not initialized",
+ * which Android treats as a fatal crash. On Android 12 and older the
+ * notification permission is granted by default, so an unguarded
+ * register-on-launch would kill the app before the first page painted.
+ * Every push entry point checks this so the Android shell never reaches
+ * the plugin. Lift the platform check when Android FCM lands.
+ */
+export function isPushSupported(): boolean {
+  return isNativeApp() && nativePlatform() === "ios";
+}
+
 /** Storage key for how many times the primer was dismissed with Not now. */
 export const PRIMER_DISMISS_KEY = "spritz:push-primer:dismissed";
 export const PRIMER_DISMISS_CAP = 3;
 
 export async function getPushPermission(): Promise<PushPermission> {
-  if (!isNativeApp()) return "unavailable";
+  if (!isPushSupported()) return "unavailable";
   const { PushNotifications } = await import("@capacitor/push-notifications");
   const { receive } = await PushNotifications.checkPermissions();
   if (receive === "granted") return "granted";
@@ -34,7 +48,7 @@ export async function getPushPermission(): Promise<PushPermission> {
  * listener that NativeAuthBridge owns; this function only kicks it off.
  */
 export async function requestPushAndRegister(): Promise<PushPermission> {
-  if (!isNativeApp()) return "unavailable";
+  if (!isPushSupported()) return "unavailable";
   const { PushNotifications } = await import("@capacitor/push-notifications");
   const { receive } = await PushNotifications.requestPermissions();
   if (receive !== "granted") return receive === "denied" ? "denied" : "prompt";

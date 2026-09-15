@@ -25,7 +25,7 @@ import { useAuth, useClerk, useSignIn } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { NATIVE_HTML_CLASS, isNativeApp } from "@/lib/native";
 import { handleNativeAuthUrl } from "@/lib/native-auth";
-import { reportPushOpened, saveTokenToServer } from "@/lib/push";
+import { isPushSupported, reportPushOpened, saveTokenToServer } from "@/lib/push";
 import { configurePurchases, logOutPurchases } from "@/lib/native/purchases";
 
 // A user whose account is younger than this when they land is treated as
@@ -93,8 +93,9 @@ export function NativeAuthBridge() {
   // Push listeners. Registered once for the app's lifetime. `registration`
   // fires after PushNotifications.register() (from the primer) and again
   // whenever iOS rotates the token, so the server copy stays current.
+  // iOS only until Android has Firebase: see isPushSupported().
   useEffect(() => {
-    if (!isNativeApp()) return;
+    if (!isPushSupported()) return;
     let cancelled = false;
     const handles: Array<{ remove: () => Promise<void> }> = [];
 
