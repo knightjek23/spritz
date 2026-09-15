@@ -25,7 +25,13 @@ import { useAuth, useClerk, useSignIn } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { NATIVE_HTML_CLASS, isNativeApp } from "@/lib/native";
 import { handleNativeAuthUrl } from "@/lib/native-auth";
-import { isPushSupported, reportPushOpened, saveTokenToServer } from "@/lib/push";
+import {
+  ensureAndroidChannel,
+  isPushSupported,
+  mayRegisterOnLaunch,
+  reportPushOpened,
+  saveTokenToServer,
+} from "@/lib/push";
 import { configurePurchases, logOutPurchases } from "@/lib/native/purchases";
 
 // A user whose account is younger than this when they land is treated as
@@ -92,8 +98,8 @@ export function NativeAuthBridge() {
 
   // Push listeners. Registered once for the app's lifetime. `registration`
   // fires after PushNotifications.register() (from the primer) and again
-  // whenever iOS rotates the token, so the server copy stays current.
-  // iOS only until Android has Firebase: see isPushSupported().
+  // whenever the OS rotates the token, so the server copy stays current.
+  // APNs on iOS, FCM on Android (D35); the plugin hides the difference.
   useEffect(() => {
     if (!isPushSupported()) return;
     let cancelled = false;
@@ -132,11 +138,14 @@ export function NativeAuthBridge() {
       // Permission already granted (an earlier Yes, or iOS carrying the
       // grant across a reinstall of the same bundle ID): register now so the
       // token reaches the server, and re-register on every launch after,
-      // since APNs rotates tokens. register() never shows a prompt; only
-      // requestPermissions() does, and that stays with the primer.
+      // since both APNs and FCM rotate tokens. register() never shows a
+      // prompt; only requestPermissions() does, and that stays with the
+      // primer. On Android 12 and older "granted" is the default state, so
+      // mayRegisterOnLaunch() also requires the primer's opt-in flag (D21).
       const { receive } = await PushNotifications.checkPermissions();
-      if (receive === "granted") {
+      if (receive === "granted" && mayRegisterOnLaunch()) {
         console.log("[push] permission granted, registering for a token");
+        await ensureAndroidChannel();
         await PushNotifications.register();
       }
     })();

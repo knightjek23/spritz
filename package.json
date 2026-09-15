@@ -18,6 +18,7 @@
     "eval:scan": "tsx scripts/scan-eval.ts",
     "test:purge": "tsx scripts/test-account-purge.ts",
     "push:test": "tsx scripts/push-test.ts",
+    "test:fcm": "tsx scripts/test-fcm.ts",
     "diag:infra": "tsx scripts/diag-storage-tables.ts"
   },
   "dependencies": {

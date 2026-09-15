@@ -12,7 +12,7 @@
 // picker produce. quality: 90 here is the plugin's JPEG quality for the
 // intermediate; the final encode is lib/image-prep's 0.8.
 
-import { isNativeApp } from "./native";
+import { isNativeApp, nativePlatform } from "./native";
 
 export type NativePhotoResult =
   | { kind: "photo"; dataUrl: string }
@@ -85,13 +85,32 @@ export function pickNativePhoto(): Promise<NativePhotoResult> {
 }
 
 /**
+ * Whether a one-tap "Open Settings" exists on this platform. iOS: yes,
+ * via the app-settings: scheme. Android: no (D36); app-settings: is
+ * silently ignored there and opening the app's settings page needs a
+ * plugin we chose not to carry for a rare path (the Android camera plugin
+ * hands off to the system camera, so a denied camera is uncommon). The
+ * caller shows the written path instead.
+ */
+export function canOpenAppSettings(): boolean {
+  return isNativeApp() && nativePlatform() === "ios";
+}
+
+/** Written path to the camera toggle, per platform, for the denied card. */
+export function appSettingsPath(): string {
+  return nativePlatform() === "android"
+    ? "Settings › Apps › Spritz › Permissions › Camera"
+    : "Settings › Spritz › Camera";
+}
+
+/**
  * Deep-link to this app's page in iOS Settings, where the camera toggle
  * lives. Capacitor hands non-http schemes to UIApplication.open, which
  * treats app-settings: as the Settings deep link. Verified on device as
  * part of slice 6 AC 4; the caller shows the written path as well in case
- * a future iOS stops honouring it.
+ * a future iOS stops honouring it. No-op on Android (D36).
  */
 export function openAppSettings(): void {
-  if (!isNativeApp()) return;
+  if (!canOpenAppSettings()) return;
   window.location.href = "app-settings:";
 }

@@ -32,6 +32,8 @@ import { useRouter } from "next/navigation";
 import { prepareFromDataUrl, prepareFromFile, prepareFromVideo } from "@/lib/image-prep";
 import { isNativeApp } from "@/lib/native";
 import {
+  appSettingsPath,
+  canOpenAppSettings,
   openAppSettings,
   pickNativePhoto,
   takeNativePhoto,
@@ -501,7 +503,9 @@ export function CameraCapture({
               <>
                 {/* D25: iOS only reverses a denied camera permission in
                     Settings, so link straight to the app's page there and
-                    keep the gallery as the path that needs no permission. */}
+                    keep the gallery as the path that needs no permission.
+                    D36: Android has no such link; the written path does the
+                    job and the button is not rendered. */}
                 <button
                   type="button"
                   onClick={openGallery}
@@ -509,15 +513,17 @@ export function CameraCapture({
                 >
                   Choose from Photos
                 </button>
-                <button
-                  type="button"
-                  onClick={openAppSettings}
-                  className="text-[13px] font-light uppercase tracking-wider text-ink hover:text-emerald transition"
-                >
-                  Open Settings
-                </button>
+                {canOpenAppSettings() && (
+                  <button
+                    type="button"
+                    onClick={openAppSettings}
+                    className="text-[13px] font-light uppercase tracking-wider text-ink hover:text-emerald transition"
+                  >
+                    Open Settings
+                  </button>
+                )}
                 <p className="text-[11px] font-light text-ink/60 text-center leading-snug max-w-[240px]">
-                  Settings › Spritz › Camera
+                  {appSettingsPath()}
                 </p>
               </>
             ) : (

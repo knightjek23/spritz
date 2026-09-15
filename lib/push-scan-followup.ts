@@ -12,11 +12,13 @@
 //     never sends a stale batch
 //   - nothing for a user with no enabled token, or with a send already in
 //     the last 24 hours (this is also what makes a second run idempotent)
-//   - a dead token (APNs 410 / BadDeviceToken) is disabled, not retried
+//   - a dead token (APNs 410 / BadDeviceToken, FCM UNREGISTERED) is
+//     disabled, not retried
 
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendApns } from "@/lib/apns";
+import { sendFcm } from "@/lib/fcm";
 
 export const CAMPAIGN = "scan_followup";
 
@@ -149,13 +151,15 @@ export async function runScanFollowup(opts: FollowupRunOptions = {}): Promise<Fo
     }
 
     for (const t of userTokens) {
-      if (t.platform !== "ios") {
-        // FCM lands with the Android half of slice 5.
-        continue;
-      }
+      // ios -> APNs (D19), android -> FCM (D35). Same payload, same
+      // result shape, same bookkeeping below. `push_sends.apns_status` /
+      // `apns_reason` keep their names and hold the FCM HTTP status and
+      // error code for Android rows; the token's platform says which.
+      const send = t.platform === "android" ? sendFcm : sendApns;
+      const provider = t.platform === "android" ? "fcm" : "apns";
 
       // The send row is written first so the sendId can ride in the
-      // payload; status is filled in after APNs answers.
+      // payload; status is filled in after the provider answers.
       const { data: sendRow, error: insErr } = await supabase
         .from("push_sends")
         .insert({
@@ -174,7 +178,7 @@ export async function runScanFollowup(opts: FollowupRunOptions = {}): Promise<Fo
       }
 
       try {
-        const r = await sendApns(t.token, {
+        const r = await send(t.token, {
           title: `${frag.name} by ${frag.house}`,
           body: "Here's how it wears, and what to compare it to.",
           path: `/fragrance/${frag.id}`,
@@ -190,7 +194,7 @@ export async function runScanFollowup(opts: FollowupRunOptions = {}): Promise<Fo
           result.sent++;
         } else {
           result.failed++;
-          result.details.push(`apns ${r.status} ${r.reason ?? ""} for user ${cand.userId}`);
+          result.details.push(`${provider} ${r.status} ${r.reason ?? ""} for user ${cand.userId}`);
           if (r.tokenDead) {
             await supabase.from("push_tokens").update({ enabled: false }).eq("id", t.id);
             result.tokensDisabled++;
@@ -199,7 +203,7 @@ export async function runScanFollowup(opts: FollowupRunOptions = {}): Promise<Fo
       } catch (e) {
         result.failed++;
         const msg = e instanceof Error ? e.message : String(e);
-        result.details.push(`apns transport error: ${msg}`);
+        result.details.push(`${provider} transport error: ${msg}`);
         await supabase
           .from("push_sends")
           .update({ apns_status: 0, apns_reason: msg.slice(0, 120) })

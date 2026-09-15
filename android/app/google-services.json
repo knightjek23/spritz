@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "52476555898",
+    "project_id": "spritz-93e1f",
+    "storage_bucket": "spritz-93e1f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:52476555898:android:143074cb316d1daf43c1c3",
+        "android_client_info": {
+          "package_name": "app.spritzofficial"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCaXxnxJB1LzDE1T6WYLQpGPx41KfV9nV4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
