@@ -364,3 +364,33 @@ Every Tier 1 and Tier 2 decision, with the options considered, the choice, who m
 - **Choice:** (a).
 - **Decided by:** Josh
 - **Why:** Apple requires a restore path for the non-consumable lifetime tier and looks for it on the paywall; a reinstalling user who opens Account first should not have to hunt for it.
+
+## D34 — Google Play category: Beauty
+
+- **Date:** 2026-09-11
+- **Slice:** 3
+- **Tier:** 2
+- **Options:** (a) Books & Reference, the literal match for the Apple primary (D11). (b) Lifestyle, the Apple secondary. (c) Beauty.
+- **Choice:** (c).
+- **Decided by:** Claude, confirmed by Josh
+- **Why:** Play allows one category and it feeds "similar apps" and the category charts. The two apps Spritz sits next to in a user's mind, Fragrantica Perfumes (500K+ installs) and Parfumo (100K+), are both in Beauty. Books & Reference buries a fragrance app among ebook readers; Lifestyle is too broad to help. Editable later, unlike Apple's.
+
+## D35 — Android push: FCM HTTP v1 direct from Vercel
+
+- **Date:** 2026-09-15
+- **Slice:** 5 (Android half)
+- **Tier:** 1
+- **Options:** (a) Firebase Cloud Messaging called directly from the Vercel route, mirroring D19's direct-to-APNs design; Firebase project used only for Messaging. (b) A push vendor (OneSignal or similar) for both platforms.
+- **Choice:** (a).
+- **Decided by:** Josh
+- **Why:** (b) reverses D19, adds an SDK to both apps and rows to both privacy declarations, and buys nothing a daily campaign needs. (a) adds only Firebase Messaging, which the Capacitor plugin requires on Android anyway, and one server credential. Detail that came with it: on Android 12 and older there is no notification permission, so register-on-launch would enrol people who never saw the primer; a local opt-in flag set by the primer's Yes keeps D21 (consent at the primer) true on Android. Design: `docs/superpowers/specs/2026-09-15-android-update-1-design.md`.
+
+## D36 — Android camera denied path: instruction, no settings deep link
+
+- **Date:** 2026-09-15
+- **Slice:** 6 (Android half)
+- **Tier:** 2
+- **Options:** (a) A community plugin to open the app's settings page, matching iOS's `app-settings:` link (D25). (b) Keep "Choose from Photos" and show the Android settings path as text, no button.
+- **Choice:** (b).
+- **Decided by:** Josh
+- **Why:** On Android the camera plugin hands off to the system camera app, so a denied camera is rare; a dependency for a rare path is not worth carrying. `app-settings:` is silently a no-op on Android, so the iOS button had to go either way.

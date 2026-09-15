@@ -136,19 +136,71 @@ Play's fields differ, so these are not a copy-paste of the above.
 
 ### App name — 30 chars
 ```
-TBD — "Spritz: Fragrance Guide" is available here too unless taken.
+Spritz: Fragrance Guide
 ```
+Same as Apple (D5). Entered in Play Console 2026-09-10.
 
-### Short description — 80 chars
+### Short description — 80 chars · indexed
 ```
-TBD
+Scan any perfume or cologne bottle. Notes, perfumer, and how it wears.
 ```
-Play's rough equivalent of the subtitle, but 80 characters rather than 30, and it IS indexed.
+70 / 80. Carries "perfume" and "cologne", the two words Play searchers actually type, plus "notes" and "perfumer".
 
 ### Full description — 4,000 chars · indexed by Play, unlike Apple's
 ```
-TBD — can reuse the Apple description as a base, but Play indexes this text, so it should carry keywords naturally where Apple's does not.
+Spritz is a fragrance scanner and perfume encyclopedia. Point your camera at the label of any perfume or cologne bottle. Spritz reads it, finds the fragrance, and puts the whole thing on one screen: what's in it, who made it, and how it actually wears.
+
+No typing a half-remembered name into a search box. No stitching an answer together from five tabs.
+
+
+WHAT YOU GET ON EVERY FRAGRANCE
+
+The notes, laid out properly. Top, heart and base, so you can see how a scent is built instead of reading a list. Tap any note to find out what it actually smells like.
+
+The fragrance families it belongs to, and the ones it borrows from.
+
+The concentration, explained. What eau de parfum actually means for how long it lasts and how far it carries.
+
+How it wears through the day, in plain language rather than numbers.
+
+
+BUILD A SHELF
+
+Save any perfume to Own, Tried or Wishlist in a tap. Your fragrance collection stays yours, sorted and searchable, and the more you add the better Spritz gets at pointing you toward the next one.
+
+
+BROWSE WHEN YOU DON'T HAVE A BOTTLE IN FRONT OF YOU
+
+Eighteen fragrance families to work through, from citrus and floral to leather and gourmand. Over 10,000 perfumes and colognes. Search by name, house or note when you already know what you are looking for.
+
+
+SPRITZ PRO
+
+Free covers the essentials. Unlimited scanning, the notes breakdown, family tags, and a collection of up to 25 bottles.
+
+Pro opens the rest:
+
+The perfumer behind the fragrance, and the story of the house that made it
+Every note's flavor profile, so an unfamiliar pyramid stops being a wall of words
+A synthesized read on what people who actually wear it say
+Perfume dupes for any fragrance, generated on demand
+An unlimited collection
+
+
+Spritz is built for the moment you pick up a bottle and want a real answer. Not a shopping list. Not a forum thread from 2019. The bottle in your hand, explained properly.
 ```
+About 1,900 / 4,000. Same structure and D9 positioning as the Apple description; the opening line is rewritten so Play's index sees "fragrance scanner", "perfume" and "cologne" up front, since that opening is also what shows before "Read more". Names no other brands or data sources.
+
+### Category
+```
+Beauty
+```
+D34. Fragrantica Perfumes and Parfumo both sit there; Play has no Reference category worth using.
+
+### Assets
+- Icon 512×512: `docs/build/play-assets/icon-512.png`
+- Feature graphic 1024×500: `docs/build/play-assets/feature-graphic-1024x500.png` (lowercase Playfair wordmark, brass full stop, tagline, brand green)
+- Phone screenshots: Play rejects anything taller than 2:1, so tall captures are framed on cream at 1080×2160.
 
 ### Developer name
 ```
