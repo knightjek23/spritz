@@ -359,6 +359,33 @@ export default function PricingPage() {
             Restore purchases
           </button>
         )}
+        {/* Guideline 3.1.2: the purchase screen itself has to state the
+            renewal terms and link the Terms of Use and Privacy Policy. The
+            store build uses Apple's standard EULA (also linked from the App
+            Store description); the web links our own terms. */}
+        {isSignedIn && !isAlreadyPro && (
+          <p className="mt-4 text-center text-[11px] leading-relaxed text-slate">
+            {native
+              ? "Subscriptions renew automatically unless cancelled at least 24 hours before the end of the current period. Manage or cancel in your App Store account settings. "
+              : "Subscriptions renew automatically until cancelled. Manage or cancel anytime from your account. "}
+            <a
+              href={
+                native
+                  ? "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
+                  : "/legal/terms"
+              }
+              target={native ? "_blank" : undefined}
+              rel={native ? "noreferrer" : undefined}
+              className="underline underline-offset-2"
+            >
+              Terms of Use
+            </a>
+            {" · "}
+            <a href="/legal/privacy" className="underline underline-offset-2">
+              Privacy Policy
+            </a>
+          </p>
+        )}
       </div>
 
       {/* Comparison table */}
