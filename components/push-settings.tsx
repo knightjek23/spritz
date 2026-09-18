@@ -15,8 +15,8 @@ import {
   disablePush,
   getPushPermission,
   isPushEnabledOnServer,
-  isPushSupported,
   requestPushAndRegister,
+  resolvePushSupport,
   type PushPermission,
 } from "@/lib/push";
 
@@ -27,14 +27,20 @@ export function PushSettings() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    // Hidden on the web and, until Android has Firebase, on Android too.
-    if (!isPushSupported()) return;
-    setNative(true);
+    // Hidden on the web and on Android builds that predate Firebase
+    // (lib/push.ts ANDROID_MIN_PUSH_BUILD), where the toggle would crash.
+    let cancelled = false;
     (async () => {
+      if (!(await resolvePushSupport()) || cancelled) return;
+      setNative(true);
       const [p, e] = await Promise.all([getPushPermission(), isPushEnabledOnServer()]);
+      if (cancelled) return;
       setPermission(p);
       setEnabled(e);
     })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (!native) return null;

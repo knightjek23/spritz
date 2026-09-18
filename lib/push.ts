@@ -19,15 +19,54 @@ import { isNativeApp, nativePlatform } from "./native";
 export type PushPermission = "prompt" | "granted" | "denied" | "unavailable";
 
 /**
- * Push exists on both shells: APNs on iOS (D19), FCM on Android (D35).
- * Kept as a function so a platform can be gated again in one place; the
- * Android gate lived here from 2026-09-15 until the Firebase project and
- * google-services.json landed, because without them the plugin's
- * register() throws "Default FirebaseApp is not initialized" and Android
- * kills the app. Any new platform goes through the same gate first.
+ * First Android versionCode that ships google-services.json. On earlier
+ * builds the plugin's register() throws "Default FirebaseApp is not
+ * initialized" natively and Android kills the app, and the web cannot
+ * catch it. The site serves every installed build at once, so the gate
+ * has to read the build number of the shell it is running in; a platform
+ * check alone reopened this crash for the closed testers on 2026-09-15,
+ * the day the iOS-only gate was lifted ahead of the v2 rollout.
+ */
+export const ANDROID_MIN_PUSH_BUILD = 2;
+
+let androidPushOk: boolean | null = null;
+
+/**
+ * Resolve whether this shell can do push. iOS: always. Android: only from
+ * ANDROID_MIN_PUSH_BUILD. Async because the build number comes from the
+ * App plugin; the answer is cached for the page's lifetime and
+ * isPushSupported() reads the cache. Every path that could reach
+ * register() awaits this first, so the sync check can only ever be
+ * stale in the safe direction (false).
+ */
+export async function resolvePushSupport(): Promise<boolean> {
+  if (!isNativeApp()) return false;
+  if (nativePlatform() !== "android") return true;
+  if (androidPushOk === null) {
+    try {
+      const { App } = await import("@capacitor/app");
+      const { build } = await App.getInfo();
+      androidPushOk = Number.parseInt(build, 10) >= ANDROID_MIN_PUSH_BUILD;
+      console.log(
+        `[push] android build ${build}: push ${androidPushOk ? "on" : "off (pre-Firebase build)"}`,
+      );
+    } catch (e) {
+      androidPushOk = false;
+      console.warn("[push] could not read the app build; push off", e);
+    }
+  }
+  return androidPushOk;
+}
+
+/**
+ * Sync view of resolvePushSupport(). False on the web, true on iOS, and on
+ * Android whatever resolvePushSupport() last found (false until it has
+ * run). Any new platform goes through the same gate first.
  */
 export function isPushSupported(): boolean {
-  return isNativeApp();
+  if (!isNativeApp()) return false;
+  if (nativePlatform() !== "android") return true;
+  return androidPushOk === true;
 }
 
 /**
@@ -89,7 +128,7 @@ export const PRIMER_DISMISS_KEY = "spritz:push-primer:dismissed";
 export const PRIMER_DISMISS_CAP = 3;
 
 export async function getPushPermission(): Promise<PushPermission> {
-  if (!isPushSupported()) return "unavailable";
+  if (!(await resolvePushSupport())) return "unavailable";
   const { PushNotifications } = await import("@capacitor/push-notifications");
   const { receive } = await PushNotifications.checkPermissions();
   if (receive === "granted") return "granted";
@@ -105,7 +144,7 @@ export async function getPushPermission(): Promise<PushPermission> {
  * listener that NativeAuthBridge owns; this function only kicks it off.
  */
 export async function requestPushAndRegister(): Promise<PushPermission> {
-  if (!isPushSupported()) return "unavailable";
+  if (!(await resolvePushSupport())) return "unavailable";
   const { PushNotifications } = await import("@capacitor/push-notifications");
   const { receive } = await PushNotifications.requestPermissions();
   if (receive !== "granted") return receive === "denied" ? "denied" : "prompt";

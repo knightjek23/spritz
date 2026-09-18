@@ -27,8 +27,8 @@ import { NATIVE_HTML_CLASS, isNativeApp } from "@/lib/native";
 import { handleNativeAuthUrl } from "@/lib/native-auth";
 import {
   ensureAndroidChannel,
-  isPushSupported,
   mayRegisterOnLaunch,
+  resolvePushSupport,
   reportPushOpened,
   saveTokenToServer,
 } from "@/lib/push";
@@ -101,11 +101,15 @@ export function NativeAuthBridge() {
   // whenever the OS rotates the token, so the server copy stays current.
   // APNs on iOS, FCM on Android (D35); the plugin hides the difference.
   useEffect(() => {
-    if (!isPushSupported()) return;
+    if (!isNativeApp()) return;
     let cancelled = false;
     const handles: Array<{ remove: () => Promise<void> }> = [];
 
     (async () => {
+      // Android builds before ANDROID_MIN_PUSH_BUILD have no Firebase;
+      // touching the plugin there is a native crash, so stop before the
+      // import.
+      if (!(await resolvePushSupport()) || cancelled) return;
       const { PushNotifications } = await import("@capacitor/push-notifications");
 
       handles.push(
