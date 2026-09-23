@@ -43,6 +43,11 @@ const config: CapacitorConfig = {
     // sat too low, the page had two resting positions, and pulling down
     // scrolled into a blank cream band above the nav.
     contentInset: "never",
+    // No long-press link preview (the title + domain bubble, then Open
+    // Link / Copy Link / Share) on cards. Cards are app rows, not web
+    // links. components/native-touch-links.tsx covers builds 1-3 from
+    // the web side; this is the native switch from build 4 on.
+    allowsLinkPreview: false,
   },
   plugins: {
     PushNotifications: {
