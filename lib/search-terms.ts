@@ -12,6 +12,7 @@
 // Server-only: reads the editorial note aliases from disk and the
 // catalog note list from Supabase (cached in-process for an hour).
 
+import type { HouseHit } from "./search-houses";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
 import { loadAllNotes } from "@/lib/notes";
@@ -70,6 +71,8 @@ export interface KeywordHit {
 /** Shape of GET /api/search. */
 export interface SearchResponse {
   results: SearchHit[];
+  /** Houses the query is typing ("xerjoff" → Xerjoff); shown above results. */
+  houses?: HouseHit[];
   /** Present only when the whole query resolved to notes/families. */
   terms: SearchTerm[] | null;
   byTerms: KeywordHit[];

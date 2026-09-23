@@ -9,6 +9,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { checkIpThrottle, clientIp } from "@/lib/rate-limit";
+import { findHouses } from "@/lib/search-houses";
 import {
   findByTerms,
   resolveKeywordQuery,
@@ -42,7 +43,7 @@ export async function GET(req: Request) {
   const q = url.searchParams.get("q")?.trim() ?? "";
   const full = url.searchParams.get("full") === "1";
   if (q.length < 2) {
-    const empty: SearchResponse = { results: [], terms: null, byTerms: [] };
+    const empty: SearchResponse = { results: [], houses: [], terms: null, byTerms: [] };
     return NextResponse.json(empty, { headers: CACHE_HEADERS });
   }
 
@@ -73,7 +74,14 @@ export async function GET(req: Request) {
     }
   })();
 
-  const [{ data, error }, keyword] = await Promise.all([namesPromise, termsPromise]);
+  // House matches come from an in-memory index after the first call.
+  const housesPromise = findHouses(q, supabase);
+
+  const [{ data, error }, keyword, houses] = await Promise.all([
+    namesPromise,
+    termsPromise,
+    housesPromise,
+  ]);
 
   if (error) {
     return NextResponse.json({ error: "search_failed" }, { status: 500 });
@@ -81,6 +89,7 @@ export async function GET(req: Request) {
 
   const body: SearchResponse = {
     results: data ?? [],
+    houses,
     terms: keyword.terms,
     byTerms: keyword.byTerms,
   };

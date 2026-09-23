@@ -15,6 +15,7 @@ import { BottleImage } from "@/components/bottle-image";
 import { SearchAutocomplete } from "@/components/search-autocomplete";
 import type { Fragrance } from "@/lib/types";
 import type { KeywordHit, SearchResponse, SearchTerm } from "@/lib/search-terms";
+import type { HouseHit } from "@/lib/search-houses";
 import { SpritzLoader } from "@/components/spritz-loader";
 
 export default function SearchPage() {
@@ -45,6 +46,8 @@ function SearchPageInner() {
   // family. byTerms is popularity-ordered, most terms matched first.
   const [terms, setTerms] = useState<SearchTerm[] | null>(null);
   const [byTerms, setByTerms] = useState<KeywordHit[]>([]);
+  // House rows: the query is typing a house name. Rendered first.
+  const [houses, setHouses] = useState<HouseHit[]>([]);
   const [busy, setBusy] = useState(false);
 
   // Run the full search whenever the user explicitly submits (Enter / "See
@@ -55,6 +58,7 @@ function SearchPageInner() {
       setResults([]);
       setTerms(null);
       setByTerms([]);
+      setHouses([]);
       return;
     }
     let cancelled = false;
@@ -67,6 +71,7 @@ function SearchPageInner() {
         const keyword = data.terms && (data.byTerms ?? []).length > 0;
         setTerms(keyword ? data.terms : null);
         setByTerms(keyword ? data.byTerms : []);
+        setHouses(data.houses ?? []);
       })
       .finally(() => {
         if (!cancelled) setBusy(false);
@@ -94,6 +99,40 @@ function SearchPageInner() {
           <SpritzLoader size={36} label="" />
           <p className="text-slate text-sm">Searching…</p>
         </div>
+      )}
+
+      {/* House match: "xerjoff" → the Xerjoff library page. */}
+      {submittedQ && !busy && houses.length > 0 && (
+        <section className="mb-6">
+          <p className="font-mono text-xs uppercase tracking-widest text-slate mb-3">
+            {houses.length === 1 ? "House" : "Houses"}
+          </p>
+          <ul className="space-y-2">
+            {houses.map((h) => (
+              <li key={h.slug}>
+                <Link
+                  href={`/house/${h.slug}`}
+                  className="flex items-center gap-3 px-3 py-2 rounded-xl bg-paper border border-ink/10 hover:brightness-95 transition"
+                >
+                  <div className="shrink-0 w-12 h-16 flex items-center justify-center">
+                    <span className="w-10 h-10 flex items-center justify-center border border-ink/15 font-serif text-xl text-ink">
+                      {h.name.trim().charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-medium truncate">{h.name}</div>
+                    <div className="text-xs text-slate truncate">
+                      {h.count} fragrance{h.count === 1 ? "" : "s"}
+                    </div>
+                  </div>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden className="shrink-0 text-slate">
+                    <path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       {/* Keyword results: most popular fragrances carrying the typed
@@ -161,7 +200,7 @@ function SearchPageInner() {
         </p>
       )}
 
-      {submittedQ && !busy && results.length === 0 && byTerms.length === 0 && (
+      {submittedQ && !busy && results.length === 0 && byTerms.length === 0 && houses.length === 0 && (
         <p className="text-sm text-slate">
           No matches in our catalog yet. Try a different brand, or notes like
           &ldquo;musk, iris, citrus&rdquo;.

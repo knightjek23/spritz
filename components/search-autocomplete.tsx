@@ -10,6 +10,11 @@
 //   - Mouse: click anywhere outside to close.
 //   - First suggestion is auto-highlighted so Enter from the input
 //     navigates to the most likely match (matches Google behavior).
+//   - House rows: when the query is typing a house name ("xerjoff"), the
+//     API returns matching houses and they render first, linking to
+//     /house/[slug]. They sit in the same ↓/↑/Enter order as the
+//     fragrance rows (index 0 is the first house), and are hidden in
+//     picker mode where only a fragrance can be picked.
 //
 // Backed by the existing /api/search route (trigram on name + house).
 // We slice down to 8 in the UI to keep the dropdown scannable.
@@ -21,6 +26,7 @@ import { cleanBottleImageUrl } from "@/lib/bottle-image";
 import { BottleImage } from "@/components/bottle-image";
 import type { Fragrance } from "@/lib/types";
 import type { SearchResponse, SearchTerm } from "@/lib/search-terms";
+import type { HouseHit } from "@/lib/search-houses";
 import {
   addRecentSearch,
   clearRecentSearches,
@@ -122,6 +128,7 @@ export function SearchAutocomplete({
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [q, setQ] = useState(initialQuery);
   const [suggestions, setSuggestions] = useState<Row[]>([]);
+  const [houses, setHouses] = useState<HouseHit[]>([]);
   const [terms, setTerms] = useState<SearchTerm[] | null>(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -143,6 +150,7 @@ export function SearchAutocomplete({
     lastResetKey.current = resetKey;
     setQ("");
     setSuggestions([]);
+    setHouses([]);
     setOpen(false);
     setHighlight(0);
     setFocused(false);
@@ -160,6 +168,7 @@ export function SearchAutocomplete({
     const trimmed = q.trim();
     if (trimmed.length < MIN_QUERY_LEN) {
       setSuggestions([]);
+      setHouses([]);
       setTerms(null);
       setLoading(false);
       // Cancel anything in flight from a prior longer query.
@@ -195,12 +204,14 @@ export function SearchAutocomplete({
           : names.slice(0, MAX_SUGGESTIONS);
         setTerms(keyword ? data.terms : null);
         setSuggestions(hits);
+        setHouses(onPick ? [] : (data.houses ?? []));
         setHighlight(0);
         setOpen(true);
       } catch (err: any) {
         // AbortError is expected when the user keeps typing — swallow it.
         if (err?.name !== "AbortError") {
           setSuggestions([]);
+          setHouses([]);
         }
       } finally {
         // Only the active controller flips loading off, so a stale finally
@@ -270,20 +281,36 @@ export function SearchAutocomplete({
     setOpen(false);
   }
 
+  // House rows come first in the highlight order, then fragrance rows.
+  const rowCount = houses.length + suggestions.length;
+
+  function goToHouse(h: HouseHit) {
+    remember();
+    setOpen(false);
+    router.push(`/house/${h.slug}`);
+  }
+
   function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      if (suggestions.length === 0) return;
+      if (rowCount === 0) return;
       setOpen(true);
-      setHighlight((h) => (h + 1) % suggestions.length);
+      setHighlight((h) => (h + 1) % rowCount);
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      if (suggestions.length === 0) return;
+      if (rowCount === 0) return;
       setOpen(true);
-      setHighlight((h) => (h - 1 + suggestions.length) % suggestions.length);
+      setHighlight((h) => (h - 1 + rowCount) % rowCount);
     } else if (e.key === "Enter") {
       e.preventDefault();
-      const target = open && suggestions[highlight] ? suggestions[highlight] : undefined;
+      if (open && highlight < houses.length && houses[highlight]) {
+        goToHouse(houses[highlight]);
+        return;
+      }
+      const target =
+        open && suggestions[highlight - houses.length]
+          ? suggestions[highlight - houses.length]
+          : undefined;
       commit(target);
     } else if (e.key === "Escape") {
       setOpen(false);
@@ -298,6 +325,7 @@ export function SearchAutocomplete({
   function clear() {
     setQ("");
     setSuggestions([]);
+    setHouses([]);
     setOpen(false);
     setHighlight(0);
     // Cancel any pending debounce or in-flight request so a stale
@@ -309,7 +337,9 @@ export function SearchAutocomplete({
   }
 
   const showDropdown =
-    open && q.trim().length >= MIN_QUERY_LEN && (loading || suggestions.length > 0);
+    open &&
+    q.trim().length >= MIN_QUERY_LEN &&
+    (loading || suggestions.length > 0 || houses.length > 0);
   const showRecents =
     recentSearches && focused && q.trim().length === 0 && recents.length > 0;
 
@@ -337,9 +367,13 @@ export function SearchAutocomplete({
           aria-controls="search-suggestions"
           aria-autocomplete="list"
           aria-activedescendant={
-            showDropdown && suggestions[highlight]
-              ? `search-suggestion-${suggestions[highlight].id}`
-              : undefined
+            !showDropdown
+              ? undefined
+              : highlight < houses.length && houses[highlight]
+                ? `search-house-${houses[highlight].slug}`
+                : suggestions[highlight - houses.length]
+                  ? `search-suggestion-${suggestions[highlight - houses.length].id}`
+                  : undefined
           }
           value={q}
           onChange={(e) => {
@@ -534,14 +568,62 @@ export function SearchAutocomplete({
           role="listbox"
           className="absolute left-0 right-0 mt-2 bg-cream border border-ink/10 rounded-none shadow-lg overflow-hidden z-20"
         >
-          {suggestions.length === 0 && loading && (
+          {rowCount === 0 && loading && (
             <li className="px-4 py-3 text-sm text-slate">Searching…</li>
           )}
-          {suggestions.map((f, idx) => {
+          {houses.length > 0 && (
+            <li
+              className="px-4 pt-3 pb-1 font-mono text-[10px] uppercase tracking-wider text-slate"
+              aria-hidden
+            >
+              {houses.length === 1 ? "House" : "Houses"}
+            </li>
+          )}
+          {houses.map((h, idx) => (
+            <li
+              key={`h-${h.slug}`}
+              id={`search-house-${h.slug}`}
+              role="option"
+              aria-selected={idx === highlight}
+            >
+              <Link
+                href={`/house/${h.slug}`}
+                onMouseEnter={() => setHighlight(idx)}
+                onClick={() => {
+                  remember();
+                  setOpen(false);
+                }}
+                className={`flex items-center gap-3 px-3 py-2.5 transition ${
+                  idx === highlight ? "bg-paper" : "bg-transparent"
+                }`}
+              >
+                {/* Same 40px slot as the bottle thumbnails so the text
+                    column lines up; a monogram stands in for a bottle. */}
+                <div className="shrink-0 w-10 h-14 flex items-center justify-center">
+                  <span className="w-9 h-9 flex items-center justify-center border border-ink/15 font-serif text-lg text-ink">
+                    {h.name.trim().charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium truncate text-ink">{h.name}</div>
+                  <div className="text-xs text-slate truncate">
+                    {h.count} fragrance{h.count === 1 ? "" : "s"}
+                  </div>
+                </div>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden className="shrink-0 text-slate">
+                  <path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </Link>
+            </li>
+          ))}
+          {suggestions.map((f, i) => {
+            const idx = houses.length + i;
             const isTerm = Array.isArray(f.matched);
-            const firstTerm = isTerm && idx === 0;
+            const firstTerm = isTerm && i === 0;
             const firstName =
-              !isTerm && terms !== null && (idx === 0 || Array.isArray(suggestions[idx - 1]?.matched));
+              !isTerm &&
+              ((terms !== null && (i === 0 || Array.isArray(suggestions[i - 1]?.matched))) ||
+                (terms === null && i === 0 && houses.length > 0));
             const inner = (
               <>
                 <div className="shrink-0 w-10 h-14 relative">
@@ -586,7 +668,9 @@ export function SearchAutocomplete({
             ) : firstName ? (
               <li
                 key="h-names"
-                className="px-4 pt-3 pb-1 font-mono text-[10px] uppercase tracking-wider text-slate border-t border-ink/5"
+                className={`px-4 pt-3 pb-1 font-mono text-[10px] uppercase tracking-wider text-slate ${
+                  i === 0 ? "" : "border-t border-ink/5"
+                }`}
                 aria-hidden
               >
                 Fragrances

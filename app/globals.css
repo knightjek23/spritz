@@ -82,6 +82,25 @@ html, body {
   display: none !important;
 }
 
+/* Inside the shell, links and buttons behave like app controls, not web
+   links: no long-press link preview (Open Link / Copy Link / Share), no
+   text-selection loupe on a card, no grey tap flash. Inputs, textareas and
+   article prose are left alone so users can still select and copy text. */
+.native-app a,
+.native-app button,
+.native-app [role="button"] {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.native-app input,
+.native-app textarea,
+.native-app [contenteditable] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 body {
   font-family: theme(fontFamily.sans);
   font-weight: 300; /* Roboto Light is the default body weight per the Figma spec */
