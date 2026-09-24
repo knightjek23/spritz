@@ -25,6 +25,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { RateSpritzRow } from "@/components/rate-spritz-row";
 import { PushSettings } from "@/components/push-settings";
 import { SignOutButton, DeleteAccountSection } from "@/components/account-actions";
 import { PlanActions } from "@/components/plan-actions";
@@ -204,6 +205,9 @@ export default async function AccountPage() {
 
       {/* Notifications — native shell only, renders nothing on the web */}
       <PushSettings />
+
+      {/* Rate Spritz — native shell only */}
+      <RateSpritzRow />
 
       {/* Manage account */}
       <section className="mb-4">

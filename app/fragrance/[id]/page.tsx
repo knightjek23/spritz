@@ -10,6 +10,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { cleanBottleImageUrl } from "@/lib/bottle-image";
 import { BottleImage } from "@/components/bottle-image";
 import { ScanReceipt } from "@/components/scan-receipt";
+import { ReviewMoment } from "@/components/review-moment";
 import { BuyOptions, type BuyOffer } from "@/components/buy-options";
 import { SimilarSection } from "@/components/similar-section";
 import { SaveButtonsRow } from "@/components/save-buttons-row";
@@ -228,6 +229,10 @@ export default async function FragrancePage({ params }: { params: { id: string }
           i.e. the visitor arrived here from a scan. Client-side so the
           ISR HTML stays identical for everyone else. */}
       <ScanReceipt fragranceId={f.id} />
+      {/* Counts this page as a lookup and, once a milestone is reached in
+          the shell, asks for an App Store / Play rating after the page
+          has settled. Renders nothing. */}
+      <ReviewMoment />
 
       {/* Title block — name + house + year + gender + concentration.
           Family lives below. House name links into the house

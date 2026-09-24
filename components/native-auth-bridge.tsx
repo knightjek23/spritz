@@ -24,6 +24,7 @@ import { useEffect, useRef } from "react";
 import { useAuth, useClerk, useSignIn } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { NATIVE_HTML_CLASS, isNativeApp } from "@/lib/native";
+import { touchReviewSession } from "@/lib/review-prompt";
 import { handleNativeAuthUrl } from "@/lib/native-auth";
 import {
   ensureAndroidChannel,
@@ -67,6 +68,7 @@ export function NativeAuthBridge() {
   useEffect(() => {
     if (!isNativeApp()) return;
     document.documentElement.classList.add(NATIVE_HTML_CLASS);
+    touchReviewSession();
 
     let remove: (() => void) | undefined;
     let cancelled = false;

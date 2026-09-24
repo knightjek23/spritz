@@ -22,6 +22,7 @@
     "diag:infra": "tsx scripts/diag-storage-tables.ts"
   },
   "dependencies": {
+    "@capacitor-community/in-app-review": "^8.0.0",
     "@capacitor/android": "^8.5.1",
     "@capacitor/app": "^8.0.0",
     "@capacitor/browser": "^8.0.0",
