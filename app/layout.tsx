@@ -12,6 +12,7 @@ import { PageTransition } from "@/components/page-transition";
 import { NativeAuthBridge } from "@/components/native-auth-bridge";
 import { NativeReturnGuard } from "@/components/native-return-guard";
 import { NativeTouchLinks } from "@/components/native-touch-links";
+import { NativeResumeReload } from "@/components/native-resume-reload";
 import "./globals.css";
 
 // Playfair Display — high-contrast serif for hero / section headings.
@@ -121,6 +122,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* In the shell: no link-preview bubble on a held card, and a
               held card opens like a tapped one. No-op on the web. */}
           <NativeTouchLinks />
+          {/* Reloads the page after a long background so a stalled router
+              or expired session never leaves the shell tap-dead. */}
+          <NativeResumeReload />
           <Nav />
           {/* --nav-clearance reserves space for the floating-pill bottom
               nav: 72px pill + 24px bottom offset + 16px breathing room,

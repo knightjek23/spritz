@@ -127,9 +127,19 @@ export function NativeTouchLinks() {
     document.addEventListener("touchmove", onTouchMove, { passive: true });
     document.addEventListener("touchend", onTouchEnd, { passive: true });
     document.addEventListener("touchcancel", onTouchEnd, { passive: true });
+    // Backgrounding mid-gesture can skip touchend; drop any parked href
+    // and pending long-press so the next tap after resume is a clean one.
+    function onHidden() {
+      if (document.visibilityState === "hidden") {
+        reset();
+        fired = false;
+      }
+    }
     document.addEventListener("click", onClick, true);
+    document.addEventListener("visibilitychange", onHidden);
     return () => {
       reset();
+      document.removeEventListener("visibilitychange", onHidden);
       document.removeEventListener("touchstart", onTouchStart);
       document.removeEventListener("touchmove", onTouchMove);
       document.removeEventListener("touchend", onTouchEnd);
