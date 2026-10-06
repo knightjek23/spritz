@@ -276,3 +276,8 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
 ## Tap-dead after a long background (2026-10-06)
 
 - **Symptom:** leave the iOS app for a few minutes, come back, nothing responds to taps (scroll still works). **Cause:** iOS suspends WKWebView and drops its sockets; a request in flight at that moment never settles on resume, Next's router queue stalls behind it, and the Clerk session cookie has expired as well. Web-side state, not native. **Fix:** `components/native-resume-reload.tsx` reloads the current URL when the page becomes visible after ≥45 s hidden (shell only); `native-touch-links` also clears any parked href / pending long press on hide. Ships via Vercel, no build.
+
+## iOS 1.0.1 (4) submitted (2026-10-06)
+
+- Carries the three queued native changes: `allowsLinkPreview: false`, the in-app-review plugin (D37), and the bottle icon/splash/notification glyph. First archive went up as 1.0.1 **build 3** (Version bumped, Build not), which Apple accepted but would have left the review-prompt gate (`build >= 4`) closed forever; re-archived as build 4 and attached that. What's New and Promotional Text do not carry over to a new version in the redesigned ASC version page; both re-entered. Manual release, no phased rollout, keep rating. Waiting for Review.
+- Rule: bump **both** Version and Build in Xcode; the build number is what the shell reports to the site.
