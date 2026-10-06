@@ -1,7 +1,8 @@
 "use client";
 
 // NavBrand — the left slot of the top nav. On tab-root routes (Home,
-// Shelf, Scan, Library, Profile) shows the bottle mark + "spritz" wordmark.
+// Shelf, Scan, Library, Profile) shows the "spritz" wordmark (the bottle mark is the app
+// icon only; the nav stays text).
 // On any other route, shows a back button that goes to the previous
 // screen via browser history, or falls back to a per-route parent.
 //
@@ -59,13 +60,8 @@ export function NavBrand() {
     return (
       <Link
         href="/"
-        className="flex items-center gap-2 font-display text-2xl tracking-tight text-emerald hover:text-emerald/80 transition"
+        className="font-display text-2xl tracking-tight text-emerald hover:text-emerald/80 transition"
       >
-        {/* Bottle mark (public/brand/bottle-logo.svg, 59x73): 22px tall so
-            it sits on the wordmark's x-height line. Plain <img>: the SVG
-            carries its own gradients, so it is not a currentColor glyph. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/brand/bottle-logo.svg" alt="" aria-hidden width={18} height={22} className="h-[22px] w-auto" />
         spritz
       </Link>
     );
