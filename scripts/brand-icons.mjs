@@ -8,10 +8,10 @@
 //
 // Surfaces:
 //   public/            favicon-32, icon-192, icon-512, icon-maskable-512,
-//                      apple-touch-icon (180)      -> bottle on emerald
-//   ios AppIcon        1024x1024, no alpha         -> bottle on emerald
+//                      apple-touch-icon (180)      -> bottle on sage (ICON_BG)
+//   ios AppIcon        1024x1024, no alpha         -> bottle on sage
 //   ios Splash         2732x2732 x3                -> bottle + wordmark on cream
-//   android mipmap-*   ic_launcher, _round (legacy, full square on emerald),
+//   android mipmap-*   ic_launcher, _round (legacy, full square on sage),
 //                      ic_launcher_foreground (adaptive, 66% safe zone)
 //   android drawable-* splash.png (all buckets)    -> bottle on cream
 //   android drawable-* ic_stat_spritz.png          -> white bottle silhouette
@@ -26,6 +26,8 @@ import path from "node:path";
 const ROOT = path.resolve(new URL(".", import.meta.url).pathname, "..");
 const SVG = await readFile(path.join(ROOT, "public/brand/bottle-logo.svg"), "utf8");
 const EMERALD = "#1F3F2E";
+// Icon tile background: sampled from Josh's reference PNG (2026-10-08).
+const ICON_BG = "#ADC6B4";
 const CREAM = "#F4EFE6";
 // Natural aspect of the mark: 59 x 73.
 const RATIO = 59 / 73;
@@ -34,6 +36,7 @@ const RATIO = 59 / 73;
 const SVG_WHITE = SVG.replace(/fill="url\(#[^"]+\)"/g, 'fill="#FFFFFF"')
   .replace(/fill="#FAF6ED"/g, 'fill="#FFFFFF"')
   .replace(/stroke="#093616"/g, 'stroke="#FFFFFF"')
+  .replace(/stroke="#144C24"/g, 'stroke="#FFFFFF"')
   .replace(/stroke="white"/g, 'stroke="#FFFFFF"');
 
 const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
@@ -82,13 +85,13 @@ for (const [file, size, ratio] of [
   ["public/apple-touch-icon.png", 180, 0.64],
   ["public/icon-maskable-512.png", 512, 0.48],
 ]) {
-  await out(file, await render({ w: size, h: size, bg: EMERALD, markH: Math.round(size * ratio) }));
+  await out(file, await render({ w: size, h: size, bg: ICON_BG, markH: Math.round(size * ratio) }));
 }
 
 // ---- iOS ----
 await out(
   "ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png",
-  await render({ w: 1024, h: 1024, bg: EMERALD, markH: 655 }),
+  await render({ w: 1024, h: 1024, bg: ICON_BG, markH: 655 }),
 );
 const splash = await render({ w: 2732, h: 2732, bg: CREAM, markH: 360, below: "spritz", wordPx: 150, shiftY: -60 });
 for (const f of ["splash-2732x2732.png", "splash-2732x2732-1.png", "splash-2732x2732-2.png"]) {
@@ -100,7 +103,7 @@ const DENS = { mdpi: 1, hdpi: 1.5, xhdpi: 2, xxhdpi: 3, xxxhdpi: 4 };
 for (const [d, k] of Object.entries(DENS)) {
   const legacy = Math.round(48 * k);
   const fg = Math.round(108 * k);
-  const legacyPng = await render({ w: legacy, h: legacy, bg: EMERALD, markH: Math.round(legacy * 0.64) });
+  const legacyPng = await render({ w: legacy, h: legacy, bg: ICON_BG, markH: Math.round(legacy * 0.64) });
   await out(`android/app/src/main/res/mipmap-${d}/ic_launcher.png`, legacyPng);
   await out(`android/app/src/main/res/mipmap-${d}/ic_launcher_round.png`, legacyPng);
   // Adaptive foreground: the visible safe zone is the central 66%.

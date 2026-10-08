@@ -281,3 +281,7 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
 
 - Carries the three queued native changes: `allowsLinkPreview: false`, the in-app-review plugin (D37), and the bottle icon/splash/notification glyph. First archive went up as 1.0.1 **build 3** (Version bumped, Build not), which Apple accepted but would have left the review-prompt gate (`build >= 4`) closed forever; re-archived as build 4 and attached that. What's New and Promotional Text do not carry over to a new version in the redesigned ASC version page; both re-entered. Manual release, no phased rollout, keep rating. Waiting for Review.
 - Rule: bump **both** Version and Build in Xcode; the build number is what the shell reports to the site.
+
+## Logo v2: softer bottle on sage (2026-10-08)
+
+- New export of the bottle (lighter body gradient `#7AA78E`, gradient S, dark-green spray lines, 0.5 stroke) replaces `public/brand/bottle-logo.svg`. Icon tiles now sit on **`#ADC6B4`** (sampled from Josh's reference PNG) instead of emerald: web favicon/192/512/maskable/apple-touch, iOS AppIcon, Android legacy launcher, and the Android adaptive background colour. Splashes stay cream; notification glyph is the white silhouette of the new mark. Rendered with `scripts/brand-icons.mjs`. Web icons live on the next deploy; app icon needs build 5 / versionCode 3.
