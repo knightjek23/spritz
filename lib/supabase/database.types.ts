@@ -549,10 +549,6 @@ export type Database = {
         Args: { p_limit?: number };
         Returns: Array<{ house: string; slug: string; fragrance_count: number }>;
       };
-      list_house_families: {
-        Args: { p_limit?: number };
-        Returns: Array<{ house: string; family: string; n: number }>;
-      };
       find_fragrances_by_family: {
         Args: { p_family: string; p_limit?: number };
         Returns: Array<Database["public"]["Tables"]["fragrances"]["Row"]>;

@@ -14,8 +14,6 @@ import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { loadAllHouses, houseSlug } from "@/lib/houses";
 import { canonicalHouseSlug } from "@/lib/slugs";
-import { familySwatch } from "@/lib/swatches";
-import { familyName } from "@/lib/families";
 
 export const revalidate = 3600;
 
@@ -32,8 +30,6 @@ interface DisplayHouse {
   hasEditorial: boolean;
   country?: string;
   founded?: number;
-  /** Most common primary family across the house's catalog rows; drives the card colour. */
-  family?: string;
 }
 
 export default async function HousesIndexPage() {
@@ -44,17 +40,6 @@ export default async function HousesIndexPage() {
   const { data: catalogHouses } = await supabase.rpc("list_catalog_houses", {
     p_limit: 500,
   });
-  // Dominant family per house (migration 0031). Additive: if the RPC is
-  // missing or fails, every card stays neutral paper.
-  const familyByHouse = new Map<string, string>();
-  try {
-    const { data: fams } = await supabase.rpc("list_house_families", { p_limit: 2000 });
-    for (const row of fams ?? []) {
-      if (row.family) familyByHouse.set(row.house, row.family);
-    }
-  } catch {
-    /* pre-migration */
-  }
 
   // Merge: every catalog house gets a row. Augment with editorial fields
   // where we have them. Editorial houses with zero catalog rows still
@@ -75,7 +60,6 @@ export default async function HousesIndexPage() {
     if (existing) {
       // Alias merge — sum counts, keep canonical display name.
       existing.count += c.fragrance_count;
-      if (!existing.family) existing.family = familyByHouse.get(c.house);
     } else {
       merged.set(slug, {
         slug,
@@ -84,7 +68,6 @@ export default async function HousesIndexPage() {
         hasEditorial: !!ed,
         country: ed?.country,
         founded: ed?.founded,
-        family: familyByHouse.get(c.house),
       });
     }
   }
@@ -140,30 +123,19 @@ export default async function HousesIndexPage() {
               .filter((h) => h.hasEditorial)
               .map((h) => (
                 <li key={h.slug}>
-                  {/* A house borrows the swatch of its dominant family, the
-                      same tone its fragrances' family pill shows, and the
-                      subtitle says which so the colour reads as information.
-                      No dominant family → neutral paper, as before. */}
                   <Link
                     href={`/house/${h.slug}`}
-                    style={h.family ? { backgroundColor: familySwatch(h.family).bg } : undefined}
-                    className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-ink/10 text-ink hover:brightness-95 transition ${
-                      h.family ? "" : "bg-paper"
-                    }`}
+                    className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-paper border border-ink/10 hover:brightness-95 transition"
                   >
                     <div className="min-w-0 flex-1">
                       <div className="font-display text-lg leading-tight">{h.name}</div>
-                      <div className={`text-xs mt-1 ${h.family ? "text-ink/70" : "text-slate"}`}>
-                        {[
-                          h.country,
-                          h.founded ? `est. ${h.founded}` : null,
-                          h.family ? `mostly ${familyName(h.family).toLowerCase()}` : null,
-                        ]
+                      <div className="text-xs text-slate mt-1">
+                        {[h.country, h.founded ? `est. ${h.founded}` : null]
                           .filter(Boolean)
                           .join(" · ")}
                       </div>
                     </div>
-                    <span className={`font-mono text-xs shrink-0 ${h.family ? "text-ink/60" : "text-slate"}`}>
+                    <span className="font-mono text-xs text-slate shrink-0">
                       {h.count > 0 ? `${h.count}` : "0"}
                     </span>
                   </Link>
@@ -185,13 +157,10 @@ export default async function HousesIndexPage() {
               <li key={h.slug}>
                 <Link
                   href={`/house/${h.slug}`}
-                  style={h.family ? { backgroundColor: familySwatch(h.family).bg } : undefined}
-                  className={`inline-flex items-center gap-2 px-3 py-1.5 text-ink text-sm rounded-full transition hover:brightness-95 ${
-                    h.family ? "" : "bg-paper"
-                  }`}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-paper hover:bg-brass/40 text-ink text-sm rounded-full transition"
                 >
                   <span>{h.name}</span>
-                  <span className={`font-mono text-[10px] ${h.family ? "text-ink/60" : "text-slate"}`}>
+                  <span className="font-mono text-[10px] text-slate">
                     {h.count}
                   </span>
                 </Link>
