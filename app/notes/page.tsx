@@ -7,6 +7,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { familySwatch, noteSwatch } from "@/lib/swatches";
 import { loadAllNotes, groupNotesByFamily } from "@/lib/notes";
 import { FAMILY_ORDER, FAMILY_BLURB } from "@/lib/families";
 
@@ -47,7 +48,16 @@ export default async function NotesIndexPage() {
       {ordered.map((family) => (
         <section key={family} className="mb-10">
           <div className="mb-4">
-            <h2 className="font-display text-2xl capitalize">{family}</h2>
+            <h2 className="font-display text-2xl capitalize flex items-center gap-2">
+              {/* Family swatch dot: ties the group to its pills and to the
+                  family card on /families. */}
+              <span
+                aria-hidden
+                className="inline-block w-3 h-3 rounded-full border border-ink/10 shrink-0"
+                style={{ backgroundColor: familySwatch(family).bg }}
+              />
+              {family}
+            </h2>
             {FAMILY_BLURB[family] && (
               <p className="text-sm text-slate mt-1">{FAMILY_BLURB[family]}</p>
             )}
@@ -57,7 +67,8 @@ export default async function NotesIndexPage() {
               <li key={n.slug}>
                 <Link
                   href={`/note/${n.slug}`}
-                  className="px-3 py-1.5 bg-paper hover:bg-brass/40 text-ink text-sm rounded-full transition capitalize"
+                  style={{ backgroundColor: noteSwatch(n.name).bg }}
+                  className="px-3 py-1.5 text-ink text-sm rounded-full transition capitalize hover:brightness-95"
                 >
                   {n.name}
                 </Link>

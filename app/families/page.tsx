@@ -7,6 +7,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { familySwatch } from "@/lib/swatches";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { FAMILY_ORDER, FAMILY_BLURB, familyName } from "@/lib/families";
 
@@ -85,21 +86,26 @@ export default async function FamiliesIndexPage() {
       <ul className="space-y-2">
         {ordered.map((f) => (
           <li key={f.slug}>
+            {/* Card colour = the family's pill swatch on a fragrance page
+                (lib/swatches.ts), so the library and the detail page agree
+                on what "citrus" looks like. Text stays ink; the swatches
+                are verified ≥7:1 against it. */}
             <Link
               href={`/family/${f.slug}`}
-              className="flex items-baseline justify-between gap-3 px-4 py-3 rounded-xl bg-paper border border-ink/10 hover:brightness-95 transition"
+              style={{ backgroundColor: familySwatch(f.slug).bg }}
+              className="flex items-baseline justify-between gap-3 px-4 py-3 rounded-xl border border-ink/10 text-ink hover:brightness-95 transition"
             >
               <div className="min-w-0 flex-1">
                 <div className="font-display text-xl capitalize leading-tight">
                   {f.name}
                 </div>
                 {f.blurb && (
-                  <div className="text-xs text-slate mt-1 leading-relaxed">
+                  <div className="text-xs text-ink/70 mt-1 leading-relaxed">
                     {f.blurb}
                   </div>
                 )}
               </div>
-              <span className="font-mono text-xs text-slate shrink-0">
+              <span className="font-mono text-xs text-ink/60 shrink-0">
                 {f.count > 0 ? f.count : "0"}
               </span>
             </Link>

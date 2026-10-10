@@ -285,3 +285,7 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
 ## Logo v2: softer bottle on sage (2026-10-08)
 
 - New export of the bottle (lighter body gradient `#7AA78E`, gradient S, dark-green spray lines, 0.5 stroke) replaces `public/brand/bottle-logo.svg`. Icon tiles now sit on **`#ADC6B4`** (sampled from Josh's reference PNG) instead of emerald: web favicon/192/512/maskable/apple-touch, iOS AppIcon, Android legacy launcher, and the Android adaptive background colour. Splashes stay cream; notification glyph is the white silhouette of the new mark. Rendered with `scripts/brand-icons.mjs`. Web icons live on the next deploy; app icon needs build 5 / versionCode 3.
+
+## Library colour-coding (2026-10-10)
+
+- `/families` cards, `/notes` pills, and `/houses` cards now take their background from `lib/swatches.ts`, the same `familySwatch` / `noteSwatch` the fragrance page uses, so "citrus" is the same golden everywhere. Notes section headings carry a family swatch dot. Houses borrow their dominant family's swatch via new RPC `list_house_families` (migration `0031_house_families.sql`: most common `normalize_family(family[1])` per house) and say "mostly woody" in the subtitle; without the migration (or a house with no family data) the card stays neutral paper. Run `npm run db:migrate` on the Mac, then redeploy or wait for the hourly ISR.
