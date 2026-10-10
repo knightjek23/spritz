@@ -289,3 +289,10 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
 ## Library colour-coding (2026-10-10)
 
 - `/families` cards and `/notes` pills take their background from `lib/swatches.ts`, the same `familySwatch` / `noteSwatch` the fragrance page uses, so "citrus" is the same golden everywhere. Notes section headings carry a family swatch dot. Houses were coloured by dominant family in the same pass (RPC `list_house_families`, migration 0031) and reverted the same day: Josh preferred the neutral paper cards there. Migration `0032` drops the function; 0031 stays in history so `supabase db push` matches the remote migration table.
+
+## iOS 1.0.1 (4) released; 1.0.2 (6) submitted (2026-10-10)
+
+- 1.0.1 (4) approved and released manually; "Ready for Distribution" within the hour. Carries the link-preview fix, in-app-review plugin, bottle icon v1 (emerald).
+- Build 5 was uploaded as 1.0.1 (Build bumped, Version not), the mirror of the build-3 slip. Left unused in TestFlight; cannot attach to 1.0.2 because its version string is 1.0.1, and swapping it into the approved 1.0.1 would have thrown away the approval for an icon change.
+- Re-archived as **1.0.2 build 6** (logo v3 on `#ADC6B4`), new version created in ASC, What's New "A refreshed app icon, and small fixes under the hood.", Promotional Text re-entered (blank again on a new version), review notes and demo account carried over, manual release. Waiting for Review.
+- Rule, restated: every archive bumps **both** Version and Build in Xcode. Next is 1.0.3 / 7.
