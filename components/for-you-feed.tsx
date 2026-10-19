@@ -2,6 +2,8 @@
 // own collection.
 //
 // Layout order (after Josh's pass on Session 01 follow-up):
+//   0. "What are you wearing today?" (passed in as `wearing`; client
+//      component, see components/wearing-today) — first thing on the page.
 //   1. Primary CTAs (Library / Scan / Search) — same trio as the
 //      marketing home, so the signed-in and signed-out home stay
 //      consistent at the top of the page.
@@ -28,9 +30,19 @@ import {
   PopularOnFragrantica,
 } from "./trending-db-sections";
 
-export function ForYouFeed({ data }: { data: Recommendations }) {
+export function ForYouFeed({
+  data,
+  wearing,
+}: {
+  data: Recommendations;
+  wearing?: React.ReactNode;
+}) {
   return (
     <div className="mx-auto max-w-md px-6 py-10">
+      {/* 0. Today's wear prompt — above everything, since it is the one
+            thing the user does on the home screen rather than reads. */}
+      {wearing}
+
       {/* 1. Primary CTAs — Library (primary), Scan (secondary),
             Search (tertiary text link). Mirrors components/marketing-home
             so signed-in and signed-out users see the same entry trio at
