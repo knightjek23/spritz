@@ -12,10 +12,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { createAdminClient } from "@/lib/supabase/admin";
-import { perfumerBySlug } from "@/lib/perfumers";
-import { houseSlug } from "@/lib/houses";
-import { canonicalHouseSlug } from "@/lib/slugs";
+import { perfumerBySlug, perfumerFragrances } from "@/lib/perfumers";
+import { canonicalHouseSlug, houseSlug } from "@/lib/slugs";
 import { FragranceScroller } from "@/components/fragrance-scroller";
 import { BottleImage } from "@/components/bottle-image";
 import { isProUser } from "@/lib/entitlement";
@@ -70,27 +68,12 @@ export default async function PerfumerPage({ params }: { params: { slug: string 
     );
   }
 
-  // One query per stored spelling that maps to this slug (almost always
-  // one), merged and deduped.
-  const supabase = createAdminClient();
-  const responses = await Promise.all(
-    p.storedNames.map((n) =>
-      supabase.rpc("find_fragrances_by_perfumer", { p_name: n, p_limit: 300 }),
-    ),
-  );
-  const seen = new Set<string>();
-  const fragrances = responses
-    .flatMap((r) => r.data ?? [])
-    .filter((f) => (seen.has(f.id) ? false : (seen.add(f.id), true)))
-    .sort((a, b) => {
-      const ra = a.popularity_rank ?? Number.MAX_SAFE_INTEGER;
-      const rb = b.popularity_rank ?? Number.MAX_SAFE_INTEGER;
-      return ra - rb || a.name.localeCompare(b.name);
-    });
-
+  const fragrances = await perfumerFragrances(p);
   if (fragrances.length === 0) notFound();
 
-  // Houses they've worked for, most frequent first.
+  // Houses they've worked for, most frequent first. Each pill opens the
+  // perfumer's work for that house (/perfumer/[slug]/house/[house]), not
+  // the house's full catalog; that page links on to the house.
   const houseCounts = new Map<string, number>();
   for (const f of fragrances) houseCounts.set(f.house, (houseCounts.get(f.house) ?? 0) + 1);
   const houses = [...houseCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
@@ -137,7 +120,7 @@ export default async function PerfumerPage({ params }: { params: { slug: string 
             {houses.map(([house, n]) => (
               <li key={house}>
                 <Link
-                  href={`/house/${canonicalHouseSlug(houseSlug(house))}`}
+                  href={`/perfumer/${p.slug}/house/${canonicalHouseSlug(houseSlug(house))}`}
                   className="inline-flex items-center gap-2 px-3 py-1.5 bg-paper hover:bg-brass/40 text-ink text-sm rounded-full transition"
                 >
                   <span>{house}</span>
