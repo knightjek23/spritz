@@ -115,3 +115,19 @@ export async function findHouses(q: string, supabase: SupabaseClient<Database>):
     return [];
   }
 }
+
+/**
+ * One catalog house by canonical slug (name + count), from the same
+ * in-memory index the typeahead uses. Null when unknown or on any failure.
+ */
+export async function catalogHouseBySlug(
+  slug: string,
+  supabase: SupabaseClient<Database>,
+): Promise<HouseHit | null> {
+  try {
+    const idx = await loadIndex(supabase);
+    return idx.houses.find((h) => h.slug === slug) ?? null;
+  } catch {
+    return null;
+  }
+}

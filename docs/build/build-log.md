@@ -304,3 +304,13 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
 - Build 5 was uploaded as 1.0.1 (Build bumped, Version not), the mirror of the build-3 slip. Left unused in TestFlight; cannot attach to 1.0.2 because its version string is 1.0.1, and swapping it into the approved 1.0.1 would have thrown away the approval for an icon change.
 - Re-archived as **1.0.2 build 6** (logo v3 on `#ADC6B4`), new version created in ASC, What's New "A refreshed app icon, and small fixes under the hood.", Promotional Text re-entered (blank again on a new version), review notes and demo account carried over, manual release. Waiting for Review.
 - Rule, restated: every archive bumps **both** Version and Build in Xcode. Next is 1.0.3 / 7.
+
+## iOS 1.0.2 (6) released (2026-10-13)
+
+- Approved over the weekend; released manually, "Ready for Distribution" immediately. First build on the sage `#ADC6B4` bottle icon (logo v3). Nothing native is queued for iOS; the next archive is 1.0.3 / build 7.
+
+## Perfumer house pills: 404 fix and perfumer × house page (2026-10-19)
+
+- **Bug (pre-existing):** two house-slug rules. SQL (`find_fragrances_by_house`, `list_catalog_houses`) hyphenated every non-alphanumeric and never trimmed ("Chloé" → `chlo-`); JS `houseSlug()` stripped accents/apostrophes and trimmed (`chlo`). The house page matches in SQL, so every JS-built house link (fragrance page, perfumer pills, dupes, popular-by-house tabs) 404ed for accented or apostrophe houses; `/houses` and the sitemap only worked because they used the SQL slug. Confirmed live: `/house/chlo-` rendered Chloé (76), `/house/chlo` was the 404 in Josh's recording.
+- **Fix:** migration `0035_house_slug.sql` adds `house_slug(text)` (unaccent → lower → drop apostrophes → `[^a-z0-9]+` → `-` → trim) and rewrites both RPCs to use it on both sides; `lib/slugs.ts houseSlug()` now folds accents (NFD + a short ø/æ/œ/ß/ł/đ map) so it is equivalent. Chloé is `/house/chloe` everywhere. Old `chlo-` URLs stop resolving; sitemap regenerates on deploy. `npm run db:migrate` required.
+- **Perfumer × house:** new `/perfumer/[slug]/house/[house]` (Pro-gated like the perfumer page): crumb back to the perfumer, house name as H1 with "By <perfumer>", their rows for that house ranked by popularity, then a "Browse all of <House> · N fragrances →" row to `/house/[slug]`. House pills on `/perfumer/[slug]` now link there. Data: `perfumerFragrances()` extracted into `lib/perfumers.ts` and shared by both pages (React `cache`), filtered by canonical house slug; house total from the typeahead's catalog index (`catalogHouseBySlug` in `lib/search-houses.ts`), no new RPC.
