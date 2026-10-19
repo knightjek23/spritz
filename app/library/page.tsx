@@ -62,7 +62,7 @@ export default function LibraryHubPage() {
           Self-hides until migration 0016 is applied. */}
       <PopularByHouse />
 
-      {/* Three browse-by-X entries — primary navigation into the
+      {/* Four browse-by-X entries — primary navigation into the
           library. Big tap targets so it's clear these are the
           main entries, not buried links. */}
       <section className="mt-12 mb-10">
@@ -117,6 +117,25 @@ export default function LibraryHubPage() {
               </p>
               <p className="text-sm text-slate mt-1 leading-snug">
                 Founders, signatures, style.
+              </p>
+            </div>
+            <ChevronRight />
+          </Link>
+
+          <Link
+            href="/perfumers"
+            className="group flex items-center justify-between px-5 py-5 rounded-2xl bg-paper border border-ink/10 hover:brightness-95 transition"
+          >
+            <div className="min-w-0">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-slate mb-1">
+                By perfumer
+                <span className="ml-2 px-1.5 py-0.5 rounded bg-brass text-ink">Pro</span>
+              </p>
+              <p className="font-display text-xl leading-tight">
+                Kurkdjian, Polge, Morillas, Ropion...
+              </p>
+              <p className="text-sm text-slate mt-1 leading-snug">
+                The noses behind the bottles.
               </p>
             </div>
             <ChevronRight />

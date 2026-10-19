@@ -38,6 +38,7 @@ import {
 } from "@/lib/vision";
 import { embedImage, normalizeVisual, visualProvider } from "@/lib/image-embed";
 import { storeScanImage } from "@/lib/scan-image-store";
+import { stripProFieldsDeep } from "@/lib/entitlement";
 import {
   lookupBottleOnWeb,
   webLookupEnabled,
@@ -489,7 +490,9 @@ export async function POST(req: Request) {
   if (!wantsStream) {
     try {
       const result = await runScan(ctx, () => {});
-      return NextResponse.json(result);
+      // Candidates carry full fragrance rows; strip Pro-only fields at the
+      // boundary so a scan can't be used to read perfumer credits.
+      return NextResponse.json(stripProFieldsDeep(result));
     } catch (err) {
       const code = err instanceof ScanError ? err.code : "scan_failed";
       if (code === "scan_failed") console.error("scan failed", err);
@@ -503,7 +506,9 @@ export async function POST(req: Request) {
     async start(controller) {
       const emit = (f: ScanFrame) => {
         try {
-          controller.enqueue(encoder.encode(JSON.stringify(f) + "\n"));
+          // Every frame passes the Pro-field stripper; "candidates" and
+          // "result" frames both carry fragrance rows.
+          controller.enqueue(encoder.encode(JSON.stringify(stripProFieldsDeep(f)) + "\n"));
         } catch {
           /* client went away */
         }

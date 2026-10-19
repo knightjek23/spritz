@@ -12,6 +12,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { stripProFieldsDeep } from "@/lib/entitlement";
 import type { DupeResult, Fragrance, PriceTier } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -145,9 +146,13 @@ export async function GET(
     }
   }
 
-  return NextResponse.json({
-    source,
-    results,
-    truncated: !isPro,
-  });
+  // Results embed full fragrance rows; perfumer credits are Pro-only and
+  // are served solely by /api/perfumer/[id].
+  return NextResponse.json(
+    stripProFieldsDeep({
+      source,
+      results,
+      truncated: !isPro,
+    }),
+  );
 }

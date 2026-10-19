@@ -18,6 +18,8 @@ import { KnownDupes } from "@/components/known-dupes";
 import { KnownConsensus } from "@/components/known-consensus";
 import { FamilyPills } from "@/components/family-pills";
 import { houseSlug } from "@/lib/houses";
+import { stripProFields } from "@/lib/entitlement";
+import { PerfumerCredit } from "@/components/perfumer-credit";
 import {
   CONCENTRATION_LABEL,
   CONCENTRATION_SHORT,
@@ -128,8 +130,14 @@ export async function generateMetadata({
 }
 
 export default async function FragrancePage({ params }: { params: { id: string } }) {
-  const f = await getFragrance(params.id);
-  if (!f) notFound();
+  const raw = await getFragrance(params.id);
+  if (!raw) notFound();
+  // Pro-only fields come off BEFORE anything else touches the row. `f` is
+  // passed to several client components (KnownConsensus, NotesPyramid,
+  // KnownDupes), and every client prop is serialized into this cached page
+  // for every visitor. Only the existence of a credit stays public.
+  const hasPerfumerCredit = !!raw.perfumer?.trim();
+  const f = stripProFields(raw);
   const bottleImage = cleanBottleImageUrl(f.bottle_image_url);
 
   // Every strength this fragrance ships in (migration 0025). Falls back to
@@ -382,6 +390,12 @@ export default async function FragrancePage({ params }: { params: { id: string }
         </section>
       )}
 
+      {/* Perfumer — Pro only. Directly under performance. The name is
+          fetched client-side through /api/perfumer/[id] after a Pro check;
+          this cached page only reveals whether a credit exists. */}
+      <PerfumerCredit fragranceId={f.id} hasCredit={hasPerfumerCredit} />
+
+
       {/* Season + occasion guidance — only when populated */}
       {(f.season_tags?.length > 0 || f.time_tags?.length > 0) && (
         <section className="mb-10">
@@ -407,25 +421,13 @@ export default async function FragrancePage({ params }: { params: { id: string }
         </section>
       )}
 
-      {/* Perfumer + house */}
-      {(f.perfumer || f.house_history) && (
+      {/* House history (perfumer moved up, under performance) */}
+      {f.house_history && (
         <section className="mb-10">
-          {f.perfumer && (
-            <div className="mb-6">
-              <p className="font-mono text-xs uppercase tracking-widest text-slate mb-1">
-                Perfumer
-              </p>
-              <p className="font-display text-xl">{f.perfumer}</p>
-            </div>
-          )}
-          {f.house_history && (
-            <div>
-              <p className="font-mono text-xs uppercase tracking-widest text-slate mb-2">
-                The house
-              </p>
-              <p className="text-ink leading-relaxed">{f.house_history}</p>
-            </div>
-          )}
+          <p className="font-mono text-xs uppercase tracking-widest text-slate mb-2">
+            The house
+          </p>
+          <p className="text-ink leading-relaxed">{f.house_history}</p>
         </section>
       )}
 

@@ -12,6 +12,7 @@
 
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { stripProFieldsDeep } from "@/lib/entitlement";
 import type { Fragrance, ScanMatchMethod, ScanResult } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -69,7 +70,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     match_method: (ev.match_method as ScanMatchMethod | null) ?? "none",
   };
 
-  return NextResponse.json(result, {
+  return NextResponse.json(stripProFieldsDeep(result), {
     headers: { "cache-control": "private, max-age=300" },
   });
 }

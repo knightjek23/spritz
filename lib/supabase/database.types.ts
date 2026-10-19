@@ -482,6 +482,27 @@ export type Database = {
           scan_count: number;
         }>;
       };
+      list_perfumers: {
+        Args: { p_limit?: number };
+        Returns: Array<{
+          perfumer: string;
+          fragrance_count: number;
+          best_rank: number | null;
+        }>;
+      };
+      find_fragrances_by_perfumer: {
+        Args: { p_name: string; p_limit?: number };
+        Returns: Array<{
+          id: string;
+          name: string;
+          house: string;
+          year: number | null;
+          family: string[] | null;
+          bottle_image_url: string | null;
+          popularity_rank: number | null;
+          perfumer: string | null;
+        }>;
+      };
       list_popular_by_house: {
         Args: { p_houses?: number; p_per_house?: number };
         Returns: Array<{

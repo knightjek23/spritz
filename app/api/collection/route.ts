@@ -10,6 +10,7 @@ import { z } from "zod";
 import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ensureAppUser } from "@/lib/users";
+import { stripProFieldsDeep } from "@/lib/entitlement";
 
 export const runtime = "nodejs";
 
@@ -96,7 +97,9 @@ export async function GET(req: Request) {
     reaction: reactionByFragrance[it.fragrance_id] ?? null,
   }));
 
-  return NextResponse.json({ items });
+  // Items embed the full joined fragrance row; perfumer is Pro-only and
+  // served solely by /api/perfumer/[id].
+  return NextResponse.json({ items: stripProFieldsDeep(items) });
 }
 
 export async function POST(req: Request) {

@@ -11,6 +11,7 @@
 // inline on the home page render.
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { stripProFieldsDeep } from "@/lib/entitlement";
 import type { DupeRecommendation, Fragrance } from "@/lib/types";
 
 /** How many owned fragrances we'll fan out from. Caps query cost. */
@@ -167,11 +168,14 @@ export async function getRecommendations(
     if (cheaperDupes.length >= DUPE_FEED_SIZE) break;
   }
 
-  return {
+  // The home page passes this straight into the <ForYouFeed> client
+  // component, so every row would be serialized into the page. Perfumer is
+  // Pro-only; strip it here at the source.
+  return stripProFieldsDeep({
     userId: appUser.id,
     ownedCount: owned.length,
     seeds: owned,
     similar,
     cheaperDupes,
-  };
+  });
 }
