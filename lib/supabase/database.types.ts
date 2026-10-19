@@ -137,6 +137,8 @@ export type Database = {
           plan: "free" | "pro";
           stripe_customer_id: string | null;
           is_lifetime: boolean;
+          // Which billing system granted Pro (migration 0030). NULL = legacy.
+          pro_source: "stripe" | "apple" | "play" | null;
           created_at: string;
           updated_at: string;
         };
@@ -147,6 +149,7 @@ export type Database = {
           plan?: "free" | "pro";
           stripe_customer_id?: string | null;
           is_lifetime?: boolean;
+          pro_source?: "stripe" | "apple" | "play" | null;
         };
         Update: Partial<Database["public"]["Tables"]["users"]["Insert"]>;
         Relationships: [];
@@ -312,6 +315,71 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["scan_events"]["Insert"]>;
         Relationships: [];
       };
+      // Push notifications (migration 0028). Service-role only.
+      push_tokens: {
+        Row: {
+          id: string;
+          user_id: string;
+          token: string;
+          platform: "ios" | "android";
+          enabled: boolean;
+          created_at: string;
+          last_seen: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          token: string;
+          platform: "ios" | "android";
+          enabled?: boolean;
+          created_at?: string;
+          last_seen?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["push_tokens"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "push_tokens_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      push_sends: {
+        Row: {
+          id: string;
+          user_id: string;
+          token_id: string | null;
+          campaign: string;
+          fragrance_id: string | null;
+          scan_event_id: string | null;
+          sent_at: string;
+          apns_status: number | null;
+          apns_reason: string | null;
+          opened_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          token_id?: string | null;
+          campaign: string;
+          fragrance_id?: string | null;
+          scan_event_id?: string | null;
+          sent_at?: string;
+          apns_status?: number | null;
+          apns_reason?: string | null;
+          opened_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["push_sends"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "push_sends_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       // scan v2 visual layer (migration 0023). One row per IMAGE, not per
       // fragrance: approved user photos and affiliate images sit beside the
       // catalog image and all vote for the same fragrance_id.
@@ -427,6 +495,30 @@ export type Database = {
           year: number | null;
           bottle_image_url: string | null;
           match_score: number;
+        }>;
+      };
+      // Keyword search across notes and families (migration 0029). p_terms
+      // is the resolved term list from lib/search-terms.ts.
+      find_fragrances_by_terms: {
+        Args: {
+          p_terms: Array<{
+            key: string;
+            names: string[];
+            pattern: string | null;
+            family: string | null;
+          }>;
+          p_limit?: number;
+        };
+        Returns: Array<{
+          id: string;
+          name: string;
+          house: string;
+          family: string[] | null;
+          year: number | null;
+          bottle_image_url: string | null;
+          popularity_rank: number | null;
+          matched: string[];
+          match_count: number;
         }>;
       };
       find_similar_fragrances: {

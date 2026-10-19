@@ -15,91 +15,41 @@
 // you configure in its dashboard. We compare it to REVENUECAT_WEBHOOK_AUTH.
 //
 // One-way sync: RevenueCat → Supabase (source of truth) → Clerk publicMetadata.
+// The write itself lives in lib/billing/entitlement.ts, shared with Stripe.
 
 import { NextResponse } from "next/server";
-import { clerkClient } from "@clerk/nextjs/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { timingSafeEqual } from "node:crypto";
+import { grantPro, revokePro, storeToSource } from "@/lib/billing/entitlement";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const WEBHOOK_AUTH = process.env.REVENUECAT_WEBHOOK_AUTH ?? "";
 
-type Plan = "free" | "pro";
-
-/** Mirror entitlement to Clerk publicMetadata. Best-effort; Supabase is truth. */
-async function mirrorPlanToClerk(clerkUserId: string, plan: Plan) {
-  try {
-    const client = await clerkClient();
-    await client.users.updateUserMetadata(clerkUserId, {
-      publicMetadata: { plan },
-    });
-  } catch (err) {
-    console.error(
-      "[revenuecat webhook] Clerk sync failed:",
-      err instanceof Error ? err.message : String(err),
-      "— Supabase is correct, client UI may lag until next sign-in",
-    );
-  }
-}
-
-/**
- * Set the entitlement by Clerk user id. Mirrors the Stripe webhook's logic:
- * granting "pro" is unconditional; downgrading to "free" is scoped with
- * `is_lifetime = false` so a lifetime buyer is never revoked by an
- * unrelated subscription expiration (including a Stripe-side one).
- */
-async function setPlanByClerkUser(
-  clerkUserId: string,
-  plan: Plan,
-  opts: { lifetime?: boolean } = {},
-) {
-  const supabase = createAdminClient();
-
-  const patch: { plan: Plan; is_lifetime?: boolean } = { plan };
-  if (opts.lifetime) patch.is_lifetime = true;
-
-  let update = supabase
-    .from("users")
-    .update(patch)
-    .eq("clerk_user_id", clerkUserId);
-  if (plan === "free") {
-    update = update.eq("is_lifetime", false);
-  }
-
-  const { data: row, error } = await update
-    .select("clerk_user_id")
-    .maybeSingle();
-
-  if (error) {
-    console.error("[revenuecat webhook] Supabase update failed:", error.message);
-    return;
-  }
-  if (!row?.clerk_user_id) {
-    // No matching user (unknown app_user_id), or a lifetime buyer shielded
-    // from downgrade. Both are safe to skip.
-    console.warn(
-      "[revenuecat webhook] no users row updated for clerk_user_id",
-      clerkUserId,
-      "— skipping (unknown user, or lifetime buyer protected from downgrade)",
-    );
-    return;
-  }
-
-  await mirrorPlanToClerk(clerkUserId, plan);
+function authorized(header: string | null): boolean {
+  if (!WEBHOOK_AUTH || !header) return false;
+  const a = Buffer.from(header);
+  const b = Buffer.from(WEBHOOK_AUTH);
+  return a.length === b.length && timingSafeEqual(a, b);
 }
 
 interface RevenueCatEvent {
   type?: string;
   app_user_id?: string;
+  original_app_user_id?: string;
   product_id?: string;
   store?: string;
   period_type?: string;
+  /** TRANSFER only: the app_user_ids that gained / lost the purchases. */
+  transferred_to?: string[];
+  transferred_from?: string[];
 }
+
+const LIFETIME_PRODUCT = "spritz_pro_lifetime";
 
 export async function POST(req: Request) {
   // 1. Verify the shared secret RevenueCat sends in the Authorization header.
-  if (!WEBHOOK_AUTH || req.headers.get("authorization") !== WEBHOOK_AUTH) {
+  if (!authorized(req.headers.get("authorization"))) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
@@ -107,17 +57,37 @@ export async function POST(req: Request) {
     | { event?: RevenueCatEvent }
     | null;
   const event = body?.event;
-  if (!event?.type || !event.app_user_id) {
+  if (!event?.type) {
     return NextResponse.json({ error: "invalid_body" }, { status: 400 });
   }
 
-  const clerkUserId = event.app_user_id;
+  const source = storeToSource(event.store);
 
-  // Guard against anonymous RevenueCat ids ($RCAnonymousID:...) — these mean
-  // the SDK wasn't configured with the Clerk id yet, so we can't map them.
+  // TRANSFER carries no app_user_id of its own: purchases moved between
+  // app user ids (same Apple ID, different Spritz accounts). Grant the
+  // receivers, revoke the senders.
+  if (event.type === "TRANSFER") {
+    for (const id of event.transferred_to ?? []) {
+      if (!id.startsWith("$RCAnonymousID")) await grantPro(id, source);
+    }
+    for (const id of event.transferred_from ?? []) {
+      if (!id.startsWith("$RCAnonymousID")) await revokePro(id, source);
+    }
+    return NextResponse.json({ received: true });
+  }
+
+  const clerkUserId = event.app_user_id;
+  if (!clerkUserId) {
+    return NextResponse.json({ error: "invalid_body" }, { status: 400 });
+  }
+
+  // Anonymous RevenueCat ids ($RCAnonymousID:...) mean the SDK was not
+  // configured with the Clerk id yet, so there is nothing to map to.
   if (clerkUserId.startsWith("$RCAnonymousID")) {
     return NextResponse.json({ received: true, ignored: "anonymous_id" });
   }
+
+  const lifetime = event.product_id === LIFETIME_PRODUCT;
 
   switch (event.type) {
     // Active subscription states → grant Pro.
@@ -125,25 +95,29 @@ export async function POST(req: Request) {
     case "RENEWAL":
     case "UNCANCELLATION":
     case "PRODUCT_CHANGE":
-      await setPlanByClerkUser(clerkUserId, "pro");
+      await grantPro(clerkUserId, source, { lifetime });
       break;
 
-    // One-time / non-renewing purchase → the $89 Lifetime tier.
+    // One-time purchase → the Lifetime tier.
     case "NON_RENEWING_PURCHASE":
-      await setPlanByClerkUser(clerkUserId, "pro", { lifetime: true });
+      await grantPro(clerkUserId, source, { lifetime: true });
       break;
 
-    // Subscription lapsed for real → drop to Free (lifetime buyers protected).
+    // Subscription lapsed for real → drop to Free. Lifetime buyers and
+    // users whose Pro came from another billing system are left alone.
     case "EXPIRATION":
-      await setPlanByClerkUser(clerkUserId, "free");
+      await revokePro(clerkUserId, source);
       break;
 
     // CANCELLATION = auto-renew turned off but access continues until the
-    // period ends; RevenueCat sends EXPIRATION when it actually lapses. So we
-    // intentionally do nothing here. BILLING_ISSUE (grace period) is likewise
-    // a no-op — keep Pro until an EXPIRATION arrives.
+    // period ends; RevenueCat sends EXPIRATION when it actually lapses.
+    // BILLING_ISSUE (grace period) likewise keeps Pro until EXPIRATION.
+    // SUBSCRIPTION_PAUSED (Play only) ends with an EXPIRATION too. TEST is
+    // the dashboard's "send test event".
     case "CANCELLATION":
     case "BILLING_ISSUE":
+    case "SUBSCRIPTION_PAUSED":
+    case "TEST":
     default:
       break;
   }

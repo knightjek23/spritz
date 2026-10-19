@@ -1,6 +1,10 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  // hover: classes only apply where the pointer can actually hover. On
+  // touch (iOS Safari and the WKWebView shell) a tap otherwise sets
+  // :hover and leaves it stuck, so the tapped shelf card sat "selected".
+  future: { hoverOnlyWhenSupported: true },
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",

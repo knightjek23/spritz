@@ -62,12 +62,15 @@ async function mirrorPlanToClerk(clerkUserId: string, plan: Plan) {
 async function setPlanByCustomer(customerId: string, plan: Plan) {
   const supabase = createAdminClient();
 
+  // Record the source on grant (migration 0030) so a store-side expiration
+  // never touches a web subscriber; scope the downgrade to Stripe-sourced
+  // rows (or legacy rows with no source recorded) for the same reason.
   let update = supabase
     .from("users")
-    .update({ plan })
+    .update(plan === "pro" ? { plan, pro_source: "stripe" as const } : { plan })
     .eq("stripe_customer_id", customerId);
   if (plan === "free") {
-    update = update.eq("is_lifetime", false);
+    update = update.eq("is_lifetime", false).or("pro_source.eq.stripe,pro_source.is.null");
   }
 
   const { data: row, error } = await update
@@ -107,7 +110,7 @@ async function grantLifetimeByCustomer(customerId: string) {
 
   const { data: row, error } = await supabase
     .from("users")
-    .update({ plan: "pro", is_lifetime: true })
+    .update({ plan: "pro", is_lifetime: true, pro_source: "stripe" })
     .eq("stripe_customer_id", customerId)
     .select("clerk_user_id")
     .maybeSingle();

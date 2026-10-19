@@ -25,6 +25,7 @@
 // an unauthenticated user taps.
 
 import { useState } from "react";
+import { recordShelfAdd } from "@/lib/review-prompt";
 import { useClerk, useUser } from "@clerk/nextjs";
 import type { CollectionStatus } from "@/lib/types";
 
@@ -108,6 +109,7 @@ export function SaveButton({
           | null;
         if (body?.item?.id) setItemId(body.item.id);
         setState("saved");
+        recordShelfAdd();
       } else if (res.status === 402) {
         setState("cap");
       } else if (res.status === 409) {

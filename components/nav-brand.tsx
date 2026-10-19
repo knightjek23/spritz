@@ -1,7 +1,8 @@
 "use client";
 
 // NavBrand — the left slot of the top nav. On tab-root routes (Home,
-// Shelf, Scan, Library, Profile) shows the "spritz" wordmark.
+// Shelf, Scan, Library, Profile) shows the "spritz" wordmark (the bottle mark is the app
+// icon only; the nav stays text).
 // On any other route, shows a back button that goes to the previous
 // screen via browser history, or falls back to a per-route parent.
 //

@@ -62,6 +62,17 @@ export function prepareFromVideo(
 }
 
 /**
+ * Normalise a data: URL (the native camera plugin's output) exactly like a
+ * picked file. Orientation is already corrected by the plugin
+ * (correctOrientation: true), so this is decode + downscale + re-encode.
+ */
+export async function prepareFromDataUrl(dataUrl: string): Promise<PreparedImage> {
+  const res = await fetch(dataUrl);
+  const blob = await res.blob();
+  return prepareFromFile(new File([blob], "native.jpg", { type: blob.type || "image/jpeg" }));
+}
+
+/**
  * Decode a picked file, honour EXIF orientation where the browser supports
  * it, and downscale. Falls back to an <img> decode for browsers without
  * createImageBitmap (older Safari).

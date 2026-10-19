@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Spritz</string>
+    <string name="title_activity_main">Spritz</string>
+    <string name="package_name">app.spritzofficial</string>
+    <string name="custom_url_scheme">app.spritzofficial</string>
+</resources>

@@ -253,6 +253,11 @@ export function CardMenu({
             {open && (
               <div
                 className="fixed inset-0 z-[60] flex flex-col justify-end"
+                // Lifts the sheet clear of the home indicator under
+                // viewportFit: "cover". The backdrop below is absolute
+                // inset-0, which resolves against the padding box, so it
+                // still covers the full screen.
+                style={{ paddingBottom: "var(--safe-bottom)" }}
                 onClick={close}
               >
                 {/* Backdrop — soft scrim, ink at low opacity so the cream

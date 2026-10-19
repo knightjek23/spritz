@@ -9,6 +9,10 @@ import { Footer } from "@/components/footer";
 import { Analytics } from "@/components/analytics";
 import { LiquidGlassDefs } from "@/components/liquid-glass/LiquidGlass";
 import { PageTransition } from "@/components/page-transition";
+import { NativeAuthBridge } from "@/components/native-auth-bridge";
+import { NativeReturnGuard } from "@/components/native-return-guard";
+import { NativeTouchLinks } from "@/components/native-touch-links";
+import { NativeResumeReload } from "@/components/native-resume-reload";
 import "./globals.css";
 
 // Playfair Display — high-contrast serif for hero / section headings.
@@ -87,6 +91,13 @@ export const viewport: Viewport = {
   themeColor: "#1F3F2E", // Emerald — matches the new brand color
   width: "device-width",
   initialScale: 1,
+  // Full-bleed layout on notched devices. Without this the WKWebView lays
+  // the page out inside the safe area and paints theme-colored bands above
+  // and below it, which reads as a wrapped website — the exact impression
+  // Guideline 4.2 punishes. With it, backgrounds run edge to edge and the
+  // insets become our problem: every fixed element uses the --safe-* and
+  // --nav-clearance tokens in globals.css. Never hardcode a bottom offset.
+  viewportFit: "cover",
   // No maximumScale / userScalable lock: blocking pinch-zoom fails
   // WCAG 1.4.4 (Android respects the lock; low-vision users can't zoom).
 };
@@ -101,13 +112,28 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               reference url(#lg-glass-subtle) etc. by id. Component is
               client-only and renders nothing visible. */}
           <LiquidGlassDefs />
+          {/* Marks <html> as native-app inside the Capacitor shell and
+              completes system-browser OAuth when the app is opened by
+              URL. Renders nothing; no-op on the web. */}
+          <NativeAuthBridge />
+          {/* In the system browser during a native sign-in, sends any
+              signed-in landing page on to /native-auth/complete. */}
+          <NativeReturnGuard />
+          {/* In the shell: no link-preview bubble on a held card, and a
+              held card opens like a tapped one. No-op on the web. */}
+          <NativeTouchLinks />
+          {/* Reloads the page after a long background so a stalled router
+              or expired session never leaves the shell tap-dead. */}
+          <NativeResumeReload />
           <Nav />
-          {/* pb-28 reserves space for the floating-pill bottom nav
-              (72px tall + 24px bottom offset = 96px occupied). pb-28
-              (112px) gives 16px breathing room above the pill. Nav
-              stays visible on /scan too (camera caps at bottom-28),
-              padding is universal so all pages have consistent clearance. */}
-          <main className="flex-1 pb-28">
+          {/* --nav-clearance reserves space for the floating-pill bottom
+              nav: 72px pill + 24px bottom offset + 16px breathing room,
+              plus the home-indicator inset on notched devices. Was a flat
+              pb-28 (112px), which is what --nav-clearance still resolves to
+              when the inset is zero. Nav stays visible on /scan too (the
+              camera caps at the same token), and the padding is universal
+              so every page has identical clearance. */}
+          <main className="flex-1" style={{ paddingBottom: "var(--nav-clearance)" }}>
             {/* PageTransition wraps every route so non-tab routes fade
                 + slide in on navigation (iOS-app pattern). Tab-root
                 switches stay instant. */}

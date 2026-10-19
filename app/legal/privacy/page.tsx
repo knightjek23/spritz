@@ -23,9 +23,11 @@ export default function PrivacyPage() {
       <h2>What we collect</h2>
       <p>
         <strong>Your account.</strong> When you sign up we store your email
-        address and, if you sign in with Google, the basic profile information
-        Google returns. Authentication is handled by Clerk. We never see or
-        store your password.
+        address and, if you sign in with Google or Apple, the name and email
+        address they return. If you use Sign in with Apple and hide your
+        email, we only ever see the relay address Apple creates for you.
+        Authentication is handled by Clerk. We never see or store your
+        password.
       </p>
       <p>
         <strong>Photos you scan.</strong> When you scan a bottle, the photo is
@@ -62,10 +64,22 @@ export default function PrivacyPage() {
         account if you are signed in.
       </p>
       <p>
-        <strong>Payment information.</strong> If you subscribe, payment is
-        processed by Stripe. Stripe handles your card details directly. We never
-        receive or store your card number. We keep a record of your plan and
-        billing status so we know what you have access to.
+        <strong>Push notifications.</strong> If you turn on notifications in
+        the iOS or Android app, your phone gives us a device token so we can
+        send them. The token is stored against your account and deleted when
+        you turn notifications off, sign out, or delete your account. You can
+        change this at any time under Account &rarr; Notifications or in your
+        phone&apos;s settings.
+      </p>
+      <p>
+        <strong>Payment information.</strong> On the web, payment is processed
+        by Stripe. In the iOS app, purchases go through the App Store, and on
+        Android through Google Play. In every case the payment provider
+        handles your card details directly; we never receive or store your
+        card number. We keep a record of your plan, where you bought it, and
+        its billing status so we know what you have access to. For App Store
+        and Google Play purchases we use RevenueCat to keep that record in
+        sync with the store.
       </p>
 
       <h2>What we do with it</h2>
@@ -107,7 +121,15 @@ export default function PrivacyPage() {
           bottle can&apos;t be identified from our catalog
         </li>
         <li>
-          <strong>Stripe</strong> — payment processing
+          <strong>Stripe</strong> — payment processing on the web
+        </li>
+        <li>
+          <strong>Apple and Google</strong> — in-app purchases and push
+          notification delivery in the iOS and Android apps
+        </li>
+        <li>
+          <strong>RevenueCat</strong> — keeping App Store and Google Play
+          purchase status in sync with your account
         </li>
         <li>
           <strong>PostHog</strong> — product analytics
@@ -134,9 +156,11 @@ export default function PrivacyPage() {
         photos are kept so we can keep improving scanning, and you can ask us
         to delete yours at any time. Analytics data is retained in aggregate.
         If you delete your account, we delete your personal data, including
-        your scan photos, within 30 days, other than anything we are required
-        to keep for tax or legal reasons, and any photo already reviewed into
-        the library.
+        your scan photos and any push notification token, within 30 days,
+        other than anything we are required to keep for tax or legal reasons,
+        and any photo already reviewed into the library. Deleting your account
+        does not cancel an App Store or Google Play subscription; manage that
+        in your Apple ID or Google account settings.
       </p>
 
       <h2>Your rights</h2>
@@ -149,7 +173,9 @@ export default function PrivacyPage() {
         confirm again that we do not sell personal information.
       </p>
       <p>
-        To exercise any of these, email{" "}
+        You can delete your account yourself from inside the app or the
+        website under Account &rarr; Manage account, with no email required.
+        For anything else, email{" "}
         <a href={`mailto:${LEGAL_CONTACT}`}>{LEGAL_CONTACT}</a>, or see{" "}
         <a href="/support/delete-account">Delete your account</a> for what
         deletion covers and how long it takes.

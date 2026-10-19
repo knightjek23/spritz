@@ -22,6 +22,7 @@
 // indicator is properly torn down the moment a scan resolves.
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { recordScan } from "@/lib/review-prompt";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SignedOut } from "@clerk/nextjs";
@@ -107,6 +108,7 @@ function ScanPageInner() {
   async function finish(r: ScanResult) {
     pushLine(resultLine(r));
     setStagesDone(true);
+    recordScan(Boolean(r.matched));
     if (r.matched) {
       prefetch(r.matched.id);
       await new Promise((res) => setTimeout(res, DONE_HOLD_MS));
@@ -216,7 +218,10 @@ function ScanPageInner() {
           stagesDone={stagesDone}
         />
         {error && (
-          <div className="fixed left-0 right-0 bottom-28 mx-auto max-w-sm z-[60] px-4">
+          <div
+            className="fixed left-0 right-0 mx-auto max-w-sm z-[60] px-4"
+            style={{ bottom: "var(--nav-clearance)" }}
+          >
             <div className="p-4 rounded-xl border border-burgundy/40 bg-cream shadow-lg">
               <p className="text-burgundy text-sm mb-1">{error}</p>
               <p className="text-sm text-ink">

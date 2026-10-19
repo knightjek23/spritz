@@ -159,3 +159,263 @@ Every Tier 1 and Tier 2 decision, with the options considered, the choice, who m
 - **Recommendation and its reasoning, recorded for the record:** Android first would start the closed-test clock sooner, and that clock is the longest uncompressible wait in the launch (14 days continuous + up to 7 days production review). Every day it is not running adds a day to the Android date.
 - **Why (b) is defensible anyway:** Apple-first has been the plan since the July runbook and is what D2 assumed. Apple is the harder review, and a Guideline 4.2 rejection is the highest-severity risk on the launch, so finding it early has real value.
 - **Mitigation, agreed:** register the Play Console account NOW in parallel. It carries its own identity and payment verification wait of up to 5 days, is slice 1 work rather than slice 2, and doing it during the iOS build means the tester clock can start the moment an Android build exists instead of 5 days later.
+## D12 — (unlogged)
+
+- **Status:** referenced as part of "D1 through D12" in the 2026-09-02 session handoff, but never written into this file. The handoff's own list of locked decisions maps cleanly onto D1 through D11 plus "iOS before Android," which is the likely candidate. Number reserved rather than reused so nothing already referencing D12 shifts.
+- **Action:** Josh to confirm what D12 was, then fill this in.
+
+## D13 — iOS safe areas: full-bleed with token'd insets
+
+- **Date:** 2026-09-03
+- **Slice:** 2 (also settles part of slice 8)
+- **Tier:** 1
+- **Context:** The app had no `env(safe-area-inset-*)` anywhere and set no `viewport-fit`. On a notched iPhone the floating bottom-nav pill sat under the home indicator.
+- **Options:** (a) `viewportFit: "cover"` plus `env()` insets on every fixed element. (b) Leave `viewport-fit` unset and let WKWebView lay the page out inside the safe area. (c) Cover, but patch only the bottom nav.
+- **Choice:** (a) **Full-bleed with `env()` insets.**
+- **Decided by:** Josh
+- **Why:** (b) needs no CSS at all but paints theme-colored bands above and below the content on notched devices, which is exactly what a wrapped website looks like and exactly the impression Guideline 4.2 punishes. Given D3 already accepts a remote-load shell, the app cannot also afford to *look* like one. (c) fixes the reported bug with the smallest diff but leaves the top nav under the status bar and the `/scan` camera tray unresolved, both of which return in slice 8.
+- **Implementation shape:** insets are exposed as `--safe-top/bottom/left/right` in `globals.css` with `0px` fallbacks, plus `--nav-pill-offset` and `--nav-clearance` for the floating pill's geometry. Fixed elements use the tokens, never a raw `env()` and never a hardcoded offset, so there is one place to look when something sits wrong on a device.
+- **Consequence:** `--nav-clearance` resolves to exactly 112px when the inset is zero, which is what the old flat `pb-28` was, so the web layout is unchanged. Slice 8's "safe areas correct on notched devices" criterion is now largely met ahead of time; what remains there is the status-bar *style* and the launch flash.
+
+## D14 — Google OAuth in the native shell: system browser plus deep link
+
+- **Date:** 2026-09-03
+- **Slice:** 2
+- **Tier:** 1
+- **Context:** Google refuses OAuth inside embedded webviews (`disallowed_useragent`), so Clerk's `<SignIn />` Google button dead-ends in the shell. Cookies do not cross between Safari and WKWebView, so the session also has to be handed back explicitly.
+- **Options:** (a) System browser via `@capacitor/browser`, session handed back on a custom URL scheme as a Clerk sign-in token exchanged with the `ticket` strategy. (b) Native Google Sign-In SDK returning an idToken for Clerk to exchange. (c) Hide Google inside the app, offer email and Apple only.
+- **Choice:** (a) **System browser plus deep link.**
+- **Decided by:** Josh
+- **Why:** Both halves exist in the pinned SDK (`@clerk/backend` `signInTokens.createSignInToken`, `@clerk/types` `TicketStrategy`), it uses first-party Capacitor plugins only, and Apple rides the same round trip. (b) adds a native dependency, a GoogleService plist, an iOS client ID and a second separate path for Apple, plus another SDK for the privacy label. (c) locks out every user who signed up through Google, since those Clerk accounts have no password.
+- **Shape:** `/native-auth/start` (nonce cookie) → `/native-auth/go` (Clerk redirect) → `/native-auth/callback` (both force URLs on complete) → `/native-auth/complete` (60-second single-use token, 302 to `app.spritzofficial://sso-callback`) → `NativeAuthBridge` (nonce check, ticket exchange). Full design: `docs/superpowers/specs/2026-09-03-slice-2.2-native-oauth-design.md`.
+- **Accepted residual risk:** `@capacitor/browser` is `SFSafariViewController`, so the callback goes through the OS URL router rather than being delivered privately as `ASWebAuthenticationSession` would. Mitigated by the nonce and the 60-second token. Closing it fully is a plugin swap, not a protocol change.
+
+## D15 — Sign in with Apple: browser path now, native sheet later
+
+- **Date:** 2026-09-03
+- **Slice:** 2
+- **Tier:** 1
+- **Context:** Guideline 4.8 requires Sign in with Apple wherever Google is offered.
+- **Options:** (a) Native `ASAuthorizationController` sheet via a Capacitor plugin, Clerk exchanging the identity token. (b) The same browser round trip as Google with `oauth_apple`. (c) Upgrade Clerk first, then (a).
+- **First choice, then reversed:** Josh picked (a) on the recommendation. Checking the installed `@clerk/types` 4.26.0 showed `signIn.create` accepts oauth, ticket, google_one_tap, password, passkey and code strategies and nothing for an Apple identity token. Clerk ships native Apple token exchange only through its Expo hook (November 2025) and does not document the underlying strategy for other SDKs. Building (a) would mean calling an undocumented API from a 2024 SDK.
+- **Choice:** (b) **Browser path now**, native sheet logged as a revisit.
+- **Decided by:** Josh, on the corrected recommendation
+- **Why:** Works today on what is installed, about twenty lines on top of D14, and still satisfies 4.8: the requirement is that an equivalent privacy-preserving option is offered, not that it use the native sheet. (c) puts a major-version auth upgrade inside slice 2, touching sign-in, middleware, webhooks and the account-deletion route verified two days ago; it deserves its own slice.
+- **UI consequence:** Apple is listed first and styled identically to Google, per Apple's HIG on button prominence.
+- **Revisit:** when Clerk is upgraded. Pre-req that still needs Josh: Apple must be enabled as a social connection in the Clerk dashboard with a Services ID and key, which the web flow needs regardless.
+
+## D16 — App icon and launch screen
+
+- **Date:** 2026-09-03
+- **Slice:** 2 (pre-satisfies part of slice 8)
+- **Tier:** 1
+- **Icon options:** (a) `public/icon-512.png`, the S with the brass dot. (b) `public/icon-maskable-512.png`, plain S. (c) `brand/spritz-pfp-monogram.png`, lowercase serif s.
+- **Icon choice:** (a) **S with brass dot**, rendered at 1024 on an opaque emerald field (Apple rejects alpha in the store icon).
+- **Splash options:** (a) Cream `#F4EFE6` field with the serif wordmark centered. (b) Emerald field with the S mark.
+- **Splash choice:** (a) **Cream with wordmark.**
+- **Decided by:** Josh
+- **Why:** The icon is what home-screen PWA users already have, so the native app and the web shortcut read as one product; the brass dot is the only detail separating it from every other green-square-white-letter icon. The splash matches the cream the app paints behind every page, so launch screen to first page is one continuous color, which is most of what slice 8 means by "no white flash." Emerald would hard-cut to cream a second later.
+- **Also done in passing:** the storyboard background was `systemBackgroundColor`, which is white in light mode and black in dark mode, and flashes for a frame against the cream image either way. Now a fixed cream. `capacitor.config.ts` gains `backgroundColor: "#F4EFE6"` for the webview itself, for the same reason.
+
+## D17 — Camera purpose string
+
+- **Date:** 2026-09-03
+- **Slice:** 2
+- **Tier:** 1
+- **Options:** (a) "Spritz uses the camera to scan fragrance bottles and identify them." (b) "Spritz needs camera access so you can scan a bottle's label to look it up." (c) "Scan a bottle to identify it and see its notes, perfumer, and how it wears."
+- **Choice:** (a).
+- **Decided by:** Josh
+- **Why:** Feature plus benefit in one sentence, agreeing with the in-app primer the user has just read. (b) reads as a demand; (c) sells the feature without explaining the permission.
+- **Why it matters now, not in slice 6:** the shell's camera is still `getUserMedia` inside WKWebView, which hard-crashes the app if `NSCameraUsageDescription` is absent. Slice 6's native camera will reuse the same string.
+
+## D18 — iPhone orientation: portrait only
+
+- **Date:** 2026-09-03
+- **Slice:** 2
+- **Tier:** 2
+- **Choice:** `UISupportedInterfaceOrientations` trimmed to portrait on iPhone. iPad list left as generated.
+- **Decided by:** Claude
+- **Why:** Capacitor's template allows landscape by default; that was never a product choice. `public/manifest.webmanifest` already declares `"orientation": "portrait"` for the PWA, the whole app is laid out at `max-w-md`, and the `/scan` camera takeover assumes a portrait frame. Locking the shell to portrait makes the native app match the web app's existing decision rather than expanding it. Reversible in one line if iPad or landscape ever becomes a goal.
+
+## D19 — Push sending: direct to APNs from Vercel
+
+- **Date:** 2026-09-04
+- **Slice:** 5
+- **Tier:** 1
+- **Options:** (a) Vercel route to APNs over HTTP/2 with a token-signed JWT, `@capacitor/push-notifications` as the only client dependency. (b) OneSignal or Firebase Cloud Messaging. (c) Supabase Edge Function to APNs.
+- **Choice:** (a).
+- **Decided by:** Josh
+- **Why:** No third-party SDK in the app, so nothing new on the App Privacy label or the Play Data Safety form; no vendor account; the send path is small. (b) is faster to a first campaign and brings a dashboard, but adds an SDK that collects device identifiers, and OneSignal reads as ad-tech to reviewers. (c) is the same design in a second runtime for one function.
+- **Consequence:** `lib/apns.ts`, `lib/push-scan-followup.ts`, `push_tokens` + `push_sends` in migration 0028, one Vercel cron. Android gets an FCM sender of the same shape.
+
+## D20 — First push campaign: scan follow-up, next day
+
+- **Date:** 2026-09-04
+- **Slice:** 5 (closes one-pager Q4)
+- **Tier:** 1
+- **Options:** (a) Day-after scan follow-up landing on the scanned bottle. (b) Weekly trending digest from the trends snapshot. (c) "A wishlist bottle is trending."
+- **Choice:** (a).
+- **Decided by:** Josh
+- **Why:** Tied to something the person did, one per scan, so it reads as service rather than marketing; the primer gets an honest, specific promise at the moment of highest intent; the data already exists. (b) is the same message to everyone, which is the kind people mute. (c) fires for too few people early on. Both logged as later campaigns. The wishlist sale alert the one-pager mentioned needs price monitoring that does not exist and is out for launch.
+
+## D21 — Primer moment: first scan result
+
+- **Date:** 2026-09-04
+- **Slice:** 5
+- **Tier:** 1
+- **Options:** (a) Inline card on the scan receipt at the first native match. (b) Full-screen primer on first launch after sign-in. (c) Settings toggle only.
+- **Choice:** (a), with "Not now" re-offering on later scans up to three times, then never.
+- **Decided by:** Josh
+- **Why:** iOS grants one shot at the system prompt; the primer's job is to make sure only someone who will say yes ever sees it. The promise is concrete right after a match. (b) has the worst documented opt-in rates because the promise is abstract. (c) exists anyway as the opt-out surface on Account but cannot reach the 60% target alone.
+
+## D22 — Primer copy
+
+- **Date:** 2026-09-04
+- **Slice:** 5
+- **Tier:** 1
+- **Choice:** Title "Want a follow-up on {fragrance} tomorrow?" Body "One notification, the day after each scan, with how it wears and what to compare it to." Buttons "Yes, notify me" / "Not now".
+- **Decided by:** Josh
+- **Why:** Names the bottle, states the frequency, describes the content; nothing to be surprised by later. Alternatives considered: a shorter forgetting-framed version ("Remember this one?") and a minimal "Turn on notifications", which is the phrase people have learned to decline.
+
+## D23 — Follow-up frequency cap and deep link
+
+- **Date:** 2026-09-04
+- **Slice:** 5
+- **Tier:** 2 (proposed in the brief, not objected to)
+- **Choice:** One push per user per day, most recent match wins; nothing for scans older than 48 hours; job at 17:00 UTC (10:00 Pacific); a tap lands on `/fragrance/{id}`. Notification copy: title "{Fragrance} by {House}", body "Here's how it wears, and what to compare it to."
+- **Decided by:** Claude
+- **Why:** The cap is what keeps a transactional notification from becoming three a day for a heavy scanner. The 48-hour floor means a job that missed a day never sends a stale batch. The landing page is the only place the message makes sense.
+
+## D24 — Native camera: the iOS camera sheet via @capacitor/camera
+
+- **Date:** 2026-09-05
+- **Slice:** 6
+- **Tier:** 1
+- **Options:** (a) Apple's camera UI through `@capacitor/camera`, keeping the branded intro screen and dropping the web viewfinder while shooting. (b) A community camera-preview plugin rendering the live camera under the webview so the existing viewfinder survives. (c) Keep `getUserMedia` and use the plugin only for the Photos picker.
+- **Choice:** (a).
+- **Decided by:** Josh
+- **Why:** Unmistakably native to a reviewer, a still photo instead of a video frame as matcher input, first-party plugin, gallery picker included, about a day. (b) is the best-looking result but a non-first-party plugin with its own privacy manifest, transparent-webview plumbing that fights the cream background and the safe-area work, and roughly three days, for a result reviewers cannot distinguish from the web viewfinder. (c) leaves the second 4.2 pillar empty.
+- **Consequence:** `lib/native-camera.ts`, `prepareFromDataUrl()` in `lib/image-prep.ts`, native branches in `components/camera-capture.tsx`, `NSPhotoLibraryUsageDescription` in Info.plist. Server and scan schema untouched. Flash and camera-switch are the sheet's own.
+
+## D25 — Camera permission denied: gallery plus a Settings link
+
+- **Date:** 2026-09-05
+- **Slice:** 6
+- **Tier:** 1
+- **Options:** (a) Existing denied message with "Choose from Photos" and "Open Settings" (deep link to the app's iOS settings page). (b) Gallery only. (c) Block scanning until camera is granted.
+- **Choice:** (a).
+- **Decided by:** Josh
+- **Why:** iOS only reverses a denied camera permission in Settings, so without the link most people never find it; the gallery keeps scanning usable for someone who said no. (c) removes a working path from a person who just declined, which is the shape of a one-star review and close to what 5.1.1 calls out. Same wording as the web path.
+
+## D26 — Offline screen: wordmark, one line, Try again
+
+- **Date:** 2026-09-06
+- **Slice:** 8
+- **Tier:** 1
+- **Options:** (a) Static cream page with the wordmark, "You're offline. Spritz needs a connection to look things up." and a Try again button. (b) Same plus auto-reload when the connection returns. (c) Cache recently viewed pages and offer them offline.
+- **Choice:** (a).
+- **Decided by:** Josh
+- **Why:** Honest about what the app is without a network. Bundled into the app through Capacitor's `server.errorPath`, so it renders with zero requests. (b) needs a backoff against reload loops on flaky signal for a small gain. (c) is a service-worker layer on a server-rendered app and a future slice, not polish.
+
+## D27 — External links open in the in-app browser sheet
+
+- **Date:** 2026-09-06
+- **Slice:** 8
+- **Tier:** 1
+- **Options:** (a) `@capacitor/browser` Safari sheet over the app, Done returns to the same place. (b) Capacitor's default: hand the link to the Safari app.
+- **Choice:** (a), for every `target="_blank"` link and every off-origin http(s) link, in one capturing click listener in `NativeAuthBridge`.
+- **Decided by:** Josh
+- **Why:** Buy is the one action that leaves the app; keeping the person inside it is what retention wants and what every shopping app does. Affiliate tracking is unaffected (it is a real Safari view). (b) is a full context switch and makes the repackaged-website impression worse.
+
+## D28 — Status bar style
+
+- **Date:** 2026-09-06
+- **Slice:** 8
+- **Tier:** 2
+- **Choice:** `@capacitor/status-bar`, `Style.Light` (dark glyphs) set once per launch.
+- **Decided by:** Claude
+- **Why:** The canvas is cream everywhere; light glyphs would be invisible. The bar already sits over the app's own top inset from slice 2.1.
+
+## D29 — App Store screenshots: Josh designs them in Figma from simulator captures
+
+- **Date:** 2026-09-06
+- **Slice:** 9
+- **Tier:** 1
+- **Options:** (a) Simulator captures at 6.9-inch, framed and captioned by Josh in Figma. (b) An HTML template on the brand tokens rendered headless. (c) Raw captures.
+- **Choice:** (a).
+- **Decided by:** Josh
+- **Why:** The store page is the first brand touchpoint and Josh is the designer. (b) would be competent and get redone; (c) undercuts the D9 story the listing copy leans on. Caption drafts live in `store-listing-copy.md`.
+- **Also:** `TARGETED_DEVICE_FAMILY` set to iPhone only, so no iPad screenshot set and no iPad review surface for a portrait, `max-w-md` app.
+
+## D30 — Native sign-in always runs the tapped provider (shortcut removed)
+
+- **Date:** 2026-09-08
+- **Slice:** 2 (revisit)
+- **Tier:** 2
+- **Context:** The native sign-in handoff runs in an `SFSafariViewController`. `/native-auth/go` used to short-circuit when that browser already held a Spritz session, on the assumption it was sharing the Safari app's session. It is not: since iOS 11 the view controller has its own cookie store, so the only session it can hold is one the app itself created on an earlier sign-in. Surfaced when Sign in with Apple kept returning the Google account even after signing out of Safari and the app.
+- **Options:** (a) Keep the shortcut. (b) Always run the tapped provider, signing the stale session out first.
+- **Choice:** (b). Josh first chose (a) on the Safari-sharing premise; reversed the same day once the cookie isolation was established.
+- **Decided by:** Josh (initial), corrected by Claude with the new fact and confirmed in the build log.
+- **Why:** With isolated storage the shortcut only ever fires for a user who signed out and is signing back in, and in that case it silently hands back the old account whichever button they tap. Nobody could switch accounts. (b) costs the OAuth round trip only at sign-in, which is rare.
+- **Consequence:** `native-auth-go.tsx` calls `clerk.signOut()` when it finds a session, then `authenticateWithRedirect` with the requested strategy. Already-installed builds pick this up on next launch (web page). The one-time workaround before the deploy is deleting and reinstalling the app, which wipes the sheet's storage.
+
+## D31 — App Store monthly carries the 7-day free trial
+
+- **Date:** 2026-09-11
+- **Slice:** 7
+- **Tier:** 1
+- **Context:** One-pager Q3. The web offers 7 days free on monthly (not annual) via Stripe.
+- **Options:** (a) Match the web: 7-day Introductory Offer on `spritz_pro_monthly` only. (b) No trial on the App Store.
+- **Choice:** (a).
+- **Decided by:** Josh
+- **Why:** Same pricing story on both platforms, the App Store listing shows the trial, and the one-pager's conversion guardrail compares like with like. Configured on the Apple product, not in code; the pricing page reads the store's intro offer and shows whatever is configured.
+
+## D32 — A Stripe-Pro user inside the app sees "managed on the web", nothing else
+
+- **Date:** 2026-09-11
+- **Slice:** 7
+- **Tier:** 1
+- **Options:** (a) Pro badge plus a line that the subscription is managed at spritzofficial.app; no portal button, no purchase offer. (b) A Manage button that opens the Stripe portal in Safari.
+- **Choice:** (a).
+- **Decided by:** Josh
+- **Why:** Apple's multiplatform rule permits honoring a subscription bought elsewhere as long as no purchase link-out is shown; (b) is the exact surface reviewers flag under 3.1.1. Backed by a new `users.pro_source` column so a store expiration never downgrades a web subscriber.
+
+## D33 — Restore purchases on /pricing and on Account
+
+- **Date:** 2026-09-11
+- **Slice:** 7
+- **Tier:** 1
+- **Options:** (a) Text link under the pricing CTA plus the same link in the Account plan card for free users. (b) Pricing page only.
+- **Choice:** (a).
+- **Decided by:** Josh
+- **Why:** Apple requires a restore path for the non-consumable lifetime tier and looks for it on the paywall; a reinstalling user who opens Account first should not have to hunt for it.
+
+## D34 — Google Play category: Beauty
+
+- **Date:** 2026-09-11
+- **Slice:** 3
+- **Tier:** 2
+- **Options:** (a) Books & Reference, the literal match for the Apple primary (D11). (b) Lifestyle, the Apple secondary. (c) Beauty.
+- **Choice:** (c).
+- **Decided by:** Claude, confirmed by Josh
+- **Why:** Play allows one category and it feeds "similar apps" and the category charts. The two apps Spritz sits next to in a user's mind, Fragrantica Perfumes (500K+ installs) and Parfumo (100K+), are both in Beauty. Books & Reference buries a fragrance app among ebook readers; Lifestyle is too broad to help. Editable later, unlike Apple's.
+
+## D35 — Android push: FCM HTTP v1 direct from Vercel
+
+- **Date:** 2026-09-15
+- **Slice:** 5 (Android half)
+- **Tier:** 1
+- **Options:** (a) Firebase Cloud Messaging called directly from the Vercel route, mirroring D19's direct-to-APNs design; Firebase project used only for Messaging. (b) A push vendor (OneSignal or similar) for both platforms.
+- **Choice:** (a).
+- **Decided by:** Josh
+- **Why:** (b) reverses D19, adds an SDK to both apps and rows to both privacy declarations, and buys nothing a daily campaign needs. (a) adds only Firebase Messaging, which the Capacitor plugin requires on Android anyway, and one server credential. Detail that came with it: on Android 12 and older there is no notification permission, so register-on-launch would enrol people who never saw the primer; a local opt-in flag set by the primer's Yes keeps D21 (consent at the primer) true on Android. Design: `docs/superpowers/specs/2026-09-15-android-update-1-design.md`.
+
+## D36 — Android camera denied path: instruction, no settings deep link
+
+- **Date:** 2026-09-15
+- **Slice:** 6 (Android half)
+- **Tier:** 2
+- **Options:** (a) A community plugin to open the app's settings page, matching iOS's `app-settings:` link (D25). (b) Keep "Choose from Photos" and show the Android settings path as text, no button.
+- **Choice:** (b).
+- **Decided by:** Josh
+- **Why:** On Android the camera plugin hands off to the system camera app, so a denied camera is rare; a dependency for a rare path is not worth carrying. `app-settings:` is silently a no-op on Android, so the iOS button had to go either way.

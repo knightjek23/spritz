@@ -131,6 +131,21 @@ async function main() {
     .upload(photoPath, jpg, { contentType: "image/jpeg", upsert: true });
   if (upErr) console.log(`  (storage seed failed: ${upErr.message} — storage assertions will be skipped)`);
 
+  // Push (migration 0028): both tables cascade with the users row.
+  const { data: tok, error: tokErr } = await supabase
+    .from("push_tokens")
+    .insert({ user_id: userId, token: `purge-test-${clerkId}`, platform: "ios" })
+    .select("id")
+    .single();
+  if (tokErr) console.log(`  (push_tokens seed failed: ${tokErr.message})`);
+  const { error: sendErr } = await supabase.from("push_sends").insert({
+    user_id: userId,
+    token_id: tok?.id ?? null,
+    campaign: "scan_followup",
+    scan_event_id: scanId,
+  });
+  if (sendErr) console.log(`  (push_sends seed failed: ${sendErr.message})`);
+
   const { error: fpErr } = await supabase.from("fragrance_photos").insert([
     { fragrance_id: frag.id, clerk_user_id: clerkId, storage_path: `${frag.id}/${clerkId}-pending.jpg`, status: "pending" },
     { fragrance_id: frag.id, clerk_user_id: clerkId, storage_path: `${frag.id}/${clerkId}-approved.jpg`, status: "approved" },
@@ -162,6 +177,13 @@ async function main() {
   check("scan_events row SURVIVES (accuracy metric)", !!scan);
   check("scan_events.user_id nulled", scan ? scan.user_id === null : false);
   check("scan_events.image_url nulled", scan ? scan.image_url === null : false);
+
+  const { count: pushTokens } = await supabase
+    .from("push_tokens").select("id", { count: "exact", head: true }).eq("user_id", userId);
+  check("push_tokens cascaded", (pushTokens ?? 0) === 0, `${pushTokens} left`);
+  const { count: pushSends } = await supabase
+    .from("push_sends").select("id", { count: "exact", head: true }).eq("user_id", userId);
+  check("push_sends cascaded", (pushSends ?? 0) === 0, `${pushSends} left`);
 
   const { data: obj } = await supabase.storage.from(SCAN_BUCKET).list("scans", { search: `${scanId}.jpg` });
   check("scan photo removed from storage", (obj ?? []).length === 0, `${(obj ?? []).length} found`);

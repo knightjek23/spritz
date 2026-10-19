@@ -99,6 +99,10 @@ function FamilySheet({
   return (
     <div
       className="fixed inset-0 z-50 flex items-end justify-center"
+      // Lifts the sheet clear of the home indicator under viewportFit:
+      // "cover". The backdrop below is absolute inset-0, which resolves
+      // against the padding box, so it still covers the full screen.
+      style={{ paddingBottom: "var(--safe-bottom)" }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="family-sheet-title"

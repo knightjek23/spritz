@@ -1,34 +1,46 @@
 "use client";
 
-// Nav-bar search slot. Renders the typeahead in a compact second row
-// of the nav. Hides itself on /search to avoid two identical inputs
-// stacked on top of each other.
+// Nav-bar search slot. Renders the compact typeahead inline in the top
+// nav, between the brand and the account controls, and takes whatever
+// width is left over. On /search, where the page already has a primary,
+// focused input, it renders an empty spacer so brand and account stay at
+// the row's edges.
 //
-// Why a wrapper: Nav itself is a server component (uses Clerk's
-// SignedIn/SignedOut server primitives), so we can't call usePathname
-// directly there.
+// Expansion state lives in NavRow; this component just wires it to the
+// autocomplete: focus expands, the leading chevron collapses.
 
 import { usePathname } from "next/navigation";
 import { SearchAutocomplete } from "./search-autocomplete";
 
-export function NavSearch() {
+export function NavSearch({
+  expanded,
+  onExpand,
+  onCollapse,
+  resetKey,
+}: {
+  expanded: boolean;
+  onExpand: () => void;
+  onCollapse: () => void;
+  resetKey: number;
+}) {
   const pathname = usePathname();
 
-  // Don't render on /search — the page already has a primary, focused
-  // input. Two synced inputs would just be confusing.
-  if (pathname === "/search") return null;
+  if (pathname === "/search") return <div className="flex-1" />;
 
   return (
-    // Sticky positioning + z-index dropped — NavScrollWrapper (parent of
-    // Nav) now owns the sticky context for the whole top strip and hides
-    // this row along with the primary nav on scroll-down.
-    <div className="border-b border-ink/10 bg-cream/80 backdrop-blur">
-      <div className="mx-auto max-w-md px-6 py-2">
-        <SearchAutocomplete
-          placeholder="Search fragrances, brands, notes…"
-          autoFocus={false}
-        />
-      </div>
+    // flex-1 + min-w-0 so the input shrinks instead of pushing the
+    // avatar off the row on narrow phones.
+    <div className="flex-1 min-w-0">
+      <SearchAutocomplete
+        placeholder="Fragrances, notes…"
+        autoFocus={false}
+        compact
+        leading={expanded ? "back" : "search"}
+        onLeadingClick={onCollapse}
+        onFocus={onExpand}
+        recentSearches
+        resetKey={resetKey}
+      />
     </div>
   );
 }
