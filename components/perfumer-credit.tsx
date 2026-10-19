@@ -17,10 +17,16 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 
+// "locked" is reserved for a real answer of "not Pro". Signed-out and
+// failed requests get their own states: collapsing all three into one
+// "Unlock with Pro" box once made a working Pro account look broken, with
+// nothing on screen to say why.
 type State =
   | { kind: "loading" }
   | { kind: "pro"; perfumer: string; slug: string }
   | { kind: "locked" }
+  | { kind: "signed-out" }
+  | { kind: "error" }
   | { kind: "none" };
 
 export function PerfumerCredit({
@@ -40,16 +46,26 @@ export function PerfumerCredit({
     }
     if (!isLoaded) return;
     if (!isSignedIn) {
-      setState({ kind: "locked" });
+      setState({ kind: "signed-out" });
       return;
     }
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`/api/perfumer/${fragranceId}`);
+        // no-store: a stale cached answer from before an upgrade or comp
+        // would keep showing the paywall to someone who is now Pro.
+        const res = await fetch(`/api/perfumer/${fragranceId}`, { cache: "no-store" });
         if (cancelled) return;
-        if (!res.ok) {
+        if (res.status === 402) {
           setState({ kind: "locked" });
+          return;
+        }
+        if (res.status === 401) {
+          setState({ kind: "signed-out" });
+          return;
+        }
+        if (!res.ok) {
+          setState({ kind: "error" });
           return;
         }
         const body = (await res.json()) as { perfumer: string | null; slug: string | null };
@@ -59,7 +75,7 @@ export function PerfumerCredit({
             : { kind: "none" },
         );
       } catch {
-        if (!cancelled) setState({ kind: "locked" });
+        if (!cancelled) setState({ kind: "error" });
       }
     })();
     return () => {
@@ -88,6 +104,26 @@ export function PerfumerCredit({
             See their work →
           </span>
         </Link>
+      )}
+
+      {state.kind === "signed-out" && (
+        <p className="text-sm text-slate">
+          See who made this with Spritz Pro.{" "}
+          <Link href="/sign-in" className="text-emerald underline underline-offset-4">
+            Sign in
+          </Link>{" "}
+          or{" "}
+          <Link href="/pricing" className="text-emerald underline underline-offset-4">
+            see Pro
+          </Link>
+          .
+        </p>
+      )}
+
+      {state.kind === "error" && (
+        <p className="text-sm text-slate">
+          Couldn&apos;t load the perfumer. Refresh to try again.
+        </p>
       )}
 
       {state.kind === "locked" && (
