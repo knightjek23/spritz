@@ -20,7 +20,7 @@
 // card's own fade. The backdrop dims everything else and fades with the
 // card. The home block is the only caller.
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { StreakBottle } from "@/components/streak-bottle";
 import { streakCopy } from "@/lib/streak";
@@ -71,6 +71,23 @@ export function StreakToast({
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  // Line the card's bottom edge up with the bottom of the "Scan a bottle"
+  // CTA. Measured after the home block has re-rendered with today's entry
+  // (this effect runs in the same commit). Off-screen CTA → centred.
+  const [anchorBottom, setAnchorBottom] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    if (!mounted) return;
+    // The home CTA, not the bottom nav's Scan tab.
+    const cta = [...document.querySelectorAll<HTMLElement>('a[href="/scan"]')].find(
+      (a) => !a.closest("nav"),
+    );
+    if (!cta) return;
+    const r = cta.getBoundingClientRect();
+    const vh = window.innerHeight;
+    if (r.bottom > 180 && r.bottom < vh - 24) setAnchorBottom(vh - r.bottom);
+  }, [mounted]);
+
   if (!mounted) return null;
 
   return createPortal(
@@ -80,6 +97,11 @@ export function StreakToast({
       aria-live="polite"
       onClick={(e) => e.stopPropagation()}
       className={`streak-toast ${copy.milestone ? "streak-toast--milestone" : ""}`}
+      style={
+        anchorBottom !== null
+          ? ({ "--anchor-bottom": `${Math.round(anchorBottom)}px` } as React.CSSProperties)
+          : undefined
+      }
     >
       <div className="streak-mark">
         <StreakBottle />

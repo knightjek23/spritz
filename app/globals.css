@@ -514,19 +514,27 @@ button .cl-spinner {
   background: rgba(26, 26, 26, 0.45);
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  padding-top: calc(var(--safe-top) + 96px);
+  align-items: center;
   opacity: 0;
   animation: streak-layer-in 500ms ease-out forwards;
 }
 .streak-layer--out { animation: streak-layer-out 600ms ease-in forwards; }
 @keyframes streak-layer-in  { to { opacity: 1; } }
-@keyframes streak-layer-out { to { opacity: 0; } }
+@keyframes streak-layer-out { from { opacity: 1; } to { opacity: 0; } }
 
 /* Card: same width as the home CTAs (max-w-md minus px-6 on each side). */
 .streak-toast {
   position: relative;
   width: min(400px, calc(100% - 48px));
+}
+/* --anchor-bottom = viewport px from the bottom edge to the Scan CTA's bottom. */
+.streak-toast[style*="--anchor-bottom"] {
+  position: absolute;
+  bottom: var(--anchor-bottom);
+  left: 50%;
+  margin-left: calc(min(400px, 100vw - 48px) / -2);
+}
+.streak-toast {
   background: #f4efe6;
   border: 1px solid rgba(26, 26, 26, 0.12);
   border-radius: 20px;
@@ -546,7 +554,7 @@ button .cl-spinner {
 }
 .streak-layer--out .streak-toast { animation: streak-toast-out 600ms ease-in forwards; }
 @keyframes streak-toast-in  { to { transform: translateY(0); } }
-@keyframes streak-toast-out { to { transform: translateY(-8px); } }
+@keyframes streak-toast-out { from { transform: translateY(0); } to { transform: translateY(-8px); } }
 .streak-day  { font-size: 34px; }
 .streak-line { font-size: 19px; }
 .streak-toast--milestone .streak-day  { font-size: 40px; }
