@@ -6,13 +6,18 @@
 // home prompt is built from that shelf, so anything else is a forged body.
 // Re-logging the same bottle on the same day is a no-op (unique index),
 // returned as 200 with the existing row.
+//
+// POST also returns the streak ending on worn_on and whether this was the
+// first log of that day, so the client can show the streak toast exactly
+// once per day without a second request.
 
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ensureAppUser } from "@/lib/users";
-import { isIsoDate, wearHistory, wornOn } from "@/lib/wear-log";
+import { isIsoDate, wearDays, wearHistory, wornOn } from "@/lib/wear-log";
+import { isFirstLogOfDay, streakEndingOn } from "@/lib/streak";
 
 export const runtime = "nodejs";
 
@@ -63,6 +68,10 @@ export async function POST(req: Request) {
     .eq("status", "own");
   if (!count) return NextResponse.json({ error: "not_owned" }, { status: 403 });
 
+  // Days before this write decide "first log today" and the streak.
+  const daysBefore = await wearDays(user.id);
+  const firstToday = isFirstLogOfDay(daysBefore, worn_on);
+
   const { error } = await supabase
     .from("wear_log")
     .upsert(
@@ -73,7 +82,11 @@ export async function POST(req: Request) {
 
   // Return the whole day so the client can swap state in one go.
   const entries = await wornOn(user.id, worn_on);
-  return NextResponse.json({ entries });
+  const streak = streakEndingOn([...daysBefore, worn_on], worn_on);
+  // Day 1 after a broken streak reads "Welcome back"; a brand-new user's
+  // first log does not.
+  const returning = firstToday && streak === 1 && daysBefore.length > 0;
+  return NextResponse.json({ entries, streak, firstToday, returning });
 }
 
 export async function DELETE(req: Request) {

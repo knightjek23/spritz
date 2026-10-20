@@ -19,7 +19,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { getRecommendations } from "@/lib/recommendations";
-import { ownedBottles, wearHistory } from "@/lib/wear-log";
+import { ownedBottles, wearDays, wearHistory } from "@/lib/wear-log";
 import { ForYouFeed } from "@/components/for-you-feed";
 import { MarketingHome } from "@/components/marketing-home";
 import { WearingToday } from "@/components/wearing-today";
@@ -44,11 +44,16 @@ export default async function HomePage() {
   // "What are you wearing today?" needs the Owned shelf and any entries
   // from the last couple of days (the client picks its local day; see
   // components/wearing-today). recs.userId is the app user id.
-  const [owned, recent] = recs.userId
-    ? await Promise.all([ownedBottles(recs.userId), recentWear(recs.userId)])
-    : [[], []];
+  const [owned, recent, days] = recs.userId
+    ? await Promise.all([ownedBottles(recs.userId), recentWear(recs.userId), wearDays(recs.userId)])
+    : [[], [], []];
 
-  return <ForYouFeed data={recs} wearing={<WearingToday owned={owned} recent={recent} />} />;
+  return (
+    <ForYouFeed
+      data={recs}
+      wearing={<WearingToday owned={owned} recent={recent} days={days} />}
+    />
+  );
 }
 
 /** Entries from UTC yesterday onward: covers every local "today" on earth. */

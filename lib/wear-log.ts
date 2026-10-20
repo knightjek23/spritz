@@ -108,3 +108,15 @@ export function mostWorn(entries: WearEntry[], sinceDay: string, top = 3) {
     .sort((a, b) => b.count - a.count || a.fragrance.name.localeCompare(b.fragrance.name))
     .slice(0, top);
 }
+
+/** Every distinct day with an entry, newest first (capped; enough for any streak). */
+export async function wearDays(appUserId: string, limit = 800): Promise<string[]> {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("wear_log")
+    .select("worn_on")
+    .eq("user_id", appUserId)
+    .order("worn_on", { ascending: false })
+    .limit(limit);
+  return [...new Set((data ?? []).map((r) => r.worn_on))];
+}

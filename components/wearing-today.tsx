@@ -17,6 +17,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { BottleImage } from "@/components/bottle-image";
+import { StreakToast } from "@/components/streak-toast";
+import { streakEndingOn } from "@/lib/streak";
 import type { OwnedBottle, WearEntry } from "@/lib/wear-log";
 
 function localDay(d = new Date()): string {
@@ -35,12 +37,17 @@ function joinNames(names: string[]): string {
 export function WearingToday({
   owned,
   recent,
+  days,
 }: {
   owned: OwnedBottle[];
   recent: WearEntry[];
+  /** Every distinct day with an entry (newest first); the streak is computed here against the local day. */
+  days: string[];
 }) {
   const [today, setToday] = useState<string | null>(null);
   const [entries, setEntries] = useState<WearEntry[]>([]);
+  const [streak, setStreak] = useState(0);
+  const [toast, setToast] = useState<{ streak: number; returning: boolean } | null>(null);
   const [picking, setPicking] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +56,8 @@ export function WearingToday({
     const d = localDay();
     setToday(d);
     setEntries(recent.filter((e) => e.wornOn === d));
-  }, [recent]);
+    setStreak(streakEndingOn(days, d));
+  }, [recent, days]);
 
   const dateLabel = useMemo(
     () =>
@@ -76,8 +84,16 @@ export function WearingToday({
         body: JSON.stringify({ fragrance_id: fragranceId, worn_on: today }),
       });
       if (!res.ok) throw new Error(String(res.status));
-      const json = (await res.json()) as { entries: WearEntry[] };
+      const json = (await res.json()) as {
+        entries: WearEntry[];
+        streak: number;
+        firstToday: boolean;
+        returning: boolean;
+      };
       setEntries(json.entries);
+      setStreak(json.streak);
+      // The streak toast fires once per day, on the first log.
+      if (json.firstToday) setToast({ streak: json.streak, returning: json.returning });
       setPicking(false);
     } catch {
       setError("Couldn't save that. Try again.");
@@ -91,12 +107,16 @@ export function WearingToday({
     setBusy(entry.id);
     setError(null);
     const prev = entries;
-    setEntries(prev.filter((e) => e.id !== entry.id));
+    const next = prev.filter((e) => e.id !== entry.id);
+    setEntries(next);
+    // Undoing the only entry of the day takes today out of the streak.
+    if (next.length === 0 && today) setStreak(streakEndingOn(days.filter((d) => d !== today), today));
     try {
       const res = await fetch(`/api/wear?id=${entry.id}`, { method: "DELETE" });
       if (!res.ok) throw new Error(String(res.status));
     } catch {
       setEntries(prev);
+      if (today) setStreak(streakEndingOn([...days, today], today));
       setError("Couldn't remove that. Try again.");
     } finally {
       setBusy(null);
@@ -111,7 +131,16 @@ export function WearingToday({
     <section className="spritz-rise spritz-rise-1 mb-10">
       <p className="font-mono text-xs uppercase tracking-widest text-slate mb-1">
         Today{dateLabel ? ` · ${dateLabel}` : ""}
+        {streak > 0 && <span className="text-emerald"> · Day {streak}</span>}
       </p>
+
+      {toast && (
+        <StreakToast
+          streak={toast.streak}
+          returning={toast.returning}
+          onClose={() => setToast(null)}
+        />
+      )}
 
       {entries.length === 0 ? (
         <h2 className="font-display text-3xl leading-[0.95] mb-4">What are you wearing?</h2>
