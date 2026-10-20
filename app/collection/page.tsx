@@ -174,7 +174,7 @@ function SignedInCollection() {
           <li key={it.id} className="relative">
             <Link
               href={`/fragrance/${it.fragrance.id}`}
-              className="flex items-center gap-3 px-3 py-2 pr-14 rounded-xl bg-paper border border-ink/10 hover:brightness-95 transition"
+              className="flex items-center gap-3 px-3 py-2 pr-16 rounded-xl bg-paper border border-ink/10 hover:brightness-95 transition"
             >
               {/* bg-paper + isolate + mix-blend-multiply trio: the multiply
                   needs an opaque backdrop to blend into (without it, the

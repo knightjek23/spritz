@@ -322,3 +322,7 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
 - **Home:** `components/wearing-today.tsx` (client) is block 0 of `ForYouFeed`, above the Scan/Browse CTAs, only when the Owned shelf is non-empty (those users are the only ones who see the feed anyway). Prompt state: "Today · Sun, Oct 19 / What are you wearing?" over a horizontal scroller of Owned bottles; tap logs. Logged state: "You're wearing **X and Y**." with the rows, per-row Undo, "Add another" reopens the scroller. `app/page.tsx` passes the Owned shelf and every entry from the last 36 h; the client keeps the ones matching its local day, so no fetch on load.
 - **Profile:** `/account` gets a "Fragrance history → N days logged" row above Account info. `/account/history`: "Most worn" (top 3 by days worn, last 90 days), then days newest first with bottle rows that open the fragrance page and a × that removes the entry (`components/wear-history-list.tsx`, optimistic). Empty state links to the home prompt. Helpers in `lib/wear-log.ts`.
 - Not included: reminders, back-dating from the history page, Pro gating.
+
+## Shelf kebab: bigger hit area (2026-10-20)
+
+- The "···" trigger in `components/card-menu.tsx` kept its 32×32 frame but the button is now 56×56 (`p-3 -m-3` around an inner span that draws the frame), so near-misses open the menu instead of falling through to the row's link. Shelf row padding `pr-14` → `pr-16` so titles never run under the wider target.
