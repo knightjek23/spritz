@@ -10,17 +10,23 @@
 // 30, 100, 365) get a larger bottle, larger type, a brass hairline and a
 // longer hold. Keyframes live in app/globals.css under "streak toast".
 //
-// Dismissal: leaves on its own after the hold (4.6 s daily, 6.2 s
-// milestone) or earlier via the × / a tap on the card. prefers-reduced-
-// motion collapses everything to a plain fade. Renders in a fixed slot
-// under the top nav; the home block is the only caller.
+// Dismissal: leaves on its own after the hold (7 s daily, 9 s milestone)
+// or earlier via the × / a tap on the card or the dimmed backdrop.
+// prefers-reduced-motion collapses everything to a plain fade.
+//
+// Rendered through a portal onto <body>: the home block it lives in is
+// animated with a transform (spritz-rise), which would otherwise turn
+// position:fixed into position-relative-to-that-block and swallow the
+// card's own fade. The backdrop dims everything else and fades with the
+// card. The home block is the only caller.
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { StreakBottle } from "@/components/streak-bottle";
 import { streakCopy } from "@/lib/streak";
 
-const HOLD_MS = { daily: 4600, milestone: 6200 } as const;
-const OUT_MS = 500;
+const HOLD_MS = { daily: 7000, milestone: 9000 } as const;
+const OUT_MS = 600;
 
 export function StreakToast({
   streak,
@@ -63,13 +69,17 @@ export function StreakToast({
     }),
   ).current;
 
-  return (
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+
+  return createPortal(
+    <div className={`streak-layer ${leaving ? "streak-layer--out" : ""}`} onClick={close} data-no-longpress>
     <div
       role="status"
       aria-live="polite"
-      onClick={close}
-      className={`streak-toast ${copy.milestone ? "streak-toast--milestone" : ""} ${leaving ? "streak-toast--out" : ""}`}
-      data-no-longpress
+      onClick={(e) => e.stopPropagation()}
+      className={`streak-toast ${copy.milestone ? "streak-toast--milestone" : ""}`}
     >
       <div className="streak-mark">
         <StreakBottle />
@@ -131,5 +141,7 @@ export function StreakToast({
         </svg>
       </button>
     </div>
+    </div>,
+    document.body,
   );
 }

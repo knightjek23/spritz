@@ -506,36 +506,47 @@ button .cl-spinner {
    depresses, a cone of mist widens from the nozzle and holds while the
    headline dissolves into view inside it, copy rises, mist trails off.
    --------------------------------------------------------------------- */
-.streak-toast {
+/* Dimmed backdrop; the card sits inside it and both fade together. */
+.streak-layer {
   position: fixed;
+  inset: 0;
   z-index: 60;
-  left: 50%;
-  top: calc(var(--safe-top) + 76px);
-  width: min(382px, calc(100% - 32px));
+  background: rgba(26, 26, 26, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: calc(var(--safe-top) + 96px);
+  opacity: 0;
+  animation: streak-layer-in 500ms ease-out forwards;
+}
+.streak-layer--out { animation: streak-layer-out 600ms ease-in forwards; }
+@keyframes streak-layer-in  { to { opacity: 1; } }
+@keyframes streak-layer-out { to { opacity: 0; } }
+
+/* Card: same width as the home CTAs (max-w-md minus px-6 on each side). */
+.streak-toast {
+  position: relative;
+  width: min(400px, calc(100% - 48px));
   background: #f4efe6;
   border: 1px solid rgba(26, 26, 26, 0.12);
   border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(26, 26, 26, 0.12);
-  padding: 18px 20px 18px 18px;
+  box-shadow: 0 18px 50px rgba(26, 26, 26, 0.25);
+  padding: 26px 22px 26px 20px;
   display: grid;
   grid-template-columns: 72px 1fr;
   column-gap: 18px;
   align-items: start;
-  opacity: 0;
-  transform: translate(-50%, -12px);
-  animation: streak-toast-in 450ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  transform: translateY(-10px);
+  animation: streak-toast-in 500ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 .streak-toast--milestone {
   grid-template-columns: 88px 1fr;
-  padding: 22px 22px 22px 20px;
+  padding: 30px 24px 30px 22px;
   border-color: #c9a961;
 }
-.streak-toast--out {
-  animation: streak-toast-out 500ms ease-in forwards;
-}
-@keyframes streak-toast-in  { to { opacity: 1; transform: translate(-50%, 0); } }
-@keyframes streak-toast-out { to { opacity: 0; transform: translate(-50%, -8px); } }
-
+.streak-layer--out .streak-toast { animation: streak-toast-out 600ms ease-in forwards; }
+@keyframes streak-toast-in  { to { transform: translateY(0); } }
+@keyframes streak-toast-out { to { transform: translateY(-8px); } }
 .streak-day  { font-size: 34px; }
 .streak-line { font-size: 19px; }
 .streak-toast--milestone .streak-day  { font-size: 40px; }
@@ -624,7 +635,7 @@ button .cl-spinner {
 @keyframes streak-rise { to { opacity: 1; transform: none; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .streak-toast, .streak-bottle, .streak-cap, .streak-cone, .streak-fleck, .streak-day, .streak-line {
+  .streak-layer, .streak-toast, .streak-bottle, .streak-cap, .streak-cone, .streak-fleck, .streak-day, .streak-line {
     animation-duration: 1ms !important;
     animation-delay: 0ms !important;
   }
