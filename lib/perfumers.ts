@@ -13,6 +13,7 @@
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { Database } from "@/lib/supabase/database.types";
 
 export function perfumerSlug(name: string): string {
   return name
@@ -88,3 +89,32 @@ export async function perfumerBySlug(slug: string): Promise<PerfumerSummary | nu
   const all = await listPerfumers();
   return all.find((p) => p.slug === slug) ?? null;
 }
+
+export type PerfumerFragrance =
+  Database["public"]["Functions"]["find_fragrances_by_perfumer"]["Returns"][number];
+
+/**
+ * Every fragrance credited to this perfumer, deduped across stored
+ * spellings and ranked by popularity. Shared by /perfumer/[slug] and
+ * /perfumer/[slug]/house/[house] so the two never disagree on a count.
+ * Pro-only data: callers check the entitlement before calling.
+ */
+export const perfumerFragrances = cache(
+  async (p: PerfumerSummary): Promise<PerfumerFragrance[]> => {
+    const supabase = createAdminClient();
+    const responses = await Promise.all(
+      p.storedNames.map((n) =>
+        supabase.rpc("find_fragrances_by_perfumer", { p_name: n, p_limit: 300 }),
+      ),
+    );
+    const seen = new Set<string>();
+    return responses
+      .flatMap((r) => r.data ?? [])
+      .filter((f) => (seen.has(f.id) ? false : (seen.add(f.id), true)))
+      .sort((a, b) => {
+        const ra = a.popularity_rank ?? Number.MAX_SAFE_INTEGER;
+        const rb = b.popularity_rank ?? Number.MAX_SAFE_INTEGER;
+        return ra - rb || a.name.localeCompare(b.name);
+      });
+  },
+);

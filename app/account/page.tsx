@@ -29,6 +29,7 @@ import { RateSpritzRow } from "@/components/rate-spritz-row";
 import { PushSettings } from "@/components/push-settings";
 import { SignOutButton, DeleteAccountSection } from "@/components/account-actions";
 import { PlanActions } from "@/components/plan-actions";
+import { daysLogged } from "@/lib/wear-log";
 
 export const metadata: Metadata = {
   title: "Account",
@@ -62,7 +63,7 @@ export default async function AccountPage() {
 
   // Usage stats — collection size + scans in the trailing 30 days. Both
   // are cheap count queries; index-served at our scale.
-  const [{ count: collectionCount }, { count: scanCount30d }] = await Promise.all([
+  const [{ count: collectionCount }, { count: scanCount30d }, wearDays] = await Promise.all([
     supabase
       .from("collection_items")
       .select("id", { count: "exact", head: true })
@@ -75,6 +76,7 @@ export default async function AccountPage() {
         "created_at",
         new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
       ),
+    appUser ? daysLogged(appUser.id) : Promise.resolve(0),
   ]);
 
   return (
@@ -168,6 +170,29 @@ export default async function AccountPage() {
             </p>
           </div>
         </div>
+      </section>
+
+      {/* Fragrance history — what they logged from the home prompt */}
+      <section className="mb-8">
+        <p className="font-mono text-xs uppercase tracking-widest text-slate mb-3">
+          Fragrance history
+        </p>
+        <Link
+          href="/account/history"
+          className="flex items-center justify-between rounded-2xl border border-ink/15 px-4 py-4 text-ink hover:bg-ink/5 transition"
+        >
+          <span>
+            {wearDays === 0
+              ? "Nothing logged yet"
+              : `${wearDays} day${wearDays === 1 ? "" : "s"} logged`}
+          </span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden className="shrink-0 text-slate">
+            <path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </Link>
+        <p className="mt-2 text-xs text-slate leading-relaxed">
+          What you wore, by day. Logged from the top of the home screen.
+        </p>
       </section>
 
       {/* Account info */}

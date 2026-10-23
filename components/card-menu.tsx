@@ -221,8 +221,10 @@ export function CardMenu({
   return (
     <>
       {/* Kebab trigger — stopPropagation so taps don't bubble to the
-          parent card link. Sized 32x32 to match the Figma rounded-square
-          frame; inherits ink color so the dots stay legible on cream. */}
+          parent card link. The visible frame stays 32x32 (Figma), but the
+          button itself is 56x56 (p-3 -m-3 grows the hit area without
+          moving the frame) so an imprecise thumb lands on the menu, not
+          on the row's link underneath. */}
       <button
         type="button"
         aria-label="More options"
@@ -231,13 +233,15 @@ export function CardMenu({
           e.stopPropagation();
           setOpen(true);
         }}
-        className="shrink-0 w-8 h-8 rounded-lg border border-ink/15 flex items-center justify-center text-ink/70 hover:bg-ink/5 hover:text-ink transition"
+        className="group/kebab shrink-0 p-3 -m-3 flex items-center justify-center text-ink/70 hover:text-ink"
       >
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden>
-          <circle cx="4" cy="10" r="1" fill="currentColor" />
-          <circle cx="10" cy="10" r="1" fill="currentColor" />
-          <circle cx="16" cy="10" r="1" fill="currentColor" />
-        </svg>
+        <span className="w-8 h-8 rounded-lg border border-ink/15 flex items-center justify-center group-hover/kebab:bg-ink/5 transition">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden>
+            <circle cx="4" cy="10" r="1" fill="currentColor" />
+            <circle cx="10" cy="10" r="1" fill="currentColor" />
+            <circle cx="16" cy="10" r="1" fill="currentColor" />
+          </svg>
+        </span>
       </button>
 
       {/* Bottom sheet + toast are portaled to document.body so they

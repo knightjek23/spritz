@@ -186,6 +186,37 @@ export type Database = {
           },
         ];
       };
+      wear_log: {
+        Row: {
+          id: string;
+          user_id: string;
+          fragrance_id: string;
+          worn_on: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          fragrance_id: string;
+          worn_on: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["wear_log"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "wear_log_fragrance_id_fkey";
+            columns: ["fragrance_id"];
+            referencedRelation: "fragrances";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "wear_log_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       user_reactions: {
         Row: {
           user_id: string;

@@ -19,11 +19,28 @@ export function noteSlug(name: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+/**
+ * House slug. Must stay byte-for-byte equivalent to SQL `house_slug(text)`
+ * (migration 0035): the house page matches slugs in SQL, so any drift
+ * between the two is a 404. Accents are stripped (NFD + drop combining
+ * marks ≙ unaccent), apostrophes dropped, everything else non-alphanumeric
+ * collapses to "-", then trimmed. "Chloé" → "chloe",
+ * "L'Artisan Parfumeur" → "lartisan-parfumeur".
+ */
 export function houseSlug(name: string): string {
   return name
+    .normalize("NFD")
+    .replace(/\p{M}+/gu, "")
+    // Letters NFD leaves alone but unaccent folds anyway.
+    .replace(/[øØ]/g, "o")
+    .replace(/[æÆ]/g, "ae")
+    .replace(/[œŒ]/g, "oe")
+    .replace(/ß/g, "ss")
+    .replace(/[łŁ]/g, "l")
+    .replace(/[đĐ]/g, "d")
     .trim()
     .toLowerCase()
-    .replace(/['']/g, "")
+    .replace(/['’]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
