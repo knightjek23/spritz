@@ -61,6 +61,11 @@ export function BuyOptions({
         href={href}
         target="_blank"
         rel="noopener noreferrer sponsored"
+        // Opt out of NativeTouchLinks. It strips href on touchstart to stop
+        // iOS link previews, and iOS treats that DOM change as a hover:
+        // the first tap is swallowed and the user has to tap twice. A buy
+        // link has no preview worth suppressing.
+        data-no-longpress
         className="block w-full text-center bg-emerald text-cream py-3 rounded-md font-medium hover:bg-emerald/90 transition"
       >
         Buy this fragrance
@@ -91,6 +96,7 @@ export function BuyOptions({
               href={o.productUrl}
               target="_blank"
               rel="noopener noreferrer sponsored"
+              data-no-longpress
               className="flex w-full items-center justify-center gap-2 border border-emerald text-ink py-3 rounded-md hover:bg-emerald/5 transition"
             >
               <span className="font-medium">{o.retailer}</span>
