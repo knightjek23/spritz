@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "week": "2026-W43",
   "week_start": "2026-10-19",
-  "generated_at": "2026-10-23T12:38:20.588665+00:00",
+  "generated_at": "2026-10-24T12:01:03.868818+00:00",
   "collector_version": "1.0.0",
   "sources_used": [
     "google_trends"
@@ -16,7 +16,7 @@
       "fragrantica_url": null,
       "thumbnail_url": null,
       "signals": {
-        "google_trends": 56.5,
+        "google_trends": 58.1,
         "retailer_bestsellers": null,
         "reddit": null,
         "fragrantica": null
@@ -29,11 +29,11 @@
       "id": "chanel-bleu-de-chanel",
       "name": "Bleu de Chanel",
       "brand": "Chanel",
-      "score": 26.1,
+      "score": 26.3,
       "fragrantica_url": null,
       "thumbnail_url": null,
       "signals": {
-        "google_trends": 27.1,
+        "google_trends": 28.0,
         "retailer_bestsellers": null,
         "reddit": null,
         "fragrantica": null
@@ -46,11 +46,11 @@
       "id": "ysl-libre",
       "name": "Libre",
       "brand": "YSL",
-      "score": 18.7,
+      "score": 17.1,
       "fragrantica_url": null,
       "thumbnail_url": null,
       "signals": {
-        "google_trends": 19.4,
+        "google_trends": 18.4,
         "retailer_bestsellers": null,
         "reddit": null,
         "fragrantica": null
@@ -63,11 +63,11 @@
       "id": "valentino-born-in-roma-donna",
       "name": "Born In Roma Donna",
       "brand": "Valentino",
-      "score": 15.4,
+      "score": 12.5,
       "fragrantica_url": null,
       "thumbnail_url": null,
       "signals": {
-        "google_trends": 16.1,
+        "google_trends": 13.5,
         "retailer_bestsellers": null,
         "reddit": null,
         "fragrantica": null
@@ -80,11 +80,11 @@
       "id": "chanel-coco-mademoiselle",
       "name": "Coco Mademoiselle",
       "brand": "Chanel",
-      "score": 6.2,
+      "score": 5.6,
       "fragrantica_url": null,
       "thumbnail_url": null,
       "signals": {
-        "google_trends": 6.6,
+        "google_trends": 6.2,
         "retailer_bestsellers": null,
         "reddit": null,
         "fragrantica": null
@@ -97,11 +97,11 @@
       "id": "escentric-molecules-molecule-01",
       "name": "Molecule 01",
       "brand": "Escentric Molecules",
-      "score": 0.1,
+      "score": 0.3,
       "fragrantica_url": null,
       "thumbnail_url": null,
       "signals": {
-        "google_trends": 0.3,
+        "google_trends": 0.6,
         "retailer_bestsellers": null,
         "reddit": null,
         "fragrantica": null
@@ -118,7 +118,7 @@
       "fragrantica_url": null,
       "thumbnail_url": null,
       "signals": {
-        "google_trends": 0.2,
+        "google_trends": 0.3,
         "retailer_bestsellers": null,
         "reddit": null,
         "fragrantica": null
