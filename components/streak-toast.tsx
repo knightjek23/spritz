@@ -2,13 +2,16 @@
 
 // Streak toast — shown once, on the first wear log of a day.
 //
-// Motion (approved prototype "D · Breath", 2026-10-20): the bottle settles
-// in from the left; at 0.5 s the gold head depresses onto the neck and
-// springs back; a soft cone of mist widens from the nozzle and holds while
-// the headline ("Day 4" / "One week") dissolves into view inside it; the
-// copy line rises beneath; the mist trails off over ~3 s. Milestones (7,
-// 30, 100, 365) get a larger bottle, larger type, a brass hairline and a
-// longer hold. Keyframes live in app/globals.css under "streak toast".
+// Motion: the streak badge (components/streak-badge.tsx) lands at the top
+// of the card: ring, laurels growing, the bottle's head pressing and a puff
+// of mist, the count rolling from yesterday's number to today's, rays
+// bursting out. Then the headline ("Day 4" / "One week") dissolves in and
+// the copy line rises beneath. The badge idles (slow rays, a spray every
+// few seconds) until the card leaves. Milestones (7, 30, 100, 365) get a
+// larger badge with a brass ring, larger type, a brass hairline and a
+// longer hold. Keyframes live in app/globals.css under "streak toast" and
+// "streak badge". The press-and-mist bottle comes from the earlier
+// "D · Breath" prototype.
 //
 // Dismissal: leaves on its own after the hold (7 s daily, 9 s milestone)
 // or earlier via the × / a tap on the card or the dimmed backdrop.
@@ -22,7 +25,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { StreakBottle } from "@/components/streak-bottle";
+import { StreakBadge } from "@/components/streak-badge";
 import { streakCopy } from "@/lib/streak";
 
 const HOLD_MS = { daily: 7000, milestone: 9000 } as const;
@@ -53,21 +56,6 @@ export function StreakToast({
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Nine brass flecks ride the mist; positions chosen once per mount.
-  const flecks = useRef(
-    Array.from({ length: 9 }, () => {
-      const ang = ((Math.random() * 24 - 8) * Math.PI) / 180;
-      const len = 60 + Math.random() * 100;
-      return {
-        r: (0.7 + Math.random() * 0.5).toFixed(2),
-        dx: (Math.cos(ang) * len).toFixed(1),
-        dy: (Math.sin(ang) * len * 0.5).toFixed(1),
-        t: (1.6 + Math.random() * 0.8).toFixed(2),
-        d: (0.75 + Math.random() * 0.45).toFixed(2),
-      };
-    }),
-  ).current;
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -103,50 +91,13 @@ export function StreakToast({
           : undefined
       }
     >
-      <div className="streak-mark">
-        <StreakBottle />
-        <svg className="streak-mist" viewBox="0 0 190 48" fill="none" aria-hidden>
-          <defs>
-            <linearGradient id="streak-mist-g" x1="0" x2="1">
-              <stop offset="0" stopColor="#1F3F2E" stopOpacity=".32" />
-              <stop offset=".35" stopColor="#1F3F2E" stopOpacity=".13" />
-              <stop offset=".72" stopColor="#1F3F2E" stopOpacity=".03" />
-              <stop offset=".9" stopColor="#1F3F2E" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          <path
-            className="streak-cone"
-            d="M0 8 C40 0 100 -8 172 -12 C190 -4 192 84 174 94 L0 8 Z"
-            fill="url(#streak-mist-g)"
-          />
-          {flecks.map((f, i) => (
-            <circle
-              key={i}
-              className="streak-fleck"
-              cx="0"
-              cy="8"
-              r={f.r}
-              style={
-                {
-                  "--dx": `${f.dx}px`,
-                  "--dy": `${f.dy}px`,
-                  "--t": `${f.t}s`,
-                  "--d": `${f.d}s`,
-                } as React.CSSProperties
-              }
-            />
-          ))}
-        </svg>
-      </div>
+      <StreakBadge streak={streak} milestone={copy.milestone} size={copy.milestone ? 248 : 220} />
 
-      <div className="min-w-0 -mt-1 pr-6">
-        <p
-          className={`streak-day font-display text-emerald leading-none ${copy.title.length > 10 ? "streak-day--long" : ""}`}
-        >
-          {copy.title}
-        </p>
-        <p className="streak-line font-display text-emerald leading-tight mt-2">{copy.line}</p>
-      </div>
+      {/* Badge only on screen. The copy is still announced to screen
+          readers, since the badge alone is just a number to them. */}
+      <p className="sr-only">
+        {copy.title}. {copy.line}
+      </p>
 
       <button
         type="button"

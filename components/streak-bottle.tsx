@@ -9,9 +9,9 @@
 // Generated from the approved prototype (docs/build 2026-10-20); edit the
 // SVG, not this file, if the mark changes, then regenerate.
 
-export function StreakBottle() {
+export function StreakBottle({ className = "streak-bottle" }: { className?: string } = {}) {
   return (
-    <svg className="streak-bottle" width="59" height="73" viewBox="0 0 59 73" fill="none" aria-hidden>
+    <svg className={className} width="59" height="73" viewBox="0 0 59 73" fill="none" aria-hidden>
     <path d="M18.25 14.3397H3.13C1.546 14.3397 0.25 15.6357 0.25 17.2197V69.0597C0.25 70.6437 1.546 71.9397 3.13 71.9397H54.97C56.554 71.9397 57.85 70.6437 57.85 69.0597V17.2197C57.85 15.6357 56.554 14.3397 54.97 14.3397H39.85H35.85H22.25H18.25Z" fill="url(#st-body)"/>
     <path d="M22.25 9.13965V14.3397H35.85V9.13965H29.05H22.25Z" fill="url(#st-neck)"/>
     <g className="streak-cap"><path d="M18.25 1.63965V9.13965H22.25H29.05H35.85H39.85V1.63965H29.35H18.25Z" fill="url(#st-cap)"/><path d="M29.05 9.13965H39.85V1.63965H29.35H18.25V9.13965H22.25M22.25 9.13965H29.05M18.25 9.13965H29.05M39.85 9.13965H35.85M35.85 9.13965H29.05"  stroke="#093616" strokeWidth="0.5" strokeLinecap="round"/></g>

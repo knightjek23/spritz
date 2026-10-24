@@ -539,113 +539,126 @@ button .cl-spinner {
   border: 1px solid rgba(26, 26, 26, 0.12);
   border-radius: 20px;
   box-shadow: 0 18px 50px rgba(26, 26, 26, 0.25);
-  padding: 26px 22px 26px 20px;
-  display: grid;
-  grid-template-columns: 72px 1fr;
-  column-gap: 18px;
-  align-items: start;
+  /* Badge only (components/streak-badge.tsx); copy is screen-reader only. */
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
   transform: translateY(-10px);
   animation: streak-toast-in 500ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 .streak-toast--milestone {
-  grid-template-columns: 88px 1fr;
-  padding: 30px 24px 30px 22px;
+  padding: 22px 24px;
   border-color: #c9a961;
 }
 .streak-layer--out .streak-toast { animation: streak-toast-out 600ms ease-in forwards; }
 @keyframes streak-toast-in  { to { transform: translateY(0); } }
 @keyframes streak-toast-out { from { transform: translateY(0); } to { transform: translateY(-8px); } }
-.streak-day  { font-size: 34px; }
-.streak-line { font-size: 19px; }
-.streak-toast--milestone .streak-day  { font-size: 40px; }
-/* "One hundred days" stays on one line in the 230px column. */
-.streak-toast--milestone .streak-day--long { font-size: 30px; }
-.streak-toast--milestone .streak-line { font-size: 20px; }
 
-.streak-mark { position: relative; width: 60px; }
-.streak-toast--milestone .streak-mark { width: 76px; }
-.streak-bottle {
-  width: 100%;
-  height: auto;
-  display: block;
-  overflow: visible;
+/* ---------------------------------------------------------------------
+   Streak badge (components/streak-badge.tsx). Plays once, then idles.
+   All transforms run in the badge's 240x240 viewBox, centre 120,120.
+   --------------------------------------------------------------------- */
+.sb-badge { display: block; overflow: visible; }
+
+/* Land: 85% -> slight overshoot -> 100%. The face is populated on arrival. */
+.sb-body {
+  transform-box: view-box;
+  transform-origin: 120px 120px;
   opacity: 0;
-  transform: translateX(-10px);
-  animation:
-    streak-bottle-in 400ms 50ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards,
-    streak-recoil 320ms 550ms ease-out;
+  transform: scale(0.85);
+  animation: sb-land 480ms 0ms cubic-bezier(0.34, 1.45, 0.5, 1) forwards;
 }
-@keyframes streak-bottle-in { to { opacity: 1; transform: translateX(0); } }
-@keyframes streak-recoil { 0% { transform: translateX(0); } 35% { transform: translateX(-1px); } 100% { transform: translateX(0); } }
+@keyframes sb-land {
+  0%   { opacity: 0; transform: scale(0.85); }
+  35%  { opacity: 1; }
+  100% { opacity: 1; transform: scale(1); }
+}
 
-/* The gold head presses onto the neck and springs back. */
-.streak-cap {
+/* Rays: burst out once, then turn slowly forever. */
+.sb-rays {
+  transform-box: view-box;
+  transform-origin: 120px 120px;
+  opacity: 0;
+  transform: scale(0.6);
+  animation: sb-burst 650ms 700ms cubic-bezier(0.2, 0.9, 0.3, 1.15) forwards;
+}
+@keyframes sb-burst {
+  0%   { opacity: 0; transform: scale(0.6); }
+  40%  { opacity: 1; }
+  100% { opacity: 0.85; transform: scale(1); }
+}
+.sb-rays-spin {
+  transform-box: view-box;
+  transform-origin: 120px 120px;
+  animation: sb-spin 60s linear infinite;
+}
+.sb-badge--milestone .sb-rays-spin { animation-duration: 40s; }
+@keyframes sb-spin { to { transform: rotate(360deg); } }
+
+/* Laurels grow up both sides; per-leaf delay is set inline. */
+.sb-leaf {
   transform-box: fill-box;
   transform-origin: 50% 100%;
-  animation: streak-cap 550ms 500ms cubic-bezier(0.3, 0.7, 0.3, 1);
+  transform: scale(0);
+  animation: sb-leaf 380ms cubic-bezier(0.3, 1.4, 0.5, 1) forwards;
 }
-@keyframes streak-cap {
-  0%   { transform: translateY(0); }
-  38%  { transform: translateY(2.4px); }
-  60%  { transform: translateY(2.2px); }
-  100% { transform: translateY(0); }
+@keyframes sb-leaf { to { transform: scale(1); } }
+.sb-stem {
+  stroke-dasharray: 130;
+  stroke-dashoffset: 130;
+  animation: sb-stem 600ms 200ms ease-out forwards;
 }
+@keyframes sb-stem { to { stroke-dashoffset: 0; } }
 
-/* Mist layer, pinned to the nozzle (bottle 60px wide → nozzle ≈ 41px, -3px). */
-.streak-mist {
-  position: absolute;
-  left: 68%;
-  top: -3px;
-  width: 190px;
-  height: 48px;
-  overflow: visible;
-  pointer-events: none;
+/* Count: yesterday's number rolls up and out, today's lands with a nudge. */
+.sb-roll { animation: sb-roll 500ms 600ms cubic-bezier(0.3, 1.35, 0.5, 1) forwards; }
+@keyframes sb-roll { to { transform: translateY(-27px); } }
+
+/* Bottle: the head presses and the mist puffs on a 4.5 s cycle. The first
+   cycle starts at 450 ms (the entrance), every later one is the idle. */
+.sb-bottle { overflow: visible; display: block; }
+.streak-cap { transform-box: fill-box; transform-origin: 50% 100%; }
+.sb-badge .streak-cap { animation: sb-cap 4.5s 450ms cubic-bezier(0.3, 0.7, 0.3, 1) infinite; }
+@keyframes sb-cap {
+  0%   { transform: translateY(0); }
+  4.5% { transform: translateY(2.4px); }
+  7%   { transform: translateY(2.2px); }
+  12%, 100% { transform: translateY(0); }
 }
-.streak-cone {
+.sb-mist {
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
   opacity: 0;
-  filter: blur(4px);
-  transform-origin: 0 8px;
-  animation: streak-cone 3.2s 600ms cubic-bezier(0.2, 0.6, 0.2, 1) forwards;
+  filter: blur(1.5px);
+  animation: sb-mist 4.5s 520ms cubic-bezier(0.2, 0.6, 0.2, 1) infinite;
 }
-@keyframes streak-cone {
-  0%   { opacity: 0;   transform: scale(0.12, 0.35); }
-  18%  { opacity: 1;   transform: scale(1, 1); }
-  45%  { opacity: 0.85; transform: scale(1.02, 1.03); }
-  100% { opacity: 0;   transform: scale(1.1, 1.12) translateX(10px); }
+@keyframes sb-mist {
+  0%   { opacity: 0;    transform: scale(0.15, 0.4); }
+  8%   { opacity: 1;    transform: scale(1, 1); }
+  22%  { opacity: 0.7;  transform: scale(1.05, 1.08); }
+  40%, 100% { opacity: 0; transform: scale(1.12, 1.15) translateX(3px); }
 }
-.streak-fleck {
+.sb-fleck {
   fill: #c9a961;
   opacity: 0;
-  animation: streak-fleck var(--t) var(--d) ease-out forwards;
+  animation: sb-fleck 4.5s ease-out infinite;
 }
-@keyframes streak-fleck {
+@keyframes sb-fleck {
   0%   { opacity: 0;   transform: translate(0, 0); }
-  30%  { opacity: 0.9; }
-  100% { opacity: 0;   transform: translate(var(--dx), var(--dy)); }
+  5%   { opacity: 0.95; }
+  30%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); }
 }
-
-/* Headline condenses out of the mist: a dissolve, no travel. */
-.streak-day {
-  opacity: 0;
-  filter: blur(5px);
-  animation: streak-mist-in 1.2s 900ms cubic-bezier(0.2, 0.6, 0.2, 1) forwards;
-}
-@keyframes streak-mist-in {
-  0%   { opacity: 0;   filter: blur(5px); }
-  60%  { opacity: 0.9; filter: blur(1px); }
-  100% { opacity: 1;   filter: blur(0); }
-}
-.streak-line {
-  opacity: 0;
-  transform: translateY(4px);
-  animation: streak-rise 700ms 1900ms ease-out forwards;
-}
-@keyframes streak-rise { to { opacity: 1; transform: none; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .streak-layer, .streak-toast, .streak-bottle, .streak-cap, .streak-cone, .streak-fleck, .streak-day, .streak-line {
+  /* Finished badge, no motion: every one-shot jumps to its end state and
+     every loop is removed. */
+  .streak-layer, .streak-toast,
+  .sb-body, .sb-rays, .sb-leaf, .sb-stem, .sb-roll {
     animation-duration: 1ms !important;
     animation-delay: 0ms !important;
   }
-  .streak-cone, .streak-fleck { display: none; }
+  .sb-rays-spin, .sb-badge .streak-cap { animation: none !important; }
+  .sb-mist, .sb-fleck { display: none; }
 }
