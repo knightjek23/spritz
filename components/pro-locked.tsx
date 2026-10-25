@@ -4,6 +4,7 @@
 // KnownConsensus.
 
 import Link from "next/link";
+import { TrialCta } from "@/components/trial-cta";
 import { SignedOut } from "@clerk/nextjs";
 
 export function ProLocked({ body }: { body: string }) {
@@ -11,12 +12,7 @@ export function ProLocked({ body }: { body: string }) {
     <section className="mb-10">
       <p className="text-sm text-slate mb-4 leading-relaxed">{body}</p>
       <div className="flex flex-col items-start gap-3">
-        <Link
-          href="/pricing"
-          className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-brass text-ink font-medium hover:bg-brass/80 transition"
-        >
-          Unlock with Pro
-        </Link>
+        <TrialCta />
         <SignedOut>
           <Link
             href="/sign-in"

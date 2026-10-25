@@ -11,6 +11,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { TrialCta } from "@/components/trial-cta";
 import { useUser } from "@clerk/nextjs";
 import type { DupeRecommendation } from "@/lib/types";
 import { LivingBreadcrumb, generatedReceipt } from "./living-breadcrumb";
@@ -196,12 +197,7 @@ export function KnownDupes({
         AI-generated dupes are a Pro feature. Get community-recognized dupes for any
         fragrance, instantly.
       </p>
-      <Link
-        href="/pricing"
-        className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-brass text-ink font-medium hover:bg-brass/80 transition"
-      >
-        Unlock with Pro
-      </Link>
+      <TrialCta />
     </section>
   );
 }

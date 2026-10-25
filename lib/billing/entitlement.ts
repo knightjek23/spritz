@@ -82,3 +82,35 @@ export async function revokePro(clerkUserId: string, source: ProSource): Promise
 export function storeToSource(store: string | undefined): ProSource {
   return store === "PLAY_STORE" ? "play" : "apple";
 }
+
+/**
+ * Record the free-trial window (migration 0037). `endsAt` null clears it:
+ * the trial converted, was cancelled, or expired, and the reminder pushes
+ * stop. trial_used_at is set once and never cleared so a user who already
+ * had a trial is not offered another at the gates.
+ */
+export async function setTrialWindow(clerkUserId: string, endsAt: string | null): Promise<void> {
+  const supabase = createAdminClient();
+  const patch: { trial_ends_at: string | null; trial_used_at?: string } = { trial_ends_at: endsAt };
+  if (endsAt) {
+    const { data } = await supabase
+      .from("users")
+      .select("trial_used_at")
+      .eq("clerk_user_id", clerkUserId)
+      .maybeSingle();
+    if (!data?.trial_used_at) patch.trial_used_at = new Date().toISOString();
+  }
+  const { error } = await supabase.from("users").update(patch).eq("clerk_user_id", clerkUserId);
+  if (error) console.error("[entitlement] trial window update failed:", error.message);
+}
+
+/** Same, keyed by Stripe customer (the Stripe webhook only knows the customer id). */
+export async function setTrialWindowByCustomer(customerId: string, endsAt: string | null): Promise<void> {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("users")
+    .select("clerk_user_id")
+    .eq("stripe_customer_id", customerId)
+    .maybeSingle();
+  if (data?.clerk_user_id) await setTrialWindow(data.clerk_user_id, endsAt);
+}

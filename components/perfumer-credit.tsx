@@ -15,6 +15,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { TrialCta } from "@/components/trial-cta";
 import { useAuth } from "@clerk/nextjs";
 
 // "locked" is reserved for a real answer of "not Pro". Signed-out and
@@ -131,12 +132,7 @@ export function PerfumerCredit({
           <p className="text-sm text-slate mb-3">
             See who made this, and everything else they&apos;ve created. Pro feature.
           </p>
-          <Link
-            href="/pricing"
-            className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-brass text-ink font-medium hover:bg-brass/80 transition"
-          >
-            Unlock with Pro
-          </Link>
+          <TrialCta />
         </div>
       )}
     </section>

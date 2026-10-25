@@ -101,7 +101,7 @@ export function SimilarSection({ fragranceId }: { fragranceId: string }) {
             <p className="text-sm text-slate mt-4">
               Showing 5 of many.{" "}
               <Link href="/pricing" className="text-emerald underline underline-offset-2">
-                Pro unlocks 25
+                Pro unlocks 25, free for 7 days
               </Link>
               .
             </p>

@@ -20,6 +20,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { TrialCta } from "@/components/trial-cta";
 import { useUser } from "@clerk/nextjs";
 import type { ConsensusRecord, Fragrance } from "@/lib/types";
 import { LivingBreadcrumb, generatedReceipt } from "./living-breadcrumb";
@@ -229,12 +230,7 @@ export function KnownConsensus({ fragrance }: Props) {
         AI-synthesized consensus from community reviews and forum discussion.
         What users actually say, and whether it&apos;s worth the buy. Pro feature.
       </p>
-      <Link
-        href="/pricing"
-        className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-brass text-ink font-medium hover:bg-brass/80 transition"
-      >
-        Unlock with Pro
-      </Link>
+      <TrialCta />
     </section>
   );
 }

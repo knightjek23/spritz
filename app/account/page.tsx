@@ -30,6 +30,7 @@ import { PushSettings } from "@/components/push-settings";
 import { SignOutButton, DeleteAccountSection } from "@/components/account-actions";
 import { PlanActions } from "@/components/plan-actions";
 import { daysLogged } from "@/lib/wear-log";
+import { MONTHLY_PRICE, trialEndLabel, trialStateFrom } from "@/lib/trial";
 
 export const metadata: Metadata = {
   title: "Account",
@@ -51,7 +52,7 @@ export default async function AccountPage() {
   // App user record — the source of truth for plan + stripe linkage.
   const { data: appUser } = await supabase
     .from("users")
-    .select("id, plan, stripe_customer_id, is_lifetime, pro_source, created_at")
+    .select("id, plan, stripe_customer_id, is_lifetime, pro_source, created_at, trial_ends_at, trial_used_at")
     .eq("clerk_user_id", userId)
     .maybeSingle();
 
@@ -60,6 +61,7 @@ export default async function AccountPage() {
   const memberSince = appUser?.created_at ?? null;
   const hasStripeCustomer = !!appUser?.stripe_customer_id;
   const proSource = appUser?.pro_source ?? null;
+  const trial = trialStateFrom(appUser);
 
   // Usage stats — collection size + scans in the trailing 30 days. Both
   // are cheap count queries; index-served at our scale.
@@ -108,7 +110,11 @@ export default async function AccountPage() {
             </div>
             {plan === "pro" && (
               <span className="px-2 py-1 rounded-full bg-emerald text-cream text-[10px] font-mono uppercase tracking-wider">
-                {isLifetime ? "Lifetime" : "Active"}
+                {isLifetime
+                  ? "Lifetime"
+                  : trial.endsAt
+                    ? `Trial · ${trial.daysLeft === 0 ? "last day" : `${trial.daysLeft} day${trial.daysLeft === 1 ? "" : "s"} left`}`
+                    : "Active"}
               </span>
             )}
           </div>
@@ -116,8 +122,9 @@ export default async function AccountPage() {
           {plan === "pro" ? (
             <>
               <p className="text-sm text-slate mb-5 leading-relaxed">
-                AI-generated dupes, full editorial library, expanded
-                similar-fragrance results, and unlimited collection.
+                {trial.endsAt
+                  ? `Your free trial is running. ${MONTHLY_PRICE}/mo starts ${trialEndLabel(trial.endsAt)} unless you cancel before then.`
+                  : "AI-generated dupes, full editorial library, expanded similar-fragrance results, and unlimited collection."}
               </p>
               <PlanActions
                 plan="pro"

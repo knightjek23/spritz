@@ -12,6 +12,8 @@ import { useEffect, useState } from "react";
 import { useClerk, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { isNativeApp } from "@/lib/native";
+import { getPushPermission, requestPushAndRegister, resolvePushSupport } from "@/lib/push";
+import { TRIAL_PRIMER, TRIAL_TIMELINE } from "@/lib/trial";
 import {
   getNativePlans,
   purchasePro,
@@ -160,6 +162,35 @@ export default function PricingPage() {
   // Optimistic check — server is authoritative, but no point showing
   // "Upgrade" to someone who's already Pro.
   const isAlreadyPro = user?.publicMetadata?.plan === "pro";
+
+  // Native + Monthly: before the store sheet, offer the day-5 reminder
+  // (the promise the timeline below makes). Only when the OS has never
+  // been asked; "denied" and "granted" both skip straight to purchase.
+  const [primerOpen, setPrimerOpen] = useState(false);
+
+  async function maybePrimeThenUpgrade(plan: Plan) {
+    if (native && plan === "monthly" && isSignedIn) {
+      try {
+        if ((await resolvePushSupport()) && (await getPushPermission()) === "prompt") {
+          setPrimerOpen(true);
+          return;
+        }
+      } catch {
+        /* fall through to the purchase */
+      }
+    }
+    await upgrade(plan);
+  }
+
+  async function primerAccept() {
+    setPrimerOpen(false);
+    try {
+      await requestPushAndRegister();
+    } catch {
+      /* the trial still starts; they just will not get the reminder */
+    }
+    await upgrade("monthly");
+  }
 
   async function upgrade(plan: Plan) {
     if (!isLoaded) return; // wait for Clerk; prevents hydration races
@@ -311,6 +342,26 @@ export default function PricingPage() {
         </div>
       </div>
 
+      {/* How the trial works — Monthly only (the trial lives there, pricing
+          decision 2026-07-13). The day-5 line is a promise lib/push-trial.ts
+          keeps. Billed amount appears in the same weight as the free days,
+          per App Store guideline 3.1.2(c). */}
+      {selected === "monthly" && !isAlreadyPro && (
+        <section className="mb-6 rounded-2xl border border-ink/10 bg-paper px-5 py-5">
+          <h2 className="font-display text-xl mb-3">How your free trial works</h2>
+          <ol className="space-y-3">
+            {TRIAL_TIMELINE.map((step) => (
+              <li key={step.when} className="flex gap-3">
+                <span className="shrink-0 w-14 font-mono text-[11px] uppercase tracking-widest text-emerald pt-0.5">
+                  {step.when}
+                </span>
+                <span className="text-sm text-ink leading-relaxed">{step.what}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
       {/* Selected plan card. Stroke + CTA use the emerald token — the same
           green as every other CTA in the app. */}
       <div className="border-2 border-emerald rounded-2xl p-6 mb-10 bg-cream">
@@ -325,7 +376,7 @@ export default function PricingPage() {
 
         {!isAlreadyPro && (
           <button
-            onClick={() => upgrade(selected)}
+            onClick={() => maybePrimeThenUpgrade(selected)}
             disabled={busy}
             className="w-full bg-emerald text-cream py-3 rounded-xl font-medium hover:bg-emerald/90 transition disabled:opacity-60"
           >
@@ -333,8 +384,36 @@ export default function PricingPage() {
               ? "Loading…"
               : selected === "lifetime"
                 ? "Get Lifetime"
-                : `Start Pro · ${plan.cadence}`}
+                : selected === "monthly"
+                  ? "Start free trial"
+                  : `Start Pro · ${plan.cadence}`}
           </button>
+        )}
+
+        {primerOpen && (
+          <div className="mt-4 rounded-xl border border-ink/10 bg-paper p-4" role="dialog" aria-label={TRIAL_PRIMER.title}>
+            <p className="font-medium mb-1">{TRIAL_PRIMER.title}</p>
+            <p className="text-sm text-slate leading-relaxed mb-4">{TRIAL_PRIMER.body}</p>
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={primerAccept}
+                className="w-full bg-emerald text-cream py-3 rounded-xl font-medium hover:bg-emerald/90 transition"
+              >
+                Turn on reminders
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setPrimerOpen(false);
+                  void upgrade("monthly");
+                }}
+                className="w-full py-2 text-sm text-slate hover:text-ink underline underline-offset-4"
+              >
+                Skip, start the trial
+              </button>
+            </div>
+          </div>
         )}
 
         <p className="mt-3 text-center font-mono text-xs uppercase tracking-widest text-slate">

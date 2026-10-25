@@ -20,6 +20,7 @@ import { NextResponse } from "next/server";
 import { clerkClient } from "@clerk/nextjs/server";
 import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { setTrialWindowByCustomer } from "@/lib/billing/entitlement";
 import type Stripe from "stripe";
 
 export const runtime = "nodejs";
@@ -59,6 +60,14 @@ async function mirrorPlanToClerk(clerkUserId: string, plan: Plan) {
  * by a subscription lifecycle event (e.g. a later, unrelated subscription
  * they cancel). Granting "pro" is unconditional.
  */
+
+/** Trial window from a subscription: open while `trialing`, closed otherwise. */
+function trialEndsAt(sub: Stripe.Subscription): string | null {
+  return sub.status === "trialing" && sub.trial_end
+    ? new Date(sub.trial_end * 1000).toISOString()
+    : null;
+}
+
 async function setPlanByCustomer(customerId: string, plan: Plan) {
   const supabase = createAdminClient();
 
@@ -169,6 +178,7 @@ export async function POST(req: Request) {
       const sub = await stripe.subscriptions.retrieve(session.subscription);
       const isActive = sub.status === "active" || sub.status === "trialing";
       await setPlanByCustomer(sub.customer as string, isActive ? "pro" : "free");
+      await setTrialWindowByCustomer(sub.customer as string, trialEndsAt(sub));
       break;
     }
     case "customer.subscription.created":
@@ -176,11 +186,18 @@ export async function POST(req: Request) {
       const sub = event.data.object as Stripe.Subscription;
       const isActive = sub.status === "active" || sub.status === "trialing";
       await setPlanByCustomer(sub.customer as string, isActive ? "pro" : "free");
+      // `trialing` with cancel_at_period_end means the user already cancelled:
+      // keep Pro until the period ends, but stop the reminders.
+      await setTrialWindowByCustomer(
+        sub.customer as string,
+        sub.cancel_at_period_end ? null : trialEndsAt(sub),
+      );
       break;
     }
     case "customer.subscription.deleted": {
       const sub = event.data.object as Stripe.Subscription;
       await setPlanByCustomer(sub.customer as string, "free");
+      await setTrialWindowByCustomer(sub.customer as string, null);
       break;
     }
     default:

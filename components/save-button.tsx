@@ -25,6 +25,7 @@
 // an unauthenticated user taps.
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { recordShelfAdd } from "@/lib/review-prompt";
 import { useClerk, useUser } from "@clerk/nextjs";
 import type { CollectionStatus } from "@/lib/types";
@@ -62,8 +63,16 @@ export function SaveButton({
     initialItemId ? "saved" : "idle",
   );
 
+  const router = useRouter();
+
   async function onClick() {
     if (!isLoaded) return; // wait for Clerk; prevents hydration-time fires
+    // Shelf cap hit: the button is now the upgrade path (the free week is
+    // the headline on /pricing), not a retry that 402s again.
+    if (state === "cap") {
+      router.push("/pricing");
+      return;
+    }
     if (!isSignedIn) {
       clerk.openSignUp({
         redirectUrl: typeof window !== "undefined" ? window.location.href : "/",
@@ -137,7 +146,7 @@ export function SaveButton({
       : state === "saved"
       ? "✓ " + label
       : state === "cap"
-      ? "Upgrade"
+      ? "Try Pro free"
       : state === "auth"
       ? "Sign in"
       : state === "error"

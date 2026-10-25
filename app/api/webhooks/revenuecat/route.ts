@@ -19,7 +19,7 @@
 
 import { NextResponse } from "next/server";
 import { timingSafeEqual } from "node:crypto";
-import { grantPro, revokePro, storeToSource } from "@/lib/billing/entitlement";
+import { grantPro, revokePro, setTrialWindow, storeToSource } from "@/lib/billing/entitlement";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -40,6 +40,8 @@ interface RevenueCatEvent {
   product_id?: string;
   store?: string;
   period_type?: string;
+  /** Epoch ms; the end of the current period (for a TRIAL, the conversion moment). */
+  expiration_at_ms?: number;
   /** TRANSFER only: the app_user_ids that gained / lost the purchases. */
   transferred_to?: string[];
   transferred_from?: string[];
@@ -89,6 +91,11 @@ export async function POST(req: Request) {
 
   const lifetime = event.product_id === LIFETIME_PRODUCT;
 
+  // Free-trial window (migration 0037). A TRIAL-period purchase opens it;
+  // conversion, cancellation and expiration close it, which also stops the
+  // day-5 / day-7 reminder pushes. RENEWAL after a trial is the conversion.
+  const trialing = event.period_type === "TRIAL" && typeof event.expiration_at_ms === "number";
+
   switch (event.type) {
     // Active subscription states → grant Pro.
     case "INITIAL_PURCHASE":
@@ -96,6 +103,15 @@ export async function POST(req: Request) {
     case "UNCANCELLATION":
     case "PRODUCT_CHANGE":
       await grantPro(clerkUserId, source, { lifetime });
+      await setTrialWindow(
+        clerkUserId,
+        trialing ? new Date(event.expiration_at_ms as number).toISOString() : null,
+      );
+      break;
+
+    case "TRIAL_CONVERTED":
+    case "TRIAL_CANCELLED":
+      await setTrialWindow(clerkUserId, null);
       break;
 
     // One-time purchase → the Lifetime tier.
@@ -107,6 +123,7 @@ export async function POST(req: Request) {
     // users whose Pro came from another billing system are left alone.
     case "EXPIRATION":
       await revokePro(clerkUserId, source);
+      await setTrialWindow(clerkUserId, null);
       break;
 
     // CANCELLATION = auto-renew turned off but access continues until the
@@ -115,6 +132,9 @@ export async function POST(req: Request) {
     // SUBSCRIPTION_PAUSED (Play only) ends with an EXPIRATION too. TEST is
     // the dashboard's "send test event".
     case "CANCELLATION":
+      // Auto-renew off. If this is still the trial, the reminders stop now.
+      await setTrialWindow(clerkUserId, null);
+      break;
     case "BILLING_ISSUE":
     case "SUBSCRIPTION_PAUSED":
     case "TEST":

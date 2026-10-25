@@ -139,6 +139,9 @@ export type Database = {
           is_lifetime: boolean;
           // Which billing system granted Pro (migration 0030). NULL = legacy.
           pro_source: "stripe" | "apple" | "play" | null;
+          // Free Pro trial (migration 0037). trial_ends_at is null unless trialing.
+          trial_ends_at: string | null;
+          trial_used_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -150,6 +153,8 @@ export type Database = {
           stripe_customer_id?: string | null;
           is_lifetime?: boolean;
           pro_source?: "stripe" | "apple" | "play" | null;
+          trial_ends_at?: string | null;
+          trial_used_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["users"]["Insert"]>;
         Relationships: [];
