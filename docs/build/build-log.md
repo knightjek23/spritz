@@ -368,3 +368,7 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
 ## Free shelf cap: 25 → 10 (2026-10-26)
 
 - `FREE_COLLECTION_CAP` in `app/api/collection/route.ts` is now 10 (Josh: 25 was too generous). Copy updated on /pricing (table + two FAQ answers), the Account usage tile ("of 10 free cap") and the Pro intro sheet. The cap only blocks new saves: a free user who already has more than 10 keeps them all, and the Save button turns into "Try Pro free" on the 11th. STRIPE_SETUP.md / the PRD still say 25 where they describe the original pricing decision; left as history.
+
+## Brass sweep on the streak card (2026-10-26)
+
+- The Annual card's reflective border is now a shared class, `.brass-sweep` (was `.plan-shine`), and the streak card wears it too: emerald 2px ring with the brass highlight passing left to right every 3.2 s. On the streak card the sweep runs alongside the card's own entrance/exit animations (both listed on `animation`, since a second rule would otherwise replace the first). Milestone cards keep their brass hairline colour via the ring. Reduced motion: static ring.

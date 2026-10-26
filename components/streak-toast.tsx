@@ -84,7 +84,7 @@ export function StreakToast({
       role="status"
       aria-live="polite"
       onClick={(e) => e.stopPropagation()}
-      className={`streak-toast ${copy.milestone ? "streak-toast--milestone" : ""}`}
+      className={`streak-toast brass-sweep ${copy.milestone ? "streak-toast--milestone" : ""}`}
       style={
         anchorBottom !== null
           ? ({ "--anchor-bottom": `${Math.round(anchorBottom)}px` } as React.CSSProperties)

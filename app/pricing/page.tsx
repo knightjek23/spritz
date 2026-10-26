@@ -361,12 +361,12 @@ function PricingContent() {
       {/* Selected plan card. Stroke + CTA use the emerald token — the same
           green as every other CTA in the app. */}
       {/* Annual gets the metallic sweep: a brass highlight travelling round
-          the emerald border (globals.css "plan shine"). The other plans keep
+          the emerald border (globals.css "brass sweep"). The other plans keep
           the static border; the shine marks the -50% plan the way the
           reference paywall marks its featured tier. */}
       <div
         className={`rounded-2xl p-6 mb-10 bg-cream ${
-          selected === "annual" ? "plan-shine" : "border-2 border-emerald"
+          selected === "annual" ? "brass-sweep" : "border-2 border-emerald"
         }`}
       >
         <div className="flex items-baseline justify-between mb-1">

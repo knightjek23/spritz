@@ -663,15 +663,17 @@ button .cl-spinner {
 }
 
 /* ---------------------------------------------------------------------
-   Plan shine (app/pricing): the Annual card's emerald border carries a
-   brass highlight that sweeps left to right, then again from the left,
-   metallic-reflection style. A 2px transparent border painted with a
-   wide linear gradient on the border-box (cream on the padding-box), the
-   gradient slid across by animating background-position. Reduced motion
-   shows the static emerald ring with the highlight parked off-canvas.
+   Brass sweep: a brass highlight travelling left to right along an
+   emerald 2px border, metallic-reflection style. Used by the Annual plan
+   card (app/pricing) and the streak card (components/streak-toast.tsx).
+   A 300%-wide linear gradient on the border-box, cream on the padding-
+   box, slid by animating background-position. The highlight sits at the
+   gradient's centre; positions 82% → 18% were measured so the band is
+   just off-canvas at both ends, so the 2.2 s travel is on screen end to
+   end at constant speed, then it rests exactly 1 s. Reduced motion shows
+   the static emerald ring.
    --------------------------------------------------------------------- */
-.plan-shine {
-  position: relative;
+.brass-sweep {
   border: 2px solid transparent;
   background:
     linear-gradient(#f4efe6, #f4efe6) padding-box,
@@ -688,21 +690,29 @@ button .cl-spinner {
   background-size: 100% 100%, 300% 100%;
   background-position: 0 0, 82% 0;
   background-repeat: no-repeat;
-  /* The gradient is 3x the card; the highlight sits at its centre. At
-     position 82% the band is just off the left edge, at 18% just off the
-     right (measured), so the 2.2 s travel is on screen end to end, at a
-     constant speed so neither edge reads as a pause. It then snaps back
-     off-canvas and rests exactly 1 s before the next pass. */
-  animation: plan-shine 3.2s linear infinite;
+  animation: brass-sweep 3.2s linear infinite;
 }
-@keyframes plan-shine {
+@keyframes brass-sweep {
   0%      { background-position: 0 0, 82% 0; }
   68.75%  { background-position: 0 0, 18% 0; }
   68.76%  { background-position: 0 0, 82% 0; }
   100%    { background-position: 0 0, 82% 0; }
 }
+/* The streak card already animates its own entrance; run both. */
+.streak-toast.brass-sweep {
+  border-color: transparent;
+  animation:
+    streak-toast-in 500ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards,
+    brass-sweep 3.2s linear infinite;
+}
+.streak-layer--out .streak-toast.brass-sweep {
+  animation:
+    streak-toast-out 600ms ease-in forwards,
+    brass-sweep 3.2s linear infinite;
+}
 @media (prefers-reduced-motion: reduce) {
-  .plan-shine { animation: none; }
+  .brass-sweep { animation: none; }
+  .streak-toast.brass-sweep { animation: streak-toast-in 1ms forwards; }
 }
 
 /* ---------------------------------------------------------------------
