@@ -3,7 +3,9 @@
 // POST   /api/collection      body: { fragrance_id, status, note? }
 // DELETE /api/collection?id=<collection_item_id>
 //
-// Auth required. Free tier capped at 25 items total (Q5 — easy to tune).
+// Auth required. Free tier capped at 10 items total (Q5 — easy to tune;
+// was 25 until 2026-10-26). Existing items above the cap are never removed;
+// the cap only blocks new saves.
 
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -14,7 +16,7 @@ import { stripProFieldsDeep } from "@/lib/entitlement";
 
 export const runtime = "nodejs";
 
-const FREE_COLLECTION_CAP = 25;
+const FREE_COLLECTION_CAP = 10;
 
 const PostBody = z.object({
   fragrance_id: z.string().uuid(),

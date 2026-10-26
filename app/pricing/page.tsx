@@ -60,7 +60,7 @@ const FEATURE_MATRIX: Array<{ label: string; free: string; pro: string }> = [
   },
   {
     label: "Saved collection",
-    free: "Up to 25 fragrances",
+    free: "Up to 10 fragrances",
     pro: "Unlimited",
   },
   {
@@ -103,7 +103,7 @@ const FEATURE_MATRIX: Array<{ label: string; free: string; pro: string }> = [
 const FAQ: Array<{ q: string; a: string }> = [
   {
     q: "Can I cancel anytime?",
-    a: "Yes. Cancel from any device and you keep Pro access until the end of your current billing period. After that you drop back to Free. Your collection stays intact, just capped at 25 items going forward.",
+    a: "Yes. Cancel from any device and you keep Pro access until the end of your current billing period. After that you drop back to Free. Your collection stays intact, just capped at 10 items going forward.",
   },
   {
     q: "What's a dupe, exactly?",
@@ -111,7 +111,7 @@ const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: "Is there a free trial?",
-    a: "Yes — the Monthly plan comes with a 7-day free trial. You get full Pro access for a week, and you won't be charged until it ends. Cancel anytime before then and you pay nothing, and the most you'd ever be charged after a trial is $4.99. The Annual plan has no trial — it's billed upfront at $29.99 (~$2.50/mo). And the Free plan is always free: scan unlimited bottles, save up to 25 fragrances, and get curated dupes without paying anything.",
+    a: "Yes — the Monthly plan comes with a 7-day free trial. You get full Pro access for a week, and you won't be charged until it ends. Cancel anytime before then and you pay nothing, and the most you'd ever be charged after a trial is $4.99. The Annual plan has no trial — it's billed upfront at $29.99 (~$2.50/mo). And the Free plan is always free: scan unlimited bottles, save up to 10 fragrances, and get curated dupes without paying anything.",
   },
   {
     q: "What's the Lifetime option?",

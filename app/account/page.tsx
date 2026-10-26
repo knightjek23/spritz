@@ -162,7 +162,7 @@ export default async function AccountPage() {
               In collection
               {plan === "free" && (
                 <span className="block mt-0.5 text-[10px] font-mono uppercase tracking-wider">
-                  of 25 free cap
+                  of 10 free cap
                 </span>
               )}
             </p>

@@ -113,7 +113,7 @@ const BENEFITS: { icon: React.ReactNode; title: string; sub: string; tint: strin
   {
     tint: "#F1E3BF",
     title: "An unlimited shelf",
-    sub: "The 25-bottle cap comes off.",
+    sub: "The 10-bottle cap comes off.",
     icon: (
       <>
         <path d="M5 11h22M5 21h22M5 5v22M27 5v22" />
