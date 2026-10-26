@@ -13,6 +13,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { TRIAL_CTA } from "@/lib/trial";
+import { recordProGateHit } from "@/components/pro-intro-sheet";
 
 let eligibility: Promise<boolean> | null = null;
 function trialAvailable(): Promise<boolean> {
@@ -30,6 +31,8 @@ export function TrialCta({ className = "" }: { className?: string }) {
   const [available, setAvailable] = useState(true);
   useEffect(() => {
     let live = true;
+    // Counts toward the intro sheet's one behaviour-triggered re-show.
+    recordProGateHit();
     trialAvailable().then((v) => live && setAvailable(v));
     return () => {
       live = false;
@@ -40,7 +43,7 @@ export function TrialCta({ className = "" }: { className?: string }) {
     <div className={`flex flex-col items-start gap-2 ${className}`}>
       <Link
         href="/pricing"
-        className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-brass text-ink font-medium hover:bg-brass/80 transition"
+        className="inline-flex items-center gap-2 px-4 py-3 bg-brass text-ink font-medium hover:bg-brass/80 transition"
       >
         {available ? TRIAL_CTA.label : "Unlock with Pro"}
       </Link>

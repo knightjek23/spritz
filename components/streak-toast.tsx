@@ -106,7 +106,7 @@ export function StreakToast({
           e.stopPropagation();
           close();
         }}
-        className="absolute top-2 right-2 w-9 h-9 rounded-full flex items-center justify-center text-slate hover:text-ink hover:bg-ink/5 transition"
+        className="absolute top-2 right-2 w-9 h-9 flex items-center justify-center text-slate hover:text-ink hover:bg-ink/5 transition"
         data-no-longpress
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>

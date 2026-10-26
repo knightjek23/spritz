@@ -9,6 +9,7 @@ import { Footer } from "@/components/footer";
 import { Analytics } from "@/components/analytics";
 import { LiquidGlassDefs } from "@/components/liquid-glass/LiquidGlass";
 import { PageTransition } from "@/components/page-transition";
+import { ProIntroSheet } from "@/components/pro-intro-sheet";
 import { NativeAuthBridge } from "@/components/native-auth-bridge";
 import { NativeReturnGuard } from "@/components/native-return-guard";
 import { NativeTouchLinks } from "@/components/native-touch-links";
@@ -125,6 +126,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* Reloads the page after a long background so a stalled router
               or expired session never leaves the shell tap-dead. */}
           <NativeResumeReload />
+          {/* First Library/Shelf visit: the Pro trial pitch, once (twice at
+              most). Portals to <body>; renders nothing otherwise. */}
+          <ProIntroSheet />
           <Nav />
           {/* --nav-clearance reserves space for the floating-pill bottom
               nav: 72px pill + 24px bottom offset + 16px breathing room,

@@ -8,9 +8,9 @@
 // Plan toggle is local state (no URL param) — keeping the page server-stable
 // avoids a flash of the wrong plan card on initial paint.
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useClerk, useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { isNativeApp } from "@/lib/native";
 import { getPushPermission, requestPushAndRegister, resolvePushSupport } from "@/lib/push";
 import { TRIAL_PRIMER, TRIAL_TIMELINE } from "@/lib/trial";
@@ -127,11 +127,27 @@ const FAQ: Array<{ q: string; a: string }> = [
   },
 ];
 
+// useSearchParams needs a Suspense boundary for the static prerender of
+// this route; the fallback is never seen in practice.
 export default function PricingPage() {
+  return (
+    <Suspense fallback={null}>
+      <PricingContent />
+    </Suspense>
+  );
+}
+
+function PricingContent() {
   const { isLoaded, isSignedIn, user } = useUser();
   const clerk = useClerk();
   const router = useRouter();
   const [selected, setSelected] = useState<Plan>("annual");
+  // ?plan=monthly from the Pro intro sheet lands on the trial card.
+  const search = useSearchParams();
+  useEffect(() => {
+    const p = search.get("plan");
+    if (p === "monthly" || p === "annual" || p === "lifetime") setSelected(p);
+  }, [search]);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
