@@ -10,7 +10,8 @@
 //   - Mouse: click anywhere outside to close.
 //   - First suggestion is auto-highlighted so Enter from the input
 //     navigates to the most likely match (matches Google behavior).
-//   - House rows: when the query is typing a house name ("xerjoff"), the
+//   - Lead rows: when the query is typing a house ("xerjoff"), a note
+//     ("frankin", misspellings tolerated) or a family ("resin"), the
 //     API returns matching houses and they render first, linking to
 //     /house/[slug]. They sit in the same ↓/↑/Enter order as the
 //     fragrance rows (index 0 is the first house), and are hidden in
@@ -27,6 +28,8 @@ import { BottleImage } from "@/components/bottle-image";
 import type { Fragrance } from "@/lib/types";
 import type { SearchResponse, SearchTerm } from "@/lib/search-terms";
 import type { HouseHit } from "@/lib/search-houses";
+import type { FamilyHit, NoteHit } from "@/lib/search-notes";
+import { familySwatch, noteSwatch } from "@/lib/swatches";
 import {
   addRecentSearch,
   clearRecentSearches,
@@ -41,6 +44,17 @@ const MAX_SUGGESTIONS = 8;
 const MAX_BY_TERMS = 5;
 const MAX_NAMES_WITH_TERMS = 3;
 const MIN_QUERY_LEN = 2;
+
+// A lead row above the fragrance matches: a house, a note or a family.
+interface Lead {
+  kind: "house" | "note" | "family";
+  id: string;
+  href: string;
+  label: string;
+  sub: string;
+  monogram?: string;
+  swatch?: string;
+}
 
 // One dropdown row. `matched` is set on keyword hits (which terms the
 // fragrance carries) and absent on name hits; that is also how rows are
@@ -129,6 +143,8 @@ export function SearchAutocomplete({
   const [q, setQ] = useState(initialQuery);
   const [suggestions, setSuggestions] = useState<Row[]>([]);
   const [houses, setHouses] = useState<HouseHit[]>([]);
+  const [notes, setNotes] = useState<NoteHit[]>([]);
+  const [families, setFamilies] = useState<FamilyHit[]>([]);
   const [terms, setTerms] = useState<SearchTerm[] | null>(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -205,6 +221,8 @@ export function SearchAutocomplete({
         setTerms(keyword ? data.terms : null);
         setSuggestions(hits);
         setHouses(onPick ? [] : (data.houses ?? []));
+        setNotes(onPick ? [] : (data.notes ?? []));
+        setFamilies(onPick ? [] : (data.families ?? []));
         setHighlight(0);
         setOpen(true);
       } catch (err: any) {
@@ -212,6 +230,8 @@ export function SearchAutocomplete({
         if (err?.name !== "AbortError") {
           setSuggestions([]);
           setHouses([]);
+          setNotes([]);
+          setFamilies([]);
         }
       } finally {
         // Only the active controller flips loading off, so a stale finally
@@ -281,13 +301,41 @@ export function SearchAutocomplete({
     setOpen(false);
   }
 
-  // House rows come first in the highlight order, then fragrance rows.
-  const rowCount = houses.length + suggestions.length;
+  // Lead rows (houses, then notes, then families) come first in the
+  // highlight order, then fragrance rows. One flat list keeps the
+  // keyboard math simple; the render groups them under section labels.
+  const leads: Lead[] = [
+    ...houses.map((h) => ({
+      kind: "house" as const,
+      id: `search-house-${h.slug}`,
+      href: `/house/${h.slug}`,
+      label: h.name,
+      sub: `${h.count} fragrance${h.count === 1 ? "" : "s"}`,
+      monogram: h.name.trim().charAt(0).toUpperCase(),
+    })),
+    ...notes.map((n) => ({
+      kind: "note" as const,
+      id: `search-note-${n.slug}`,
+      href: `/note/${n.slug}`,
+      label: n.name,
+      sub: n.count > 0 ? `Note · ${n.count} fragrance${n.count === 1 ? "" : "s"}` : "Note",
+      swatch: noteSwatch(n.name).bg,
+    })),
+    ...families.map((f) => ({
+      kind: "family" as const,
+      id: `search-family-${f.slug}`,
+      href: `/family/${f.slug}`,
+      label: f.name,
+      sub: "Family",
+      swatch: familySwatch(f.slug).bg,
+    })),
+  ];
+  const rowCount = leads.length + suggestions.length;
 
-  function goToHouse(h: HouseHit) {
+  function goToLead(l: Lead) {
     remember();
     setOpen(false);
-    router.push(`/house/${h.slug}`);
+    router.push(l.href);
   }
 
   function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -303,13 +351,13 @@ export function SearchAutocomplete({
       setHighlight((h) => (h - 1 + rowCount) % rowCount);
     } else if (e.key === "Enter") {
       e.preventDefault();
-      if (open && highlight < houses.length && houses[highlight]) {
-        goToHouse(houses[highlight]);
+      if (open && highlight < leads.length && leads[highlight]) {
+        goToLead(leads[highlight]);
         return;
       }
       const target =
-        open && suggestions[highlight - houses.length]
-          ? suggestions[highlight - houses.length]
+        open && suggestions[highlight - leads.length]
+          ? suggestions[highlight - leads.length]
           : undefined;
       commit(target);
     } else if (e.key === "Escape") {
@@ -339,7 +387,7 @@ export function SearchAutocomplete({
   const showDropdown =
     open &&
     q.trim().length >= MIN_QUERY_LEN &&
-    (loading || suggestions.length > 0 || houses.length > 0);
+    (loading || suggestions.length > 0 || leads.length > 0);
   const showRecents =
     recentSearches && focused && q.trim().length === 0 && recents.length > 0;
 
@@ -369,10 +417,10 @@ export function SearchAutocomplete({
           aria-activedescendant={
             !showDropdown
               ? undefined
-              : highlight < houses.length && houses[highlight]
-                ? `search-house-${houses[highlight].slug}`
-                : suggestions[highlight - houses.length]
-                  ? `search-suggestion-${suggestions[highlight - houses.length].id}`
+              : highlight < leads.length && leads[highlight]
+                ? leads[highlight].id
+                : suggestions[highlight - leads.length]
+                  ? `search-suggestion-${suggestions[highlight - leads.length].id}`
                   : undefined
           }
           value={q}
@@ -571,59 +619,71 @@ export function SearchAutocomplete({
           {rowCount === 0 && loading && (
             <li className="px-4 py-3 text-sm text-slate">Searching…</li>
           )}
-          {houses.length > 0 && (
-            <li
-              className="px-4 pt-3 pb-1 font-mono text-[10px] uppercase tracking-wider text-slate"
-              aria-hidden
-            >
-              {houses.length === 1 ? "House" : "Houses"}
-            </li>
-          )}
-          {houses.map((h, idx) => (
-            <li
-              key={`h-${h.slug}`}
-              id={`search-house-${h.slug}`}
-              role="option"
-              aria-selected={idx === highlight}
-            >
-              <Link
-                href={`/house/${h.slug}`}
-                onMouseEnter={() => setHighlight(idx)}
-                onClick={() => {
-                  remember();
-                  setOpen(false);
-                }}
-                className={`flex items-center gap-3 px-3 py-2.5 transition ${
-                  idx === highlight ? "bg-paper" : "bg-transparent"
-                }`}
-              >
-                {/* Same 40px slot as the bottle thumbnails so the text
-                    column lines up; a monogram stands in for a bottle. */}
-                <div className="shrink-0 w-10 h-14 flex items-center justify-center">
-                  <span className="w-9 h-9 flex items-center justify-center border border-ink/15 font-serif text-lg text-ink">
-                    {h.name.trim().charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="font-medium truncate text-ink">{h.name}</div>
-                  <div className="text-xs text-slate truncate">
-                    {h.count} fragrance{h.count === 1 ? "" : "s"}
-                  </div>
-                </div>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden className="shrink-0 text-slate">
-                  <path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </Link>
-            </li>
-          ))}
+          {leads.map((l, idx) => {
+            const first = idx === 0 || leads[idx - 1].kind !== l.kind;
+            const count = leads.filter((x) => x.kind === l.kind).length;
+            const heading =
+              l.kind === "house" ? (count === 1 ? "House" : "Houses")
+              : l.kind === "note" ? (count === 1 ? "Note" : "Notes")
+              : (count === 1 ? "Family" : "Families");
+            return (
+              <Fragment key={l.id}>
+                {first && (
+                  <li
+                    className="px-4 pt-3 pb-1 font-mono text-[10px] uppercase tracking-wider text-slate"
+                    aria-hidden
+                  >
+                    {heading}
+                  </li>
+                )}
+                <li id={l.id} role="option" aria-selected={idx === highlight}>
+                  <Link
+                    href={l.href}
+                    onMouseEnter={() => setHighlight(idx)}
+                    onClick={() => {
+                      remember();
+                      setOpen(false);
+                    }}
+                    className={`flex items-center gap-3 px-3 py-2.5 transition ${
+                      idx === highlight ? "bg-paper" : "bg-transparent"
+                    }`}
+                  >
+                    {/* Same 40px slot as the bottle thumbnails so the text
+                        column lines up: a monogram for houses, the note or
+                        family swatch for the others. */}
+                    <div className="shrink-0 w-10 h-14 flex items-center justify-center">
+                      {l.kind === "house" ? (
+                        <span className="w-9 h-9 flex items-center justify-center border border-ink/15 font-serif text-lg text-ink">
+                          {l.monogram}
+                        </span>
+                      ) : (
+                        <span
+                          className="w-9 h-9 border border-ink/10"
+                          style={{ backgroundColor: l.swatch }}
+                          aria-hidden
+                        />
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium truncate text-ink">{l.label}</div>
+                      <div className="text-xs text-slate truncate">{l.sub}</div>
+                    </div>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden className="shrink-0 text-slate">
+                      <path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </Link>
+                </li>
+              </Fragment>
+            );
+          })}
           {suggestions.map((f, i) => {
-            const idx = houses.length + i;
+            const idx = leads.length + i;
             const isTerm = Array.isArray(f.matched);
             const firstTerm = isTerm && i === 0;
             const firstName =
               !isTerm &&
               ((terms !== null && (i === 0 || Array.isArray(suggestions[i - 1]?.matched))) ||
-                (terms === null && i === 0 && houses.length > 0));
+                (terms === null && i === 0 && leads.length > 0));
             const inner = (
               <>
                 <div className="shrink-0 w-10 h-14 relative">

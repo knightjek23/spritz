@@ -13,6 +13,7 @@
 // catalog note list from Supabase (cached in-process for an hour).
 
 import type { HouseHit } from "./search-houses";
+import type { FamilyHit, NoteHit } from "./search-notes";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
 import { loadAllNotes } from "@/lib/notes";
@@ -73,6 +74,10 @@ export interface SearchResponse {
   results: SearchHit[];
   /** Houses the query is typing ("xerjoff" → Xerjoff); shown above results. */
   houses?: HouseHit[];
+  /** Notes the query is typing ("frankin" → Frankincense); link to /note/[slug]. */
+  notes?: NoteHit[];
+  /** Families the query is typing ("resin" → Resinous); link to /family/[slug]. */
+  families?: FamilyHit[];
   /** Present only when the whole query resolved to notes/families. */
   terms: SearchTerm[] | null;
   byTerms: KeywordHit[];

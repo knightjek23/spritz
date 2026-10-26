@@ -10,6 +10,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { checkIpThrottle, clientIp } from "@/lib/rate-limit";
 import { findHouses } from "@/lib/search-houses";
+import { findFamilies, findNotes } from "@/lib/search-notes";
 import {
   findByTerms,
   resolveKeywordQuery,
@@ -43,7 +44,7 @@ export async function GET(req: Request) {
   const q = url.searchParams.get("q")?.trim() ?? "";
   const full = url.searchParams.get("full") === "1";
   if (q.length < 2) {
-    const empty: SearchResponse = { results: [], houses: [], terms: null, byTerms: [] };
+    const empty: SearchResponse = { results: [], houses: [], notes: [], families: [], terms: null, byTerms: [] };
     return NextResponse.json(empty, { headers: CACHE_HEADERS });
   }
 
@@ -74,13 +75,17 @@ export async function GET(req: Request) {
     }
   })();
 
-  // House matches come from an in-memory index after the first call.
+  // House / note matches come from in-memory indexes after the first
+  // call; families are a fixed list.
   const housesPromise = findHouses(q, supabase);
+  const notesPromise = findNotes(q, supabase);
+  const families = findFamilies(q);
 
-  const [{ data, error }, keyword, houses] = await Promise.all([
+  const [{ data, error }, keyword, houses, notes] = await Promise.all([
     namesPromise,
     termsPromise,
     housesPromise,
+    notesPromise,
   ]);
 
   if (error) {
@@ -90,6 +95,8 @@ export async function GET(req: Request) {
   const body: SearchResponse = {
     results: data ?? [],
     houses,
+    notes,
+    families,
     terms: keyword.terms,
     byTerms: keyword.byTerms,
   };
