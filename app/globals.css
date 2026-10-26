@@ -664,36 +664,37 @@ button .cl-spinner {
 }
 
 /* ---------------------------------------------------------------------
-   Plan shine (app/pricing): the Annual card's border carries a brass
-   highlight that sweeps around the emerald frame, metallic-reflection
-   style. Built as a conic-gradient border-image on a 2px padding ring:
-   the card keeps its cream fill, only the ring moves. --plan-angle is a
-   registered custom property so the rotation interpolates; browsers
-   without @property (pre-16.4 Safari) show a static emerald/brass ring.
+   Plan shine (app/pricing): the Annual card's emerald border carries a
+   brass highlight that sweeps left to right, then again from the left,
+   metallic-reflection style. A 2px transparent border painted with a
+   wide linear gradient on the border-box (cream on the padding-box), the
+   gradient slid across by animating background-position. Reduced motion
+   shows the static emerald ring with the highlight parked off-canvas.
    --------------------------------------------------------------------- */
-@property --plan-angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
 .plan-shine {
   position: relative;
   border: 2px solid transparent;
   background:
     linear-gradient(#f4efe6, #f4efe6) padding-box,
-    conic-gradient(
-      from var(--plan-angle),
-      #1f3f2e 0deg,
-      #1f3f2e 210deg,
-      #c9a961 260deg,
-      #f1e3bf 290deg,
-      #c9a961 320deg,
-      #1f3f2e 360deg
+    linear-gradient(
+      100deg,
+      #1f3f2e 0%,
+      #1f3f2e 38%,
+      #c9a961 46%,
+      #f1e3bf 50%,
+      #c9a961 54%,
+      #1f3f2e 62%,
+      #1f3f2e 100%
     ) border-box;
-  animation: plan-shine 4.2s linear infinite;
+  background-size: 100% 100%, 300% 100%;
+  background-position: 0 0, 100% 0;
+  background-repeat: no-repeat;
+  animation: plan-shine 3.6s cubic-bezier(0.4, 0, 0.3, 1) infinite;
 }
 @keyframes plan-shine {
-  to { --plan-angle: 360deg; }
+  0%   { background-position: 0 0, 100% 0; }
+  70%  { background-position: 0 0, 0% 0; }
+  100% { background-position: 0 0, 0% 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   .plan-shine { animation: none; }
