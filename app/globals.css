@@ -676,25 +676,30 @@ button .cl-spinner {
   background:
     linear-gradient(#f4efe6, #f4efe6) padding-box,
     linear-gradient(
-      100deg,
+      90deg,
       #1f3f2e 0%,
-      #1f3f2e 38%,
-      #c9a961 46%,
+      #1f3f2e 42%,
+      #c9a961 47%,
       #f1e3bf 50%,
-      #c9a961 54%,
-      #1f3f2e 62%,
+      #c9a961 53%,
+      #1f3f2e 58%,
       #1f3f2e 100%
     ) border-box;
   background-size: 100% 100%, 300% 100%;
-  background-position: 0 0, 100% 0;
+  background-position: 0 0, 82% 0;
   background-repeat: no-repeat;
-  /* ~3.3 s of travel, no rest: the next pass starts as soon as the
-     highlight has left the right edge. */
-  animation: plan-shine 3.3s cubic-bezier(0.45, 0, 0.35, 1) infinite;
+  /* The gradient is 3x the card; the highlight sits at its centre. At
+     position 82% the band is just off the left edge, at 18% just off the
+     right (measured), so the 2.2 s travel is on screen end to end, at a
+     constant speed so neither edge reads as a pause. It then snaps back
+     off-canvas and rests exactly 1 s before the next pass. */
+  animation: plan-shine 3.2s linear infinite;
 }
 @keyframes plan-shine {
-  0%   { background-position: 0 0, 100% 0; }
-  100% { background-position: 0 0, 0% 0; }
+  0%      { background-position: 0 0, 82% 0; }
+  68.75%  { background-position: 0 0, 18% 0; }
+  68.76%  { background-position: 0 0, 82% 0; }
+  100%    { background-position: 0 0, 82% 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   .plan-shine { animation: none; }

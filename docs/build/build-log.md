@@ -357,7 +357,7 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
 
 ## Pricing: metallic sweep on the Annual card (2026-10-26)
 
-- Josh's reference: MasterClass's featured-tier border with a highlight travelling round it. Spritz version: the Annual card (the -50% plan) swaps its static `border-2 border-emerald` for `.plan-shine`: a 2px transparent border painted with a 300%-wide linear gradient (emerald → brass → pale brass → brass → emerald) on the border-box, cream on the padding-box, slid left-to-right by animating `background-position`, 3.3 s cycle, no rest: the next pass starts as the highlight clears the right edge (slowed, then the gap removed, after Josh's tests) (Josh asked for left-to-right, not a rotation round the frame). Monthly and Lifetime keep the plain border; reduced-motion stops the loop.
+- Josh's reference: MasterClass's featured-tier border with a highlight travelling round it. Spritz version: the Annual card (the -50% plan) swaps its static `border-2 border-emerald` for `.plan-shine`: a 2px transparent border painted with a 300%-wide linear gradient (emerald → brass → pale brass → brass → emerald) on the border-box, cream on the padding-box, slid left-to-right by animating `background-position`, 3.2 s cycle: the highlight travels edge to edge in 2.2 s at constant speed (positions 82% → 18% of a 3× gradient, measured so the band is just off-canvas at both ends; easing was dropped because its slow ends read as dead time), then rests exactly 1 s. Tuned over four rounds with Josh (Josh asked for left-to-right, not a rotation round the frame). Monthly and Lifetime keep the plain border; reduced-motion stops the loop.
 
 ## Pro intro sheet (2026-10-26)
 
