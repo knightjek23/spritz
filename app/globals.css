@@ -662,3 +662,39 @@ button .cl-spinner {
   .sb-rays-spin, .sb-badge .streak-cap { animation: none !important; }
   .sb-mist, .sb-fleck { display: none; }
 }
+
+/* ---------------------------------------------------------------------
+   Plan shine (app/pricing): the Annual card's border carries a brass
+   highlight that sweeps around the emerald frame, metallic-reflection
+   style. Built as a conic-gradient border-image on a 2px padding ring:
+   the card keeps its cream fill, only the ring moves. --plan-angle is a
+   registered custom property so the rotation interpolates; browsers
+   without @property (pre-16.4 Safari) show a static emerald/brass ring.
+   --------------------------------------------------------------------- */
+@property --plan-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.plan-shine {
+  position: relative;
+  border: 2px solid transparent;
+  background:
+    linear-gradient(#f4efe6, #f4efe6) padding-box,
+    conic-gradient(
+      from var(--plan-angle),
+      #1f3f2e 0deg,
+      #1f3f2e 210deg,
+      #c9a961 260deg,
+      #f1e3bf 290deg,
+      #c9a961 320deg,
+      #1f3f2e 360deg
+    ) border-box;
+  animation: plan-shine 4.2s linear infinite;
+}
+@keyframes plan-shine {
+  to { --plan-angle: 360deg; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .plan-shine { animation: none; }
+}

@@ -354,3 +354,7 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
 
 - **Root cause:** every page renders inside `PageTransition` (`.animate-page-slide-in`, `will-change: transform`). A transformed ancestor becomes the containing block for `position: fixed`, so the FamilySheet's `fixed inset-0` covered the whole page content (backdrop dimmed and blurred everything) while the sheet itself (`items-end`) sat at the bottom of the content, below the viewport. Same mechanism that swallowed the streak toast's fade on 10-20. CardMenu never had it because it portals to `<body>`.
 - **Fix:** `FamilySheet` now renders through `createPortal(…, document.body)` with a mounted gate. Audited the rest: the only other `fixed inset-0` overlays (CardMenu, StreakToast) already portal. Rule going forward: any fixed overlay opened from page content must portal.
+
+## Pricing: metallic sweep on the Annual card (2026-10-26)
+
+- Josh's reference: MasterClass's featured-tier border with a highlight travelling round it. Spritz version: the Annual card (the -50% plan) swaps its static `border-2 border-emerald` for `.plan-shine`: a 2px transparent border painted with a conic gradient (emerald → brass → pale brass → brass → emerald over the last 150°) on the border-box, cream on the padding-box, rotated via a registered `--plan-angle` custom property, 4.2 s linear loop. Monthly and Lifetime keep the plain border. Pre-16.4 Safari (no `@property`) shows a static ring; reduced-motion stops the loop.
