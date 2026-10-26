@@ -689,11 +689,12 @@ button .cl-spinner {
   background-size: 100% 100%, 300% 100%;
   background-position: 0 0, 100% 0;
   background-repeat: no-repeat;
-  animation: plan-shine 3.6s cubic-bezier(0.4, 0, 0.3, 1) infinite;
+  /* ~3.3 s of travel, ~0.5 s rest before the next pass. */
+  animation: plan-shine 3.8s cubic-bezier(0.45, 0, 0.35, 1) infinite;
 }
 @keyframes plan-shine {
   0%   { background-position: 0 0, 100% 0; }
-  70%  { background-position: 0 0, 0% 0; }
+  87%  { background-position: 0 0, 0% 0; }
   100% { background-position: 0 0, 0% 0; }
 }
 @media (prefers-reduced-motion: reduce) {
