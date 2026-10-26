@@ -218,8 +218,8 @@ export function ProIntroSheet() {
       <button type="button" aria-label="Close" onClick={() => close()} className="pro-intro__backdrop" />
 
       <div className="pro-intro__panel">
-        <div className="mx-auto max-w-md px-6 pt-6 pb-8 min-h-full flex flex-col">
-          <div className="flex items-center justify-between mb-8">
+        <div className="mx-auto max-w-md px-6 pt-4 pb-4 min-h-full flex flex-col">
+          <div className="flex items-center justify-between mb-4">
             <p className="font-mono text-xs uppercase tracking-widest text-slate">Spritz Pro</p>
             <button
               type="button"
@@ -233,19 +233,19 @@ export function ProIntroSheet() {
             </button>
           </div>
 
-          <h1 id="pro-intro-title" className="font-display text-4xl leading-[0.98] mb-6">
+          <h1 id="pro-intro-title" className="font-display text-[32px] leading-[0.98] mb-4">
             The full library, free for {TRIAL_DAYS} days.
           </h1>
 
-          <ul className="divide-y divide-ink/10 mb-6">
+          <ul className="divide-y divide-ink/10 mb-4">
             {BENEFITS.map((b, i) => (
               <li
                 key={b.title}
-                className="pro-intro__row flex items-start gap-4 py-3.5"
+                className="pro-intro__row flex items-start gap-3 py-2.5"
                 style={{ animationDelay: `${420 + i * 40}ms` }}
               >
                 <span
-                  className="shrink-0 w-10 h-10 flex items-center justify-center text-emerald"
+                  className="shrink-0 w-9 h-9 flex items-center justify-center text-emerald"
                   style={{ backgroundColor: b.tint }}
                   aria-hidden
                 >
@@ -256,26 +256,26 @@ export function ProIntroSheet() {
                     strokeWidth="1.1"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="w-6 h-6"
+                    className="w-5 h-5"
                   >
                     {b.icon}
                   </svg>
                 </span>
                 <div className="min-w-0">
-                  <p className="font-medium leading-snug">{b.title}</p>
-                  <p className="text-sm text-slate leading-snug mt-0.5">{b.sub}</p>
+                  <p className="text-[15px] font-medium leading-snug">{b.title}</p>
+                  <p className="text-[13px] text-slate leading-snug mt-0.5">{b.sub}</p>
                 </div>
               </li>
             ))}
           </ul>
 
-          <p className="font-mono text-[11px] uppercase tracking-widest text-emerald mb-6">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-emerald mb-3">
             <span className="inline-block w-1.5 h-1.5 bg-brass align-middle mr-2" aria-hidden />
             We&apos;ll remind you on day {TRIAL_DAYS - 2}, two days before anything is charged.
           </p>
 
           <div className="mt-auto">
-            <p className="text-xs text-slate leading-relaxed mb-4">
+            <p className="text-[11px] text-slate leading-snug mb-3">
               By tapping Start free trial you agree to the{" "}
               <a href="/legal/terms" className="underline underline-offset-2 text-ink">
                 Terms
@@ -288,14 +288,14 @@ export function ProIntroSheet() {
             <button
               type="button"
               onClick={() => close(() => router.push("/pricing?plan=monthly"))}
-              className="w-full bg-emerald text-cream py-4 font-medium tracking-wide hover:bg-emerald/90 transition"
+              className="w-full bg-emerald text-cream py-3.5 font-medium tracking-wide hover:bg-emerald/90 transition"
             >
               Start {TRIAL_DAYS}-day free trial
             </button>
             <button
               type="button"
               onClick={() => close()}
-              className="block w-full text-center mt-3 py-2 text-sm text-slate hover:text-ink underline underline-offset-4"
+              className="block w-full text-center mt-1 py-2 text-sm text-slate hover:text-ink underline underline-offset-4"
             >
               Not now
             </button>

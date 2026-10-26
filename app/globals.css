@@ -736,7 +736,7 @@ button .cl-spinner {
   left: 0;
   right: 0;
   bottom: 0;
-  top: calc(var(--safe-top) + 12px);
+  top: calc(var(--safe-top) + 8px);
   background: #f4efe6;
   box-shadow: 0 -12px 40px rgba(26, 26, 26, 0.18);
   overflow-y: auto;

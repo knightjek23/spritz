@@ -372,3 +372,4 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
 ## Brass sweep on the streak card (2026-10-26)
 
 - The Annual card's reflective border is now a shared class, `.brass-sweep` (was `.plan-shine`), and the streak card wears it too: emerald 2px ring with the brass highlight passing left to right every 3.2 s. On the streak card the sweep runs alongside the card's own entrance/exit animations (both listed on `animation`, since a second rule would otherwise replace the first). Milestone cards keep their brass hairline colour via the ring. Reduced motion: static ring.
+- Fit pass (same day): Josh had to scroll for the CTA on an iPhone 17. Tightened the sheet (headline 32px, rows py-2.5 with 36px tiles and 15/13px text, consent 11px, CTA py-3.5, panel starts 8px under the status bar). Measured at 393×852 with the 59px status bar and 34px home indicator: everything including "Not now" fits with ~50px to spare, no scroll.
