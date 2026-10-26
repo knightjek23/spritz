@@ -18,8 +18,17 @@
 // (Safari share sheet, iOS picker), feels lower-friction than a
 // full-screen modal, and reads as ephemeral information rather than a
 // destination switch.
+//
+// Rendered through a portal onto <body>. The page sits inside
+// PageTransition (.animate-page-slide-in, will-change: transform), and a
+// transformed ancestor turns position:fixed into "fixed to that ancestor":
+// the backdrop then covered the whole page (dimmed + blurred everything)
+// while the sheet itself landed at the bottom of the page content, below
+// the viewport, so a tap on a family looked like a dead end. Same fix as
+// CardMenu and StreakToast.
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { FAMILY_BLURB, familyName, normalizeFamily } from "@/lib/families";
 import { familySwatch } from "@/lib/swatches";
@@ -96,7 +105,11 @@ function FamilySheet({
   const rawDisplay = family.charAt(0).toUpperCase() + family.slice(1).toLowerCase();
   const displayName = rawDisplay;
 
-  return (
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-end justify-center"
       // Lifts the sheet clear of the home indicator under viewportFit:
@@ -174,6 +187,7 @@ function FamilySheet({
           Browse all {canonicalDisplay.toLowerCase()} fragrances
         </Link>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

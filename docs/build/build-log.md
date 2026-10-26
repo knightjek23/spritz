@@ -349,3 +349,8 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
 - **Pushes:** `lib/push-trial.ts`, run from the existing daily cron after the scan follow-up. `trial_day1` (≥12 h in), `trial_day5` (1–2.5 days left), `trial_day7` (< 1 day left); each once per trial via `push_sends.campaign`; stops the moment `trial_ends_at` is cleared. Copy in `lib/trial.ts`.
 - **Josh to do once:** in Stripe → Settings → Subscriptions and emails, turn on "Send emails about expiring trials" (3 days before) so web subscribers without push still get a reminder. In the RevenueCat dashboard, make sure `TRIAL_CONVERTED` and `TRIAL_CANCELLED` events are enabled for the webhook.
 - Not built, by decision: discount ladders, trial on Annual, first-launch interstitial, email sender.
+
+## Family pill sheet: dim-and-nothing on tap (2026-10-26)
+
+- **Root cause:** every page renders inside `PageTransition` (`.animate-page-slide-in`, `will-change: transform`). A transformed ancestor becomes the containing block for `position: fixed`, so the FamilySheet's `fixed inset-0` covered the whole page content (backdrop dimmed and blurred everything) while the sheet itself (`items-end`) sat at the bottom of the content, below the viewport. Same mechanism that swallowed the streak toast's fade on 10-20. CardMenu never had it because it portals to `<body>`.
+- **Fix:** `FamilySheet` now renders through `createPortal(…, document.body)` with a mounted gate. Audited the rest: the only other `fixed inset-0` overlays (CardMenu, StreakToast) already portal. Rule going forward: any fixed overlay opened from page content must portal.
