@@ -358,26 +358,6 @@ function PricingContent() {
         </div>
       </div>
 
-      {/* How the trial works — Monthly only (the trial lives there, pricing
-          decision 2026-07-13). The day-5 line is a promise lib/push-trial.ts
-          keeps. Billed amount appears in the same weight as the free days,
-          per App Store guideline 3.1.2(c). */}
-      {selected === "monthly" && !isAlreadyPro && (
-        <section className="mb-6 rounded-2xl border border-ink/10 bg-paper px-5 py-5">
-          <h2 className="font-display text-xl mb-3">How your free trial works</h2>
-          <ol className="space-y-3">
-            {TRIAL_TIMELINE.map((step) => (
-              <li key={step.when} className="flex gap-3">
-                <span className="shrink-0 w-14 font-mono text-[11px] uppercase tracking-widest text-emerald pt-0.5">
-                  {step.when}
-                </span>
-                <span className="text-sm text-ink leading-relaxed">{step.what}</span>
-              </li>
-            ))}
-          </ol>
-        </section>
-      )}
-
       {/* Selected plan card. Stroke + CTA use the emerald token — the same
           green as every other CTA in the app. */}
       {/* Annual gets the metallic sweep: a brass highlight travelling round
@@ -490,6 +470,27 @@ function PricingContent() {
           </p>
         )}
       </div>
+
+      {/* How the trial works — below the plan card so the CTA is reached
+          first (Josh, 2026-10-26); Monthly only (the trial lives there, pricing
+          decision 2026-07-13). The day-5 line is a promise lib/push-trial.ts
+          keeps. Billed amount appears in the same weight as the free days,
+          per App Store guideline 3.1.2(c). */}
+      {selected === "monthly" && !isAlreadyPro && (
+        <section className="mb-10 rounded-2xl border border-ink/10 bg-paper px-5 py-5">
+          <h2 className="font-display text-xl mb-3">How your free trial works</h2>
+          <ol className="space-y-3">
+            {TRIAL_TIMELINE.map((step) => (
+              <li key={step.when} className="flex gap-3">
+                <span className="shrink-0 w-14 font-mono text-[11px] uppercase tracking-widest text-emerald pt-0.5">
+                  {step.when}
+                </span>
+                <span className="text-sm text-ink leading-relaxed">{step.what}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
 
       {/* Comparison table */}
       <section className="mb-10">
