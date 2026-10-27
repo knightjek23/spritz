@@ -124,8 +124,8 @@ export function CostEffectiveOptions({
       <section className="mb-10">
         {heading}
         <p className="text-sm text-slate">
-          We don&apos;t have a current price for {fragranceName} yet, so we can&apos;t work out
-          what would save you money. Check back once a retailer lists it.
+          We don&apos;t have a price for {fragranceName} yet, so we can&apos;t work out what
+          would save you money.
         </p>
       </section>
     );
@@ -170,8 +170,10 @@ export function CostEffectiveOptions({
       {heading}
       <p className="text-sm text-slate mb-4">
         Bottles with the same scent profile as {fragranceName}
-        {src ? ` (${money(src.price, src.currency)})` : ""} for less. Match is how close
-        the profile is; prices are from retailer feeds and can lag the store.
+        {src ? ` (${src.estimated ? "~" : ""}${money(src.price, src.currency)} for 100 ml)` : ""}{" "}
+        for less. Match is how close the profile is. Prices are per 100 ml; retailer prices
+        can lag the store, &ldquo;est.&rdquo; is an estimated list price, and &ldquo;rough
+        est.&rdquo; is based on the house&apos;s usual pricing rather than this bottle.
       </p>
       <ul className="space-y-2">
         {data.options.map((o) => (
@@ -199,22 +201,36 @@ export function CostEffectiveOptions({
                 </div>
               </div>
             </Link>
-            {/* The saving is the headline number; the price beneath it is
-                the retailer's, and tapping it goes to the affiliate page. */}
-            <a
-              href={o.product_url}
-              target="_blank"
-              rel="noopener noreferrer sponsored"
-              className="shrink-0 text-right min-h-[44px] flex flex-col justify-center px-2 rounded-lg hover:bg-ink/5 transition"
-              data-no-longpress
-            >
-              <span className="font-display text-lg leading-none text-emerald">
-                save {money(o.saving, o.currency)}
-              </span>
-              <span className="font-mono text-[10px] uppercase tracking-wider text-slate mt-1">
-                {money(o.price, o.currency)} · {o.retailer}
-              </span>
-            </a>
+            {/* The saving is the headline number. Beneath it: a retailer
+                price links out to the affiliate page; an estimate (model
+                recollection of list price, no store behind it) is labelled
+                "est." and does not link, so nobody taps through to a price
+                that was never observed. */}
+            {o.product_url && !o.estimated ? (
+              <a
+                href={o.product_url}
+                target="_blank"
+                rel="noopener noreferrer sponsored"
+                className="shrink-0 text-right min-h-[44px] flex flex-col justify-center px-2 rounded-lg hover:bg-ink/5 transition"
+                data-no-longpress
+              >
+                <span className="font-display text-lg leading-none text-emerald">
+                  save {money(o.saving, o.currency)}
+                </span>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-slate mt-1">
+                  {money(o.price, o.currency)} · {o.retailer}
+                </span>
+              </a>
+            ) : (
+              <div className="shrink-0 text-right min-h-[44px] flex flex-col justify-center px-2">
+                <span className="font-display text-lg leading-none text-emerald">
+                  save ~{money(o.saving, o.currency)}
+                </span>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-slate mt-1">
+                  ~{money(o.price, o.currency)} · {o.rough ? "rough est." : "est. list price"}
+                </span>
+              </div>
+            )}
           </li>
         ))}
       </ul>

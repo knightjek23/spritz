@@ -27,6 +27,18 @@ export const runtime = "nodejs";
 const NO_STORE = { "Cache-Control": "private, no-store" };
 const FULL_LIMIT = 10;
 
+/** Trust order for reference prices; mirrors migration 0039. */
+const SOURCE_PRIORITY: Record<string, number> = {
+  gpt_estimate: 1,
+  house_median: 2,
+  house_estimate: 3,
+  gpt_guess: 4,
+};
+/** House-level and forced tiers are "rough": shown with a stronger caveat. */
+function isRough(source: string): boolean {
+  return (SOURCE_PRIORITY[source] ?? 9) >= 2;
+}
+
 export interface CostEffectiveOption {
   id: string;
   name: string;
@@ -35,17 +47,23 @@ export interface CostEffectiveOption {
   year: number | null;
   bottle_image_url: string | null;
   similarity: number;
+  /** For 100 ml. */
   price: number;
   currency: string;
-  retailer: string;
-  product_url: string;
+  /** Null when the price is an estimate rather than a listing. */
+  retailer: string | null;
+  product_url: string | null;
+  /** True when `price` is a model estimate of list price, not a listing. */
+  estimated: boolean;
+  /** True for the house-level and forced tiers: estimate with wide error bars. */
+  rough: boolean;
   saving: number;
   saving_pct: number;
 }
 
 export interface CostEffectiveResponse {
-  /** Cheapest in-stock price we have for the source fragrance. */
-  sourcePrice: { price: number; currency: string } | null;
+  /** Best price we have for the source fragrance, for 100 ml. */
+  sourcePrice: { price: number; currency: string; estimated: boolean; rough: boolean } | null;
   /** Full list for Pro; empty for free users. */
   options: CostEffectiveOption[];
   /** For free users: enough to write an honest upsell line. */
@@ -70,22 +88,42 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     .maybeSingle();
   const pro = user?.plan === "pro";
 
-  // Source price first: it decides whether the feature can run at all and
-  // the UI needs it for the "you'd pay $X" framing either way.
-  const { data: srcOffer } = await supabase
-    .from("fragrance_offers")
-    .select("price, currency")
-    .eq("fragrance_id", params.id)
-    .not("price", "is", null)
-    .eq("in_stock", true)
-    .order("price", { ascending: true })
-    .limit(1)
-    .maybeSingle();
+  // Source price: a real offer first, then a reference estimate (0038).
+  // It decides whether the feature can run at all, and the UI needs it for
+  // the "you'd pay $X" framing either way.
+  const [{ data: srcOffer }, { data: srcRef }] = await Promise.all([
+    supabase
+      .from("fragrance_offers")
+      .select("price, currency")
+      .eq("fragrance_id", params.id)
+      .not("price", "is", null)
+      .eq("in_stock", true)
+      .order("price", { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("fragrance_prices")
+      .select("price_per_ml, currency, source")
+      .eq("fragrance_id", params.id),
+  ]);
+
+  // Most trustworthy reference first (same order as migration 0039), never
+  // the cheapest: a rough guess must not override a confident estimate.
+  const best = (srcRef ?? [])
+    .map((r) => ({ ...r, pri: SOURCE_PRIORITY[r.source] ?? 9 }))
+    .sort((a, b) => a.pri - b.pri || Number(a.price_per_ml) - Number(b.price_per_ml))[0];
 
   const sourcePrice =
     srcOffer?.price != null
-      ? { price: Number(srcOffer.price), currency: srcOffer.currency }
-      : null;
+      ? { price: Number(srcOffer.price), currency: srcOffer.currency, estimated: false, rough: false }
+      : best?.price_per_ml != null
+        ? {
+            price: Number(best.price_per_ml) * 100,
+            currency: best.currency,
+            estimated: true,
+            rough: isRough(best.source),
+          }
+        : null;
 
   if (!sourcePrice) {
     const body: CostEffectiveResponse = {
@@ -119,6 +157,8 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     currency: r.currency,
     retailer: r.retailer,
     product_url: r.product_url,
+    estimated: r.price_source !== "offer",
+    rough: isRough(r.price_source),
     saving: Number(r.saving),
     saving_pct: Number(r.saving_pct),
   }));
