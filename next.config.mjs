@@ -7,6 +7,9 @@
 // SETUP.md.
 const nextConfig = {
   reactStrictMode: true,
+  // Required by the PostHog /ingest proxy below: PostHog's API paths end
+  // in a trailing slash and Next would otherwise 308-redirect them.
+  skipTrailingSlashRedirect: true,
   // /encyclopedia → /library rename (2026-07-05). Permanent redirect so
   // any pre-rename link, bookmark, or crawled URL keeps working.
   async redirects() {
@@ -16,6 +19,14 @@ const nextConfig = {
         destination: "/library",
         permanent: true,
       },
+    ];
+  },
+  // PostHog reverse proxy. The browser sends events to our own domain,
+  // so ad blockers that block *.posthog.com don't drop them.
+  async rewrites() {
+    return [
+      { source: "/ingest/static/:path*", destination: "https://us-assets.i.posthog.com/static/:path*" },
+      { source: "/ingest/:path*", destination: "https://us.i.posthog.com/:path*" },
     ];
   },
   images: {

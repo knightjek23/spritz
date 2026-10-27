@@ -7,6 +7,7 @@ import { Nav } from "@/components/nav";
 import { BottomNav } from "@/components/bottom-nav";
 import { Footer } from "@/components/footer";
 import { Analytics } from "@/components/analytics";
+import { PostHogIdentify } from "@/components/posthog-identify";
 import { LiquidGlassDefs } from "@/components/liquid-glass/LiquidGlass";
 import { PageTransition } from "@/components/page-transition";
 import { ProIntroSheet } from "@/components/pro-intro-sheet";
@@ -151,6 +152,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <BottomNav />
           {/* PostHog — renders nothing unless NEXT_PUBLIC_POSTHOG_KEY is set. */}
           <Analytics />
+          {/* Attaches the Clerk user to PostHog events. Renders nothing. */}
+          <PostHogIdentify />
         </body>
       </html>
     </ClerkProvider>
