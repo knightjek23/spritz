@@ -16,6 +16,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { BottleImage } from "@/components/bottle-image";
 import { StreakToast } from "@/components/streak-toast";
 import { streakEndingOn } from "@/lib/streak";
@@ -44,6 +45,7 @@ export function WearingToday({
   /** Every distinct day with an entry (newest first); the streak is computed here against the local day. */
   days: string[];
 }) {
+  const router = useRouter();
   const [today, setToday] = useState<string | null>(null);
   const [entries, setEntries] = useState<WearEntry[]>([]);
   const [streak, setStreak] = useState(0);
@@ -95,6 +97,11 @@ export function WearingToday({
       // The streak toast fires once per day, on the first log.
       if (json.firstToday) setToast({ streak: json.streak, returning: json.returning });
       setPicking(false);
+      // The router keeps a client-side copy of this page from before the
+      // log. Without this, tapping away and back to Home served that copy,
+      // which still showed the empty picker, so the bottle looked
+      // "unchosen" even though the entry was saved and the streak counted.
+      router.refresh();
     } catch {
       setError("Couldn't save that. Try again.");
     } finally {
@@ -107,16 +114,22 @@ export function WearingToday({
     setBusy(entry.id);
     setError(null);
     const prev = entries;
+    const prevStreak = streak;
     const next = prev.filter((e) => e.id !== entry.id);
     setEntries(next);
     // Undoing the only entry of the day takes today out of the streak.
-    if (next.length === 0 && today) setStreak(streakEndingOn(days.filter((d) => d !== today), today));
+    // streakEndingOn() returns 0 when today has no entry, so this is 0.
+    if (next.length === 0) setStreak(0);
     try {
       const res = await fetch(`/api/wear?id=${entry.id}`, { method: "DELETE" });
       if (!res.ok) throw new Error(String(res.status));
+      router.refresh(); // same reason as in log()
     } catch {
+      // Put back exactly what was shown, rather than recomputing from the
+      // server's day list: that list predates today's log, so the recompute
+      // produced a different number from the one the user had just seen.
       setEntries(prev);
-      if (today) setStreak(streakEndingOn([...days, today], today));
+      setStreak(prevStreak);
       setError("Couldn't remove that. Try again.");
     } finally {
       setBusy(null);
@@ -154,8 +167,15 @@ export function WearingToday({
       {entries.length > 0 && (
         <ul className="space-y-2 mb-3">
           {entries.map((e) => (
-            <li key={e.id} className="flex items-center gap-3 px-3 py-2 rounded-xl bg-paper border border-ink/10">
-              <Link href={`/fragrance/${e.fragrance.id}`} className="flex items-center gap-3 min-w-0 flex-1">
+            <li key={e.id} className="flex items-center gap-2 pl-3 pr-1 py-1 rounded-xl bg-paper border border-ink/10">
+              <Link
+                href={`/fragrance/${e.fragrance.id}`}
+                className="flex items-center gap-3 min-w-0 flex-1 py-1"
+                // Keep the link's touch handling off the Undo button beside it.
+                onClick={(ev) => {
+                  if (busy) ev.preventDefault();
+                }}
+              >
                 <div className="shrink-0 w-10 h-14 relative">
                   <BottleImage
                     src={e.fragrance.bottle_image_url}
@@ -170,11 +190,20 @@ export function WearingToday({
                   <div className="text-xs text-slate truncate">{e.fragrance.house}</div>
                 </div>
               </Link>
+              {/* Full-height tap target with its own padding, so a thumb
+                  landing near "Undo" hits the button and not the row link
+                  beside it. Previously the text alone was the target
+                  (~30x16px) next to a link filling the rest of the row,
+                  and near-misses opened the fragrance page. */}
               <button
                 type="button"
-                onClick={() => undo(e)}
+                onClick={(ev) => {
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                  undo(e);
+                }}
                 disabled={busy === e.id}
-                className="shrink-0 text-xs text-slate hover:text-ink underline underline-offset-4 disabled:opacity-50"
+                className="shrink-0 min-w-[64px] min-h-[44px] px-3 rounded-lg text-xs text-slate hover:text-ink hover:bg-ink/5 underline underline-offset-4 disabled:opacity-50 transition"
                 data-no-longpress
               >
                 Undo
