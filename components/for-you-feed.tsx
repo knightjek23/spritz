@@ -82,7 +82,7 @@ export function ForYouFeed({
         </h1>
         {data.seeds.length > 0 && (
           <p className="text-sm text-slate mt-3 leading-relaxed">
-            Built from{" "}
+            Today, built from{" "}
             {data.seeds.map((s, i) => (
               <span key={s.id}>
                 {i > 0 ? (i === data.seeds.length - 1 ? " and " : ", ") : ""}
@@ -90,6 +90,12 @@ export function ForYouFeed({
               </span>
             ))}
             .
+            {data.profile.notes.length > 0 && (
+              <>
+                {" "}
+                The thread: {data.profile.notes.slice(0, 3).join(", ")}.
+              </>
+            )}
           </p>
         )}
       </header>
@@ -101,10 +107,10 @@ export function ForYouFeed({
         <section className="mb-12">
           <h2 className="font-display text-2xl mb-1">Try next</h2>
           <p className="text-sm text-slate mb-4">
-            Bottles that share notes and family with yours.
+            Bottles that share notes and family with today&apos;s three. A new set every day.
           </p>
           <ul className="space-y-2">
-            {data.similar.map(({ fragrance: f, similarity, becauseOf }) => (
+            {data.similar.map(({ fragrance: f, similarity, becauseOf, sharedNotes }) => (
               <li key={f.id}>
                 <Link
                   href={`/fragrance/${f.id}`}
@@ -125,15 +131,24 @@ export function ForYouFeed({
                       {f.house}
                       {f.year ? ` · ${f.year}` : ""}
                     </div>
-                    {becauseOf.length > 0 && (
+                    {/* "shares: bergamot, vetiver" says WHY in the user's own
+                        terms; fall back to the seed name when the overlap
+                        is in the vector but not in a named note. */}
+                    {sharedNotes.length > 0 ? (
+                      <div className="text-[11px] text-slate mt-1 truncate">
+                        <span className="font-mono uppercase tracking-wider text-[9px] text-slate">
+                          shares:{" "}
+                        </span>
+                        {sharedNotes.join(", ")}
+                      </div>
+                    ) : becauseOf.length > 0 ? (
                       <div className="text-[11px] text-slate mt-1 truncate">
                         <span className="font-mono uppercase tracking-wider text-[9px] text-slate">
                           if you like:{" "}
                         </span>
                         {becauseOf.slice(0, 2).join(", ")}
-                        {becauseOf.length > 2 ? ` +${becauseOf.length - 2}` : ""}
                       </div>
-                    )}
+                    ) : null}
                   </div>
                   <span className="shrink-0 font-mono text-[10px] text-slate">
                     {Math.round(similarity * 100)}%
