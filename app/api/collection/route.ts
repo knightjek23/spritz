@@ -1,6 +1,7 @@
 // GET    /api/collection?status=own|tried|wishlist
 // GET    /api/collection?fragranceId=<uuid>   (light: save-state for one fragrance)
 // POST   /api/collection      body: { fragrance_id, status, note? }
+// PATCH  /api/collection    body: { id, price_paid_cents: number | null }  (owned bottles; drives cost per wear)
 // DELETE /api/collection?id=<collection_item_id>
 //
 // Auth required. Free tier capped at 10 items total (Q5 — easy to tune;
@@ -17,6 +18,11 @@ import { stripProFieldsDeep } from "@/lib/entitlement";
 export const runtime = "nodejs";
 
 const FREE_COLLECTION_CAP = 10;
+
+const PatchBody = z.object({
+  id: z.string().uuid(),
+  price_paid_cents: z.number().int().min(0).max(10_000_000).nullable(),
+});
 
 const PostBody = z.object({
   fragrance_id: z.string().uuid(),
@@ -153,6 +159,26 @@ export async function POST(req: Request) {
     }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+  return NextResponse.json({ item: data });
+}
+
+export async function PATCH(req: Request) {
+  const { userId } = auth();
+  if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  const parsed = PatchBody.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "invalid_body" }, { status: 400 });
+  const user = await ensureAppUser(userId);
+  if (!user) return NextResponse.json({ error: "user_provision_failed" }, { status: 500 });
+
+  const { data, error } = await createAdminClient()
+    .from("collection_items")
+    .update({ price_paid_cents: parsed.data.price_paid_cents })
+    .eq("id", parsed.data.id)
+    .eq("user_id", user.id)
+    .select("id, price_paid_cents")
+    .maybeSingle();
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (!data) return NextResponse.json({ error: "not_found" }, { status: 404 });
   return NextResponse.json({ item: data });
 }
 

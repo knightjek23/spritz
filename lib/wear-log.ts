@@ -11,11 +11,14 @@ export interface WearEntry {
   id: string;
   wornOn: string;
   createdAt: string;
+  /** "Got a compliment" taps on this entry (migration 0038). */
+  compliments: number;
   fragrance: {
     id: string;
     name: string;
     house: string;
     bottle_image_url: string | null;
+    family?: string[] | null;
   };
 }
 
@@ -36,12 +39,22 @@ type RawRow = {
   id: string;
   worn_on: string;
   created_at: string;
+  compliments?: number | null;
   fragrance: WearEntry["fragrance"] | null;
 };
 
+const ENTRY_SELECT =
+  "id, worn_on, created_at, compliments, fragrance:fragrances(id, name, house, bottle_image_url, family)";
+
 function toEntry(r: RawRow): WearEntry | null {
   if (!r.fragrance) return null;
-  return { id: r.id, wornOn: r.worn_on, createdAt: r.created_at, fragrance: r.fragrance };
+  return {
+    id: r.id,
+    wornOn: r.worn_on,
+    createdAt: r.created_at,
+    compliments: r.compliments ?? 0,
+    fragrance: r.fragrance,
+  };
 }
 
 /** The user's Owned shelf, most recently added first. */
@@ -64,7 +77,7 @@ export async function wornOn(appUserId: string, day: string): Promise<WearEntry[
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("wear_log")
-    .select("id, worn_on, created_at, fragrance:fragrances(id, name, house, bottle_image_url)")
+    .select(ENTRY_SELECT)
     .eq("user_id", appUserId)
     .eq("worn_on", day)
     .order("created_at", { ascending: true });
@@ -76,7 +89,7 @@ export async function wearHistory(appUserId: string, limit = 500): Promise<WearE
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("wear_log")
-    .select("id, worn_on, created_at, fragrance:fragrances(id, name, house, bottle_image_url)")
+    .select(ENTRY_SELECT)
     .eq("user_id", appUserId)
     .order("worn_on", { ascending: false })
     .order("created_at", { ascending: false })

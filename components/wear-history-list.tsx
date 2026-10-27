@@ -37,6 +37,22 @@ export function WearHistoryList({ initial }: { initial: WearEntry[] }) {
     }
   }
 
+  async function compliment(entry: WearEntry) {
+    const next = Math.min(99, entry.compliments + 1);
+    const prev = entries;
+    setEntries(prev.map((e) => (e.id === entry.id ? { ...e, compliments: next } : e)));
+    try {
+      const res = await fetch("/api/wear", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: entry.id, compliments: next }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+    } catch {
+      setEntries(prev);
+    }
+  }
+
   // Group by day, preserving the server's newest-first order.
   const days: { day: string; items: WearEntry[] }[] = [];
   for (const e of entries) {
@@ -78,6 +94,19 @@ export function WearHistoryList({ initial }: { initial: WearEntry[] }) {
                     <div className="text-xs text-slate truncate">{e.fragrance.house}</div>
                   </div>
                 </Link>
+                <button
+                  type="button"
+                  onClick={() => compliment(e)}
+                  aria-label={`Got a compliment wearing ${e.fragrance.name}`}
+                  title="Got a compliment"
+                  className={`shrink-0 h-8 px-2 rounded-full text-xs flex items-center gap-1 transition ${
+                    e.compliments > 0 ? "text-emerald bg-emerald/10" : "text-slate hover:text-ink hover:bg-ink/5"
+                  }`}
+                  data-no-longpress
+                >
+                  <span aria-hidden>♥</span>
+                  {e.compliments > 0 && <span>{e.compliments}</span>}
+                </button>
                 <button
                   type="button"
                   onClick={() => remove(e)}

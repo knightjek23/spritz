@@ -13,6 +13,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { wearHistory, mostWorn } from "@/lib/wear-log";
 import { BottleImage } from "@/components/bottle-image";
 import { WearHistoryList } from "@/components/wear-history-list";
+import { WearInsights } from "@/components/wear-insights";
+import { ProLocked } from "@/components/pro-locked";
+import { ProGateTracker } from "@/components/pro-gate-tracker";
+import { costPerWear, mostComplimented, neglected, ownedForInsights, seasonalPatterns } from "@/lib/wear-insights";
 
 export const metadata: Metadata = {
   title: "Fragrance history",
@@ -27,11 +31,16 @@ export default async function WearHistoryPage() {
 
   const { data: appUser } = await createAdminClient()
     .from("users")
-    .select("id")
+    .select("id, plan")
     .eq("clerk_user_id", userId)
     .maybeSingle();
 
-  const entries = appUser ? await wearHistory(appUser.id) : [];
+  const isPro = appUser?.plan === "pro";
+  const [entries, owned] = await Promise.all([
+    appUser ? wearHistory(appUser.id) : Promise.resolve([]),
+    appUser && isPro ? ownedForInsights(appUser.id) : Promise.resolve([]),
+  ]);
+  const today = new Date().toISOString().slice(0, 10);
   const since = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const top = mostWorn(entries, since);
   const dayCount = new Set(entries.map((e) => e.wornOn)).size;
@@ -94,6 +103,23 @@ export default async function WearHistoryPage() {
                   </li>
                 ))}
               </ul>
+            </section>
+          )}
+
+          {isPro ? (
+            <WearInsights
+              cost={costPerWear(owned, entries)}
+              complimented={mostComplimented(entries)}
+              seasons={seasonalPatterns(entries)}
+              neglected={neglected(owned, entries, today)}
+              pricedCount={owned.filter((o) => o.pricePaidCents !== null).length}
+              ownedCount={owned.length}
+            />
+          ) : (
+            <section className="mb-10">
+              <ProGateTracker feature="wear_insights" state="locked" />
+              <h2 className="font-display text-2xl mb-1">Insights</h2>
+              <ProLocked body="Pro turns this log into cost per wear, your most complimented bottles, what you reach for each season, and which bottles are gathering dust." />
             </section>
           )}
 

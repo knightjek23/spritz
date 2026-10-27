@@ -14,7 +14,7 @@
 // ones whose worn_on equals the local day, so no fetch on load and no
 // wrong-day logs around midnight.
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BottleImage } from "@/components/bottle-image";
@@ -74,6 +74,20 @@ export function WearingToday({
   );
 
   const loggedIds = new Set(entries.map((e) => e.fragrance.id));
+
+  // /?wear=<fragrance id> (from "Wear it today" in Insights) logs that
+  // bottle once today is known, then drops the param so a reload or a
+  // back-navigation can't log it again.
+  const autoLogged = useRef(false);
+  useEffect(() => {
+    if (!today || autoLogged.current) return;
+    const id = new URLSearchParams(window.location.search).get("wear");
+    if (!id) return;
+    autoLogged.current = true;
+    window.history.replaceState(null, "", window.location.pathname);
+    if (owned.some((b) => b.id === id) && !loggedIds.has(id)) void log(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [today]);
 
   async function log(fragranceId: string) {
     if (!today || busy) return;

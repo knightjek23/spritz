@@ -212,6 +212,12 @@ function SignedInCollection() {
                 }}
                 collectionItemId={it.id}
                 currentReaction={it.reaction}
+                pricePaidCents={it.price_paid_cents ?? null}
+                onPriceChange={(cents) =>
+                  setItems((current) =>
+                    current.map((item) => (item.id === it.id ? { ...item, price_paid_cents: cents } : item)),
+                  )
+                }
                 onDelete={refetch}
                 // Inline local state update instead of a full refetch —
                 // the API call already happened inside CardMenu, and

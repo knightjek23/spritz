@@ -130,6 +130,8 @@ export interface CollectionItem {
   status: CollectionStatus;
   note: string | null;
   added_at: string;
+  /** What the user paid, in cents. Optional; drives cost per wear (0038). */
+  price_paid_cents?: number | null;
 }
 
 /** Per-user Like / Dislike on a fragrance. Independent from collection —

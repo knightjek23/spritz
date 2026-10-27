@@ -39,6 +39,11 @@ interface CardMenuProps {
   currentReaction?: Reaction | null;
   /** Called after a successful Delete so the parent can refetch its list. */
   onDelete?: () => void;
+  /** What the user paid, in cents (owned shelf cards only). Drives cost per
+   *  wear in /account/history Insights. */
+  pricePaidCents?: number | null;
+  /** Called after a successful price save so the parent can mirror it. */
+  onPriceChange?: (cents: number | null) => void;
   /** Called after a successful reaction change so the parent can refresh
    *  the shelf indicator. Passed the new reaction (or null if cleared). */
   onReactionChange?: (next: Reaction | null) => void;
@@ -52,10 +57,45 @@ export function CardMenu({
   currentReaction,
   onDelete,
   onReactionChange,
+  pricePaidCents,
+  onPriceChange,
 }: CardMenuProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  // Inline "what did you pay?" field inside the sheet. Opens from the
+  // Price paid row; saves on Enter or the Save button via PATCH.
+  const [pricing, setPricing] = useState(false);
+  const [priceText, setPriceText] = useState(
+    pricePaidCents != null ? (pricePaidCents / 100).toFixed(pricePaidCents % 100 === 0 ? 0 : 2) : "",
+  );
+  const [priceBusy, setPriceBusy] = useState(false);
+
+  async function savePrice() {
+    if (!collectionItemId || priceBusy) return;
+    const trimmed = priceText.trim().replace(/^\$/, "");
+    const cents = trimmed === "" ? null : Math.round(Number(trimmed) * 100);
+    if (cents !== null && (!Number.isFinite(cents) || cents < 0 || cents > 10_000_000)) {
+      setToast({ message: "Enter a price like 89 or 129.50", tone: "error" });
+      return;
+    }
+    setPriceBusy(true);
+    try {
+      const res = await fetch("/api/collection", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: collectionItemId, price_paid_cents: cents }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      onPriceChange?.(cents);
+      setPricing(false);
+      setToast({ message: cents === null ? "Price cleared" : "Price saved", tone: "neutral" });
+    } catch {
+      setToast({ message: "Couldn't save the price. Try again.", tone: "error" });
+    } finally {
+      setPriceBusy(false);
+    }
+  }
   const [toast, setToast] = useState<ToastState>(null);
 
   // Local optimistic mirror of currentReaction so the menu row's active
@@ -337,6 +377,44 @@ export function CardMenu({
                       label="Find Dupe"
                       onClick={onFindDupe}
                     />
+                    {collectionItemId && !pricing && (
+                      <MenuItem
+                        icon={<TagIcon />}
+                        label={pricePaidCents != null ? `Price paid · $${(pricePaidCents / 100).toFixed(pricePaidCents % 100 === 0 ? 0 : 2)}` : "Price paid"}
+                        onClick={() => setPricing(true)}
+                      />
+                    )}
+                    {collectionItemId && pricing && (
+                      <li className="px-3 py-2">
+                        <label className="font-mono text-xs uppercase tracking-widest text-slate block mb-2">
+                          What did you pay?
+                        </label>
+                        <div className="flex gap-2">
+                          <div className="flex-1 flex items-center border border-ink/15 bg-cream px-3">
+                            <span className="text-slate mr-1">$</span>
+                            <input
+                              autoFocus
+                              inputMode="decimal"
+                              value={priceText}
+                              onChange={(e) => setPriceText(e.target.value)}
+                              onKeyDown={(e) => e.key === "Enter" && savePrice()}
+                              placeholder="0"
+                              aria-label="Price paid in dollars"
+                              className="w-full bg-transparent py-3 text-base text-ink outline-none"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={savePrice}
+                            disabled={priceBusy}
+                            className="px-4 py-3 bg-emerald text-cream text-sm font-medium disabled:opacity-50"
+                          >
+                            {priceBusy ? "Saving…" : "Save"}
+                          </button>
+                        </div>
+                        <p className="text-xs text-slate mt-2">Powers cost per wear in your history. Leave blank to clear.</p>
+                      </li>
+                    )}
                     {collectionItemId && (
                       <MenuItem
                         icon={<CircleXIcon />}
@@ -512,6 +590,15 @@ function DropletIcon() {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </svg>
+  );
+}
+
+function TagIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z" />
+      <circle cx="7.5" cy="7.5" r="1.5" />
     </svg>
   );
 }

@@ -419,3 +419,13 @@ Every Tier 1 and Tier 2 decision, with the options considered, the choice, who m
 - **Choice:** (b).
 - **Decided by:** Josh
 - **Why:** On Android the camera plugin hands off to the system camera app, so a denied camera is rare; a dependency for a rare path is not worth carrying. `app-settings:` is silently a no-op on Android, so the iOS button had to go either way.
+
+## D38 — Four Pro features on the taste profile: match score, compare, layering, wear insights
+
+- **Date:** 2026-10-26
+- **Slice:** post-launch (web only, no native build)
+- **Tier:** 1
+- **Options:** (a) Gate what the app already does (scans, notes). (b) Keep "what is this bottle?" free and sell what is personal: a taste profile built from the shelf (owned 1.0, tried 0.5, liked +0.5, disliked −0.75 over `note_vector`) and four features on it.
+- **Choice:** (b). Match score (free 3 new fragrances/week, score only; Pro unlimited with templated reasons), Compare at `/compare` (free 2 pairs/week; Pro unlimited plus both match scores), Layer it (pairs from the Owned shelf; Pro, free sees one veiled row), Wear insights on `/account/history` (Pro: cost per wear from `collection_items.price_paid_cents`, most complimented from `wear_log.compliments`, by-season family, bottles unworn 60+ days).
+- **Decided by:** Josh
+- **Why:** Scanning is the hook every TikTok post sells, so a cap there breaks the loop; the personal layer gets better the more someone uses the app, which is the freemium shape that converts without feeling like a take-away. Reasons are templated from notes the rows actually carry, never generated, so they are instant, free and cannot name a note that is not there. Free caps live in one table, `feature_uses`, keyed per fragrance or pair so re-opening never spends a use. Every gate fires `pro_gate_shown` / `pro_gate_cta_tapped {feature}` to PostHog so the features can be ranked by what sells Pro. Server checks `users.plan`; clients only read the 402. Migration `0038_pro_features.sql`.

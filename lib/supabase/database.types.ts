@@ -167,6 +167,7 @@ export type Database = {
           status: "own" | "tried" | "wishlist";
           note: string | null;
           added_at: string;
+          price_paid_cents: number | null;
         };
         Insert: {
           id?: string;
@@ -174,6 +175,7 @@ export type Database = {
           fragrance_id: string;
           status: "own" | "tried" | "wishlist";
           note?: string | null;
+          price_paid_cents?: number | null;
         };
         Update: Partial<Database["public"]["Tables"]["collection_items"]["Insert"]>;
         Relationships: [
@@ -198,6 +200,7 @@ export type Database = {
           fragrance_id: string;
           worn_on: string;
           created_at: string;
+          compliments: number;
         };
         Insert: {
           id?: string;
@@ -205,6 +208,7 @@ export type Database = {
           fragrance_id: string;
           worn_on: string;
           created_at?: string;
+          compliments?: number;
         };
         Update: Partial<Database["public"]["Tables"]["wear_log"]["Insert"]>;
         Relationships: [
@@ -216,6 +220,29 @@ export type Database = {
           },
           {
             foreignKeyName: "wear_log_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      feature_uses: {
+        Row: {
+          user_id: string;
+          feature: "match" | "compare";
+          key: string;
+          used_on: string;
+        };
+        Insert: {
+          user_id: string;
+          feature: "match" | "compare";
+          key: string;
+          used_on: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["feature_uses"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "feature_uses_user_id_fkey";
             columns: ["user_id"];
             referencedRelation: "users";
             referencedColumns: ["id"];

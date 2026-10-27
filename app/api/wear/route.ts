@@ -1,5 +1,6 @@
 // GET    /api/wear?day=YYYY-MM-DD   entries for one local day (default: all, newest first)
 // POST   /api/wear      body: { fragrance_id, worn_on }   worn_on = client's local day
+// PATCH  /api/wear      body: { id, compliments }   0–99, "got a compliment" counter
 // DELETE /api/wear?id=<wear_log id>
 //
 // Auth required. POST only accepts bottles on the user's Owned shelf; the
@@ -87,6 +88,31 @@ export async function POST(req: Request) {
   // first log does not.
   const returning = firstToday && streak === 1 && daysBefore.length > 0;
   return NextResponse.json({ entries, streak, firstToday, returning });
+}
+
+const PatchBody = z.object({
+  id: z.string().uuid(),
+  compliments: z.number().int().min(0).max(99),
+});
+
+export async function PATCH(req: Request) {
+  const { userId } = auth();
+  if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  const id = await appUserId(userId);
+  if (!id) return NextResponse.json({ error: "not_found" }, { status: 404 });
+  const parsed = PatchBody.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "invalid_body" }, { status: 400 });
+
+  const { data, error } = await createAdminClient()
+    .from("wear_log")
+    .update({ compliments: parsed.data.compliments })
+    .eq("id", parsed.data.id)
+    .eq("user_id", id)
+    .select("id, compliments")
+    .maybeSingle();
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (!data) return NextResponse.json({ error: "not_found" }, { status: 404 });
+  return NextResponse.json({ entry: data });
 }
 
 export async function DELETE(req: Request) {

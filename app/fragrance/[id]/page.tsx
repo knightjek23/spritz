@@ -17,6 +17,9 @@ import { SaveButtonsRow } from "@/components/save-buttons-row";
 import { NotesPyramid } from "@/components/notes-pyramid";
 import { KnownDupes } from "@/components/known-dupes";
 import { KnownConsensus } from "@/components/known-consensus";
+import { MatchScore } from "@/components/match-score";
+import { CompareButton } from "@/components/compare-button";
+import { LayerIt } from "@/components/layer-it";
 import { FamilyPills } from "@/components/family-pills";
 import { houseSlug } from "@/lib/houses";
 import { stripProFields } from "@/lib/entitlement";
@@ -272,12 +275,20 @@ export default async function FragrancePage({ params }: { params: { id: string }
       <section className="grid grid-cols-2 gap-3 mb-10">
         <SaveButtonsRow fragranceId={f.id} />
         <div className="col-span-2">
+          <CompareButton fragranceId={f.id} name={f.name} house={f.house} />
+        </div>
+        <div className="col-span-2">
           {/* One retailer links straight out; several expand into a picker
               with prices. Falls back to the constructed affiliate link
               (/api/buy/[id]) when no feed offers exist for this fragrance. */}
           <BuyOptions offers={offers} fallbackUrl={`/api/buy/${f.id}`} />
         </div>
       </section>
+
+      {/* Match score — per-user, hydrates client-side (ISR page). Free:
+          3 new fragrances a week, score only. Pro: unlimited, with the
+          notes behind it. Signed-out visitors see nothing here. */}
+      <MatchScore fragranceId={f.id} />
 
       {/* Family / accords — own section, clearly labeled. Not the same as
           notes. Pills tap to open a bottom sheet with the family's
@@ -351,6 +362,10 @@ export default async function FragrancePage({ params }: { params: { id: string }
           (cheaper version?) → consensus (worth buying this one OR a
           dupe?). Same Pro-gate + Living Breadcrumb pattern as dupes. */}
       <KnownConsensus fragrance={f} />
+
+      {/* Layer it — pairs from the user's own shelf. Pro; free users see the
+          section with the first pair veiled. Hydrates client-side. */}
+      <LayerIt fragranceId={f.id} name={f.name} />
 
       {/* Longevity + projection — bars give the numeric quantification,
           descriptions translate it into plain English ("Wears a full
