@@ -1,6 +1,6 @@
 "use client";
 
-// "Cost-effective options": cheaper bottles that smell close to this one,
+// "Cost-effective options": cheaper bottles with the same scent profile,
 // with the retailer and the saving. Pro feature. Replaces <KnownDupes>.
 //
 // The list is fetched here rather than rendered into the page, because the
@@ -98,7 +98,8 @@ export function CostEffectiveOptions({
       <section className="mb-10">
         {heading}
         <p className="text-sm text-slate mb-4">
-          Bottles that smell close to {fragranceName} for less, with live prices. Pro feature.
+          Bottles with the same scent profile as {fragranceName} for less, with live prices.
+          Pro feature.
         </p>
         <TrialCta />
       </section>
@@ -135,7 +136,8 @@ export function CostEffectiveOptions({
       <section className="mb-10">
         {heading}
         <p className="text-sm text-slate">
-          Nothing close enough to {fragranceName} is selling for meaningfully less right now.
+          Nothing with the same scent profile as {fragranceName} is selling for meaningfully
+          less right now.
           That usually means it&apos;s already well priced for what it is.
         </p>
       </section>
@@ -153,7 +155,7 @@ export function CostEffectiveOptions({
           <span className="text-ink font-medium">
             {count} bottle{count === 1 ? "" : "s"}
           </span>{" "}
-          that smell close to {fragranceName} for less, the best saving{" "}
+          that have the same scent profile as {fragranceName} for less, the best saving{" "}
           <span className="text-ink font-medium">{money(bestSaving, currency)}</span>.
         </p>
         <p className="text-sm text-slate mb-4">See which ones with Pro.</p>
@@ -167,9 +169,9 @@ export function CostEffectiveOptions({
     <section className="mb-10">
       {heading}
       <p className="text-sm text-slate mb-4">
-        Bottles that smell close to {fragranceName}
-        {src ? ` (${money(src.price, src.currency)})` : ""} for less. Match is scent
-        similarity; prices are from retailer feeds and can lag the store.
+        Bottles with the same scent profile as {fragranceName}
+        {src ? ` (${money(src.price, src.currency)})` : ""} for less. Match is how close
+        the profile is; prices are from retailer feeds and can lag the store.
       </p>
       <ul className="space-y-2">
         {data.options.map((o) => (
