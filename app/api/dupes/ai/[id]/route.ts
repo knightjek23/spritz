@@ -1,8 +1,15 @@
 // POST /api/dupes/ai/[id]
 //
-// Generates AI dupes for a fragrance and caches them to the DB.
-// Pro-only. Idempotent: if dupes already exist (editorial OR previously
-// AI-generated), we return them without making a new OpenAI call.
+// RETIRED (Oct 2026). The "Known dupes" section was replaced by
+// cost-effective options (/api/cost-effective/[id], migration 0037), which
+// ranks by scent similarity and live retailer price instead of relying on
+// an editorial or AI entry per fragrance. Nothing in the app calls this
+// route any more; it returns 410 so an old client or a bookmarked request
+// can't trigger a paid OpenAI call. The generator in lib/ai-dupes.ts is
+// kept for the scraper's batch use.
+//
+// Original behaviour, for reference: generates AI dupes for a fragrance
+// and caches them to the DB. Pro-only. Idempotent.
 
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
@@ -14,10 +21,20 @@ import type { DupeRecommendation, Fragrance } from "@/lib/types";
 export const runtime = "nodejs";
 export const maxDuration = 30;
 
+/** Flip to true only to bring the old generator back deliberately. */
+const RETIRED_ROUTE_ENABLED = false;
+
 export async function POST(
   _req: Request,
   { params }: { params: { id: string } },
 ) {
+  if (!RETIRED_ROUTE_ENABLED) {
+    return NextResponse.json(
+      { error: "gone", message: "Known dupes was replaced by cost-effective options." },
+      { status: 410 },
+    );
+  }
+
   // 1. Identity
   const { userId: clerkUserId } = auth();
   if (!clerkUserId) {

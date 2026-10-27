@@ -60,7 +60,7 @@ export default function SupportPage() {
       <h2>Pro and billing</h2>
       <p>
         Pro unlocks perfumer credits, full house histories, every note&apos;s
-        flavor profile, the community take, on-demand dupes, and an unlimited
+        flavor profile, the community take, cost-effective options, and an unlimited
         collection.
       </p>
       <p>

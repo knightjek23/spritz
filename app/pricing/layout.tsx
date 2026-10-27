@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Pricing",
   description:
-    "Spritz is free to use. Pro adds AI dupes, community consensus, and unlimited scans.",
+    "Spritz is free to use. Pro adds cost-effective options, community consensus, and unlimited scans.",
 };
 
 export default function PricingLayout({ children }: { children: React.ReactNode }) {

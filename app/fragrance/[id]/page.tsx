@@ -15,7 +15,7 @@ import { BuyOptions, type BuyOffer } from "@/components/buy-options";
 import { SimilarSection } from "@/components/similar-section";
 import { SaveButtonsRow } from "@/components/save-buttons-row";
 import { NotesPyramid } from "@/components/notes-pyramid";
-import { KnownDupes } from "@/components/known-dupes";
+import { CostEffectiveOptions } from "@/components/cost-effective-options";
 import { KnownConsensus } from "@/components/known-consensus";
 import { MatchScore } from "@/components/match-score";
 import { CompareButton } from "@/components/compare-button";
@@ -345,22 +345,19 @@ export default async function FragrancePage({ params }: { params: { id: string }
         </section>
       )}
 
-      {/* Known dupes — promoted up the page per Session 01 feedback. Sits
-          right after Notes so the natural reading order is "what's in it"
-          → "what's a cheaper version of this". The Pro upsell case still
-          renders here for free users but is now the second visible
-          content block, not buried after editorial. */}
-      <KnownDupes
-        fragranceId={f.id}
-        fragranceName={f.name}
-        fragranceHouse={f.house}
-        initialDupes={f.dupes}
-      />
+      {/* Cost-effective options — replaced "Known dupes" (Oct 2026). Same
+          slot, same reasoning: right after Notes so the reading order is
+          "what's in it" → "what smells like it for less". The old feature
+          needed an editorial or AI entry per fragrance and most had
+          neither; this one works from scent similarity plus retailer
+          prices, which cover far more of the catalog. Pro-gated; the list
+          is fetched client-side so this cached page never carries it. */}
+      <CostEffectiveOptions fragranceId={f.id} fragranceName={f.name} />
 
-      {/* Community consensus — Pro AI feature, sits right after dupes so
-          the natural reading order is: notes (what's in it) → dupes
-          (cheaper version?) → consensus (worth buying this one OR a
-          dupe?). Same Pro-gate + Living Breadcrumb pattern as dupes. */}
+      {/* Community consensus — Pro AI feature, sits right after the
+          cost-effective options so the reading order is: notes (what's in
+          it) → options (cheaper version?) → consensus (worth buying this
+          one or the cheaper one?). */}
       <KnownConsensus fragrance={f} />
 
       {/* Layer it — pairs from the user's own shelf. Pro; free users see the

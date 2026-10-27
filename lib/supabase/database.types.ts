@@ -637,6 +637,27 @@ export type Database = {
           scan_count: number;
         }>;
       };
+      find_cost_effective_options: {
+        Args: { p_id: string; p_limit?: number; p_min_sim?: number; p_min_saving?: number };
+        Returns: Array<{
+          id: string;
+          name: string;
+          house: string;
+          family: string[] | null;
+          year: number | null;
+          bottle_image_url: string | null;
+          popularity_rank: number | null;
+          similarity: number;
+          price: number;
+          currency: string;
+          retailer: string;
+          product_url: string;
+          source_price: number;
+          saving: number;
+          saving_pct: number;
+          score: number;
+        }>;
+      };
       list_perfumers: {
         Args: { p_limit?: number };
         Returns: Array<{

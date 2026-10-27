@@ -69,14 +69,9 @@ const FEATURE_MATRIX: Array<{ label: string; free: string; pro: string }> = [
     pro: "25 per fragrance",
   },
   {
-    label: "Curated dupes (community-known)",
-    free: "Included",
-    pro: "Included",
-  },
-  {
-    label: "AI-generated dupes on demand",
-    free: "Not included",
-    pro: "Unlimited",
+    label: "Cost-effective options (smells close, costs less)",
+    free: "How many, and the best saving",
+    pro: "The full list, with prices",
   },
   {
     label: "Perfumer credits + house history",
@@ -106,12 +101,12 @@ const FAQ: Array<{ q: string; a: string }> = [
     a: "Yes. Cancel from any device and you keep Pro access until the end of your current billing period. After that you drop back to Free. Your collection stays intact, just capped at 10 items going forward.",
   },
   {
-    q: "What's a dupe, exactly?",
-    a: "A fragrance that smells very close to a more expensive one, usually at a fraction of the price. We split them into two kinds: curated dupes (community-recognized, hand-vetted by us) and AI-generated dupes (Pro feature) that use the fragrance's note profile to suggest cheaper alternatives the community has talked about.",
+    q: "What are cost-effective options?",
+    a: "Fragrances that smell close to the one you're looking at and cost less, ranked by how much you save for how close the match is. We compare scent profiles across the whole library and check current retailer prices, so you see the saving in dollars, not a vague 'similar'. Free users see how many options exist and the best saving; Pro shows the bottles themselves.",
   },
   {
     q: "Is there a free trial?",
-    a: "Yes — the Monthly plan comes with a 7-day free trial. You get full Pro access for a week, and you won't be charged until it ends. Cancel anytime before then and you pay nothing, and the most you'd ever be charged after a trial is $4.99. The Annual plan has no trial — it's billed upfront at $29.99 (~$2.50/mo). And the Free plan is always free: scan unlimited bottles, save up to 10 fragrances, and get curated dupes without paying anything.",
+    a: "Yes — the Monthly plan comes with a 7-day free trial. You get full Pro access for a week, and you won't be charged until it ends. Cancel anytime before then and you pay nothing, and the most you'd ever be charged after a trial is $4.99. The Annual plan has no trial — it's billed upfront at $29.99 (~$2.50/mo). And the Free plan is always free: scan unlimited bottles, save up to 10 fragrances, and see when a cheaper match exists.",
   },
   {
     q: "What's the Lifetime option?",
@@ -317,7 +312,8 @@ function PricingContent() {
         </h1>
         <p className="text-slate text-base leading-relaxed max-w-xs">
           Every perfumer credit, every house story, every note&apos;s flavor
-          profile. Plus AI-generated dupes for any fragrance, on demand.
+          profile. Plus cost-effective options for any fragrance: what smells
+          close, for less.
         </p>
       </header>
 
