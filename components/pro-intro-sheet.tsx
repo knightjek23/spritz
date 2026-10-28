@@ -255,7 +255,11 @@ export function ProIntroSheet() {
             </button>
           </div>
 
-          <h1 id="pro-intro-title" className="font-display text-[32px] leading-[0.98] mb-4">
+          {/* mt-auto here, not on the consent block: the spare height on a
+              tall screen sits above the headline, so the pitch reads as one
+              piece with the button beneath it instead of floating at the
+              top with a gap before the fine print. */}
+          <h1 id="pro-intro-title" className="font-display text-[32px] leading-[0.98] mb-4 mt-auto">
             The full library, free for {TRIAL_DAYS} days.
           </h1>
 
@@ -296,7 +300,7 @@ export function ProIntroSheet() {
             We&apos;ll remind you on day {TRIAL_DAYS - 2}, two days before anything is charged.
           </p>
 
-          <div className="mt-auto">
+          <div className="mt-3">
             <p className="text-[11px] text-slate leading-snug mb-3">
               By tapping Start free trial you agree to the{" "}
               <a href="/legal/terms" className="underline underline-offset-2 text-ink">
