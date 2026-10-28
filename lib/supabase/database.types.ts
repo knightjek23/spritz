@@ -278,6 +278,35 @@ export type Database = {
           },
         ];
       };
+      fragrance_prices: {
+        Row: {
+          id: string;
+          fragrance_id: string;
+          source: string;
+          price: number;
+          currency: string;
+          size_ml: number;
+          price_per_ml: number;
+          confidence: number | null;
+          retailer: string | null;
+          product_url: string | null;
+          fetched_at: string;
+        };
+        Insert: {
+          id?: string;
+          fragrance_id: string;
+          source: string;
+          price: number;
+          currency?: string;
+          size_ml: number;
+          confidence?: number | null;
+          retailer?: string | null;
+          product_url?: string | null;
+          fetched_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["fragrance_prices"]["Insert"]>;
+        Relationships: [];
+      };
       fragrance_offers: {
         Row: {
           id: string;
@@ -650,9 +679,11 @@ export type Database = {
           similarity: number;
           price: number;
           currency: string;
-          retailer: string;
-          product_url: string;
+          retailer: string | null;
+          product_url: string | null;
+          price_source: string;
           source_price: number;
+          source_price_source: string;
           saving: number;
           saving_pct: number;
           score: number;

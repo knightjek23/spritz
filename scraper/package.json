@@ -21,7 +21,7 @@
     "parse:one": "tsx src/parser.ts --one",
     "vectorize": "tsx src/note-vector.ts",
     "upload": "tsx src/upload-to-supabase.ts",
-    "upload:new": "tsx src/upload-to-supabase.ts --new-only",
+    "upload:new": "tsx src/upload-to-supabase.ts --new-only && tsx src/estimate-prices.ts --new-only",
     "import:targets": "tsx src/import-targets.ts",
     "backfill:images": "tsx src/backfill-affiliate-images.ts",
     "audit:images": "tsx src/audit-bottle-images.ts",
@@ -36,7 +36,8 @@
     "all": "npm run discover && npm run scrape && npm run parse && npm run vectorize && npm run upload && npm run compute-dupes",
     "embed:images": "tsx src/embed-bottle-images.ts",
     "review:scans": "tsx src/review-scan-images.ts",
-    "repair:concentration": "tsx src/repair-concentration.ts"
+    "repair:concentration": "tsx src/repair-concentration.ts",
+    "prices:estimate": "tsx src/estimate-prices.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
