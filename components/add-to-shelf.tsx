@@ -100,8 +100,8 @@ export function AddToShelf({
           data-no-longpress
         >
           <svg width="28" height="28" viewBox="0 0 64 64" fill="none" aria-hidden>
-            <path d="M32.5 12L32.5 52" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-            <path d="M52 32.5L12 32.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+            <path d="M32.5 12L32.5 53" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+            <path d="M53 32.5L12 32.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
           </svg>
         </button>
         {notice && <NoticeLine notice={notice} status={status} />}
