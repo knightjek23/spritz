@@ -3,7 +3,9 @@
 // Pro intro sheet (design approved 2026-10-26, modelled on the DashPass
 // trial interstitial): a full-height cream panel that slides up the first
 // time a non-Pro user opens the Library or Shelf tab, pitches the free
-// week with five benefit rows, carries the express-consent paragraph
+// week with six benefit rows (keep these in step with the pricing page's
+// feature table; wear insights is on the pricing page only, since it has
+// nothing to show until weeks of wear logs exist), carries the express-consent paragraph
 // directly above the CTA (California ARL + App Store 3.1.2(c): billed
 // amount in the same weight as the trial), and offers "Not now".
 //
@@ -86,27 +88,47 @@ function shouldShow(): boolean {
   return gateHits() >= RESHOW_GATE_HITS && since >= RESHOW_AFTER_DAYS * 24 * 3600 * 1000;
 }
 
+// Six rows, ordered by what sells: the personal features first (they only
+// exist with a shelf, which is why this sheet opens from Library/Shelf),
+// then the library depth. "Deeper similar results" was dropped to make
+// room; 25 suggestions vs 5 is the weakest pitch on the list.
 const BENEFITS: { icon: React.ReactNode; title: string; sub: string; tint: string }[] = [
   {
-    tint: "#E7D9BE",
-    title: "Every perfumer",
-    sub: "Who made it, and everything else they've made.",
+    tint: "#DCE2EC",
+    title: "Your match, and why",
+    sub: "A score for any bottle against your taste, with the reasons. Compare any two.",
     icon: (
+      // A target: the score is "how close to you".
       <>
-        <circle cx="16" cy="11" r="5" />
-        <path d="M6 27c1.5-5 5.5-8 10-8s8.5 3 10 8" />
+        <circle cx="16" cy="16" r="10" />
+        <circle cx="16" cy="16" r="5" />
+        <circle cx="16" cy="16" r="1" />
+      </>
+    ),
+  },
+  {
+    tint: "#E7D9BE",
+    title: "Layer it",
+    sub: "The best pairings from your own shelf, and what each one does.",
+    icon: (
+      // Two overlapping drops: one scent over another.
+      <>
+        <path d="M12 6c-3 4-6 7-6 11a6 6 0 0 0 12 0c0-4-3-7-6-11z" />
+        <path d="M21 10c-2.5 3.5-5 6-5 9.5a5 5 0 0 0 10 0c0-3.5-2.5-6-5-9.5z" />
       </>
     ),
   },
   {
     tint: "#D7E3D3",
-    title: "AI dupes on demand",
-    sub: "Cheaper bottles that smell close, for any fragrance.",
+    title: "Cost-effective options",
+    sub: "Same scent profile for less, with the saving in dollars.",
     icon: (
+      // Two bottles, the second with a price tag: "this one, for less".
       <>
-        <rect x="7" y="11" width="8" height="15" rx="1.5" />
-        <rect x="17" y="8" width="8" height="18" rx="1.5" />
-        <path d="M10 11V8h2v3M20 8V5h2v3" />
+        <rect x="6" y="11" width="8" height="15" rx="1.5" />
+        <rect x="16" y="11" width="8" height="15" rx="1.5" />
+        <path d="M9 11V8h2v3M19 11V8h2v3" />
+        <path d="M22 5h5l1 1v4l-1 1h-5z" />
       </>
     ),
   },
@@ -122,13 +144,13 @@ const BENEFITS: { icon: React.ReactNode; title: string; sub: string; tint: strin
     ),
   },
   {
-    tint: "#DCE2EC",
-    title: "Deeper similar results",
-    sub: "25 suggestions per fragrance instead of 5.",
+    tint: "#E7D9BE",
+    title: "Every perfumer",
+    sub: "Who made it, and browse everything else they've made.",
     icon: (
       <>
-        <circle cx="12" cy="16" r="6" />
-        <circle cx="21" cy="16" r="6" />
+        <circle cx="16" cy="11" r="5" />
+        <path d="M6 27c1.5-5 5.5-8 10-8s8.5 3 10 8" />
       </>
     ),
   },
@@ -262,7 +284,7 @@ export function ProIntroSheet() {
                   </svg>
                 </span>
                 <div className="min-w-0">
-                  <p className="text-[15px] font-medium leading-snug">{b.title}</p>
+                  <p className="text-[15px] font-normal leading-snug">{b.title}</p>
                   <p className="text-[13px] text-slate leading-snug mt-0.5">{b.sub}</p>
                 </div>
               </li>
