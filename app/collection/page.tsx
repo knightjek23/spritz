@@ -20,6 +20,7 @@ import type {
   Reaction,
 } from "@/lib/types";
 import { CardMenu } from "@/components/card-menu";
+import { AddToShelf } from "@/components/add-to-shelf";
 import { SpritzLoader } from "@/components/spritz-loader";
 
 // The API now bundles the user's reaction (like/dislike/null) per item so
@@ -128,7 +129,9 @@ function SignedInCollection() {
 
   return (
     <div className="mx-auto max-w-md px-6 py-10">
-      <h1 className="font-display text-3xl mb-6">My collection</h1>
+      {/* Title row with the "+" (components/add-to-shelf.tsx). The pick
+          lands in whichever tab is open, and refetch() redraws the list. */}
+      <AddToShelf status={tab} onAdded={refetch} />
 
       <div className="flex gap-1 p-1 bg-ink/5 rounded-xl mb-6">
         {TABS.map((t) => (
