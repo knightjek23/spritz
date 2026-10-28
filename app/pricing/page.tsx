@@ -64,12 +64,32 @@ const FEATURE_MATRIX: Array<{ label: string; free: string; pro: string }> = [
     pro: "Unlimited",
   },
   {
+    label: "Your match: a score against your taste",
+    free: "3 new fragrances a week, score only",
+    pro: "Unlimited, with the reasons",
+  },
+  {
+    label: "Compare any two fragrances",
+    free: "2 pairs a week",
+    pro: "Unlimited, with both match scores",
+  },
+  {
+    label: "Layer it: pairings from your own shelf",
+    free: "A glimpse of one",
+    pro: "Top three, with what each does",
+  },
+  {
+    label: "Wear insights: cost per wear, most complimented, what's gone unworn",
+    free: "Not included",
+    pro: "Included",
+  },
+  {
     label: "Similar-fragrance suggestions",
     free: "5 per fragrance",
     pro: "25 per fragrance",
   },
   {
-    label: "Cost-effective options (smells close, costs less)",
+    label: "Cost-effective options (same scent profile, costs less)",
     free: "How many, and the best saving",
     pro: "The full list, with prices",
   },
