@@ -61,7 +61,8 @@ export default function PrivacyPage() {
       <p>
         <strong>Usage data.</strong> Which pages you open and which features you
         use, via PostHog, so we know what to improve. This is tied to your
-        account if you are signed in.
+        account if you are signed in. We don&apos;t use it for advertising,
+        and we don&apos;t use it to track you across other apps or websites.
       </p>
       <p>
         <strong>Push notifications.</strong> If you turn on notifications in
