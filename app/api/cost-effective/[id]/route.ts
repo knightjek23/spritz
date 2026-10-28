@@ -25,7 +25,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export const runtime = "nodejs";
 
 const NO_STORE = { "Cache-Control": "private, no-store" };
-const FULL_LIMIT = 10;
+// Five, not ten: a shortlist to choose from, not a page to sift through.
+// The ranking already puts the best saving-for-similarity first, so the
+// rows cut are the weakest ones.
+const FULL_LIMIT = 5;
 
 /** Trust order for reference prices; mirrors migration 0039. */
 const SOURCE_PRIORITY: Record<string, number> = {
