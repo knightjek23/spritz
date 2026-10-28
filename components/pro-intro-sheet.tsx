@@ -260,8 +260,13 @@ export function ProIntroSheet() {
               All of it above left the pitch sitting oddly low; all of it
               below split the pitch from its button. */}
           <div className="flex-[2]" aria-hidden />
+          {/* Fixed break: "for" belongs with "7 days" on the second line.
+              Left to wrap on its own, the first line ran to the right edge
+              and "for" was stranded at the end of it. */}
           <h1 id="pro-intro-title" className="font-display text-[32px] leading-[0.98] mb-4">
-            The full library, free for {TRIAL_DAYS} days.
+            The full library, free
+            <br />
+            for {TRIAL_DAYS} days.
           </h1>
 
           <ul className="divide-y divide-ink/10 mb-4">
