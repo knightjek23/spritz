@@ -508,14 +508,14 @@ export type Database = {
           id: string;
           user_id: string | null;
           fragrance_id: string;
-          retailer: "scentbird" | "fragrancenet" | "nordstrom";
+          retailer: string;
           clicked_at: string;
         };
         Insert: {
           id?: string;
           user_id?: string | null;
           fragrance_id: string;
-          retailer: "scentbird" | "fragrancenet" | "nordstrom";
+          retailer: string;
         };
         Update: Partial<Database["public"]["Tables"]["affiliate_clicks"]["Insert"]>;
         Relationships: [];
@@ -553,6 +553,10 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      most_clicked_fragrances: {
+        Args: { p_days?: number; p_limit?: number };
+        Returns: Array<{ fragrance_id: string; clicks: number }>;
+      };
       search_fragrances: {
         Args: { p_brand: string; p_name: string; p_limit?: number };
         Returns: Array<

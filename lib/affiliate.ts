@@ -99,3 +99,57 @@ export function buildAffiliateUrl(f: Fragrance): {
 
   return { url: searchUrl, retailer };
 }
+
+// ---------------------------------------------------------------------------
+// Feed-offer links
+// ---------------------------------------------------------------------------
+//
+// Rakuten product feeds ship tracking links in the old LinkShare product
+// format: click.linksynergy.com/link?id=<pub>&offerid=<...>&type=15&murl=<...>
+//
+// FragranceNet clicks pass through impact.com, which attaches an im_ref
+// click id on landing. Re-tested 2026-10-29: the link FORMAT doesn't decide
+// attribution, the landing URL does. The feed's murl is a legacy FragranceNet
+// path that 301s to the current product URL, and that redirect strips
+// im_ref (both /link and /deeplink forms). A text-search landing keeps it.
+// So /api/buy sends FragranceNet offers to buildAffiliateUrl()'s search
+// deeplink instead of the feed URL.
+//
+// Nicchia (classic Rakuten) lands with ranSiteID/ranEAID in both forms.
+// normalizeOfferUrl() rewrites feed links into the deeplink form when we
+// know the merchant's Rakuten MID. Anything else passes through unchanged.
+
+/** Rakuten merchant IDs, matched against the offer's retailer name. */
+const RAKUTEN_MIDS: Array<{ match: RegExp; mid: string }> = [
+  { match: /fragrance\s*net/i, mid: FRAGRANCENET_RAKUTEN_MERCHANT || "216" },
+  // From the Nicchia feed filename (54306_4736579_mp.xml = <mid>_<sid>_mp).
+  { match: /nicchia/i, mid: "54306" },
+];
+
+export function normalizeOfferUrl(rawUrl: string, retailerName: string): string {
+  let u: URL;
+  try {
+    u = new URL(rawUrl);
+  } catch {
+    return rawUrl;
+  }
+  if (u.hostname !== "click.linksynergy.com" || u.pathname !== "/link") return rawUrl;
+
+  const pub = u.searchParams.get("id") || FRAGRANCENET_RAKUTEN_PUBLISHER;
+  const murl = u.searchParams.get("murl");
+  const mid = RAKUTEN_MIDS.find((m) => m.match.test(retailerName))?.mid;
+  if (!pub || !murl || !mid) return rawUrl;
+
+  return (
+    `https://click.linksynergy.com/deeplink?id=${encodeURIComponent(pub)}` +
+    `&mid=${encodeURIComponent(mid)}&murl=${encodeURIComponent(murl)}`
+  );
+}
+
+/**
+ * The value written to affiliate_clicks.retailer: a lowercase alphanumeric
+ * slug ("FragranceNet" -> "fragrancenet"), matching migration 0040's check.
+ */
+export function retailerSlug(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "") || "unknown";
+}

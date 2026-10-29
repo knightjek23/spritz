@@ -138,31 +138,53 @@ async function _getMostAddedToCollection(limit = 12, days = 90): Promise<Scrolle
  */
 export const getMostClickedToBuy = unstable_cache(
   _getMostClickedToBuy,
-  ["db-trending-most-clicked"],
+  // v2: window changed from 90 to 30 days, so don't serve the old cache.
+  ["db-trending-most-clicked-v2"],
   { revalidate: CACHE_REVALIDATE_SECONDS },
 );
-async function _getMostClickedToBuy(limit = 12, days = 90): Promise<ScrollerRow[]> {
+/**
+ * Top fragrances by Buy clicks over the last `days` days. 30 by default so
+ * the "Most shopped this month" heading is literally true.
+ *
+ * Ranking happens in Postgres (most_clicked_fragrances, migration 0040).
+ * If that function isn't deployed yet, falls back to counting the most
+ * recent 5,000 clicks here. The fallback is ordered, so a busy window
+ * undercounts the oldest clicks instead of sampling at random.
+ */
+async function _getMostClickedToBuy(limit = 12, days = 30): Promise<ScrollerRow[]> {
   try {
     const supabase = createAdminClient();
-    const since = new Date(Date.now() - days * 86_400_000).toISOString();
-    const { data: clicks, error } = await supabase
-      .from("affiliate_clicks")
-      .select("fragrance_id, clicked_at")
-      .gte("clicked_at", since)
-      .limit(5000);
-    if (error) {
-      console.warn("[db-trending] most-clicked:", error.message);
-      return [];
+    let topIds: string[];
+
+    const { data: ranked, error: rpcErr } = await supabase.rpc("most_clicked_fragrances", {
+      p_days: days,
+      p_limit: limit,
+    });
+    if (!rpcErr) {
+      topIds = (ranked ?? []).map((r) => r.fragrance_id);
+    } else {
+      console.warn("[db-trending] most-clicked rpc failed, counting in app:", rpcErr.message);
+      const since = new Date(Date.now() - days * 86_400_000).toISOString();
+      const { data: clicks, error } = await supabase
+        .from("affiliate_clicks")
+        .select("fragrance_id, clicked_at")
+        .gte("clicked_at", since)
+        .order("clicked_at", { ascending: false })
+        .limit(5000);
+      if (error) {
+        console.warn("[db-trending] most-clicked:", error.message);
+        return [];
+      }
+      const counts = new Map<string, number>();
+      for (const c of clicks ?? []) {
+        counts.set(c.fragrance_id, (counts.get(c.fragrance_id) ?? 0) + 1);
+      }
+      topIds = [...counts.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, limit)
+        .map(([id]) => id);
     }
-    const counts = new Map<string, number>();
-    for (const c of clicks ?? []) {
-      counts.set(c.fragrance_id, (counts.get(c.fragrance_id) ?? 0) + 1);
-    }
-    if (counts.size === 0) return [];
-    const topIds = [...counts.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, limit)
-      .map(([id]) => id);
+    if (topIds.length === 0) return [];
 
     const { data: frs, error: frErr } = await supabase
       .from("fragrances")

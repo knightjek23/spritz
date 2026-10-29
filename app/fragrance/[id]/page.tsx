@@ -92,7 +92,10 @@ const getOffers = cache(async (id: string): Promise<BuyOffer[]> => {
   }
   return (data ?? []).map((o) => ({
     retailer: o.retailer,
-    productUrl: o.product_url,
+    // Through the click-logging redirect, never the raw feed URL: linking
+    // straight out skipped affiliate_clicks and kept the feed's old
+    // Rakuten link format, which impact.com doesn't attribute.
+    productUrl: `/api/buy/${id}?retailer=${encodeURIComponent(o.retailer)}`,
     price: o.price,
     currency: o.currency ?? "USD",
   }));

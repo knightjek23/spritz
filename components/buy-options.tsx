@@ -19,6 +19,8 @@ import { useState } from "react";
 
 export interface BuyOffer {
   retailer: string;
+  /** Click-logging redirect for this offer (/api/buy/[id]?retailer=...).
+   *  Every outbound link goes through it so the click is recorded. */
   productUrl: string;
   price: number | null;
   currency: string;

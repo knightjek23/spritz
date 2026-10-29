@@ -208,7 +208,7 @@ export function CostEffectiveOptions({
                 that was never observed. */}
             {o.product_url && !o.estimated ? (
               <a
-                href={o.product_url}
+                href={`/api/buy/${o.id}${o.retailer ? `?retailer=${encodeURIComponent(o.retailer)}` : ""}`}
                 target="_blank"
                 rel="noopener noreferrer sponsored"
                 className="shrink-0 text-right min-h-[44px] flex flex-col justify-center px-2 rounded-lg hover:bg-ink/5 transition"
