@@ -482,6 +482,8 @@ html.launching .launch-screen {
    word, which keeps the word dead center on screen. */
 .launch-screen__lockup {
   position: relative;
+  /* 1pt down: the HTML wordmark drew 1pt above the native SplashWordmark image at the hand-off (measured on device). On the lockup so word and nozzle move together. */
+  top: 1px;
   display: flex;
   align-items: center;
   animation: launch-press 900ms cubic-bezier(0.32, 0.72, 0, 1) 800ms both;
