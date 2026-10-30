@@ -442,6 +442,103 @@ h1, h2, h3, h4 {
   animation: spritz-loader-glow 1.35s ease-in-out infinite;
 }
 
+/* ===== Launch screen (components/launch-screen.tsx) =====
+   Cream field over everything on a cold launch of the shell, bottle
+   centered on the loader's pump cycle. Hidden unless the pre-paint boot
+   script put `launching` on <html>, so the server-rendered node costs
+   nothing on the web and never flashes.
+
+   The bottle arrives rather than being there: a short settle from 0.92
+   scale (the OS icon-zoom has just finished, so it should feel like the
+   mark landing in place, not popping). On leave the whole field fades
+   while the bottle drifts up in scale and fades a touch faster than the
+   field, which is the Instagram move: the glyph goes first, the color
+   follows, the content is already underneath. */
+.launch-screen {
+  display: none;
+}
+
+html.launching .launch-screen {
+  display: flex;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-base, #F4EFE6);
+  color: var(--accent-primary, #1F3F2E);
+  pointer-events: auto;
+}
+
+.launch-screen__bottle {
+  /* 148:214 viewBox; ~118px tall reads as a mark, not an icon. */
+  height: 118px;
+  width: auto;
+  transform-origin: 50% 50%;
+  animation: launch-bottle-settle 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes launch-bottle-settle {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Leave: field fades over 600ms; bottle scales to 1.14 and is gone by
+   ~70% of that so the color is the last thing to go. Both `both` so
+   the end state holds if React unmounts a frame late. */
+html.launching .launch-screen--leave {
+  animation: launch-field-leave 600ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  pointer-events: none;
+}
+
+.launch-screen--leave .launch-screen__bottle {
+  animation: launch-bottle-leave 600ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+@keyframes launch-field-leave {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes launch-bottle-leave {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(1.14);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .launch-screen__bottle,
+  .launch-screen .spritz-loader-cap,
+  .launch-screen .spritz-loader-liquid {
+    animation: none;
+  }
+  /* No pump: spray and mist stay hidden, the bottle just sits. */
+  .launch-screen .spritz-loader-spray,
+  .launch-screen .spritz-loader-mist {
+    animation: none;
+    opacity: 0;
+  }
+  html.launching .launch-screen--leave {
+    animation: launch-field-leave 220ms ease-out both;
+  }
+  .launch-screen--leave .launch-screen__bottle {
+    animation: launch-field-leave 220ms ease-out both;
+  }
+}
+
 /* Reduced motion: hold the bottle mid-spray as a static mark. Callers
    still get role="status" + the label, so the wait state is announced
    either way. */

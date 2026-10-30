@@ -15,6 +15,7 @@ import { NativeAuthBridge } from "@/components/native-auth-bridge";
 import { NativeReturnGuard } from "@/components/native-return-guard";
 import { NativeTouchLinks } from "@/components/native-touch-links";
 import { NativeResumeReload } from "@/components/native-resume-reload";
+import { LaunchScreen, LAUNCH_SCREEN_BOOT } from "@/components/launch-screen";
 import "./globals.css";
 
 // Playfair Display — high-contrast serif for hero / section headings.
@@ -109,6 +110,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <ClerkProvider appearance={spritzClerkAppearance}>
       <html lang="en" className={`${playfair.variable} ${roboto.variable}`}>
         <body className="min-h-screen flex flex-col font-sans">
+          {/* Runs before the body paints: on a cold launch of the shell
+              (or an installed PWA) it marks <html class="launching"> so
+              the LaunchScreen below is visible from the very first frame.
+              Plain web loads skip it. Must stay the first thing in <body>
+              and ahead of <LaunchScreen />. */}
+          <script dangerouslySetInnerHTML={{ __html: LAUNCH_SCREEN_BOOT }} />
+          {/* Cream field + pumping bottle over the whole app while it
+              hydrates, then a 600ms fade into the page. Server-rendered
+              so it paints with the HTML; display:none unless `launching`. */}
+          <LaunchScreen />
           {/* SVG <defs> for the liquid-glass displacement filters. Mounted
               once near the root so any <LiquidGlass> in the tree can
               reference url(#lg-glass-subtle) etc. by id. Component is
