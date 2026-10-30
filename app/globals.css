@@ -539,7 +539,10 @@ html.launching .launch-screen {
 .launch-screen__drop {
   fill: currentColor;
   opacity: 0;
-  animation: launch-mist 620ms cubic-bezier(0.25, 0.55, 0.45, 1) both;
+  /* Scale each droplet about its own center (SVG defaults to the viewBox 0,0, which lifted the spray 24px), and stay invisible until each flight starts (`both` stacked every droplet on the nozzle as a line). */
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: launch-mist 620ms cubic-bezier(0.25, 0.55, 0.45, 1) forwards;
   /* 950ms: the press bottoms out (800 + 150ms down). Each droplet adds
      its own 0-420ms lag, which spans the hold, so the z is emitting for
      the whole time the word is depressed. */
