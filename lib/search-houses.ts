@@ -117,6 +117,37 @@ export async function findHouses(q: string, supabase: SupabaseClient<Database>):
 }
 
 /**
+ * Is this token (one or more words) exactly a house name? Used by keyword
+ * search so "creed patchouli" can treat "creed" as a house filter.
+ *
+ * Stricter than findHouses(): every word must match a house word in full,
+ * not as a prefix, and the token must account for the whole house name
+ * once filler words are dropped ("tom ford" → Tom Ford; "ford" alone →
+ * null, because "ford" is only part of the name and a lone surname is
+ * more often a typo than a house). Returns the canonical hit, or null.
+ */
+export async function houseForToken(
+  token: string,
+  supabase: SupabaseClient<Database>,
+): Promise<HouseHit | null> {
+  const tw = words(token);
+  if (tw.length === 0) return null;
+  try {
+    const idx = await loadIndex(supabase);
+    let best: HouseHit | null = null;
+    for (let i = 0; i < idx.houses.length; i++) {
+      const hw = idx.words[i];
+      if (hw.length !== tw.length) continue;
+      if (!tw.every((w, k) => w === hw[k])) continue;
+      if (!best || idx.houses[i].count > best.count) best = idx.houses[i];
+    }
+    return best;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * One catalog house by canonical slug (name + count), from the same
  * in-memory index the typeahead uses. Null when unknown or on any failure.
  */

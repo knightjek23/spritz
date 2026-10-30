@@ -263,11 +263,17 @@ export function SearchAutocomplete({
     return () => document.removeEventListener("pointerdown", handler);
   }, [leading, onLeadingClick]);
 
-  function remember() {
+  /**
+   * Save to recent searches. Pass what the user actually CHOSE when they
+   * picked a row ("Creed Aventus", "Tom Ford", "Patchouli"); fall back to
+   * the typed text only for a plain submit. Saving the typed text on a
+   * pick left the list full of half-words like "avent".
+   */
+  function remember(chosen?: string) {
     if (!recentSearches) return;
-    const trimmed = q.trim();
-    if (trimmed.length < MIN_QUERY_LEN) return;
-    setRecents(addRecentSearch(trimmed));
+    const value = (chosen ?? q).trim();
+    if (value.length < MIN_QUERY_LEN) return;
+    setRecents(addRecentSearch(value));
   }
 
   function commit(fragrance?: Fragrance) {
@@ -285,7 +291,9 @@ export function SearchAutocomplete({
         }
         return;
       }
-      remember();
+      // "Creed Aventus", not "Aventus": the house disambiguates when the
+      // list is scanned later, and re-running it as a search still works.
+      remember(`${fragrance.house} ${fragrance.name}`);
       router.push(`/fragrance/${fragrance.id}`);
       setOpen(false);
       return;
@@ -331,9 +339,24 @@ export function SearchAutocomplete({
     })),
   ];
   const rowCount = leads.length + suggestions.length;
+  const scoredTermCount = terms ? terms.filter((t) => t.kind !== "house").length : 0;
+
+  /**
+   * Section label for the keyword results.
+   *   notes/families only  "Most popular with Patchouli · Vanilla"
+   *   house only           "Most popular from Creed"
+   *   house + notes        "Creed · with Patchouli"
+   */
+  function termsHeader(ts: SearchTerm[]): string {
+    const house = ts.find((t) => t.kind === "house");
+    const rest = ts.filter((t) => t.kind !== "house").map((t) => t.label);
+    if (!house) return `Most popular with ${rest.join(" · ")}`;
+    if (rest.length === 0) return `Most popular from ${house.label}`;
+    return `${house.label} · with ${rest.join(" · ")}`;
+  }
 
   function goToLead(l: Lead) {
-    remember();
+    remember(l.label);
     setOpen(false);
     router.push(l.href);
   }
@@ -641,7 +664,7 @@ export function SearchAutocomplete({
                     href={l.href}
                     onMouseEnter={() => setHighlight(idx)}
                     onClick={() => {
-                      remember();
+                      remember(l.label);
                       setOpen(false);
                     }}
                     className={`flex items-center gap-3 px-3 py-2.5 transition ${
@@ -702,10 +725,13 @@ export function SearchAutocomplete({
                     {f.year ? ` · ${f.year}` : ""}
                   </div>
                 </div>
-                {isTerm && terms && terms.length > 1 ? (
-                  // "2/3": how many of the typed terms this bottle carries.
+                {isTerm && terms && scoredTermCount > 1 ? (
+                  // "2/3": how many of the typed NOTE/FAMILY terms this bottle
+                  // carries. House terms are filters every row satisfies, so
+                  // they are left out or "creed patchouli" would read 1/2 on
+                  // every single row.
                   <span className="font-mono text-[10px] uppercase tracking-wider text-slate shrink-0">
-                    {f.match_count}/{terms.length}
+                    {f.match_count}/{scoredTermCount}
                   </span>
                 ) : (
                   Array.isArray(f.family) &&
@@ -723,7 +749,7 @@ export function SearchAutocomplete({
                 className="px-4 pt-3 pb-1 font-mono text-[10px] uppercase tracking-wider text-slate truncate"
                 aria-hidden
               >
-                Most popular with {terms!.map((t) => t.label).join(" · ")}
+                {termsHeader(terms!)}
               </li>
             ) : firstName ? (
               <li

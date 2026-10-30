@@ -1,27 +1,33 @@
 // Keyword search: "musk, iris, citrus" → the most popular fragrances that
-// carry those notes or sit in those families.
+// carry those notes or sit in those families; "creed patchouli" → Creed
+// fragrances that carry patchouli.
 //
 // This module turns the raw search string into resolved terms for the
-// find_fragrances_by_terms RPC (migration 0029). The rule for whether a
-// query is a keyword query at all: every chunk has to resolve to a known
-// note or family. "rose" resolves (so the UI shows a By notes section
-// above the name matches); "dior sauvage" does not, and stays a plain
-// name search. Mixed queries are name searches on purpose: guessing
-// half a query is worse than getting out of the way.
+// find_fragrances_by_terms RPC (migrations 0029, 0040). The rule for
+// whether a query is a keyword query at all: every word has to resolve to
+// a known house, note or family. "rose" resolves (so the UI shows a
+// keyword section above the name matches); "dior sauvage" does not,
+// because "sauvage" is a fragrance name, and it stays a plain name search.
+// Partly-resolving queries are name searches on purpose: guessing half a
+// query is worse than getting out of the way.
+//
+// Houses FILTER, notes and families SCORE (see 0040): "creed patchouli"
+// never shows a Dior, while "patchouli vanilla" ranks bottles with both
+// notes above bottles with one.
 //
 // Server-only: reads the editorial note aliases from disk and the
 // catalog note list from Supabase (cached in-process for an hour).
 
-import type { HouseHit } from "./search-houses";
+import { houseForToken, type HouseHit } from "./search-houses";
 import type { FamilyHit, NoteHit } from "./search-notes";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
 import { loadAllNotes } from "@/lib/notes";
-import { noteSlug } from "@/lib/slugs";
+import { noteSlug, slugsForCanonicalHouse } from "@/lib/slugs";
 import { NOTE_ALIASES, resolveNoteQueries } from "@/lib/note-aliases";
 import { normalizeFamily, familyName } from "@/lib/families";
 
-export type TermKind = "note" | "family";
+export type TermKind = "note" | "family" | "house";
 
 /** What the client sees back: the word as typed and what it resolved to. */
 export interface SearchTerm {
@@ -38,6 +44,8 @@ interface RpcTerm {
   names: string[];
   pattern: string | null;
   family: string | null;
+  /** Canonical slug plus aliases; non-empty marks this as a house filter. */
+  house_slugs: string[];
 }
 
 export interface KeywordResolution {
@@ -196,7 +204,7 @@ function resolveToken(token: string, index: NoteIndex): { term: SearchTerm; rpc:
     const pattern = token.includes(" ") ? null : `\\m${escapeRegex(token)}\\M`;
     return {
       term: { key: token, kind: "note", label: note.name },
-      rpc: { key: token, names: note.names, pattern, family: null },
+      rpc: { key: token, names: note.names, pattern, family: null, house_slugs: [] },
     };
   }
   const fam = isFamily(token);
@@ -206,15 +214,65 @@ function resolveToken(token: string, index: NoteIndex): { term: SearchTerm; rpc:
     const pattern = `\\m${escapeRegex(fam)}\\M`;
     return {
       term: { key: token, kind: "family", label: familyName(fam) },
-      rpc: { key: token, names: [], pattern, family: fam },
+      rpc: { key: token, names: [], pattern, family: fam, house_slugs: [] },
     };
   }
   return null;
 }
 
+type Resolved = { term: SearchTerm; rpc: RpcTerm };
+
+/** Note / family first (in-memory), then house (in-memory index, async). */
+async function resolveAny(
+  token: string,
+  index: NoteIndex,
+  supabase: SupabaseClient<Database>,
+): Promise<Resolved | null> {
+  const nf = resolveToken(token, index);
+  if (nf) return nf;
+  const house = await houseForToken(token, supabase);
+  if (!house) return null;
+  return {
+    term: { key: token, kind: "house", label: house.name },
+    rpc: { key: token, names: [], pattern: null, family: null, house_slugs: slugsForCanonicalHouse(house.slug) },
+  };
+}
+
+/**
+ * Resolve a chunk of space-separated words where houses may span more
+ * than one word ("tom ford vanilla" → [Tom Ford][vanilla]). Greedy: at each
+ * position try the longest run of words (up to 3) that resolves, then move
+ * on. Null if any word is left over.
+ */
+async function resolveWords(
+  words: string[],
+  index: NoteIndex,
+  supabase: SupabaseClient<Database>,
+): Promise<Resolved[] | null> {
+  const out: Resolved[] = [];
+  let i = 0;
+  while (i < words.length) {
+    let hit: Resolved | null = null;
+    let used = 0;
+    for (let len = Math.min(3, words.length - i); len >= 1; len--) {
+      const token = words.slice(i, i + len).join(" ");
+      const r = await resolveAny(token, index, supabase);
+      if (r) {
+        hit = r;
+        used = len;
+        break;
+      }
+    }
+    if (!hit) return null;
+    out.push(hit);
+    i += used;
+  }
+  return out;
+}
+
 /**
  * Resolve a raw query into keyword terms, or null when any part of it is
- * not a known note or family (then it is a name search).
+ * not a known house, note or family (then it is a name search).
  */
 export async function resolveKeywordQuery(
   q: string,
@@ -228,7 +286,7 @@ export async function resolveKeywordQuery(
   const rpcTerms: RpcTerm[] = [];
   const seen = new Set<string>();
 
-  function push(r: { term: SearchTerm; rpc: RpcTerm }) {
+  function push(r: Resolved) {
     if (seen.has(r.term.key)) return;
     seen.add(r.term.key);
     terms.push(r.term);
@@ -236,19 +294,22 @@ export async function resolveKeywordQuery(
   }
 
   for (const c of chunks) {
-    const whole = resolveToken(c, index);
+    const whole = await resolveAny(c, index, supabase);
     if (whole) {
       push(whole);
       continue;
     }
     const words = c.split(" ");
     if (words.length < 2) return null;
-    const resolved = words.map((w) => resolveToken(w, index));
-    if (resolved.some((r) => r === null)) return null;
-    for (const r of resolved) push(r!);
+    const resolved = await resolveWords(words, index, supabase);
+    if (!resolved) return null;
+    for (const r of resolved) push(r);
   }
 
   if (terms.length === 0 || terms.length > MAX_TERMS) return null;
+  // Two different houses can't both be true of one bottle; that's a name
+  // search ("creed dior" is probably someone typing a comparison).
+  if (terms.filter((t) => t.kind === "house").length > 1) return null;
   return { terms, rpcTerms };
 }
 
