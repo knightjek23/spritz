@@ -443,17 +443,24 @@ h1, h2, h3, h4 {
 }
 
 /* ===== Launch screen (components/launch-screen.tsx) =====
-   Cream field over everything on a cold launch of the shell, bottle
-   centered on the loader's pump cycle. Hidden unless the pre-paint boot
-   script put `launching` on <html>, so the server-rendered node costs
-   nothing on the web and never flashes.
+   Cream field over everything on a cold launch of the shell, the "spritz"
+   wordmark centered, acting as the atomizer. Hidden unless the pre-paint
+   boot script put `launching` on <html>, so the server-rendered node
+   costs nothing on the web and never flashes.
 
-   The bottle arrives rather than being there: a short settle from 0.92
-   scale (the OS icon-zoom has just finished, so it should feel like the
-   mark landing in place, not popping). On leave the whole field fades
-   while the bottle drifts up in scale and fades a touch faster than the
-   field, which is the Instagram move: the glyph goes first, the color
-   follows, the content is already underneath. */
+   Schedule, from first paint:
+     0 - 480ms    wordmark settles in (opacity only; it is the first frame)
+     800ms        press: word + nozzle drop 9px like a pump head, bottom
+                  out at 950ms, held to 1370ms, back up by 1700ms
+     950 - 1990ms mist: 220 fine droplets stream from the right of the z
+                  for the whole time the word is down (each leaves 0-420ms
+                  after the bottom, on a 620ms flight), horizontal cone
+     2250ms       leave (JS adds --leave once hydrated and the hold is up)
+
+   On leave the whole field fades while the lockup drifts up in scale
+   and fades a touch faster than the field, which is the Instagram move:
+   the glyph goes first, the color follows, the content is already
+   underneath. */
 .launch-screen {
   display: none;
 }
@@ -470,35 +477,109 @@ html.launching .launch-screen {
   pointer-events: auto;
 }
 
-.launch-screen__bottle {
-  /* 148:214 viewBox; ~118px tall reads as a mark, not an icon. */
-  height: 118px;
-  width: auto;
-  transform-origin: 50% 50%;
-  animation: launch-bottle-settle 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+/* The pump head. Word and mist press together; the mist SVG is
+   positioned off the word's right edge so the lockup's box is just the
+   word, which keeps the word dead center on screen. */
+.launch-screen__lockup {
+  position: relative;
+  display: flex;
+  align-items: center;
+  animation:
+    launch-word-settle 480ms cubic-bezier(0.22, 1, 0.36, 1) both,
+    launch-press 900ms cubic-bezier(0.32, 0.72, 0, 1) 800ms both;
 }
 
-@keyframes launch-bottle-settle {
+.launch-screen__word {
+  font-size: clamp(56px, 16vw, 72px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--accent-primary, #1F3F2E);
+}
+
+@keyframes launch-word-settle {
   from {
     opacity: 0;
-    transform: scale(0.92);
   }
   to {
     opacity: 1;
-    transform: scale(1);
   }
 }
 
-/* Leave: field fades over 600ms; bottle scales to 1.14 and is gone by
+/* Down fast, hold while it sprays, back up: over 900ms that is a 150ms
+   press (0-16.7%), a 420ms hold (16.7-63.3%) and a 330ms return. The
+   mist is timed to the hold, so the spray only ever comes from a
+   depressed pump. */
+@keyframes launch-press {
+  0% {
+    transform: translateY(0);
+  }
+  16.7%,
+  63.3% {
+    transform: translateY(9px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Nozzle: 120-box hung off the right edge of the word, its vertical
+   center on the x-height line. For Playfair at line-height 1 the
+   baseline sits at 0.916em and the x-height is 0.514em, so the middle
+   of the lowercase letters is 0.66em down the box, not 0.5em. Each
+   droplet starts at (2, 60 ± slit), the nozzle, flush with the z, and
+   travels to its own (--dx, --dy). overflow visible so nothing clips. */
+.launch-screen__mist {
+  position: absolute;
+  left: 100%;
+  top: 66%;
+  width: 120px;
+  height: 120px;
+  margin-left: -1px;
+  transform: translateY(-50%);
+  overflow: visible;
+}
+
+.launch-screen__drop {
+  fill: currentColor;
+  opacity: 0;
+  animation: launch-mist 620ms cubic-bezier(0.25, 0.55, 0.45, 1) both;
+  /* 950ms: the press bottoms out (800 + 150ms down). Each droplet adds
+     its own 0-420ms lag, which spans the hold, so the z is emitting for
+     the whole time the word is depressed. */
+  animation-delay: calc(950ms + var(--lag, 0ms));
+}
+
+/* Fully visible at the nozzle on frame one (no fade-in: a fade-in is
+   what made the earlier mist look like it appeared next to the word
+   rather than out of it). The easing is a moderate ease-out, not a
+   snap: a snappier curve had every droplet a third of the way out
+   within two frames, which read as a cloud hanging beside the z. */
+@keyframes launch-mist {
+  0% {
+    opacity: var(--op, 0.8);
+    transform: translate(0, 0) scale(0.6);
+  }
+  55% {
+    opacity: calc(var(--op, 0.8) * 0.7);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) scale(1);
+  }
+}
+
+/* Leave: field fades over 600ms; lockup scales to 1.14 and is gone by
    ~70% of that so the color is the last thing to go. Both `both` so
-   the end state holds if React unmounts a frame late. */
+   the end state holds if React unmounts a frame late. The lockup's
+   leave animation replaces its settle/press, which are finished. */
 html.launching .launch-screen--leave {
   animation: launch-field-leave 600ms cubic-bezier(0.32, 0.72, 0, 1) both;
   pointer-events: none;
 }
 
-.launch-screen--leave .launch-screen__bottle {
-  animation: launch-bottle-leave 600ms cubic-bezier(0.32, 0.72, 0, 1) both;
+.launch-screen--leave .launch-screen__lockup {
+  animation: launch-lockup-leave 600ms cubic-bezier(0.32, 0.72, 0, 1) both;
 }
 
 @keyframes launch-field-leave {
@@ -507,7 +588,7 @@ html.launching .launch-screen--leave {
   }
 }
 
-@keyframes launch-bottle-leave {
+@keyframes launch-lockup-leave {
   0% {
     opacity: 1;
     transform: scale(1);
@@ -520,21 +601,18 @@ html.launching .launch-screen--leave {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .launch-screen__bottle,
-  .launch-screen .spritz-loader-cap,
-  .launch-screen .spritz-loader-liquid {
+  /* Static wordmark from the first frame: no settle, no press, no mist. */
+  .launch-screen__lockup {
     animation: none;
   }
-  /* No pump: spray and mist stay hidden, the bottle just sits. */
-  .launch-screen .spritz-loader-spray,
-  .launch-screen .spritz-loader-mist {
+  .launch-screen__drop {
     animation: none;
     opacity: 0;
   }
   html.launching .launch-screen--leave {
     animation: launch-field-leave 220ms ease-out both;
   }
-  .launch-screen--leave .launch-screen__bottle {
+  .launch-screen--leave .launch-screen__lockup {
     animation: launch-field-leave 220ms ease-out both;
   }
 }
