@@ -2,15 +2,19 @@
 
 // Launch screen — the first thing on screen when the app is opened cold.
 //
-// The iOS storyboard and capacitor.config.ts backgroundColor paint plain
-// cream while WKWebView boots; this layer takes over the moment our HTML
-// paints, so launch reads as one continuous cream surface: cream splash,
-// then the "spritz" wordmark in the middle of it, then the wordmark IS the
-// atomizer: it presses down like a pump head and a cone of mist leaves
-// from the right of the z, the word springs back, the layer fades and the
-// app is underneath. Modeled on Instagram's launch (icon zoom from the OS,
-// a held glyph on a solid field, a soft fade into content that is already
-// rendered), not a progress bar.
+// Native and web share one frame. iOS shows LaunchScreen.storyboard (cream
+// + the "spritz" wordmark, SplashWordmark image) the instant the icon is
+// tapped, and @capacitor/splash-screen keeps that view up while the
+// webview fetches the live site. This layer then paints the SAME frame in
+// HTML (same cream, same 72px Playfair wordmark, same screen center), and
+// only after it has painted does it tell the native splash to go, with no
+// fade. So the wordmark is on screen from the tap onward with no blank
+// beat; the earlier version let the plain cream webview show for ~0.7s
+// while the page loaded. Then the wordmark IS the atomizer: it presses
+// down like a pump head and a cone of mist leaves from the right of the
+// z, the word springs back, the layer fades and the app is underneath.
+// Modeled on Instagram's launch (a held glyph on a solid field, a soft
+// fade into content that is already rendered), not a progress bar.
 //
 // How it stays flicker-free:
 //   - The overlay is server-rendered but hidden by default. An inline
@@ -20,11 +24,15 @@
 //     has not shown this session. No React, so no hydration flash either
 //     way. On the plain web it never shows: a visitor landing from Google
 //     should see the page, not a splash.
+//   - The same script hides the native splash two frames later, i.e. once
+//     the overlay is actually on screen. On native it always hides it, even
+//     when this load skips the overlay, so the splash can never hang.
 //   - Every motion is CSS scheduled from first paint (globals.css,
 //     launch-*), so it runs whether or not React has hydrated yet. The
-//     hold is at least MIN_HOLD_MS from navigation start so the pump
-//     always completes, and at least until hydration so the app is live
-//     when it is revealed.
+//     hold is measured from that first paint (window.__spritzLaunchT0), not
+//     from navigation start: on a slow network the page can take most of a
+//     second to arrive, and timing from navigation start would cut the
+//     pump short.
 //   - The leave is a CSS class; React only removes the node afterwards.
 //
 // sessionStorage, not localStorage: a cold start is a new WKWebView
@@ -32,12 +40,13 @@
 // NativeResumeReload does after a long background.
 
 import { useEffect, useState } from "react";
+import { isNativeApp } from "@/lib/native";
 
 const SESSION_KEY = "spritz.launched";
-/** Minimum time on screen from navigation start. Schedule (globals.css):
- *  wordmark settles 0-480ms, press at 800ms (down by 950ms), mist streams
- *  950-1950ms while the word is held, word back up by 1700ms, then a
- *  beat of stillness before the fade. */
+/** Minimum time on screen from the overlay's first paint. Schedule
+ *  (globals.css): wordmark on screen from frame one, press at 800ms (down
+ *  by 950ms), mist streams 950-1990ms while the word is held, word back up
+ *  by 1700ms, then a beat of stillness before the fade. */
 const MIN_HOLD_MS = 2250;
 /** Matches .launch-screen--leave in globals.css. */
 const LEAVE_MS = 600;
@@ -286,22 +295,47 @@ const MIST: ReadonlyArray<readonly [number, number, number, number, number, numb
 
 /**
  * Inline, pre-paint. Decides whether this page load gets the launch
- * screen. Kept as a string so it can be dropped into the layout with
- * dangerouslySetInnerHTML and run before any stylesheet-dependent paint.
- * window.Capacitor is injected by the shell before our scripts run.
+ * screen, stamps its paint time, and hands off from the native splash.
+ * Kept as a string so it can be dropped into the layout with
+ * dangerouslySetInnerHTML and run before the body paints.
+ * window.Capacitor (with its plugin bridge) is injected by the shell
+ * before any page script runs.
  */
 export const LAUNCH_SCREEN_BOOT = `(function(){try{
 var c=window.Capacitor,native=!!(c&&c.isNativePlatform&&c.isNativePlatform());
 var pwa=window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches;
-if(!(native||pwa))return;
-if(window.sessionStorage.getItem('${SESSION_KEY}'))return;
+function hideSplash(){try{
+var o={fadeOutDuration:0};
+if(c.Plugins&&c.Plugins.SplashScreen){c.Plugins.SplashScreen.hide(o);return;}
+if(c.nativePromise){c.nativePromise('SplashScreen','hide',o);}
+}catch(e){}}
+var show=(native||pwa)&&!window.sessionStorage.getItem('${SESSION_KEY}');
+if(show){
 document.documentElement.classList.add('launching');
+window.__spritzLaunchT0=performance.now();
+}
+if(native){
+// Two frames: the first rAF runs before the overlay's first paint, the
+// second after it, so the web wordmark is on screen under the native one.
+requestAnimationFrame(function(){requestAnimationFrame(hideSplash);});
+}
 }catch(e){}})();`;
 
 export function LaunchScreen() {
   const [phase, setPhase] = useState<"hold" | "leave" | "gone">("hold");
 
   useEffect(() => {
+    // Second, guaranteed hand-off from the native splash. The boot script
+    // already tried two frames after paint; this runs after hydration via
+    // the real plugin module, so the splash cannot outlive the page even if
+    // the bridge's plugin proxy was not ready that early. Hiding an
+    // already-hidden splash is a no-op.
+    if (isNativeApp()) {
+      import("@capacitor/splash-screen")
+        .then(({ SplashScreen }) => SplashScreen.hide({ fadeOutDuration: 0 }))
+        .catch(() => {});
+    }
+
     // The boot script decided. If it did not add the class, this load gets
     // no launch screen and the node can go immediately.
     if (!document.documentElement.classList.contains("launching")) {
@@ -317,11 +351,13 @@ export function LaunchScreen() {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const hold = reduce ? REDUCED_HOLD_MS : MIN_HOLD_MS;
     const leave = reduce ? REDUCED_LEAVE_MS : LEAVE_MS;
-    // performance.now() counts from navigation start, which is when the
-    // first paint (and the CSS schedule) began, give or take a frame. So
-    // the wait is "whatever is left of the hold", or nothing if hydration
-    // itself took longer than the hold.
-    const remaining = Math.max(0, hold - performance.now());
+    // __spritzLaunchT0 is when the boot script showed the overlay, which is
+    // when the CSS schedule began, give or take a frame. So the wait is
+    // "whatever is left of the hold", or nothing if hydration itself took
+    // longer than the hold.
+    const t0 =
+      (window as unknown as { __spritzLaunchT0?: number }).__spritzLaunchT0 ?? 0;
+    const remaining = Math.max(0, hold - (performance.now() - t0));
 
     const t1 = window.setTimeout(() => setPhase("leave"), remaining);
     const t2 = window.setTimeout(() => {

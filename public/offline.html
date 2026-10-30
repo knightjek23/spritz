@@ -37,5 +37,14 @@
   <h1>You’re offline.</h1>
   <p>Spritz needs a connection to look things up.</p>
   <button type="button" onclick="location.replace('https://spritzofficial.app/')">Try again</button>
-</body>
+    <!-- The native launch splash stays up until the page hides it
+         (capacitor.config.ts SplashScreen). This page is what the shell
+         shows when the live site cannot load, so it must hide it too or
+         the person waits out the 8s failsafe looking at the wordmark. -->
+    <script>
+      (function(){try{var c=window.Capacitor;if(!c)return;var o={fadeOutDuration:0};
+      if(c.Plugins&&c.Plugins.SplashScreen){c.Plugins.SplashScreen.hide(o);}
+      else if(c.nativePromise){c.nativePromise('SplashScreen','hide',o);}}catch(e){}})();
+    </script>
+  </body>
 </html>

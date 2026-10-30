@@ -449,7 +449,7 @@ h1, h2, h3, h4 {
    costs nothing on the web and never flashes.
 
    Schedule, from first paint:
-     0 - 480ms    wordmark settles in (opacity only; it is the first frame)
+     0ms          wordmark on screen, identical to the native splash
      800ms        press: word + nozzle drop 9px like a pump head, bottom
                   out at 950ms, held to 1370ms, back up by 1700ms
      950 - 1990ms mist: 220 fine droplets stream from the right of the z
@@ -484,26 +484,22 @@ html.launching .launch-screen {
   position: relative;
   display: flex;
   align-items: center;
-  animation:
-    launch-word-settle 480ms cubic-bezier(0.22, 1, 0.36, 1) both,
-    launch-press 900ms cubic-bezier(0.32, 0.72, 0, 1) 800ms both;
+  animation: launch-press 900ms cubic-bezier(0.32, 0.72, 0, 1) 800ms both;
 }
 
+/* No entrance: the native launch storyboard is already showing this
+   exact wordmark when the page paints (SplashWordmark image, 72pt
+   Playfair, em box centered on the screen), so the web copy must sit in
+   the same pixels from frame one. That is why the size is a fixed 72px
+   rather than a clamp() and the tracking is 0: the storyboard image can
+   only match one size. Change either and the SplashWordmark images in
+   ios/App/App/Assets.xcassets must be regenerated to match. */
 .launch-screen__word {
-  font-size: clamp(56px, 16vw, 72px);
+  font-size: 72px;
   font-weight: 400;
   line-height: 1;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
   color: var(--accent-primary, #1F3F2E);
-}
-
-@keyframes launch-word-settle {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
 }
 
 /* Down fast, hold while it sprays, back up: over 900ms that is a 150ms

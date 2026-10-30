@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Spritz launch screen. Shown by iOS the instant the icon is tapped, and
+  re-used by @capacitor/splash-screen (launchAutoHide: false) to stay on
+  screen until the web launch layer (components/launch-screen.tsx) has
+  painted the identical frame underneath it. Then it is removed with no
+  fade, so the hand-off is invisible.
+
+  Must stay pixel-identical to the web layer:
+    - background #F4EFE6 (--bg-base)
+    - SplashWordmark is a 200x100pt image with the 72pt Playfair "spritz"
+      em box centered in it, centered on the SUPERVIEW (not the safe
+      area), exactly as the web overlay centers it on the full screen.
+  If the wordmark size changes in globals.css (.launch-screen__word),
+  regenerate the SplashWordmark images to match.
+-->
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17132" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
-    <device id="retina4_7" orientation="portrait" appearance="light"/>
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17105"/>
@@ -11,11 +26,24 @@
         <scene sceneID="EHf-IW-A2E">
             <objects>
                 <viewController id="01J-lp-oVM" sceneMemberID="viewController">
-                    <imageView key="view" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Splash" id="snD-IY-ifK">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
-                        <autoresizingMask key="autoresizingMask"/>
+                    <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="SplashWordmark" translatesAutoresizingMaskIntoConstraints="NO" id="snD-IY-ifK">
+                                <rect key="frame" x="107" y="398" width="200" height="100"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="200" id="Wd1-aa-001"/>
+                                    <constraint firstAttribute="height" constant="100" id="Ht1-aa-002"/>
+                                </constraints>
+                            </imageView>
+                        </subviews>
                         <color key="backgroundColor" red="0.95686274509803915" green="0.93725490196078431" blue="0.90196078431372551" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                    </imageView>
+                        <constraints>
+                            <constraint firstItem="snD-IY-ifK" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="Cx1-aa-003"/>
+                            <constraint firstItem="snD-IY-ifK" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="Cy1-aa-004"/>
+                        </constraints>
+                    </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -23,6 +51,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="Splash" width="2732" height="2732"/>
+        <image name="SplashWordmark" width="200" height="100"/>
     </resources>
 </document>

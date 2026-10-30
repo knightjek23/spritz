@@ -50,6 +50,23 @@ const config: CapacitorConfig = {
     allowsLinkPreview: false,
   },
   plugins: {
+    // Keeps the launch storyboard (cream + "spritz" wordmark) on screen
+    // while the webview fetches the live site, instead of iOS swapping it
+    // for an empty cream webview the moment the app process is up. That
+    // swap was the blank beat on cold launch. The web launch layer paints
+    // the identical frame and then calls SplashScreen.hide() with no fade
+    // (LAUNCH_SCREEN_BOOT in components/launch-screen.tsx), so the native
+    // wordmark is replaced by the web wordmark in the same pixels.
+    // launchAutoHide stays on with a long duration purely as a failsafe:
+    // if the page never loads, the splash still clears after 8s.
+    // public/offline.html hides it too.
+    SplashScreen: {
+      launchAutoHide: true,
+      launchShowDuration: 8000,
+      launchFadeOutDuration: 0,
+      backgroundColor: "#F4EFE6",
+      showSpinner: false,
+    },
     PushNotifications: {
       // Show the banner even when the app is in the foreground. Without
       // this iOS delivers the notification silently to Notification Center
