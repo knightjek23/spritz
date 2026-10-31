@@ -21,19 +21,29 @@ const CACHE_REVALIDATE_SECONDS = 900;
  * "Trending on Fragrantica" — straight from the catalog's popularity_rank
  * (scraped from Fragrantica at catalog-build time). Lower rank = more popular.
  * This replaces the live Fragrantica scrape: same signal, no anti-bot, no ToS risk.
+ * Pass a gender for the Men / Women split; the cache keys on the arguments.
  */
 export const getPopularOnFragrantica = unstable_cache(
   _getPopularOnFragrantica,
   ["db-trending-popular"],
   { revalidate: CACHE_REVALIDATE_SECONDS },
 );
-async function _getPopularOnFragrantica(limit = 12): Promise<ScrollerRow[]> {
+async function _getPopularOnFragrantica(
+  limit = 12,
+  gender?: "men" | "women",
+): Promise<ScrollerRow[]> {
   try {
     const supabase = createAdminClient();
-    const { data, error } = await supabase
+    let query = supabase
       .from("fragrances")
       .select(`${SELECT}, popularity_rank`)
-      .not("popularity_rank", "is", null)
+      .not("popularity_rank", "is", null);
+    // Men / Women split. Unisex counts for both, matching Top Scents and
+    // Seasonal Suggestions (lib/discovery/lists.ts fitsGender).
+    if (gender) {
+      query = query.in("gender", [gender === "men" ? "masculine" : "feminine", "unisex"]);
+    }
+    const { data, error } = await query
       .order("popularity_rank", { ascending: true })
       .limit(limit);
     if (error) {

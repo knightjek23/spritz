@@ -24,7 +24,7 @@
 | `scripts/test-discovery.ts` | new | All unit tests. |
 | `package.json` | mod | `"test:discovery": "tsx scripts/test-discovery.ts"`, `"research:match": "tsx scripts/research-match.ts"`, `"audit:discovery": "tsx scripts/audit-discovery-coverage.ts"`. |
 | `components/seasonal-suggestions.tsx` | new | Server wrapper loads both sides; client toggle child renders Men/Women. |
-| `components/seasonal-toggle.tsx` | new | Client component: two-button segmented toggle, renders the chosen `FragranceScroller` rows. Pattern from `popular-by-house-tabs.tsx`. |
+| `components/gender-toggle.tsx` (was `seasonal-toggle.tsx`) | new | Client component: two-button segmented toggle, renders the chosen `FragranceScroller` rows. Pattern from `popular-by-house-tabs.tsx`. |
 | `components/top-scents.tsx` | new | `TopScentsForMen`, `TopScentsForWomen` server components on `FragranceScroller` (`showRank={false}`). |
 | `components/for-you-feed.tsx` | mod | Seasonal Suggestions after the "Based on what you wear" block. |
 | `components/marketing-home.tsx` | mod | Seasonal Suggestions above `PopularOnFragrantica`. |

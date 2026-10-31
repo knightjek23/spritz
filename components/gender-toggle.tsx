@@ -1,25 +1,34 @@
 "use client";
 
-// Client half of Seasonal Suggestions: heading, one-line subline, a
-// Men / Women pill toggle and the scroller for the chosen side. Both sides
-// arrive from the server in one payload, so switching is instant. Pills
-// follow the "Most popular" house tabs (ink-on-cream for the selected
-// state). If one side is empty the toggle is dropped and the other side
-// shows alone.
+// Men / Women pill toggle over a FragranceScroller. Shared by Seasonal
+// Suggestions and "Most popular right now". Both sides arrive from the
+// server in one payload, so switching is instant. Pills follow the "Most
+// popular" house tabs (ink-on-cream for the selected state). If one side is
+// empty the toggle is dropped and the other side shows alone; if both are
+// empty the section hides.
 
 import { useState } from "react";
 import { FragranceScroller, type ScrollerRow } from "@/components/fragrance-scroller";
 
 type Side = "men" | "women";
 
-export function SeasonalToggle({
+export function GenderToggle({
   heading,
+  subline,
   men,
   women,
+  showRank = false,
+  compact = false,
 }: {
   heading: string;
+  /** One line under the heading. Omit for none. */
+  subline?: string;
   men: ScrollerRow[];
   women: ScrollerRow[];
+  /** #n chips. On for ranked lists, off for rotating picks. */
+  showRank?: boolean;
+  /** Tighter outer spacing, for the signed-in feed. */
+  compact?: boolean;
 }) {
   const sides = (["men", "women"] as Side[]).filter((s) => (s === "men" ? men : women).length > 0);
   const [active, setActive] = useState<Side>(sides[0] ?? "men");
@@ -27,10 +36,10 @@ export function SeasonalToggle({
   const rows = active === "men" ? men : women;
 
   return (
-    <section className="w-full mt-10 mb-6">
+    <section className={compact ? "mb-8" : "w-full mt-10 mb-6"}>
       <div className="px-1 mb-4">
         <h2 className="font-display text-2xl">{heading}</h2>
-        <p className="text-sm text-slate mt-1">What people are reaching for this season.</p>
+        {subline && <p className="text-sm text-slate mt-1">{subline}</p>}
       </div>
 
       {sides.length > 1 && (
@@ -58,7 +67,7 @@ export function SeasonalToggle({
       )}
 
       <div role="tabpanel" aria-label={`${heading}, ${active === "men" ? "men" : "women"}`}>
-        <FragranceScroller rows={rows} variant="compact" showRank={false} />
+        <FragranceScroller rows={rows} variant="compact" showRank={showRank} />
       </div>
     </section>
   );
