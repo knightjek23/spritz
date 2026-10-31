@@ -17,6 +17,7 @@ import Link from "next/link";
 import { TrendingSection } from "./trending-section";
 import { TrendingFeeds } from "./trending-feeds";
 import { PopularOnFragrantica, NewThisYear } from "./trending-db-sections";
+import { SeasonalSuggestions } from "./seasonal-suggestions";
 
 export function MarketingHome() {
   return (
@@ -87,6 +88,7 @@ export function MarketingHome() {
         <TrendingSection />
         {/* Catalog-derived surfaces: always have data even with zero users,
             query Supabase live, and self-hide if empty. */}
+        <SeasonalSuggestions />
         <PopularOnFragrantica />
         <NewThisYear />
       </div>

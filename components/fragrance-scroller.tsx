@@ -21,7 +21,9 @@ export function FragranceScroller({
   showRank = true,
   showHouse = true,
 }: {
-  title: string;
+  /** Section heading. Omit when the caller renders its own header
+      (e.g. Seasonal Suggestions, which needs a subline and a toggle). */
+  title?: string;
   rows: ScrollerRow[];
   variant?: "default" | "compact";
   /** Show the #n chip. Off for sets where order isn't a ranking. */
@@ -34,9 +36,11 @@ export function FragranceScroller({
 
   return (
     <section className={variant === "compact" ? "mb-8" : "w-full mt-10 mb-6"}>
-      <div className="flex items-baseline justify-between mb-3 px-1">
-        <h2 className="font-display text-2xl">{title}</h2>
-      </div>
+      {title && (
+        <div className="flex items-baseline justify-between mb-3 px-1">
+          <h2 className="font-display text-2xl">{title}</h2>
+        </div>
+      )}
 
       {/* scroll-pl-6 keeps snap-start items aligned to the padded content
           edge (the page gutter) — without it, mandatory snap pulls the

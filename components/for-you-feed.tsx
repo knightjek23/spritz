@@ -24,6 +24,7 @@ import type { Recommendations } from "@/lib/recommendations";
 import { houseSlug } from "@/lib/houses";
 import { TrendingSection } from "./trending-section";
 import { TrendingFeeds } from "./trending-feeds";
+import { SeasonalSuggestions } from "./seasonal-suggestions";
 import {
   MostAddedToCollection,
   MostClickedToBuy,
@@ -172,6 +173,11 @@ export function ForYouFeed({
           </Link>
         </section>
       )}
+
+      {/* 3b. Seasonal Suggestions — timely, not personal, so it sits
+            after the personalized recs and before the general pulse.
+            Strictly in-season; self-hides when empty. */}
+      <SeasonalSuggestions />
 
       {/* 4. Trending this week — general pulse. Sits below the
             personalized recs because it's hierarchically less relevant

@@ -18,6 +18,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { TrendingFeeds } from "@/components/trending-feeds";
+import { SeasonalSuggestions } from "@/components/seasonal-suggestions";
+import { TopScentsForMen, TopScentsForWomen } from "@/components/top-scents";
 import { TrendingSection } from "@/components/trending-section";
 import { PopularByHouse } from "@/components/popular-by-house";
 
@@ -61,6 +63,14 @@ export default function LibraryHubPage() {
           complement to the two week-scoped trending blocks above.
           Self-hides until migration 0016 is applied. */}
       <PopularByHouse />
+
+      {/* Seasonal picks and the men's / women's top scents. Scored from
+          the monthly research file plus popularity, trends and in-app
+          activity; rotate every 3 days (lib/discovery). Self-hide when
+          empty. */}
+      <SeasonalSuggestions />
+      <TopScentsForMen />
+      <TopScentsForWomen />
 
       {/* Four browse-by-X entries — primary navigation into the
           library. Big tap targets so it's clear these are the
