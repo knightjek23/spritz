@@ -16,6 +16,7 @@ async function main() {
   const { combineScores, WEIGHTS } = await import("../lib/discovery/score");
   const { researchMentions } = await import("../lib/discovery/research");
   const { inferSeasons, seasonsOf } = await import("../lib/discovery/infer-season");
+  const { resolveResearchEntry, houseKey } = await import("../lib/discovery/research-resolve");
 
   // ---- Season (Pacific time, meteorological, Northern Hemisphere) ----
   {
@@ -195,6 +196,58 @@ async function main() {
     assert.deepEqual(inferSeasons(["mystery accord"]), [], "never guesses");
     assert.deepEqual(seasonsOf({ season_tags: ["winter"], family: ["citrus"] }), ["winter"], "stored tags win");
     ok("inferSeasons: <=2 seasons, real-catalog cases, never guesses, stored tags win");
+  }
+
+  // ---- Research resolver (pass 2 of research:match) ----
+  // URL lists are trimmed copies of scraper/data/house-fragrances.
+  {
+    const u = (house: string, slug: string, votes: number) => ({
+      url: `https://www.fragrantica.com/perfume/${house}/${slug}.html`,
+      votes,
+    });
+    const lists = {
+      "Giorgio-Armani": [
+        u("Giorgio-Armani", "Emporio-Armani-Stronger-With-You-45258", 900),
+        u("Giorgio-Armani", "Emporio-Armani-Stronger-With-You-Parfum-100895", 300),
+        u("Giorgio-Armani", "Acqua-di-Gio-410", 2000),
+        u("Giorgio-Armani", "Acqua-di-Gio-Profumo-29727", 1500),
+      ],
+      Chanel: [
+        u("Chanel", "Coco-Mademoiselle-611", 2384),
+        u("Chanel", "Coco-Eau-de-Parfum-609", 1306),
+        u("Chanel", "Chanel-No-5-Parfum-28711", 1168),
+        u("Chanel", "Chanel-No-5-Eau-de-Toilette-10856", 494),
+      ],
+      "Tom-Ford": [
+        u("Tom-Ford", "Ombre-Leather-2018-50239", 1800),
+        u("Tom-Ford", "Ombre-Leather-Parfum-68716", 600),
+        u("Tom-Ford", "Eau-d-Ombre-Leather-60000", 200),
+      ],
+      "Maison-Martin-Margiela": [u("Maison-Martin-Margiela", "By-the-Fireplace-31623", 2912)],
+      "Narciso-Rodriguez": [u("Narciso-Rodriguez", "Narciso-Rodriguez-for-Him-Bleu-Noir-Parfum-71783", 400)],
+      "Dolce-Gabbana": [u("Dolce-Gabbana", "K-by-Dolce-Gabbana-Eau-de-Parfum-Intense-89373", 300)],
+      "DS-Durga": [u("DS-Durga", "Rum-Bay-Rum-107523", 50)],
+    };
+    const id = (name: string, house: string) => resolveResearchEntry({ name, house }, lists)?.fragranticaId ?? null;
+    // House prefix in the catalog name, house alias with no shared folder.
+    assert.equal(id("Stronger With You", "Emporio Armani"), "45258");
+    assert.equal(id("Stronger With You Parfum", "Emporio Armani"), "100895", "exact flanker beats base");
+    // Accents.
+    assert.equal(id("Acqua di Giò", "Giorgio Armani"), "410");
+    // Concentration and year suffixes (tier 2), flanker names stay apart.
+    assert.equal(id("Coco", "Chanel"), "609");
+    assert.equal(id("N°5", "Chanel"), "28711", "most-voted concentration");
+    assert.equal(id("Ombré Leather Eau de Parfum", "Tom Ford"), "50239");
+    assert.equal(id("Replica By the Fireplace", "Maison Margiela"), "31623");
+    // "for Him" after the house prefix, "by <house>" mid-name, initials.
+    assert.equal(id("Bleu Noir Parfum", "Narciso Rodriguez"), "71783");
+    assert.equal(id("K Eau de Parfum Intense", "Dolce & Gabbana"), "89373");
+    assert.equal(id("Rum Bay Rum", "D.S. & Durga"), "107523");
+    assert.equal(houseKey("D.S. & Durga"), houseKey("DS-Durga"));
+    // Never guesses: unknown house, unknown name.
+    assert.equal(id("Kasbah", "19-69"), null);
+    assert.equal(id("Coco Noir", "Chanel"), null, "not in list -> null, never Coco Mademoiselle");
+    ok("resolveResearchEntry: house prefix, accents, suffixes, aliases, never guesses");
   }
 
   console.log(`\n${pass} checks passed`);
