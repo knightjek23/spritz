@@ -1,6 +1,6 @@
 # Seasonal Suggestions, Top Scents for Men, Top Scents for Women
 
-**Status:** draft for Josh's approval, 2026-10-31. No code until approved.
+**Status:** approved by Josh 2026-10-31, with one change: seasonal picks are strictly in-season (no lead-in to the next season).
 **Decisions from Josh (2026-10-31):** research = blend of existing signals plus a monthly cited research file; placement = home feed and Library; unisex = eligible for both gendered lists, capped.
 
 ## What ships
@@ -41,14 +41,14 @@ Citations stay internal. No user-facing string names a source, which is the same
 ## Eligibility
 
 - **Gendered lists:** `gender` is masculine (men) or feminine (women), or unisex for either. At most 3 of the 10 picks in a window can be unisex.
-- **Seasonal:** the season is meteorological, Northern Hemisphere: Dec to Feb winter, Mar to May spring, Jun to Aug summer, Sep to Nov fall. A fragrance qualifies if `season_tags` contains the current season, or if the research file lists it for that season. In the last 14 days of a season, fragrances tagged for the next season also qualify, so the list leans into the change instead of flipping overnight. The Men and Women sides follow the same gender rules as above.
+- **Seasonal:** the season is meteorological, Northern Hemisphere: Dec to Feb winter, Mar to May spring, Jun to Aug summer, Sep to Nov fall. A fragrance qualifies only for the season it belongs to: `season_tags` contains the current season, or the research file lists it for that season. Fall fragrances appear only in fall, spring only in spring. A fragrance tagged for two seasons (fall and winter, say) qualifies in both. The list switches on the first day of the new season, including the heading ("Fall picks" becomes "Winter picks" on Dec 1). The Men and Women sides follow the same gender rules as above.
 - **Quality floor:** a bottle image is required, and the fragrance must have notes. A list without pictures reads as broken.
 
 **Coverage check (first implementation task):** an audit query counts how many fragrances in the top 300 by popularity have `gender` and `season_tags` filled. If season coverage is under 60%, the plan adds a fallback that infers season from families and accords (citrus, aquatic and green lean spring and summer; amber, gourmand, oud and leather lean fall and winter). That fallback is decided from real numbers, not built speculatively.
 
 ## Rotation
 
-Each list has a **pool**: the top 30 eligible fragrances by score. Time is cut into 3-day windows counted from a fixed epoch, and each window shows 10 picks from the pool:
+Each list has a **pool**: the top 30 eligible fragrances by score. Time is cut into 3-day windows counted from a fixed epoch, and each window shows 10 picks from the pool. For the seasonal lists, a season change ends the current window early: the cache key includes the season, so a window that straddles Dec 1 shows fall picks through Nov 30 and the new season's picks from Dec 1, with the rotation starting fresh for that season.
 
 - **Anchors** (top 3 in the pool) are eligible in any window but sit out at least one window in every three, so the best bottles recur roughly two windows out of three.
 - **Everyone else** gets a cooldown: after appearing, a fragrance sits out the next 2 windows (6 days).
@@ -65,8 +65,8 @@ Computed on request, then cached until the window ends. There is no cron, no new
 
 - `lib/discovery/score.ts`: loads the signals and returns scores per list. Server-only.
 - `lib/discovery/rotation.ts`: the pure rotation function, with no I/O.
-- `lib/discovery/season.ts`: current season and shoulder logic, from a date.
-- `lib/discovery/lists.ts`: `getSeasonalPicks(gender)`, `getTopScents(gender)`. Wrapped in `unstable_cache`, keyed by list and window number. They never throw: on error a section self-hides, same as the existing trending sections.
+- `lib/discovery/season.ts`: the current season from a date (Pacific time, matching the rest of the app's day boundaries).
+- `lib/discovery/lists.ts`: `getSeasonalPicks(gender)`, `getTopScents(gender)`. Wrapped in `unstable_cache`, keyed by list, season (seasonal lists only) and window number. They never throw: on error a section self-hides, same as the existing trending sections.
 - `components/seasonal-suggestions.tsx`: section with the Men / Women toggle, following `popular-by-house-tabs.tsx`.
 - `components/top-scents.tsx`: two exports rendering through the shared `FragranceScroller`.
 - `data/scent-research.json` plus `scripts/research-match.ts`, which matches entries to catalog ids and prints coverage.
@@ -87,13 +87,13 @@ Computed on request, then cached until the window ends. There is no cron, no new
 1. The same window always gives the same picks; the next window differs.
 2. Over 30 consecutive windows: every non-anchor respects the 2-window cooldown; each anchor appears in at least 50% and at most 67% of windows; every pool member appears at least once.
 3. A gendered list never has more than 3 unisex picks.
-4. Season boundaries: Nov 30 is fall, Dec 1 is winter, and Nov 17 qualifies winter-tagged fragrances through the shoulder rule.
+4. Season boundaries: Nov 30 is fall and Dec 1 is winter. On Nov 30 the seasonal pool contains no fragrance tagged only winter; on Dec 1 it contains no fragrance tagged only fall. A fragrance tagged fall and winter qualifies on both days.
 5. Scoring: a missing signal scores 0 and does not exclude the fragrance; the weights sum to 1.
 6. A pool smaller than 10 returns everything it has without crashing.
 
 ## Acceptance
 
-1. On the home feed (signed in), Seasonal Suggestions shows "Fall picks" with 10 bottles per side, every bottle with an image.
+1. On the home feed (signed in), Seasonal Suggestions shows "Fall picks" with 10 bottles per side, every bottle with an image, and none of them tagged only for another season. On Dec 1 it shows "Winter picks" without waiting for a rotation window to end.
 2. Library shows all three sections. Men's shows no feminine-only bottle, and women's no masculine-only bottle.
 3. On the same day, two devices see identical lists; three days later at least 6 of the 10 have changed.
 4. `npm run test:discovery` passes; typecheck is clean.
