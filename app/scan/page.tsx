@@ -23,6 +23,7 @@
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { recordScan } from "@/lib/review-prompt";
+import { track } from "@/lib/analytics";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SignedOut } from "@clerk/nextjs";
@@ -64,6 +65,8 @@ function ScanPageInner() {
   const [stages, setStages] = useState<StageLine[] | undefined>(undefined);
   const [stagesDone, setStagesDone] = useState(false);
   const prefetched = useRef(new Set<string>());
+  // performance.now() at capture, for scan_completed.latency_ms.
+  const scanStartedAt = useRef<number | null>(null);
 
   const pushLine = useCallback((line: StageLine | null) => {
     if (!line) return;
@@ -106,6 +109,11 @@ function ScanPageInner() {
   }
 
   async function finish(r: ScanResult) {
+    track("scan_completed", {
+      result: r.matched ? "matched" : r.candidates.length > 0 ? "candidates" : "no_match",
+      candidate_count: r.candidates.length,
+      latency_ms: scanStartedAt.current ? Math.round(performance.now() - scanStartedAt.current) : null,
+    });
     pushLine(resultLine(r));
     setStagesDone(true);
     recordScan(Boolean(r.matched));
@@ -120,6 +128,8 @@ function ScanPageInner() {
   }
 
   async function onCapture(base64: string) {
+    scanStartedAt.current = performance.now();
+    track("scan_started");
     setBusy(true);
     setError(null);
     setResult(null);
@@ -180,6 +190,11 @@ function ScanPageInner() {
       if (!final) throw new ScanFailure("scan_failed");
       await finish(final);
     } catch (err) {
+      track("scan_completed", {
+        result: "failed",
+        error: err instanceof ScanFailure ? err.code : "network",
+        latency_ms: scanStartedAt.current ? Math.round(performance.now() - scanStartedAt.current) : null,
+      });
       if (err instanceof ScanFailure) {
         setError(errorCopy(err.code));
       } else {

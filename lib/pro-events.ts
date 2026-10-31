@@ -1,5 +1,7 @@
 "use client";
 
+import { rememberPaywallTrigger } from "@/lib/analytics";
+
 // Analytics for Pro gates. Every gate fires `pro_gate_shown` once when it
 // renders and `pro_gate_cta_tapped` when its CTA is tapped, both with the
 // feature name. Grouping conversions by `feature` in PostHog answers
@@ -21,6 +23,7 @@ export function trackProGateShown(feature: ProFeature, props: Record<string, unk
 
 export function trackProGateCta(feature: ProFeature, props: Record<string, unknown> = {}) {
   ph()?.capture("pro_gate_cta_tapped", { feature, ...props });
+  rememberPaywallTrigger(feature);
 }
 
 export function trackFeatureUsed(feature: ProFeature, props: Record<string, unknown> = {}) {

@@ -8,10 +8,11 @@
 // Plan toggle is local state (no URL param) — keeping the page server-stable
 // avoids a flash of the wrong plan card on initial paint.
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useClerk, useUser } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
-import { isNativeApp } from "@/lib/native";
+import { isNativeApp, nativePlatform } from "@/lib/native";
+import { consumePaywallTrigger, track } from "@/lib/analytics";
 import { getPushPermission, requestPushAndRegister, resolvePushSupport } from "@/lib/push";
 import { TRIAL_PRIMER, TRIAL_TIMELINE } from "@/lib/trial";
 import {
@@ -194,6 +195,19 @@ function PricingContent() {
   // "Upgrade" to someone who's already Pro.
   const isAlreadyPro = user?.publicMetadata?.plan === "pro";
 
+  // paywall_viewed, once per visit, after Clerk loads so already_pro is real.
+  const paywallTracked = useRef(false);
+  useEffect(() => {
+    if (!isLoaded || paywallTracked.current) return;
+    paywallTracked.current = true;
+    track("paywall_viewed", {
+      trigger:
+        consumePaywallTrigger() ?? (search.get("plan") === "monthly" ? "intro_sheet" : "direct"),
+      already_pro: isAlreadyPro,
+      signed_in: Boolean(isSignedIn),
+    });
+  }, [isLoaded, isSignedIn, isAlreadyPro, search]);
+
   // Native + Monthly: before the store sheet, offer the day-5 reminder
   // (the promise the timeline below makes). Only when the OS has never
   // been asked; "denied" and "granted" both skip straight to purchase.
@@ -241,6 +255,11 @@ function PricingContent() {
       });
       return;
     }
+    const platform = nativePlatform();
+    track("purchase_started", {
+      plan,
+      rail: !native ? "stripe" : platform === "android" ? "play_store" : "app_store",
+    });
     if (native) {
       setBusy(true);
       setNotice(null);

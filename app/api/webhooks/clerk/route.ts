@@ -7,6 +7,7 @@ import { NextResponse } from "next/server";
 import { Webhook } from "svix";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { purgeAppUserData } from "@/lib/account-deletion";
+import { captureServer } from "@/lib/posthog-server";
 
 export const runtime = "nodejs";
 
@@ -67,6 +68,14 @@ export async function POST(req: Request) {
       await supabase
         .from("users")
         .insert({ id: crypto.randomUUID(), clerk_user_id: clerkId, email, plan: "free" });
+    }
+    if (event.type === "user.created") {
+      // Server-side so every signup counts, ad blocker or not. distinct_id is
+      // the Clerk id, the same id the client identifies with.
+      const today = new Date().toISOString().slice(0, 10);
+      await captureServer(clerkId, "user_signed_up", {
+        $set_once: { signup_date: today },
+      });
     }
   } else if (event.type === "user.deleted") {
     // The purge lives in lib/account-deletion.ts so this webhook and the

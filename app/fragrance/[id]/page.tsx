@@ -10,6 +10,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { cleanBottleImageUrl } from "@/lib/bottle-image";
 import { BottleImage } from "@/components/bottle-image";
 import { ScanReceipt } from "@/components/scan-receipt";
+import { FragranceViewTracker } from "@/components/fragrance-view-tracker";
 import { ReviewMoment } from "@/components/review-moment";
 import { BuyOptions, type BuyOffer } from "@/components/buy-options";
 import { SimilarSection } from "@/components/similar-section";
@@ -242,6 +243,7 @@ export default async function FragrancePage({ params }: { params: { id: string }
       {/* Scan audit trail — renders only when the URL carries ?scan=<id>,
           i.e. the visitor arrived here from a scan. Client-side so the
           ISR HTML stays identical for everyone else. */}
+      <FragranceViewTracker fragranceId={f.id} />
       <ScanReceipt fragranceId={f.id} />
       {/* Counts this page as a lookup and, once a milestone is reached in
           the shell, asks for an App Store / Play rating after the page

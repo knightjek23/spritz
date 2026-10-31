@@ -53,6 +53,12 @@ export async function POST(req: Request) {
     try {
       const existing = await stripe.customers.retrieve(customerId);
       if ((existing as { deleted?: boolean }).deleted) customerId = null;
+      else if (!(existing as Stripe.Customer).metadata?.posthog_person_distinct_id) {
+        // Backfill customers created before PostHog revenue tracking.
+        await stripe.customers.update(customerId, {
+          metadata: { posthog_person_distinct_id: userId },
+        });
+      }
     } catch {
       customerId = null;
     }
@@ -61,7 +67,8 @@ export async function POST(req: Request) {
   if (!customerId) {
     const customer = await stripe.customers.create({
       email: email ?? undefined,
-      metadata: { clerk_user_id: userId },
+      // posthog_person_distinct_id ties Stripe revenue to the PostHog person.
+      metadata: { clerk_user_id: userId, posthog_person_distinct_id: userId },
     });
     customerId = customer.id;
     await supabase

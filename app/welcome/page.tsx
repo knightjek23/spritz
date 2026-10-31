@@ -26,6 +26,7 @@ import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { SearchAutocomplete } from "@/components/search-autocomplete";
 import type { Fragrance } from "@/lib/types";
 import { SpritzLoader } from "@/components/spritz-loader";
+import { track } from "@/lib/analytics";
 
 const TARGET_PICKS = 3;
 
@@ -118,6 +119,11 @@ function WelcomeInner() {
       const failures = results.filter(
         (r) => r.status === "rejected" || (r.status === "fulfilled" && !r.value.ok),
       );
+      results.forEach((r, i) => {
+        if (r.status === "fulfilled" && r.value.ok) {
+          track("shelf_item_added", { fragrance_id: picks[i].id, status: "own", source: "onboarding" });
+        }
+      });
       if (failures.length === picks.length) {
         // Total failure — likely auth / DB outage. Let the user retry.
         setError("Couldn't save your selections. Try again in a moment.");

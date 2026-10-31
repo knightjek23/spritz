@@ -21,6 +21,7 @@
 import { useState } from "react";
 import { SearchAutocomplete } from "@/components/search-autocomplete";
 import { TrialCta } from "@/components/trial-cta";
+import { track } from "@/lib/analytics";
 import type { CollectionStatus, Fragrance } from "@/lib/types";
 
 const TAB_LABEL: Record<CollectionStatus, string> = {
@@ -72,6 +73,7 @@ export function AddToShelf({
         return;
       }
       setNotice({ kind: "added", name: f.name });
+      track("shelf_item_added", { fragrance_id: f.id, status, source: "shelf_search" });
       setOpen(false);
       onAdded();
     } catch {

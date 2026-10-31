@@ -27,6 +27,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { recordShelfAdd } from "@/lib/review-prompt";
+import { track } from "@/lib/analytics";
 import { useClerk, useUser } from "@clerk/nextjs";
 import type { CollectionStatus } from "@/lib/types";
 
@@ -119,6 +120,7 @@ export function SaveButton({
         if (body?.item?.id) setItemId(body.item.id);
         setState("saved");
         recordShelfAdd();
+        track("shelf_item_added", { fragrance_id: fragranceId, status, source: "fragrance_page" });
       } else if (res.status === 402) {
         setState("cap");
       } else if (res.status === 409) {
