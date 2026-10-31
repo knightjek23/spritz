@@ -158,19 +158,43 @@ async function main() {
   }
 
   // ---- Season inference (season_tags is empty catalog-wide) ----
+  // Accord lists are the real top-4 from the 2026-10-31 audit.
   {
-    assert.deepEqual(inferSeasons(["citrus", "aromatic", "fresh spicy"]), ["spring", "summer"]);
-    assert.deepEqual(inferSeasons(["amber", "vanilla", "warm spicy"]), ["fall", "winter"]);
-    assert.deepEqual(inferSeasons(["marine", "citrus"]), ["summer"]);
-    assert.deepEqual(inferSeasons(["white floral", "rose", "green"]), ["spring"]);
-    // Dominant accord decides: a citrus top with a vanilla tail stays warm-weather.
-    assert.ok(!inferSeasons(["citrus", "aquatic", "fresh", "vanilla"]).includes("winter"));
+    const has = (a: string[], want: string[]) => want.every((w) => inferSeasons(a).includes(w as never));
+    const lacks = (a: string[], no: string[]) => no.every((w) => !inferSeasons(a).includes(w as never));
+    // At most two seasons, ever: seasonal lists must actually be seasonal.
+    for (const a of [
+      ["citrus", "amber", "woody", "fresh spicy"],
+      ["aromatic", "vanilla", "fresh spicy", "lavender"],
+      ["citrus", "woody", "patchouli", "sweet"],
+    ]) assert.ok(inferSeasons(a).length <= 2, `${a} -> ${inferSeasons(a)}`);
+    // Le Male: a cold-weather staple despite the aromatic/fresh accords.
+    assert.ok(has(["aromatic", "vanilla", "fresh spicy", "lavender"], ["fall", "winter"]), "Le Male");
+    // Acqua di Gio, Sauvage EDP: warm weather.
+    assert.ok(has(["citrus", "aromatic", "marine", "fresh spicy"], ["summer"]), "Acqua di Gio");
+    assert.ok(lacks(["citrus", "aromatic", "marine", "fresh spicy"], ["fall", "winter"]), "Acqua di Gio not cold");
+    assert.ok(has(["fresh spicy", "citrus", "amber", "lavender"], ["summer"]), "Sauvage EDP");
+    // Baccarat Rouge, Tobacco Vanille, Ombre Leather, Angel: cold weather only.
+    for (const a of [
+      ["woody", "amber", "warm spicy", "metallic"],
+      ["vanilla", "sweet", "tobacco", "warm spicy"],
+      ["leather", "animalic", "warm spicy", "white floral"],
+      ["sweet", "patchouli", "fruity", "warm spicy"],
+    ]) {
+      assert.ok(lacks(a, ["spring", "summer"]), `${a} -> ${inferSeasons(a)}`);
+      assert.ok(inferSeasons(a).length > 0);
+    }
+    // Chanel No 5 Parfum: spring-led.
+    assert.equal(inferSeasons(["powdery", "woody", "aldehydic", "iris"])[0], "spring");
+    // Accords the first audit flagged as unknown now vote.
+    for (const a of ["soft spicy", "lactonic", "nutty", "tuberose", "cacao", "cherry"]) {
+      assert.ok(inferSeasons([a]).length > 0, `${a} unknown`);
+    }
     assert.deepEqual(inferSeasons([]), []);
     assert.deepEqual(inferSeasons(null), []);
     assert.deepEqual(inferSeasons(["mystery accord"]), [], "never guesses");
     assert.deepEqual(seasonsOf({ season_tags: ["winter"], family: ["citrus"] }), ["winter"], "stored tags win");
-    assert.deepEqual(seasonsOf({ season_tags: [], family: ["citrus", "aquatic"] }), ["summer"]);
-    ok("inferSeasons: dominance-weighted accords, never guesses, stored tags win");
+    ok("inferSeasons: <=2 seasons, real-catalog cases, never guesses, stored tags win");
   }
 
   console.log(`\n${pass} checks passed`);
