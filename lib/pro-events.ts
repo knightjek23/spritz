@@ -7,7 +7,7 @@ import { rememberPaywallTrigger } from "@/lib/analytics";
 // feature name. Grouping conversions by `feature` in PostHog answers
 // "which feature actually sells Pro". No-op when PostHog isn't loaded.
 
-export type ProFeature = "match" | "compare" | "layering" | "wear_insights" | "consensus" | "dupes" | "perfumer";
+export type ProFeature = "match" | "compare" | "layering" | "wear_insights" | "consensus" | "dupes" | "perfumer" | "seasonal";
 
 type PostHogLike = { capture: (event: string, props?: Record<string, unknown>) => void };
 
