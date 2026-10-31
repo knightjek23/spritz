@@ -20,6 +20,7 @@ for (const line of fs.readFileSync(".env.local", "utf8").split(/\r?\n/)) {
 }
 
 import { createClient } from "@supabase/supabase-js";
+import { inferSeasons } from "../lib/discovery/infer-season";
 
 const SEASONS = ["spring", "summer", "fall", "winter"] as const;
 
@@ -31,7 +32,7 @@ async function main() {
 
   const { data, error } = await supabase
     .from("fragrances")
-    .select("id, gender, season_tags, bottle_image_url, top_notes, mid_notes, base_notes")
+    .select("id, name, house, gender, season_tags, family, bottle_image_url, top_notes, mid_notes, base_notes")
     .not("popularity_rank", "is", null)
     .order("popularity_rank", { ascending: true })
     .limit(300);
@@ -70,6 +71,35 @@ async function main() {
   }
   const needInference = tagged.length < 0.6 * n || thin;
   console.log(`\nSeason inference fallback (plan Task 4b): ${needInference ? "NEEDED" : "not needed"}`);
+
+  // Inference preview: what the seasonal lists would draw from.
+  const inferred = quality.map((r) => ({ r, seasons: inferSeasons(r.family as string[] | null) }));
+  const none = inferred.filter((x) => x.seasons.length === 0);
+  console.log(`\nInferred seasons (quality floor applied)`);
+  console.log(`  no season inferred: ${none.length}`);
+  for (const s of SEASONS) {
+    const inS = inferred.filter((x) => x.seasons.includes(s));
+    const m = inS.filter((x) => forMen(x.r.gender)).length;
+    const w = inS.filter((x) => forWomen(x.r.gender)).length;
+    console.log(`  ${s}: men ${m}, women ${w}`);
+  }
+  // Accords the map does not know, most common first: candidates to add.
+  const unknown = new Map<string, number>();
+  for (const r of quality) {
+    for (const a of ((r.family as string[] | null) ?? []).slice(0, 6)) {
+      const k = a.trim().toLowerCase();
+      // An accord the map knows always yields at least one season alone.
+      if (inferSeasons([k]).length === 0) unknown.set(k, (unknown.get(k) ?? 0) + 1);
+    }
+  }
+  console.log(`  unknown accords (top 15):`, [...unknown].sort((a, b) => b[1] - a[1]).slice(0, 15));
+  for (const s of SEASONS) {
+    const sample = inferred.filter((x) => x.seasons.includes(s)).slice(0, 12);
+    console.log(`\n${s} sample (most popular first):`);
+    for (const x of sample) {
+      console.log(`  ${x.r.name} (${x.r.house}) [${x.r.gender}] ${x.seasons.join("/")} <- ${((x.r.family as string[] | null) ?? []).slice(0, 4).join(", ")}`);
+    }
+  }
 }
 
 main().catch((e) => {

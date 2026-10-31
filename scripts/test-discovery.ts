@@ -15,6 +15,7 @@ async function main() {
   const { rotate } = await import("../lib/discovery/rotation");
   const { combineScores, WEIGHTS } = await import("../lib/discovery/score");
   const { researchMentions } = await import("../lib/discovery/research");
+  const { inferSeasons, seasonsOf } = await import("../lib/discovery/infer-season");
 
   // ---- Season (Pacific time, meteorological, Northern Hemisphere) ----
   {
@@ -154,6 +155,22 @@ async function main() {
     assert.equal(fallMen.get("a"), 1.5, "seasonal list matches seasonal-<season> for either gender");
     assert.equal(researchMentions(file, "seasonal-men-winter", now).size, 0);
     ok("researchMentions: one per source, 90-day half decay, unmatched skipped, season-specific");
+  }
+
+  // ---- Season inference (season_tags is empty catalog-wide) ----
+  {
+    assert.deepEqual(inferSeasons(["citrus", "aromatic", "fresh spicy"]), ["spring", "summer"]);
+    assert.deepEqual(inferSeasons(["amber", "vanilla", "warm spicy"]), ["fall", "winter"]);
+    assert.deepEqual(inferSeasons(["marine", "citrus"]), ["summer"]);
+    assert.deepEqual(inferSeasons(["white floral", "rose", "green"]), ["spring"]);
+    // Dominant accord decides: a citrus top with a vanilla tail stays warm-weather.
+    assert.ok(!inferSeasons(["citrus", "aquatic", "fresh", "vanilla"]).includes("winter"));
+    assert.deepEqual(inferSeasons([]), []);
+    assert.deepEqual(inferSeasons(null), []);
+    assert.deepEqual(inferSeasons(["mystery accord"]), [], "never guesses");
+    assert.deepEqual(seasonsOf({ season_tags: ["winter"], family: ["citrus"] }), ["winter"], "stored tags win");
+    assert.deepEqual(seasonsOf({ season_tags: [], family: ["citrus", "aquatic"] }), ["summer"]);
+    ok("inferSeasons: dominance-weighted accords, never guesses, stored tags win");
   }
 
   console.log(`\n${pass} checks passed`);
