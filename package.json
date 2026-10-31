@@ -19,7 +19,10 @@
     "test:purge": "tsx scripts/test-account-purge.ts",
     "push:test": "tsx scripts/push-test.ts",
     "test:fcm": "tsx scripts/test-fcm.ts",
-    "diag:infra": "tsx scripts/diag-storage-tables.ts"
+    "diag:infra": "tsx scripts/diag-storage-tables.ts",
+    "test:discovery": "tsx scripts/test-discovery.ts",
+    "research:match": "tsx scripts/research-match.ts",
+    "audit:discovery": "tsx scripts/audit-discovery-coverage.ts"
   },
   "dependencies": {
     "@capacitor-community/in-app-review": "^8.0.0",

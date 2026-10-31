@@ -66,12 +66,12 @@ export interface RotateOpts {
   cooldown?: number;  // 2 windows for non-anchors
   power?: number;     // 1.5
   maxUnisex?: number; // undefined = no cap; 3 for gendered lists
-  replay?: number;    // 6 prior windows replayed to derive cooldowns
+  origin?: number;    // 0: every window replayed from the epoch, one shared timeline
 }
 export function rotate(pool: PoolItem[], listKey: string, window: number, opts?: RotateOpts): string[];
 ```
 
-Algorithm: sort pool by score desc; anchors = first `anchors`. Replay windows `window-replay .. window` in order with empty history at the start. For each window k: eligible = pool minus non-anchors that appeared in any of the previous `cooldown` windows, minus anchors that appeared in both of the previous 2 windows. Draw `size` by weighted sampling without replacement, weight `max(score, 1e-6) ** power`, PRNG `mulberry32(fnv1a(listKey + ":" + k))`; skip a unisex item once `maxUnisex` is reached. If fewer than `size` are drawable, top up from excluded items by score (cooldown relaxed before the unisex cap; the unisex cap is never relaxed). Return window `window`'s picks sorted by score desc.
+Algorithm: sort pool by score desc; anchors = first `anchors`. Replay windows `origin .. window` in order from an empty history (a fixed origin, so every call sees the same timeline; replaying only the last N windows gives each call a different history and breaks cooldowns). For each window k: eligible = pool minus non-anchors that appeared in any of the previous `cooldown` windows, minus anchors that appeared in both of the previous 2 windows. Draw `size` by weighted sampling without replacement, weight `max(score, 1e-6) ** power`, PRNG `mulberry32(fnv1a(listKey + ":" + k))`; skip a unisex item once `maxUnisex` is reached. If fewer than `size` are drawable, top up from excluded items by score (cooldown relaxed before the unisex cap; the unisex cap is never relaxed). Return window `window`'s picks sorted by score desc.
 
 - [ ] Tests first, on a synthetic 30-item pool with descending scores and 8 unisex items:
   1. Determinism: `rotate(p,"m",5)` deep-equals a second call; `rotate(p,"m",6)` differs.
