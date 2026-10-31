@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-30T14:10:54.006148+00:00",
+  "generated_at": "2026-10-31T13:39:39.902645+00:00",
   "period": {
     "start": "2026-10-26",
     "end": "2026-11-01"
@@ -34,13 +34,13 @@
     },
     {
       "rank": 6,
-      "name": "Vanilla Sex",
-      "house": "Tom Ford"
+      "name": "Molecule 01",
+      "house": "Escentric Molecules"
     },
     {
       "rank": 7,
-      "name": "Molecule 01",
-      "house": "Escentric Molecules"
+      "name": "Vanilla Sex",
+      "house": "Tom Ford"
     }
   ]
 }
