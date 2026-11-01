@@ -35,7 +35,7 @@
     {
       "name": "Marrakech Intense",
       "house": "Aesop",
-      "fragrance_id": null,
+      "fragrance_id": "2ee2e61e-90a9-4f39-98e9-803df11496ed",
       "lists": [
         "men",
         "seasonal-winter"
@@ -82,7 +82,7 @@
     {
       "name": "Reflection Man",
       "house": "Amouage",
-      "fragrance_id": null,
+      "fragrance_id": "df4bdac3-b6c8-4496-b179-f3a6877d22f1",
       "lists": [
         "men"
       ],
@@ -127,7 +127,7 @@
     {
       "name": "MOD Vanilla",
       "house": "Ariana Grande",
-      "fragrance_id": null,
+      "fragrance_id": "7a130c7a-e225-4dbb-8652-47aa0c7e2833",
       "lists": [
         "women",
         "seasonal-winter"
@@ -309,7 +309,7 @@
     {
       "name": "Goddess",
       "house": "Burberry",
-      "fragrance_id": null,
+      "fragrance_id": "0a673c85-acd1-4c70-bb8a-936861b16913",
       "lists": [
         "women",
         "seasonal-winter"
@@ -408,7 +408,7 @@
     {
       "name": "Omnia Amethyste",
       "house": "Bvlgari",
-      "fragrance_id": null,
+      "fragrance_id": "7f9f7c83-d3af-433f-977f-1c60e28214f6",
       "lists": [
         "seasonal-fall"
       ],
@@ -428,7 +428,7 @@
     {
       "name": "Bal d'Afrique",
       "house": "Byredo",
-      "fragrance_id": null,
+      "fragrance_id": "412f7f37-9751-49ae-b3a8-9a90b4c1e720",
       "lists": [
         "seasonal-fall"
       ],
@@ -494,7 +494,7 @@
     {
       "name": "Slow Dance",
       "house": "Byredo",
-      "fragrance_id": null,
+      "fragrance_id": "79f0da3a-8f60-4458-a866-b14e722aad1c",
       "lists": [
         "men",
         "seasonal-winter"
@@ -540,7 +540,7 @@
     {
       "name": "Bad Boy Elixir",
       "house": "Carolina Herrera",
-      "fragrance_id": null,
+      "fragrance_id": "d65c798f-39b1-438e-869c-1fae123080c0",
       "lists": [
         "men"
       ],
@@ -555,7 +555,7 @@
     {
       "name": "Cedar Chic",
       "house": "Carolina Herrera",
-      "fragrance_id": null,
+      "fragrance_id": "3a6ee4ef-fb21-479f-876d-9470d2868e9a",
       "lists": [
         "seasonal-winter"
       ],
@@ -690,7 +690,7 @@
     {
       "name": "Chance Eau Tendre Eau de Toilette",
       "house": "Chanel",
-      "fragrance_id": null,
+      "fragrance_id": "67b21f83-cd9e-4329-84eb-752261e07cd3",
       "lists": [
         "women"
       ],
@@ -705,7 +705,7 @@
     {
       "name": "Coco Mademoiselle",
       "house": "Chanel",
-      "fragrance_id": null,
+      "fragrance_id": "dd752365-c877-4669-8ae4-96a9c2dab8d4",
       "lists": [
         "women"
       ],
@@ -720,7 +720,7 @@
     {
       "name": "Coco Mademoiselle Crush Absolu",
       "house": "Chanel",
-      "fragrance_id": null,
+      "fragrance_id": "8def81c8-bed9-4c6a-a909-de325014c9a2",
       "lists": [
         "seasonal-fall"
       ],
@@ -735,7 +735,7 @@
     {
       "name": "Coco Mademoiselle Eau de Parfum Intense",
       "house": "Chanel",
-      "fragrance_id": null,
+      "fragrance_id": "598ff990-f536-40f5-9bc7-c485486ed1b2",
       "lists": [
         "women"
       ],
@@ -816,7 +816,7 @@
     {
       "name": "Tears",
       "house": "Comme des Garçons",
-      "fragrance_id": null,
+      "fragrance_id": "857b6341-e661-4524-ab6f-4b73174fb5f7",
       "lists": [
         "seasonal-fall"
       ],
@@ -979,7 +979,7 @@
     {
       "name": "Cool Water",
       "house": "Davidoff",
-      "fragrance_id": null,
+      "fragrance_id": "1d76e6f5-3e33-4505-82ad-2666626d44ed",
       "lists": [
         "men"
       ],
@@ -994,7 +994,7 @@
     {
       "name": "Mochi Milk",
       "house": "DedCool",
-      "fragrance_id": null,
+      "fragrance_id": "e5757526-68a8-4d11-a022-039a9c5a7885",
       "lists": [
         "seasonal-winter"
       ],
@@ -1463,7 +1463,7 @@
     {
       "name": "Bois d'Hiver",
       "house": "Ex Nihilo",
-      "fragrance_id": null,
+      "fragrance_id": "8360cc72-d5df-410d-8c6d-0ec338fc561e",
       "lists": [
         "seasonal-winter"
       ],
@@ -1594,7 +1594,7 @@
     {
       "name": "Acqua di Giò Profondo",
       "house": "Giorgio Armani",
-      "fragrance_id": null,
+      "fragrance_id": "f8780395-b078-4ed5-b871-ced22ff33393",
       "lists": [
         "men"
       ],
@@ -1625,7 +1625,7 @@
     {
       "name": "L'Interdit Eau de Parfum Rouge",
       "house": "Givenchy",
-      "fragrance_id": null,
+      "fragrance_id": "d8165294-3ba9-4087-9559-6b4f25113105",
       "lists": [
         "women"
       ],
@@ -1640,7 +1640,7 @@
     {
       "name": "Flora Gorgeous Gardenia",
       "house": "Gucci",
-      "fragrance_id": null,
+      "fragrance_id": "cc5b87ee-07d0-4b0a-a15a-97bd98e50bc2",
       "lists": [
         "women"
       ],
@@ -1660,7 +1660,7 @@
     {
       "name": "Flora Gorgeous Magnolia",
       "house": "Gucci",
-      "fragrance_id": null,
+      "fragrance_id": "ba3194ae-14a0-4345-ad01-78cf51f6d67d",
       "lists": [
         "women"
       ],
@@ -1763,7 +1763,7 @@
     {
       "name": "Dirty Hinoki",
       "house": "Heretic",
-      "fragrance_id": null,
+      "fragrance_id": "2aff86b6-188e-4513-a539-18f0e96f59e9",
       "lists": [
         "seasonal-winter"
       ],
@@ -1919,7 +1919,7 @@
     {
       "name": "Side Effect",
       "house": "Initio Parfums Privés",
-      "fragrance_id": null,
+      "fragrance_id": "00c7ea84-f18b-4c2c-93a5-bf3b30428304",
       "lists": [
         "men"
       ],
@@ -1949,7 +1949,7 @@
     {
       "name": "Le Beau Le Parfum",
       "house": "Jean Paul Gaultier",
-      "fragrance_id": null,
+      "fragrance_id": "1dc9f3ea-c958-4ff8-b237-92033c365456",
       "lists": [
         "men"
       ],
@@ -2020,7 +2020,7 @@
     {
       "name": "I Want Choo Forever",
       "house": "Jimmy Choo",
-      "fragrance_id": null,
+      "fragrance_id": "08587942-5f13-4bf4-a4dd-9c0121403f3a",
       "lists": [
         "women"
       ],
@@ -2035,7 +2035,7 @@
     {
       "name": "I Want Choo With Love",
       "house": "Jimmy Choo",
-      "fragrance_id": null,
+      "fragrance_id": "312c9b6f-6702-4635-ae16-257d11138d17",
       "lists": [
         "women",
         "seasonal-winter"
@@ -2051,7 +2051,7 @@
     {
       "name": "Dark Amber & Ginger Lily",
       "house": "Jo Malone London",
-      "fragrance_id": null,
+      "fragrance_id": "e46359e0-5ffb-48d6-a941-d542e9ae4af2",
       "lists": [
         "men",
         "seasonal-winter"
@@ -2159,7 +2159,7 @@
     {
       "name": "Boujee Kitty Caramel Milk 22",
       "house": "Kayali",
-      "fragrance_id": null,
+      "fragrance_id": "2ab5d2d7-6ec2-4e23-9a1c-f7ac604ddbab",
       "lists": [
         "seasonal-fall"
       ],
@@ -2288,7 +2288,7 @@
     {
       "name": "Encre Noire",
       "house": "Lalique",
-      "fragrance_id": null,
+      "fragrance_id": "5b9f7877-31c2-45f2-b392-174f5f22d125",
       "lists": [
         "men"
       ],
@@ -2303,7 +2303,7 @@
     {
       "name": "La Vie Est Belle",
       "house": "Lancôme",
-      "fragrance_id": null,
+      "fragrance_id": "13d0f09e-1b43-4a2d-876b-24f13848e615",
       "lists": [
         "women"
       ],
@@ -2364,7 +2364,7 @@
     {
       "name": "Thé Noir 29",
       "house": "Le Labo",
-      "fragrance_id": null,
+      "fragrance_id": "270cb60b-4838-4761-9c4d-6954cad48493",
       "lists": [
         "men",
         "women",
@@ -2466,7 +2466,7 @@
     {
       "name": "Baccarat Rouge 540",
       "house": "Maison Francis Kurkdjian",
-      "fragrance_id": null,
+      "fragrance_id": "c8efa9e2-34ff-4a97-ac17-620dbf35e16d",
       "lists": [
         "women"
       ],
@@ -2481,7 +2481,7 @@
     {
       "name": "Baccarat Rouge 540 Extrait de Parfum",
       "house": "Maison Francis Kurkdjian",
-      "fragrance_id": null,
+      "fragrance_id": "2d89d150-e196-4afe-a4d5-07adac4836cd",
       "lists": [
         "women"
       ],
@@ -2496,7 +2496,7 @@
     {
       "name": "L'Eau à la Rose",
       "house": "Maison Francis Kurkdjian",
-      "fragrance_id": null,
+      "fragrance_id": "ecd0a3ef-b541-4ac8-84d3-de87f8d78a51",
       "lists": [
         "women"
       ],
@@ -2511,7 +2511,7 @@
     {
       "name": "Oud Satin Mood",
       "house": "Maison Francis Kurkdjian",
-      "fragrance_id": null,
+      "fragrance_id": "b6293bb7-fb6a-4330-88d8-65fcb44c2612",
       "lists": [
         "men",
         "seasonal-winter"
@@ -2547,7 +2547,7 @@
     {
       "name": "Replica Beach Walk",
       "house": "Maison Margiela",
-      "fragrance_id": null,
+      "fragrance_id": "ef70f7ce-6899-4d85-9190-2f621f30da77",
       "lists": [
         "women"
       ],
@@ -2567,7 +2567,7 @@
     {
       "name": "Replica Lazy Sunday Morning",
       "house": "Maison Margiela",
-      "fragrance_id": null,
+      "fragrance_id": "f5489394-c8fe-4356-8e7e-966426e1bd1f",
       "lists": [
         "seasonal-winter"
       ],
@@ -2598,7 +2598,7 @@
     {
       "name": "Cedrat Boisé",
       "house": "Mancera",
-      "fragrance_id": null,
+      "fragrance_id": "009b3f09-35e9-4b25-8e18-721e1f0a641a",
       "lists": [
         "men"
       ],
@@ -2613,7 +2613,7 @@
     {
       "name": "Daisy",
       "house": "Marc Jacobs",
-      "fragrance_id": null,
+      "fragrance_id": "7328cabb-6150-44d9-b43e-792a6121d6d8",
       "lists": [
         "women"
       ],
@@ -2796,7 +2796,7 @@
     {
       "name": "Alien",
       "house": "Mugler",
-      "fragrance_id": null,
+      "fragrance_id": "a39a2209-45b4-4028-8b29-cd09fdfea6fb",
       "lists": [
         "women",
         "seasonal-winter"
@@ -2888,7 +2888,7 @@
     {
       "name": "Tolu",
       "house": "Ormonde Jayne",
-      "fragrance_id": null,
+      "fragrance_id": "1fc6deac-4a9b-49ad-b7ec-1057aca5ceda",
       "lists": [
         "seasonal-winter"
       ],
@@ -2938,7 +2938,7 @@
     {
       "name": "Delina",
       "house": "Parfums de Marly",
-      "fragrance_id": null,
+      "fragrance_id": "da4104b2-e2e9-4ba0-923b-beebd3d27735",
       "lists": [
         "women"
       ],
@@ -3060,7 +3060,7 @@
     {
       "name": "Cashmere Skin",
       "house": "Phlur",
-      "fragrance_id": null,
+      "fragrance_id": "e2c10aad-9230-46c4-b3e5-e5fc9b0d506e",
       "lists": [
         "seasonal-winter"
       ],
@@ -3111,7 +3111,7 @@
     {
       "name": "L'Homme",
       "house": "Prada",
-      "fragrance_id": null,
+      "fragrance_id": "337a8d70-187b-4d3e-add8-2ccb99cb1c70",
       "lists": [
         "men"
       ],
@@ -3261,7 +3261,7 @@
     {
       "name": "Polo 67",
       "house": "Ralph Lauren",
-      "fragrance_id": null,
+      "fragrance_id": "6648a08d-be10-4eaa-b0a1-2244093e4477",
       "lists": [
         "men"
       ],
@@ -3291,7 +3291,7 @@
     {
       "name": "Polo Red",
       "house": "Ralph Lauren",
-      "fragrance_id": null,
+      "fragrance_id": "6f27b92e-9369-415d-966a-f281cbdf4576",
       "lists": [
         "men"
       ],
@@ -3351,7 +3351,7 @@
     {
       "name": "Vanilla Vice",
       "house": "Snif",
-      "fragrance_id": null,
+      "fragrance_id": "a87aa60f-d86b-4933-be7c-136b6b70da19",
       "lists": [
         "women",
         "seasonal-winter"
@@ -3413,7 +3413,7 @@
     {
       "name": "Grey Vetiver Eau de Parfum",
       "house": "Tom Ford",
-      "fragrance_id": null,
+      "fragrance_id": "7dad4c69-0a5f-4296-96e1-4421b8fb3e72",
       "lists": [
         "men",
         "seasonal-winter"
@@ -3512,7 +3512,7 @@
     {
       "name": "Donna Born in Roma",
       "house": "Valentino",
-      "fragrance_id": null,
+      "fragrance_id": "0aae96bc-2df3-44f1-a53f-62da72d79b57",
       "lists": [
         "women"
       ],
@@ -3527,7 +3527,7 @@
     {
       "name": "Donna Born in Roma Green Stravaganza",
       "house": "Valentino",
-      "fragrance_id": null,
+      "fragrance_id": "dbe1219c-cb79-45c5-8c43-04ebae8d88e0",
       "lists": [
         "women"
       ],
@@ -3750,7 +3750,7 @@
     {
       "name": "Flowerbomb",
       "house": "Viktor&Rolf",
-      "fragrance_id": null,
+      "fragrance_id": "249cfb81-a2e6-40b9-a128-516738e4a1cf",
       "lists": [
         "women"
       ],
@@ -3817,7 +3817,7 @@
     {
       "name": "Spicebomb Night Vision",
       "house": "Viktor&Rolf",
-      "fragrance_id": null,
+      "fragrance_id": "f6fcc81f-9255-4b66-ba97-9f1c9fe3d676",
       "lists": [
         "men"
       ],
@@ -3894,7 +3894,7 @@
     {
       "name": "Black Opium",
       "house": "Yves Saint Laurent",
-      "fragrance_id": null,
+      "fragrance_id": "ec7fd0f2-7341-49cc-aa1c-08a53a9d6379",
       "lists": [
         "women"
       ],
@@ -3994,7 +3994,7 @@
     {
       "name": "Mon Paris",
       "house": "Yves Saint Laurent",
-      "fragrance_id": null,
+      "fragrance_id": "5b9b10ea-faea-41fc-b08b-11ddd4f68bd3",
       "lists": [
         "women"
       ],
