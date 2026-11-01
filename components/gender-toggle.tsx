@@ -2,8 +2,9 @@
 
 // Men / Women pill toggle over a FragranceScroller. Shared by Seasonal
 // Suggestions and "Most popular right now". Both sides arrive from the
-// server in one payload, so switching is instant. Pills follow the "Most
-// popular" house tabs (ink-on-cream for the selected state). If one side is
+// server in one payload, so switching is instant. Both pills are one
+// fixed width (and both carry a 1px border, so heights match too); the
+// selected pill is brand emerald with cream text. If one side is
 // empty the toggle is dropped and the other side shows alone; if both are
 // empty the section hides.
 
@@ -54,9 +55,10 @@ export function GenderToggle({
                 aria-selected={selected}
                 onClick={() => setActive(s)}
                 className={
-                  selected
-                    ? "px-4 py-2 text-sm rounded-full bg-ink text-cream transition"
-                    : "px-4 py-2 text-sm rounded-full bg-paper border border-ink/10 text-ink hover:brightness-95 transition"
+                  "w-24 py-2 text-sm text-center rounded-full border transition " +
+                  (selected
+                    ? "bg-emerald border-emerald text-cream"
+                    : "bg-paper border-ink/10 text-ink hover:brightness-95")
                 }
               >
                 {s === "men" ? "Men" : "Women"}
