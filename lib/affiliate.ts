@@ -126,6 +126,34 @@ const RAKUTEN_MIDS: Array<{ match: RegExp; mid: string }> = [
   { match: /nicchia/i, mid: "54306" },
 ];
 
+// CJ click domains. CJ rotates a tracking link across these hosts; all
+// carry the publisher id (PID) in the path and the landing page in ?url=.
+const CJ_CLICK_HOSTS = /(^|\.)(anrdoezrs\.net|dpbolvw\.net|tkqlhce\.com|kqzyfj\.com|jdoqocy\.com|emjcd\.com)$/i;
+
+// CJ feed links (Perfumania) land on one specific size: a Shopify product
+// URL with ?variant=<id>. A feed row can match a tester or a size that
+// sells out after the export, so the shopper arrives on "Sold out"
+// (seen 2026-11-01 on Versace Pour Homme, 3.4 oz tester). Dropping
+// `variant` lands on the product page, where Shopify preselects the first
+// available size. Only the inner landing URL changes; the PID path and the
+// click id CJ appends on redirect are untouched.
+function stripCjShopifyVariant(u: URL): string {
+  const inner = u.searchParams.get("url");
+  if (!inner) return u.toString();
+  let dest: URL;
+  try {
+    dest = new URL(inner);
+  } catch {
+    return u.toString();
+  }
+  if (!dest.pathname.startsWith("/products/") || !dest.searchParams.has("variant")) {
+    return u.toString();
+  }
+  dest.searchParams.delete("variant");
+  u.searchParams.set("url", dest.toString());
+  return u.toString();
+}
+
 export function normalizeOfferUrl(rawUrl: string, retailerName: string): string {
   let u: URL;
   try {
@@ -133,6 +161,8 @@ export function normalizeOfferUrl(rawUrl: string, retailerName: string): string 
   } catch {
     return rawUrl;
   }
+  if (CJ_CLICK_HOSTS.test(u.hostname)) return stripCjShopifyVariant(u);
+
   if (u.hostname !== "click.linksynergy.com" || u.pathname !== "/link") return rawUrl;
 
   const pub = u.searchParams.get("id") || FRAGRANCENET_RAKUTEN_PUBLISHER;
