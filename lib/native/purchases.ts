@@ -50,7 +50,17 @@ export interface NativePlanInfo {
 }
 
 let sdkPromise: Promise<typeof import("@revenuecat/purchases-capacitor")> | null = null;
+/** Purchases.configure has run (anonymously or for a user). It may only run once. */
+let sdkConfigured = false;
+/** In-flight anonymous configure, so a sign-in racing it never configures twice. */
+let anonConfigure: Promise<boolean> | null = null;
+/** The Clerk user the SDK is logged in as; null while anonymous. */
 let configuredFor: string | null = null;
+
+/** The store's own name, for copy: "the App Store" or "Google Play". */
+export function storeName(): string {
+  return nativePlatform() === "android" ? "Google Play" : "the App Store";
+}
 
 function sdk() {
   if (!sdkPromise) {
@@ -79,9 +89,11 @@ export async function configurePurchases(clerkUserId: string): Promise<boolean> 
     return false;
   }
   if (configuredFor === clerkUserId) return true;
+  if (anonConfigure) await anonConfigure;
   const { Purchases } = await sdk();
-  if (configuredFor === null) {
+  if (!sdkConfigured) {
     await Purchases.configure({ apiKey: key, appUserID: clerkUserId });
+    sdkConfigured = true;
   } else {
     await Purchases.logIn({ appUserID: clerkUserId });
   }
@@ -89,9 +101,36 @@ export async function configurePurchases(clerkUserId: string): Promise<boolean> 
   return true;
 }
 
+/**
+ * Configure anonymously so a signed-out visitor still sees the store's own
+ * localized prices (Play's Subscriptions policy: the price shown must match
+ * the purchase sheet, currency included). Sign-in later logs the SDK in.
+ */
+async function ensureConfigured(): Promise<boolean> {
+  if (sdkConfigured) return true;
+  if (!anonConfigure) {
+    anonConfigure = (async () => {
+      const key = apiKey();
+      if (!key) {
+        console.warn("[purchases] no RevenueCat key for", nativePlatform());
+        return false;
+      }
+      const { Purchases } = await sdk();
+      if (!sdkConfigured) {
+        await Purchases.configure({ apiKey: key });
+        sdkConfigured = true;
+      }
+      return true;
+    })().finally(() => {
+      anonConfigure = null;
+    });
+  }
+  return anonConfigure;
+}
+
 /** Forget the user in the SDK cache on sign-out. */
 export async function logOutPurchases(): Promise<void> {
-  if (!isNativeApp() || configuredFor === null) return;
+  if (!isNativeApp() || !sdkConfigured || configuredFor === null) return;
   try {
     const { Purchases } = await sdk();
     await Purchases.logOut();
@@ -123,7 +162,7 @@ function describeTrial(pkg: PurchasesPackage): string | null {
  * approved: it looks exactly like a code bug and is not one.
  */
 export async function getNativePlans(): Promise<Record<PurchasePlan, NativePlanInfo> | null> {
-  if (!isNativeApp() || configuredFor === null) return null;
+  if (!isNativeApp() || !(await ensureConfigured())) return null;
   const { Purchases } = await sdk();
   const { current, all } = await Purchases.getOfferings();
   const offerings = { current, all } as PurchasesOfferings;

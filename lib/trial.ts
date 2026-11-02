@@ -12,26 +12,42 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const TRIAL_DAYS = 7;
+/**
+ * The web (Stripe, USD) monthly price. Inside the native apps never quote
+ * this: use the store's localized string (lib/native/store-prices.ts).
+ * Google rejected Android 1.0.3 for USD shown against a local-currency
+ * purchase sheet (Subscriptions policy, Nov 2, 2026).
+ */
 export const MONTHLY_PRICE = "$4.99";
 
-/** Button + sub-line for a Pro gate. Billed amount always travels with the offer. */
-export const TRIAL_CTA = {
-  label: `Try Pro free for ${TRIAL_DAYS} days`,
-  sub: `Then ${MONTHLY_PRICE}/mo. Cancel anytime.`,
-} as const;
+/**
+ * Button + sub-line for a Pro gate. The billed amount always travels with
+ * the offer (App Store 3.1.2(c)), so callers without a price must not
+ * show the trial offer at all.
+ */
+export function trialCta(price: string) {
+  return {
+    label: `Try Pro free for ${TRIAL_DAYS} days`,
+    sub: `Then ${price}/mo. Cancel anytime.`,
+  };
+}
 
 /** Pricing-page timeline (Monthly only). */
-export const TRIAL_TIMELINE = [
-  { when: "Today", what: "Everything unlocks: perfumers, dupes, the full library, unlimited shelf." },
-  { when: `Day ${TRIAL_DAYS - 2}`, what: "One reminder from us, so the end never sneaks up on you." },
-  { when: `Day ${TRIAL_DAYS}`, what: `${MONTHLY_PRICE}/mo begins. Cancel before then and you pay nothing.` },
-] as const;
+export function trialTimeline(price: string) {
+  return [
+    { when: "Today", what: "Everything unlocks: perfumers, dupes, the full library, unlimited shelf." },
+    { when: `Day ${TRIAL_DAYS - 2}`, what: "One reminder from us, so the end never sneaks up on you." },
+    { when: `Day ${TRIAL_DAYS}`, what: `${price}/mo begins. Cancel before then and you pay nothing.` },
+  ];
+}
 
 /** Copy for the push-permission primer shown before a native trial purchase. */
-export const TRIAL_PRIMER = {
-  title: "We'll remind you before it ends",
-  body: `Turn on notifications and we'll send one reminder on day ${TRIAL_DAYS - 2}, two days before ${MONTHLY_PRICE}/mo would begin.`,
-} as const;
+export function trialPrimer(price: string) {
+  return {
+    title: "We'll remind you before it ends",
+    body: `Turn on notifications and we'll send one reminder on day ${TRIAL_DAYS - 2}, two days before ${price}/mo would begin.`,
+  };
+}
 
 export interface TrialState {
   /** Non-null while a free trial is running. ISO timestamp. */
@@ -91,7 +107,9 @@ export function trialPush(day: TrialPushDay, endsAt: string): { title: string; b
     case "trial_day5":
       return {
         title: "Your Pro trial ends in two days",
-        body: `${MONTHLY_PRICE}/mo begins ${trialEndLabel(endsAt)} unless you cancel.`,
+        // No amount: store trials bill in local currency, and a push can't
+        // know which. The amount was shown at the point of purchase.
+        body: `Your monthly plan begins ${trialEndLabel(endsAt)} unless you cancel.`,
         url: "/account",
       };
     case "trial_day7":

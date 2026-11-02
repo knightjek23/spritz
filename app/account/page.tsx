@@ -30,7 +30,7 @@ import { PushSettings } from "@/components/push-settings";
 import { SignOutButton, DeleteAccountSection } from "@/components/account-actions";
 import { PlanActions } from "@/components/plan-actions";
 import { daysLogged } from "@/lib/wear-log";
-import { MONTHLY_PRICE, trialEndLabel, trialStateFrom } from "@/lib/trial";
+import { trialEndLabel, trialStateFrom } from "@/lib/trial";
 
 export const metadata: Metadata = {
   title: "Account",
@@ -123,7 +123,7 @@ export default async function AccountPage() {
             <>
               <p className="text-sm text-slate mb-5 leading-relaxed">
                 {trial.endsAt
-                  ? `Your free trial is running. ${MONTHLY_PRICE}/mo starts ${trialEndLabel(trial.endsAt)} unless you cancel before then.`
+                  ? `Your free trial is running. Your monthly plan starts ${trialEndLabel(trial.endsAt)} unless you cancel before then.`
                   : "AI-generated dupes, full editorial library, expanded similar-fragrance results, and unlimited collection."}
               </p>
               <PlanActions

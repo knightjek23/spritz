@@ -9,10 +9,16 @@
 // the gate never promises a free week the store will refuse.
 //
 // One fetch per page, shared by every gate on it.
+//
+// Inside the native apps the amount is the store's own localized price
+// (lib/native/store-prices.ts). Until it is known, or if the store has no
+// free intro offer, the gate says "Unlock with Pro" with no amount: never
+// a USD figure next to a local-currency purchase sheet.
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { TRIAL_CTA } from "@/lib/trial";
+import { MONTHLY_PRICE, trialCta } from "@/lib/trial";
+import { monthlyPriceFor, useStorePrices } from "@/lib/native/store-prices";
 import { recordProGateHit } from "@/components/pro-intro-sheet";
 
 let eligibility: Promise<boolean> | null = null;
@@ -39,15 +45,21 @@ export function TrialCta({ className = "" }: { className?: string }) {
     };
   }, []);
 
+  const prices = useStorePrices();
+  const price = monthlyPriceFor(prices, MONTHLY_PRICE);
+  // Native: only offer the trial when the store itself has a free intro offer.
+  const storeHasTrial = prices.status !== "ready" || prices.plans.monthly.trial !== null;
+  const offer = available && price !== null && storeHasTrial ? trialCta(price) : null;
+
   return (
     <div className={`flex flex-col items-start gap-2 ${className}`}>
       <Link
         href="/pricing"
         className="inline-flex items-center gap-2 px-4 py-3 bg-brass text-ink font-medium hover:bg-brass/80 transition"
       >
-        {available ? TRIAL_CTA.label : "Unlock with Pro"}
+        {offer ? offer.label : "Unlock with Pro"}
       </Link>
-      {available && <p className="text-sm text-ink">{TRIAL_CTA.sub}</p>}
+      {offer && <p className="text-sm text-ink">{offer.sub}</p>}
     </div>
   );
 }

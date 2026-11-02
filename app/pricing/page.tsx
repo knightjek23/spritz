@@ -14,13 +14,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { isNativeApp, nativePlatform } from "@/lib/native";
 import { consumePaywallTrigger, track } from "@/lib/analytics";
 import { getPushPermission, requestPushAndRegister, resolvePushSupport } from "@/lib/push";
-import { TRIAL_PRIMER, TRIAL_TIMELINE } from "@/lib/trial";
-import {
-  getNativePlans,
-  purchasePro,
-  restorePro,
-  type NativePlanInfo,
-} from "@/lib/native/purchases";
+import { MONTHLY_PRICE, trialPrimer, trialTimeline } from "@/lib/trial";
+import { purchasePro, restorePro } from "@/lib/native/purchases";
+import { useStorePrices } from "@/lib/native/store-prices";
 
 type Plan = "monthly" | "annual" | "lifetime";
 
@@ -116,7 +112,13 @@ const FEATURE_MATRIX: Array<{ label: string; free: string; pro: string }> = [
   },
 ];
 
-const FAQ: Array<{ q: string; a: string }> = [
+// Prices in the FAQ follow the same rule as the plan card: USD on the web,
+// the store's localized strings in the apps, and no amounts at all while
+// the store hasn't answered (Play Subscriptions policy, Nov 2, 2026).
+type FaqPrices = { monthly: string; annual: string; lifetime: string; web: boolean } | null;
+
+function buildFaq(p: FaqPrices): Array<{ q: string; a: string }> {
+  return [
   {
     q: "Can I cancel anytime?",
     a: "Yes. Cancel from any device and you keep Pro access until the end of your current billing period. After that you drop back to Free. Your collection stays intact, just capped at 10 items going forward.",
@@ -127,11 +129,13 @@ const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: "Is there a free trial?",
-    a: "Yes — the Monthly plan comes with a 7-day free trial. You get full Pro access for a week, and you won't be charged until it ends. Cancel anytime before then and you pay nothing, and the most you'd ever be charged after a trial is $4.99. The Annual plan has no trial — it's billed upfront at $29.99 (~$2.50/mo). And the Free plan is always free: scan unlimited bottles, save up to 10 fragrances, and see when a cheaper match exists.",
+    a: p
+      ? `Yes — the Monthly plan comes with a 7-day free trial. You get full Pro access for a week, and you won't be charged until it ends. Cancel anytime before then and you pay nothing, and the most you'd ever be charged after a trial is ${p.monthly}. The Annual plan has no trial — it's billed upfront at ${p.annual}${p.web ? " (~$2.50/mo)" : ""}. And the Free plan is always free: scan unlimited bottles, save up to 10 fragrances, and see when a cheaper match exists.`
+      : "Yes — the Monthly plan comes with a 7-day free trial. You get full Pro access for a week, and you won't be charged until it ends. Cancel anytime before then and you pay nothing. The Annual plan has no trial — it's billed upfront for the year. And the Free plan is always free: scan unlimited bottles, save up to 10 fragrances, and see when a cheaper match exists.",
   },
   {
     q: "What's the Lifetime option?",
-    a: "A one-time payment of $89 that unlocks Pro permanently — no subscription, no renewals. Same Pro feature set as the monthly and annual plans, just paid once and yours for good. There's no trial on Lifetime since it's a single upfront purchase.",
+    a: `A one-time payment${p ? ` of ${p.lifetime}` : ""} that unlocks Pro permanently — no subscription, no renewals. Same Pro feature set as the monthly and annual plans, just paid once and yours for good. There's no trial on Lifetime since it's a single upfront purchase.`,
   },
   {
     q: "Do you sell my data?",
@@ -141,7 +145,8 @@ const FAQ: Array<{ q: string; a: string }> = [
     q: "What if I scan something you don't have?",
     a: "We log every miss and use it to prioritize what to add next. After a no-match scan you can also tap \"we missed this\" to flag it directly. The catalog grows weekly.",
   },
-];
+  ];
+}
 
 // useSearchParams needs a Suspense boundary for the static prerender of
 // this route; the fallback is never seen in practice.
@@ -172,24 +177,21 @@ function PricingContent() {
   // reachable from here (Guideline 3.1.1). Detected after mount so the
   // server render and first client render agree.
   const [native, setNative] = useState(false);
-  const [nativePlans, setNativePlans] = useState<Record<Plan, NativePlanInfo> | null>(null);
+  // Until mounted we can't tell web from app, so no amount is shown yet:
+  // the apps must never flash the USD prices (Play Subscriptions policy).
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setNative(isNativeApp());
+    setMounted(true);
   }, []);
-  useEffect(() => {
-    if (!native || !isSignedIn) return;
-    let cancelled = false;
-    getNativePlans()
-      .then((plans) => {
-        if (!cancelled) setNativePlans(plans);
-      })
-      .catch(() => {
-        if (!cancelled) setNativePlans(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [native, isSignedIn]);
+  // Store prices load for signed-out visitors too (anonymous RevenueCat
+  // configure), so the price shown always matches the purchase sheet.
+  const prices = useStorePrices();
+  const nativePlans = prices.status === "ready" ? prices.plans : null;
+  const storePending = prices.status === "loading";
+  const storeUnavailable = prices.status === "unavailable";
+  const android = prices.status !== "web" && prices.platform === "android";
+  const store = android ? "Google Play" : "the App Store";
 
   // Optimistic check — server is authoritative, but no point showing
   // "Upgrade" to someone who's already Pro.
@@ -309,7 +311,11 @@ function PricingContent() {
         router.push("/account");
         router.refresh();
       } else {
-        setNotice("No previous purchase found for this Apple ID.");
+        setNotice(
+          android
+            ? "No previous purchase found for this Google account."
+            : "No previous purchase found for this Apple ID.",
+        );
       }
     } catch {
       setNotice("Couldn't reach the store. Try again in a moment.");
@@ -322,7 +328,20 @@ function PricingContent() {
   // the trial line reflects the store's own introductory offer.
   const web = PLANS[selected];
   const storePlan = nativePlans?.[selected] ?? null;
-  const plan = storePlan
+  // Native without store prices: no amount anywhere (never the USD fallback).
+  const noAmount = !mounted || prices.status === "loading" || prices.status === "unavailable";
+  const plan = noAmount
+    ? {
+        ...web,
+        price: "",
+        unit: "",
+        sub: storeUnavailable
+          ? "Purchases aren't available on this device right now."
+          : native
+            ? `Loading prices from ${store}…`
+            : "Loading prices…",
+      }
+    : storePlan
     ? {
         ...web,
         price: storePlan.priceString,
@@ -336,6 +355,30 @@ function PricingContent() {
               : web.sub,
       }
     : web;
+
+  // Trial copy quotes the same price the purchase sheet will show.
+  const monthlyPrice: string | null = !mounted
+    ? null
+    : !native
+    ? MONTHLY_PRICE
+    : nativePlans
+      ? nativePlans.monthly.priceString
+      : null;
+  const primer = trialPrimer(monthlyPrice ?? MONTHLY_PRICE);
+  const faq = buildFaq(
+    !mounted
+      ? null
+      : !native
+      ? { monthly: PLANS.monthly.price, annual: PLANS.annual.price, lifetime: PLANS.lifetime.price, web: true }
+      : nativePlans
+        ? {
+            monthly: nativePlans.monthly.priceString,
+            annual: nativePlans.annual.priceString,
+            lifetime: nativePlans.lifetime.priceString,
+            web: false,
+          }
+        : null,
+  );
 
   return (
     <div className="mx-auto max-w-md px-6 py-12">
@@ -416,23 +459,25 @@ function PricingContent() {
         {!isAlreadyPro && (
           <button
             onClick={() => maybePrimeThenUpgrade(selected)}
-            disabled={busy}
+            disabled={busy || noAmount}
             className="w-full bg-emerald text-cream py-3 rounded-xl font-medium hover:bg-emerald/90 transition disabled:opacity-60"
           >
-            {busy
+            {busy || storePending || !mounted
               ? "Loading…"
-              : selected === "lifetime"
+              : storeUnavailable
+                ? "Unavailable right now"
+                : selected === "lifetime"
                 ? "Get Lifetime"
-                : selected === "monthly"
+                : selected === "monthly" && !(storePlan && storePlan.trial === null)
                   ? "Start free trial"
                   : `Start Pro · ${plan.cadence}`}
           </button>
         )}
 
         {primerOpen && (
-          <div className="mt-4 rounded-xl border border-ink/10 bg-paper p-4" role="dialog" aria-label={TRIAL_PRIMER.title}>
-            <p className="font-medium mb-1">{TRIAL_PRIMER.title}</p>
-            <p className="text-sm text-slate leading-relaxed mb-4">{TRIAL_PRIMER.body}</p>
+          <div className="mt-4 rounded-xl border border-ink/10 bg-paper p-4" role="dialog" aria-label={primer.title}>
+            <p className="font-medium mb-1">{primer.title}</p>
+            <p className="text-sm text-slate leading-relaxed mb-4">{primer.body}</p>
             <div className="flex flex-col gap-2">
               <button
                 type="button"
@@ -459,7 +504,7 @@ function PricingContent() {
           {!isSignedIn
             ? "Sign up first. Takes 30 seconds."
             : native
-              ? "Billed through the App Store"
+              ? `Billed through ${store}`
               : "Secure checkout via Stripe"}
         </p>
         {notice && (
@@ -483,17 +528,19 @@ function PricingContent() {
             Store description); the web links our own terms. */}
         {isSignedIn && !isAlreadyPro && (
           <p className="mt-4 text-center text-[11px] leading-relaxed text-slate">
-            {native
-              ? "Subscriptions renew automatically unless cancelled at least 24 hours before the end of the current period. Manage or cancel in your App Store account settings. "
-              : "Subscriptions renew automatically until cancelled. Manage or cancel anytime from your account. "}
+            {!native
+              ? "Subscriptions renew automatically until cancelled. Manage or cancel anytime from your account. "
+              : android
+                ? "Subscriptions renew automatically until cancelled. Manage or cancel anytime in Google Play under Payments & subscriptions. "
+                : "Subscriptions renew automatically unless cancelled at least 24 hours before the end of the current period. Manage or cancel in your App Store account settings. "}
             <a
               href={
-                native
+                native && !android
                   ? "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
                   : "/legal/terms"
               }
-              target={native ? "_blank" : undefined}
-              rel={native ? "noreferrer" : undefined}
+              target={native && !android ? "_blank" : undefined}
+              rel={native && !android ? "noreferrer" : undefined}
               className="underline underline-offset-2"
             >
               Terms of Use
@@ -511,11 +558,11 @@ function PricingContent() {
           decision 2026-07-13). The day-5 line is a promise lib/push-trial.ts
           keeps. Billed amount appears in the same weight as the free days,
           per App Store guideline 3.1.2(c). */}
-      {selected === "monthly" && !isAlreadyPro && (
+      {selected === "monthly" && !isAlreadyPro && monthlyPrice !== null && (
         <section className="mb-10 rounded-2xl border border-ink/10 bg-paper px-5 py-5">
           <h2 className="font-display text-xl mb-3">How your free trial works</h2>
           <ol className="space-y-3">
-            {TRIAL_TIMELINE.map((step) => (
+            {trialTimeline(monthlyPrice).map((step) => (
               <li key={step.when} className="flex gap-3">
                 <span className="shrink-0 w-14 font-mono text-[11px] uppercase tracking-widest text-emerald pt-0.5">
                   {step.when}
@@ -560,7 +607,7 @@ function PricingContent() {
       <section className="mb-10">
         <h2 className="font-display text-2xl mb-4">Common questions</h2>
         <div className="space-y-2">
-          {FAQ.map((item) => (
+          {faq.map((item) => (
             <FaqItem key={item.q} q={item.q} a={item.a} />
           ))}
         </div>
@@ -582,14 +629,16 @@ function PricingContent() {
         <div className="text-center">
           <button
             onClick={() => upgrade(selected)}
-            disabled={busy}
+            disabled={busy || noAmount}
             className="w-full bg-ink text-cream py-4 rounded-2xl font-medium tracking-wide hover:bg-ink/90 transition disabled:opacity-60 mb-3"
           >
-            {busy
+            {busy || storePending || !mounted
               ? "Loading…"
-              : selected === "lifetime"
-                ? `Get Lifetime · ${plan.price}`
-                : `Go Pro · ${plan.price}${plan.unit}`}
+              : storeUnavailable
+                ? "Unavailable right now"
+                : selected === "lifetime"
+                  ? `Get Lifetime · ${plan.price}`
+                  : `Go Pro · ${plan.price}${plan.unit}`}
           </button>
           <p className="text-xs text-slate font-mono uppercase tracking-widest">
             Cancel anytime · {isSignedIn ? "Secure" : "30-second"} signup

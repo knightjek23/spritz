@@ -29,6 +29,7 @@ import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { MONTHLY_PRICE, TRIAL_DAYS } from "@/lib/trial";
+import { monthlyPriceFor, useStorePrices } from "@/lib/native/store-prices";
 
 const KEY = "spritz:pro-intro:v1";
 const GATE_HITS_KEY = "spritz:pro-gate-hits";
@@ -175,11 +176,19 @@ export function ProIntroSheet() {
   const [leaving, setLeaving] = useState(false);
   const [mounted, setMounted] = useState(false);
   const armed = useRef(false);
+  // Native: the pitch quotes the store's own price, so it waits for it and
+  // is skipped when the store has no price or no free intro offer.
+  const prices = useStorePrices();
+  const price = monthlyPriceFor(prices, MONTHLY_PRICE);
+  const storeReady =
+    prices.status === "web" || (prices.status === "ready" && prices.plans.monthly.trial !== null);
+  const storeName = prices.status !== "web" && prices.platform === "android" ? "Google Play" : "the App Store";
 
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (!mounted || !isLoaded || open || armed.current) return;
+    if (!storeReady) return;
     if (!pathname || !TRIGGER_PATHS.has(pathname)) return;
     if (user?.publicMetadata?.plan === "pro") return;
     if (!shouldShow()) return;
@@ -203,7 +212,7 @@ export function ProIntroSheet() {
     return () => {
       cancelled = true;
     };
-  }, [mounted, isLoaded, pathname, user, open]);
+  }, [mounted, isLoaded, pathname, user, open, storeReady]);
 
   function close(then?: () => void) {
     if (leaving) return;
@@ -227,7 +236,7 @@ export function ProIntroSheet() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  if (!mounted || !open) return null;
+  if (!mounted || !open || price === null) return null;
 
   return createPortal(
     <div
@@ -314,9 +323,10 @@ export function ProIntroSheet() {
                 Terms
               </a>{" "}
               and, after {TRIAL_DAYS} days, to{" "}
-              <span className="text-ink">{MONTHLY_PRICE}/month</span> billed automatically through
-              the App Store (or your card on the web) until you cancel. Cancel anytime in your App
-              Store or Account settings.
+              <span className="text-ink">{price}/month</span> billed automatically
+              {prices.status === "web"
+                ? " to your card until you cancel. Cancel anytime in your Account settings."
+                : ` through ${storeName} until you cancel. Cancel anytime in ${storeName} or your Account settings.`}
             </p>
             <button
               type="button"

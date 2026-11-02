@@ -74,7 +74,11 @@ export function PlanActions({
         await user?.reload();
         router.refresh();
       } else {
-        setNotice("No previous purchase found for this Apple ID.");
+        setNotice(
+          nativePlatform() === "android"
+            ? "No previous purchase found for this Google account."
+            : "No previous purchase found for this Apple ID.",
+        );
       }
     } catch {
       setNotice("Couldn't reach the store. Try again in a moment.");
