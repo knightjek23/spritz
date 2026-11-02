@@ -1,6 +1,6 @@
 import "@/lib/env"; // fail fast on missing env vars in production
 import type { Metadata, Viewport } from "next";
-import { Playfair_Display, Roboto } from "next/font/google";
+import localFont from "next/font/local";
 import { ClerkProvider } from "@clerk/nextjs";
 import { spritzClerkAppearance } from "@/lib/clerk-appearance";
 import { Nav } from "@/components/nav";
@@ -18,18 +18,27 @@ import { NativeResumeReload } from "@/components/native-resume-reload";
 import { LaunchScreen, LAUNCH_SCREEN_BOOT } from "@/components/launch-screen";
 import "./globals.css";
 
+// Fonts are self-hosted (OFL variable fonts from Fontsource, in app/fonts).
+// next/font/google started failing every uncached production build on
+// Nov 2, 2026 inside Next 14.2's Google Fonts loader: its regex for the font
+// file's extension came back null for one of Google's font URLs ("Cannot
+// read properties of null (reading '1')", loader.js:112). Local files remove
+// the build-time dependency on Google Fonts entirely.
+
 // Playfair Display — high-contrast serif for hero / section headings.
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+// Variable font, so any weight 400-900 works (we use 400-700).
+const playfair = localFont({
+  src: "./fonts/playfair-display-latin-wght-normal.woff2",
+  weight: "400 900",
   variable: "--font-playfair",
   display: "swap",
 });
 
 // Roboto — body, small, metadata. Light + Extra Light per the Figma type spec.
-const roboto = Roboto({
-  subsets: ["latin"],
-  weight: ["100", "300", "400", "500"],
+// Variable font, weights 100-900 (we use 100, 300, 400, 500).
+const roboto = localFont({
+  src: "./fonts/roboto-latin-wght-normal.woff2",
+  weight: "100 900",
   variable: "--font-roboto",
   display: "swap",
 });
