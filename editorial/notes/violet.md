@@ -1,7 +1,7 @@
 ---
 name: violet
 type: note
-aliases: [violet leaf, violet flower, parma violet]
+aliases: [violet flower, parma violet]
 family: floral
 ---
 

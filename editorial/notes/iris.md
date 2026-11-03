@@ -1,7 +1,7 @@
 ---
 name: iris
 type: note
-aliases: [orris, orris root, orris butter, iris pallida]
+aliases: [orris butter, iris pallida]
 family: floral
 ---
 

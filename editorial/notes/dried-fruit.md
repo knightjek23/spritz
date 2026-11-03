@@ -1,7 +1,7 @@
 ---
 name: dried fruit
 type: note
-aliases: [dried fruits accord, prune, fig, raisin]
+aliases: [dried fruits accord, prune, raisin]
 family: fruity
 ---
 

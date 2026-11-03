@@ -1,7 +1,7 @@
 ---
 name: fig
 type: note
-aliases: [fig leaf, fig fruit, figue]
+aliases: [fig fruit, figue]
 family: fruity
 ---
 

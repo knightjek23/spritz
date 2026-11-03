@@ -1,7 +1,7 @@
 ---
 name: birch tar
 type: note
-aliases: [birch, smoked birch, russian leather]
+aliases: [smoked birch]
 family: smoky
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: blackcurrant
 type: note
-aliases: [cassis, black currant, blackcurrant bud]
+aliases: [black currant, blackcurrant bud]
 family: fruity
 ---
 

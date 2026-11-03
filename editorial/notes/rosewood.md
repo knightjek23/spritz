@@ -1,7 +1,7 @@
 ---
 name: rosewood
 type: note
-aliases: [bois de rose, brazilian rosewood, rosewood oil]
+aliases: [bois de rose, rosewood oil]
 family: woody
 ---
 

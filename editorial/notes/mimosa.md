@@ -1,7 +1,7 @@
 ---
 name: mimosa
 type: note
-aliases: [mimosa absolute, acacia, cassie]
+aliases: [acacia, cassie]
 family: floral
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: tonka bean
 type: note
-aliases: [tonka, fève tonka]
+aliases: [fève tonka]
 family: gourmand
 ---
 

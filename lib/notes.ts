@@ -56,11 +56,43 @@ export async function loadNote(slug: string): Promise<NoteEditorial | null> {
   // Alias scan — load all files (~80 small files, fast at this scale).
   // If/when this gets to thousands of notes, build an index at module
   // load time instead of scanning per-request.
+  // Alias fallback, for spelling variants only ("ylang ylang" → the
+  // ylang-ylang file). It used to accept any alias, so /note/frankincense
+  // rendered the Incense page (frankincense was an incense alias), and the
+  // same for orris → Iris, tangerine → Mandarin, suede → Leather and a
+  // dozen more. Every stored note name gets its own page now; an alias
+  // only routes when it is the same name written differently.
   const all = await loadAllNotes();
   return (
-    all.find((n) => n.slug === normalized || n.aliases.includes(normalized)) ??
-    null
+    all.find(
+      (n) =>
+        n.slug === normalized ||
+        n.aliases.some((a) => noteSlug(a) === normalized && isSameNoteName(a, n.name)),
+    ) ?? null
   );
+}
+
+/**
+ * True when two note names are the same name written differently: case,
+ * spacing, hyphens, punctuation, accents, or a trailing plural "s"
+ * ("Ylang Ylang" / "ylang-ylang", "Lily of the valley" / "lily-of-the-
+ * valley", "Black currant" / "blackcurrant"). Different words are
+ * different notes, even near-synonyms: Frankincense is not Incense, Orris
+ * is not Iris, Tonka is not Tonka Bean. The catalog stores them as
+ * separate notes, so they get separate pages. Known typos in the catalog
+ * ("myrhh", "vanila") are mapped explicitly in lib/note-aliases.ts.
+ */
+export function isSameNoteName(a: string, b: string): boolean {
+  const n = (s: string) =>
+    s
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "");
+  const x = n(a);
+  const y = n(b);
+  if (!x || !y) return false;
+  return x === y || x.replace(/s$/, "") === y.replace(/s$/, "");
 }
 
 /**

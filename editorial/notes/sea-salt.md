@@ -1,7 +1,7 @@
 ---
 name: sea salt
 type: note
-aliases: [marine accord, sea spray, salt]
+aliases: [marine accord, sea spray]
 family: aquatic
 ---
 

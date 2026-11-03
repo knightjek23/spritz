@@ -1,7 +1,7 @@
 ---
 name: musk
 type: note
-aliases: [white musk, animal musk, synthetic musk, ambrette]
+aliases: [animal musk, synthetic musk]
 family: musk
 ---
 

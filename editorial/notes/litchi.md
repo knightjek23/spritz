@@ -1,7 +1,7 @@
 ---
 name: litchi
 type: note
-aliases: [lychee]
+aliases: []
 family: fruity
 source: ai
 generated_at: 2026-07-01T06:23:05.542Z

@@ -1,7 +1,7 @@
 ---
 name: mint
 type: note
-aliases: [peppermint, spearmint, fresh mint]
+aliases: [fresh mint]
 family: aromatic
 ---
 

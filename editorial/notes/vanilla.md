@@ -1,7 +1,7 @@
 ---
 name: vanilla
 type: note
-aliases: [madagascan vanilla, vanilla bean, vanilla absolute, tahitian vanilla]
+aliases: [madagascan vanilla]
 family: gourmand
 ---
 

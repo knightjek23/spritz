@@ -1,7 +1,7 @@
 ---
 name: ethyl-maltol
 type: note
-aliases: [maltol, cotton candy molecule, caramel ketone]
+aliases: [cotton candy molecule, caramel ketone]
 family: synthetic
 ---
 

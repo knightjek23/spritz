@@ -1,7 +1,7 @@
 ---
 name: benzoin
 type: note
-aliases: [siam benzoin, sumatra benzoin]
+aliases: [sumatra benzoin]
 family: amber
 ---
 

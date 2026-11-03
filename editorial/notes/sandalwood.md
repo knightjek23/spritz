@@ -1,7 +1,7 @@
 ---
 name: sandalwood
 type: note
-aliases: [mysore sandalwood, australian sandalwood, santal]
+aliases: [santal]
 family: woody
 ---
 

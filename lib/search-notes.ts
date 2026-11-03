@@ -4,8 +4,9 @@
 // ("frankin…") or a family ("resin…"), the dropdown shows a Note / Family
 // row above the fragrance matches that links straight to /note/[slug] or
 // /family/[slug]. Index: every catalog note (list_canonical_notes, with
-// its fragrance count) plus the editorial notes and their aliases, so
-// "olibanum" finds Frankincense; and the fixed family list.
+// its fragrance count) plus the editorial notes and their aliases (an
+// alias that is itself a stored note matches only its own row); and the
+// fixed family list.
 //
 // Match rule: every query word must be a prefix of a word in the name or
 // an alias. When prefix matching finds nothing and the query is at least
@@ -15,7 +16,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
-import { loadAllNotes } from "@/lib/notes";
+import { isSameNoteName, loadAllNotes } from "@/lib/notes";
 import { noteSlug } from "@/lib/slugs";
 import { FAMILY_ORDER, familyName } from "@/lib/families";
 
@@ -88,14 +89,23 @@ async function loadIndex(supabase: SupabaseClient<Database>): Promise<Index> {
         });
       }
     }
-    // Editorial notes: the canonical display name wins, aliases match too.
+    // Editorial notes: the canonical display name wins, aliases match too,
+    // except an alias that is a different stored note in its own right
+    // ("frankincense" on Incense): that one has its own row and page, and
+    // letting it match here put Incense above Frankincense for the query
+    // "frankincense".
+    const catalogSlugs = new Set(bySlug.keys());
     for (const n of editorial) {
       const entry = bySlug.get(n.slug) ?? {
         hit: { name: n.name, slug: n.slug, count: 0 },
         forms: [],
       };
       entry.hit.name = n.name;
-      entry.forms.push(words(n.name), ...n.aliases.map(words));
+      const aliases = n.aliases.filter((a) => {
+        const s = noteSlug(a);
+        return s === n.slug || !catalogSlugs.has(s) || isSameNoteName(a, n.name);
+      });
+      entry.forms.push(words(n.name), ...aliases.map(words));
       bySlug.set(n.slug, entry);
     }
     const built: Index = { notes: [...bySlug.values()], loadedAt: Date.now() };

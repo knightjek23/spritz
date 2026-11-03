@@ -1,7 +1,7 @@
 ---
 name: thyme
 type: note
-aliases: [thyme oil, wild thyme, red thyme]
+aliases: [thyme oil, wild thyme]
 family: aromatic
 ---
 

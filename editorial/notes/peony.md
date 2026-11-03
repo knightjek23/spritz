@@ -1,7 +1,7 @@
 ---
 name: peony
 type: note
-aliases: [pink peony, white peony]
+aliases: [white peony]
 family: floral
 ---
 

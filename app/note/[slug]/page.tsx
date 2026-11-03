@@ -4,33 +4,19 @@
 //   1. Editorial: the flavor profile, aliases, and family — read from
 //      editorial/notes/<slug>.md.
 //   2. Catalog: every fragrance in our database that includes this note,
-//      ordered by popularity, badged by which layer it appears in.
+//      ordered by popularity, badged by which layer it appears in. First
+//      50 here, then "See more" loads 50 at a time (components/browse-list).
 //
 // Server Component — both sources are read at request time and revalidated
 // on a 5-minute cycle (notes don't churn fast).
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { cleanBottleImageUrl } from "@/lib/bottle-image";
-import { BottleImage } from "@/components/bottle-image";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { loadNote, loadAllNotes } from "@/lib/notes";
-import { resolveNoteQueries } from "@/lib/note-aliases";
-import type { Fragrance } from "@/lib/types";
+import { fetchNotePage } from "@/lib/browse-pages";
+import { BrowseList } from "@/components/browse-list";
 
 export const revalidate = 300;
-
-const LAYER_LABEL: Record<string, string> = {
-  top: "top",
-  mid: "heart",
-  base: "base",
-};
-
-const LAYER_PILL: Record<string, string> = {
-  top: "bg-brass/40 text-ink",
-  mid: "bg-paper text-ink",
-  base: "bg-ink/10 text-ink",
-};
 
 export async function generateMetadata({
   params,
@@ -49,35 +35,11 @@ export async function generateMetadata({
 export default async function NotePage({ params }: { params: { slug: string } }) {
   const note = await loadNote(params.slug);
 
-  // Try every candidate query name in sequence (see lib/note-aliases.ts
-  // for resolution rules — covers trademark suffixes, spelling
-  // variants, and canonical synonyms). Union results across variants
-  // so a page for "oud" shows fragrances stored under BOTH "oud" AND
-  // "agarwood (oud)". Dedupe by fragrance id, cap at 60.
-  //
-  // Public read — note browsing is unauthenticated, RPC has a grant to
-  // anon. Admin client used only because the @supabase/ssr typed
-  // client's .rpc() overload selection is finicky with hand-rolled
-  // Database types; functionally identical for read-only queries.
-  const supabase = createAdminClient();
-  const candidateNames = resolveNoteQueries(params.slug, note?.name);
-  const seenFragranceIds = new Set<string>();
-  const collected: Array<Fragrance & { layer: "top" | "mid" | "base" }> = [];
-  for (const name of candidateNames) {
-    if (collected.length >= 60) break;
-    const { data } = await supabase.rpc("find_fragrances_by_note", {
-      p_note: name,
-      p_limit: 60,
-    });
-    if (!data) continue;
-    for (const row of data as Array<Fragrance & { layer: "top" | "mid" | "base" }>) {
-      if (seenFragranceIds.has(row.id)) continue;
-      seenFragranceIds.add(row.id);
-      collected.push(row);
-      if (collected.length >= 60) break;
-    }
-  }
-  const fragrances = collected;
+  // First page of the catalog list (50, popularity order) plus the full
+  // match count. Candidate names (trademark marks, spacing variants,
+  // catalog typos) are unioned in one query; see lib/browse-pages.ts.
+  // "See more" in BrowseList fetches the next 50 from the same function.
+  const { rows: fragrances, total } = await fetchNotePage(params.slug);
   const queryName = note?.name ?? params.slug.replace(/-/g, " ");
 
   // Soft-404: neither editorial nor any variant matched. Render a
@@ -103,8 +65,8 @@ export default async function NotePage({ params }: { params: { slug: string } })
       <header className="mb-8">
         <p className="font-mono text-xs uppercase tracking-widest text-slate">
           {note?.family ?? "note"}
-          {fragrances.length > 0 && (
-            <span> · in {fragrances.length} fragrance{fragrances.length === 1 ? "" : "s"}</span>
+          {total > 0 && (
+            <span> · in {total} fragrance{total === 1 ? "" : "s"}</span>
           )}
         </p>
         <h1 className="font-display text-5xl mt-2 leading-[0.95] capitalize">
@@ -138,40 +100,7 @@ export default async function NotePage({ params }: { params: { slug: string } })
       {fragrances.length > 0 && (
         <section className="mb-10">
           <h2 className="font-display text-2xl mb-4">Fragrances featuring it</h2>
-          <ul className="space-y-2">
-            {fragrances.map((f) => (
-              <li key={f.id}>
-                <Link
-                  href={`/fragrance/${f.id}`}
-                  className="flex items-center gap-3 px-3 py-2 rounded-xl bg-paper border border-ink/10 hover:brightness-95 transition"
-                >
-                  <div className="shrink-0 w-12 h-16 relative">
-                    <BottleImage
-                      src={f.bottle_image_url}
-                      house={f.house}
-                      name={f.name}
-                      sizes="48px"
-                      className="object-contain mix-blend-multiply"
-                    />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="font-medium truncate">{f.name}</div>
-                    <div className="text-xs text-slate truncate">
-                      {f.house}
-                      {f.year ? ` · ${f.year}` : ""}
-                    </div>
-                  </div>
-                  <span
-                    className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider ${
-                      LAYER_PILL[f.layer] ?? LAYER_PILL.base
-                    }`}
-                  >
-                    {LAYER_LABEL[f.layer] ?? f.layer}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <BrowseList kind="note" slug={params.slug} initialRows={fragrances} total={total} />
         </section>
       )}
     </article>

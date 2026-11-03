@@ -1,7 +1,7 @@
 ---
 name: lily
 type: note
-aliases: [casablanca lily, white lily, oriental lily, calla lily]
+aliases: [oriental lily]
 family: floral
 ---
 

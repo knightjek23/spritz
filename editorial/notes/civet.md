@@ -1,7 +1,7 @@
 ---
 name: civet
 type: note
-aliases: [civet absolute, civetone, synthetic civet]
+aliases: [civet absolute, civetone]
 family: musky
 ---
 

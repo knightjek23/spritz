@@ -1,7 +1,7 @@
 ---
 name: tobacco
 type: note
-aliases: [tobacco leaf, tobacco absolute, pipe tobacco]
+aliases: [tobacco absolute, pipe tobacco]
 family: gourmand
 ---
 

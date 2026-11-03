@@ -1,7 +1,7 @@
 ---
 name: patchouli
 type: note
-aliases: [patchouli leaf, indonesian patchouli]
+aliases: [indonesian patchouli]
 family: woody
 ---
 

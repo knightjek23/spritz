@@ -649,6 +649,31 @@ export type Database = {
         Args: { p_family: string; p_limit?: number };
         Returns: Array<Database["public"]["Tables"]["fragrances"]["Row"]>;
       };
+      find_fragrances_by_notes_page: {
+        Args: { p_notes: string[]; p_limit?: number; p_offset?: number };
+        Returns: Array<{
+          id: string;
+          name: string;
+          house: string;
+          year: number | null;
+          bottle_image_url: string | null;
+          popularity_rank: number | null;
+          layer: "top" | "mid" | "base";
+          total_count: number;
+        }>;
+      };
+      find_fragrances_by_family_page: {
+        Args: { p_family: string; p_limit?: number; p_offset?: number };
+        Returns: Array<{
+          id: string;
+          name: string;
+          house: string;
+          year: number | null;
+          bottle_image_url: string | null;
+          popularity_rank: number | null;
+          total_count: number;
+        }>;
+      };
       list_catalog_families: {
         Args: { p_limit?: number };
         Returns: Array<{ family: string; fragrance_count: number }>;

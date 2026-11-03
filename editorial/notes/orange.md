@@ -1,7 +1,7 @@
 ---
 name: orange
 type: note
-aliases: [sweet orange, orange peel, orange blossom water, blood orange]
+aliases: [orange blossom water]
 family: citrus
 ---
 

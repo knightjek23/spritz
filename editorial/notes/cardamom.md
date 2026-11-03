@@ -1,7 +1,7 @@
 ---
 name: cardamom
 type: note
-aliases: [green cardamom, black cardamom]
+aliases: [green cardamom]
 family: spicy
 ---
 

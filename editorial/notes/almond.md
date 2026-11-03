@@ -1,7 +1,7 @@
 ---
 name: almond
 type: note
-aliases: [bitter almond, sweet almond, marzipan]
+aliases: [marzipan]
 family: gourmand
 ---
 

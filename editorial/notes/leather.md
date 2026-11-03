@@ -1,7 +1,7 @@
 ---
 name: leather
 type: note
-aliases: [suede, leather accord]
+aliases: [leather accord]
 family: leather
 ---
 

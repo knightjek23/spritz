@@ -1,7 +1,7 @@
 ---
 name: coconut
 type: note
-aliases: [coconut milk, dried coconut]
+aliases: [dried coconut]
 family: gourmand
 ---
 

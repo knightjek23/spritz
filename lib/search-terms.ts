@@ -22,7 +22,7 @@ import { houseForToken, type HouseHit } from "./search-houses";
 import type { FamilyHit, NoteHit } from "./search-notes";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
-import { loadAllNotes } from "@/lib/notes";
+import { isSameNoteName, loadAllNotes } from "@/lib/notes";
 import { noteSlug, slugsForCanonicalHouse } from "@/lib/slugs";
 import { NOTE_ALIASES, resolveNoteQueries } from "@/lib/note-aliases";
 import { normalizeFamily, familyName } from "@/lib/families";
@@ -124,7 +124,11 @@ async function getNoteIndex(supabase: SupabaseClient<Database>): Promise<NoteInd
       const name = n.name.toLowerCase();
       aliasToName.set(name, name);
       aliasToName.set(n.slug, name);
-      for (const a of n.aliases) aliasToName.set(a, name);
+      // An alias that is a stored note of its own stays that note
+      // ("frankincense" must search frankincense, not incense).
+      for (const a of n.aliases) {
+        if (!catalog.has(a) || isSameNoteName(a, n.name)) aliasToName.set(a, name);
+      }
     }
     // NOTE_ALIASES keys are slugs (sometimes a known misspelling, per
     // that file); the values are catalog spellings. Label with the

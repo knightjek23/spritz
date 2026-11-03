@@ -1,7 +1,7 @@
 ---
 name: juniper
 type: note
-aliases: [juniper berry, gin note]
+aliases: [gin note]
 family: aromatic
 ---
 

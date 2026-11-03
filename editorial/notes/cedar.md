@@ -1,7 +1,7 @@
 ---
 name: cedar
 type: note
-aliases: [cedarwood, virginia cedar, atlas cedar, texas cedar]
+aliases: []
 family: woody
 ---
 

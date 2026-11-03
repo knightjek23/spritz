@@ -1,7 +1,7 @@
 ---
 name: birch
 type: note
-aliases: [silver birch, birch leaf, birch wood]
+aliases: [birch wood]
 family: woody
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: peach
 type: note
-aliases: [white peach, peach skin, fuzzy peach]
+aliases: [peach skin, fuzzy peach]
 family: fruity
 ---
 

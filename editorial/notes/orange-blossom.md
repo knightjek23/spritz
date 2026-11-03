@@ -1,7 +1,7 @@
 ---
 name: orange blossom
 type: note
-aliases: [neroli, orange flower, fleur d'oranger]
+aliases: [orange flower, fleur d'oranger]
 family: floral
 ---
 

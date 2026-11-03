@@ -1,7 +1,7 @@
 ---
 name: honey
 type: note
-aliases: [honey absolute, beeswax]
+aliases: [honey absolute]
 family: gourmand
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: sage
 type: note
-aliases: [clary sage, sage leaf]
+aliases: [sage leaf]
 family: aromatic
 ---
 

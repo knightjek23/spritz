@@ -1,7 +1,7 @@
 ---
 name: bergamot
 type: note
-aliases: [italian bergamot, bergamot oil, bergamot peel, calabrian bergamot]
+aliases: [italian bergamot, bergamot oil, bergamot peel]
 family: citrus
 ---
 

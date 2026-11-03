@@ -1,7 +1,7 @@
 ---
 name: grapefruit
 type: note
-aliases: [pink grapefruit, ruby grapefruit]
+aliases: [ruby grapefruit]
 family: citrus
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: jasmine
 type: note
-aliases: [jasmine sambac, jasmine grandiflorum, indian jasmine]
+aliases: [jasmine grandiflorum]
 family: floral
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: green tea
 type: note
-aliases: [matcha, sencha, tea leaf]
+aliases: [matcha, sencha]
 family: green
 ---
 

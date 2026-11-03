@@ -1,7 +1,7 @@
 ---
 name: white flowers
 type: note
-aliases: [jasmine, gardenia, tuberose]
+aliases: []
 family: floral
 source: ai
 generated_at: 2026-07-01T06:24:13.844Z

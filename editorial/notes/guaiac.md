@@ -1,7 +1,7 @@
 ---
 name: guaiac wood
 type: note
-aliases: [guaiac, guaiacwood, palo santo]
+aliases: [guaiacwood]
 family: woody
 ---
 

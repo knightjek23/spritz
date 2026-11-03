@@ -1,7 +1,7 @@
 ---
 name: anise
 type: note
-aliases: [star anise, aniseed, pastis accord]
+aliases: [aniseed, pastis accord]
 family: spicy
 ---
 

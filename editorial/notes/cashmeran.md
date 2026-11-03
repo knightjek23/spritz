@@ -1,7 +1,7 @@
 ---
 name: cashmeran
 type: note
-aliases: [cashmere wood, cashmeran molecule]
+aliases: [cashmeran molecule]
 family: woody
 ---
 

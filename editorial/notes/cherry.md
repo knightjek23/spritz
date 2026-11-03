@@ -1,7 +1,7 @@
 ---
 name: cherry
 type: note
-aliases: [black cherry, cherry accord, maraschino cherry, wild cherry]
+aliases: [cherry accord, wild cherry]
 family: fruity
 ---
 

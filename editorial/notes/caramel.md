@@ -1,7 +1,7 @@
 ---
 name: caramel
 type: note
-aliases: [burnt sugar, salted caramel]
+aliases: []
 family: gourmand
 ---
 

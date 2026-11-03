@@ -1,7 +1,7 @@
 ---
 name: cocoa
 type: note
-aliases: [cocoa absolute, raw cocoa, cacao, dark cocoa]
+aliases: [cocoa absolute, raw cocoa, dark cocoa]
 family: gourmand
 ---
 

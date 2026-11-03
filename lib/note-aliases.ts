@@ -18,8 +18,8 @@
 //
 // Generated from the note-coverage SQL audit (top 900+ notes ranked by
 // fragrance count). Entries below cover: (a) trademark-suffixed notes,
-// (b) confirmed scraper spelling errors, (c) canonical synonyms where
-// multiple names refer to the same molecule/material.
+// (b) confirmed scraper spelling errors, (c) the same name stored with
+// different spacing or punctuation.
 //
 // To add a new alias: pick the URL slug as the key; put every catalog
 // name that should feed into it as the value array (with the "primary"
@@ -70,17 +70,26 @@ export function resolveNoteQueries(slug: string, editorialName?: string): string
  *   - Spelling corrections: scraper picked up Fragrantica typos like
  *     "vanila", "myrhh". Slug is the correct spelling; alias is what's
  *     actually in the DB.
- *   - Canonical synonyms: same material stored under multiple names.
- *     Slug is what the user is most likely to type; aliases cover the
- *     other stored variants.
+ *   - Same-name variants: the same note stored with different spacing,
+ *     hyphens or a parenthetical. NOT synonyms: different words are
+ *     different notes with their own pages (see the rule below).
  *   - Bracket-suffix variants: "agarwood (oud)" style, where the slug
  *     collapses parens away.
  */
 export const NOTE_ALIASES: Record<string, string[]> = {
-  // --- Trademark-suffixed synthetics (already handled by the auto ™
-  //     appender, but list explicitly for the common cases so the RPC
-  //     hits the ™ variant FIRST for these known trademarks) ---
-  ambrofix: ["ambrofix™", "ambroxan"],
+  // Rule (2026-11-03): an alias only merges names that are the SAME note
+  // written differently: a trademark mark, spacing or hyphens, a
+  // parenthetical that repeats the name ("agarwood (oud)"), or a catalog
+  // typo. Different words are different notes and get their own pages,
+  // even near-synonyms. Before this, /note/frankincense showed Incense,
+  // orris folded into Iris, olibanum into Frankincense, cassis into
+  // Blackcurrant, the regional vanillas/cedars/sandalwoods/vetivers into
+  // the plain note, and so on. If two notes should share a page, that is
+  // an editorial decision to make on purpose, not an alias.
+
+  // --- Trademark-suffixed synthetics (the auto ™/® appender covers
+  //     these too; listed so the ™ variant is tried first) ---
+  ambrofix: ["ambrofix™"],
   orcanox: ["orcanox™"],
   ambrostar: ["ambrostar™"],
   ambermax: ["ambermax™"],
@@ -98,59 +107,57 @@ export const NOTE_ALIASES: Record<string, string[]> = {
   z11: ["z11™"],
   "ambrox-super": ["ambrox® super", "ambrox super"],
 
-  // --- Canonical synonyms (same material, multiple stored names) ---
-  oud: ["agarwood (oud)", "oud", "agarwood"],
-  agarwood: ["agarwood (oud)", "agarwood", "oud"],
-  "agarwood-oud": ["agarwood (oud)", "oud", "agarwood"],
-  ambroxan: ["ambroxan", "ambrofix™", "cetalox", "ambrox", "ambroxide"],
-  oakmoss: ["oakmoss", "oak moss", "moss"],
-  "oak-moss": ["oak moss", "oakmoss", "moss"],
-  tonka: ["tonka bean", "tonka"],
-  "tonka-bean": ["tonka bean", "tonka"],
-  orris: ["orris", "orris root", "iris"],
-  "orris-root": ["orris root", "orris"],
-  frankincense: ["frankincense", "olibanum"],
-  olibanum: ["olibanum", "frankincense"],
-  vetiver: ["vetiver", "vetyver", "haitian vetiver", "bourbon vetiver"],
+  // --- Same name, different spacing / hyphenation / parenthetical ---
+  oud: ["oud", "agarwood (oud)"],
+  agarwood: ["agarwood", "agarwood (oud)"],
+  "agarwood-oud": ["agarwood (oud)"],
+  oakmoss: ["oakmoss", "oak moss"],
+  "oak-moss": ["oak moss", "oakmoss"],
   "ylang-ylang": ["ylang-ylang", "ylang ylang"],
-  vanilla: ["vanilla", "vanille", "bourbon vanilla", "madagascar vanilla", "tahitian vanilla"],
   "lily-of-the-valley": ["lily-of-the-valley", "lily of the valley"],
-  cedar: ["cedar", "cedarwood", "virginia cedar", "atlas cedar"],
-  cedarwood: ["cedarwood", "cedar", "virginia cedar"],
-  sandalwood: ["sandalwood", "sandalowood", "australian sandalwood", "mysore sandalwood"],
-  "black-currant": ["black currant", "blackcurrant", "cassis"],
-  blackcurrant: ["blackcurrant", "black currant", "cassis"],
-  cassis: ["cassis", "blackcurrant", "black currant"],
+  "black-currant": ["black currant", "blackcurrant"],
+  blackcurrant: ["blackcurrant", "black currant"],
 
-  // --- Spelling variants confirmed in the audit ---
+  // --- Catalog typos (Fragrantica spellings), both directions ---
   vanila: ["vanila", "vanilla"],
+  vanilla: ["vanilla", "vanila"],
   myrhh: ["myrhh", "myrrh"],
+  myrrh: ["myrrh", "myrhh"],
   sandalowood: ["sandalowood", "sandalwood"],
+  sandalwood: ["sandalwood", "sandalowood"],
   vetyver: ["vetyver", "vetiver"],
+  vetiver: ["vetiver", "vetyver"],
   cardamon: ["cardamon", "cardamom"],
+  cardamom: ["cardamom", "cardamon"],
   cinammon: ["cinammon", "cinnamon"],
+  cinnamon: ["cinnamon", "cinammon"],
   hiacynth: ["hiacynth", "hyacinth"],
+  hyacinth: ["hyacinth", "hiacynth"],
   rhuburb: ["rhuburb", "rhubarb"],
+  rhubarb: ["rhubarb", "rhuburb"],
   graperfuit: ["graperfuit", "grapefruit"],
+  grapefruit: ["grapefruit", "graperfuit"],
   marshamallow: ["marshamallow", "marshmallow"],
+  marshmallow: ["marshmallow", "marshamallow"],
   "coton-candy": ["coton candy", "cotton candy"],
+  "cotton-candy": ["cotton candy", "coton candy"],
 
-  // --- Bracket-suffix variants where slug drops the paren ---
-  "ambrette-musk-mallow": ["ambrette (musk mallow)", "ambrette"],
-  "carambola-star-fruit": ["carambola (star fruit)", "carambola"],
-  "buchu-or-agathosma": ["buchu or agathosma", "buchu"],
-  "cypriol-oil-or-nagarmotha": ["cypriol oil or nagarmotha", "cypriol", "nagarmotha"],
-  "lime-linden-blossom": ["lime (linden blossom)", "lime (linden) blossom", "linden blossom"],
-  "mastic-or-lentisque": ["mastic or lentisque", "mastic"],
-  "nard-himalayan-jatamansi": ["nard himalayan (jatamansi)", "nard", "jatamansi"],
-  "pepperwood-or-hercules-club": ["pepperwood or hercules club", "pepperwood"],
-  "erigeron-fleabane": ["erigeron (fleabane)", "erigeron"],
-  "quandong-desert-peach": ["quandong, desert peach", "quandong"],
-  "ishpink-ocotea-quixos": ["ishpink, ocotea quixos", "ishpink"],
+  // --- Stored names whose punctuation the slug drops ---
+  "ambrette-musk-mallow": ["ambrette (musk mallow)"],
+  "carambola-star-fruit": ["carambola (star fruit)"],
+  "buchu-or-agathosma": ["buchu or agathosma"],
+  "cypriol-oil-or-nagarmotha": ["cypriol oil or nagarmotha"],
+  "lime-linden-blossom": ["lime (linden blossom)", "lime (linden) blossom"],
+  "mastic-or-lentisque": ["mastic or lentisque"],
+  "nard-himalayan-jatamansi": ["nard himalayan (jatamansi)"],
+  "pepperwood-or-hercules-club": ["pepperwood or hercules club"],
+  "erigeron-fleabane": ["erigeron (fleabane)"],
+  "quandong-desert-peach": ["quandong, desert peach"],
+  "ishpink-ocotea-quixos": ["ishpink, ocotea quixos"],
   "confetti-sugared-almonds": ["confetti (sugared almonds)"],
   "beer-ale": ["beer/ale"],
-  "donut-or-doughnut": ["donut or doughnut", "donut"],
-  "frosting-glac": ["frosting [glacé]", "frosting"],
+  "donut-or-doughnut": ["donut or doughnut"],
+  "frosting-glac": ["frosting [glacé]"],
   "champagne-ros": ["champagne rosé"],
   "ac-cia": ["acácia"],
   "cacha-a": ["cachaça"],

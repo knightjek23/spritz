@@ -1,7 +1,7 @@
 ---
 name: vetiver
 type: note
-aliases: [haitian vetiver, java vetiver, vetiver root]
+aliases: [java vetiver]
 family: woody
 ---
 

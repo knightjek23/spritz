@@ -1,7 +1,7 @@
 ---
 name: apple
 type: note
-aliases: [green apple, red apple, apple skin]
+aliases: [apple skin]
 family: fruity
 ---
 

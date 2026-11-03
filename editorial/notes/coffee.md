@@ -1,7 +1,7 @@
 ---
 name: coffee
 type: note
-aliases: [coffee bean, espresso, roasted coffee]
+aliases: [coffee bean, roasted coffee]
 family: gourmand
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: cypriol oil
 type: note
-aliases: [nagarmotha]
+aliases: []
 family: woody
 source: ai
 generated_at: 2026-07-01T06:23:56.542Z

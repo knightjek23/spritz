@@ -1,7 +1,7 @@
 ---
 name: geranium
 type: note
-aliases: [rose geranium, pelargonium, geranium bourbon]
+aliases: [geranium bourbon]
 family: floral
 ---
 

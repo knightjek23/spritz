@@ -4,17 +4,16 @@
 // popular" top-10 scroller (same FragranceScroller surface as the
 // library hub and house pages) when the family has more than 10
 // fragrances, followed by the catalog list of every fragrance whose
-// family[] includes this slug, ordered by popularity.
+// family[] includes this slug, ordered by popularity: first 50, then
+// "See more" loads 50 at a time (components/browse-list).
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { fetchFamilyPage } from "@/lib/browse-pages";
+import { BrowseList } from "@/components/browse-list";
 import { FAMILY_BLURB, familyName, familySlug } from "@/lib/families";
 import { FragranceScroller } from "@/components/fragrance-scroller";
-import { cleanBottleImageUrl } from "@/lib/bottle-image";
-import { BottleImage } from "@/components/bottle-image";
-import type { Fragrance } from "@/lib/types";
 
 export const revalidate = 300;
 
@@ -44,13 +43,9 @@ export default async function FamilyPage({
 }) {
   const slug = familySlug(params.slug);
 
-  const supabase = createAdminClient();
-  const { data: rows } = await supabase.rpc("find_fragrances_by_family", {
-    p_family: slug,
-    p_limit: 100,
-  });
-
-  const fragrances = (rows ?? []) as Fragrance[];
+  // First 50 by popularity plus the full count; "See more" in BrowseList
+  // loads the next 50 from the same function (lib/browse-pages.ts).
+  const { rows: fragrances, total } = await fetchFamilyPage(slug);
 
   // No matches AND no blurb → 404. Otherwise render whatever we have.
   if (fragrances.length === 0 && !FAMILY_BLURB[slug]) notFound();
@@ -86,8 +81,8 @@ export default async function FamilyPage({
       <header className="mb-8">
         <p className="font-mono text-xs uppercase tracking-widest text-slate">
           Family
-          {fragrances.length > 0 && (
-            <span> · {fragrances.length} fragrance{fragrances.length === 1 ? "" : "s"}</span>
+          {total > 0 && (
+            <span> · {total} fragrance{total === 1 ? "" : "s"}</span>
           )}
         </p>
         <h1 className="font-display text-5xl mt-2 leading-[0.95] capitalize">
@@ -116,41 +111,7 @@ export default async function FamilyPage({
           <h2 className="font-display text-2xl mb-4">
             In this family
           </h2>
-          <ul className="space-y-2">
-            {fragrances.map((f) => (
-              <li key={f.id}>
-                <Link
-                  href={`/fragrance/${f.id}`}
-                  className="flex items-center gap-3 px-3 py-2 rounded-xl bg-paper border border-ink/10 hover:brightness-95 transition"
-                >
-                  <div className="shrink-0 w-12 h-16 relative">
-                    <BottleImage
-                      src={f.bottle_image_url}
-                      house={f.house}
-                      name={f.name}
-                      sizes="48px"
-                      className="object-contain mix-blend-multiply"
-                    />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="font-medium truncate">{f.name}</div>
-                    {/* House rendered as plain text (not a nested Link)
-                        because nested <a> tags are invalid HTML and the
-                        Server-Component onClick handler that previously
-                        tried to gate them crashed the page with
-                        "Event handlers cannot be passed to Client
-                        Component props." Two-tap path to the house page:
-                        tap card → fragrance detail → house link in
-                        the header. */}
-                    <div className="text-xs text-slate truncate">
-                      {f.house}
-                      {f.year ? ` · ${f.year}` : ""}
-                    </div>
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <BrowseList kind="family" slug={slug} initialRows={fragrances} total={total} />
         </section>
       ) : (
         <section className="mb-10 rounded-xl border border-dashed border-ink/15 p-6 text-center">

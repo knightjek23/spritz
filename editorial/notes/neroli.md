@@ -1,7 +1,7 @@
 ---
 name: neroli
 type: note
-aliases: [neroli oil, bitter orange blossom, neroli bigarade]
+aliases: [neroli oil, neroli bigarade]
 family: floral
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: cinnamon
 type: note
-aliases: [ceylon cinnamon, cassia, cinnamon bark]
+aliases: [cinnamon bark]
 family: spicy
 ---
 

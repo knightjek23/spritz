@@ -1,7 +1,7 @@
 ---
 name: rose
 type: note
-aliases: [bulgarian rose, turkish rose, rose damascena, rose centifolia, rose absolute]
+aliases: [rose damascena, rose centifolia, rose absolute]
 family: floral
 ---
 

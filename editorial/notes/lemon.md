@@ -1,7 +1,7 @@
 ---
 name: lemon
 type: note
-aliases: [sicilian lemon, lemon zest, lemon peel]
+aliases: []
 family: citrus
 ---
 

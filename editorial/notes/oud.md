@@ -1,7 +1,7 @@
 ---
 name: oud
 type: note
-aliases: [agarwood, oudh, agar, aoud]
+aliases: [oudh, aoud]
 family: woody
 ---
 

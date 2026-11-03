@@ -1,7 +1,7 @@
 ---
 name: mandarin
 type: note
-aliases: [mandarin orange, tangerine, clementine]
+aliases: []
 family: citrus
 ---
 
