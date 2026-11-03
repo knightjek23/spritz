@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "week": "2026-W44",
-  "week_start": "2026-10-26",
-  "generated_at": "2026-11-01T14:16:49.516894+00:00",
+  "week": "2026-W45",
+  "week_start": "2026-11-02",
+  "generated_at": "2026-11-03T15:10:06.162970+00:00",
   "collector_version": "1.0.0",
   "sources_used": [
     "google_trends"
@@ -16,7 +16,7 @@
       "fragrantica_url": null,
       "thumbnail_url": null,
       "signals": {
-        "google_trends": 57.7,
+        "google_trends": 63.3,
         "retailer_bestsellers": null,
         "reddit": null,
         "fragrantica": null
@@ -29,11 +29,11 @@
       "id": "chanel-bleu-de-chanel",
       "name": "Bleu de Chanel",
       "brand": "Chanel",
-      "score": 23.9,
+      "score": 24.9,
       "fragrantica_url": null,
       "thumbnail_url": null,
       "signals": {
-        "google_trends": 25.3,
+        "google_trends": 29.3,
         "retailer_bestsellers": null,
         "reddit": null,
         "fragrantica": null
@@ -46,11 +46,11 @@
       "id": "ysl-libre",
       "name": "Libre",
       "brand": "YSL",
-      "score": 10.2,
+      "score": 14.1,
       "fragrantica_url": null,
       "thumbnail_url": null,
       "signals": {
-        "google_trends": 10.9,
+        "google_trends": 17.0,
         "retailer_bestsellers": null,
         "reddit": null,
         "fragrantica": null
@@ -63,11 +63,11 @@
       "id": "valentino-born-in-roma-donna",
       "name": "Born In Roma Donna",
       "brand": "Valentino",
-      "score": 6.8,
+      "score": 9.3,
       "fragrantica_url": null,
       "thumbnail_url": null,
       "signals": {
-        "google_trends": 7.3,
+        "google_trends": 11.5,
         "retailer_bestsellers": null,
         "reddit": null,
         "fragrantica": null
@@ -80,11 +80,11 @@
       "id": "chanel-coco-mademoiselle",
       "name": "Coco Mademoiselle",
       "brand": "Chanel",
-      "score": 2.1,
+      "score": 1.8,
       "fragrantica_url": null,
       "thumbnail_url": null,
       "signals": {
-        "google_trends": 2.3,
+        "google_trends": 3.0,
         "retailer_bestsellers": null,
         "reddit": null,
         "fragrantica": null
@@ -94,14 +94,14 @@
       "is_new_entry": false
     },
     {
-      "id": "escentric-molecules-molecule-01",
-      "name": "Molecule 01",
-      "brand": "Escentric Molecules",
-      "score": 0.3,
+      "id": "tom-ford-vanilla-sex",
+      "name": "Vanilla Sex",
+      "brand": "Tom Ford",
+      "score": 0.2,
       "fragrantica_url": null,
       "thumbnail_url": null,
       "signals": {
-        "google_trends": 0.4,
+        "google_trends": 1.2,
         "retailer_bestsellers": null,
         "reddit": null,
         "fragrantica": null
@@ -111,14 +111,14 @@
       "is_new_entry": false
     },
     {
-      "id": "tom-ford-vanilla-sex",
-      "name": "Vanilla Sex",
-      "brand": "Tom Ford",
+      "id": "escentric-molecules-molecule-01",
+      "name": "Molecule 01",
+      "brand": "Escentric Molecules",
       "score": 0.0,
       "fragrantica_url": null,
       "thumbnail_url": null,
       "signals": {
-        "google_trends": 0.2,
+        "google_trends": 0.9,
         "retailer_bestsellers": null,
         "reddit": null,
         "fragrantica": null
