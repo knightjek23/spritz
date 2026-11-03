@@ -16,7 +16,8 @@
 
 import { useEffect, useState } from "react";
 import { isNativeApp, nativePlatform } from "@/lib/native";
-import { getNativePlans, type NativePlanInfo, type PurchasePlan } from "@/lib/native/purchases";
+import { loadNativePlans, type NativePlanInfo, type PurchasePlan } from "@/lib/native/purchases";
+import { trackDiagnostic } from "@/lib/analytics";
 
 export type StorePlans = Record<PurchasePlan, NativePlanInfo>;
 
@@ -33,8 +34,20 @@ let cached: Promise<StorePlans | null> | null = null;
 
 function load(): Promise<StorePlans | null> {
   if (!cached) {
-    cached = getNativePlans()
-      .catch(() => null)
+    cached = loadNativePlans()
+      .then(({ plans, diag }) => {
+        // Every failure reports its stage and the store's own error, so a
+        // "Purchases aren't available" on a device is diagnosable in PostHog.
+        if (!plans) trackDiagnostic("store_prices_unavailable", { ...diag });
+        return plans;
+      })
+      .catch((err: unknown) => {
+        trackDiagnostic("store_prices_unavailable", {
+          stage: "unexpected",
+          error_message: String((err as { message?: unknown })?.message ?? err).slice(0, 500),
+        });
+        return null;
+      })
       .then((plans) => {
         // Don't pin a failure: the next page that asks tries again.
         if (!plans) cached = null;

@@ -162,14 +162,93 @@ function describeTrial(pkg: PurchasesPackage): string | null {
  * approved: it looks exactly like a code bug and is not one.
  */
 export async function getNativePlans(): Promise<Record<PurchasePlan, NativePlanInfo> | null> {
-  if (!isNativeApp() || !(await ensureConfigured())) return null;
-  const { Purchases } = await sdk();
-  const { current, all } = await Purchases.getOfferings();
-  const offerings = { current, all } as PurchasesOfferings;
+  return (await loadNativePlans()).plans;
+}
+
+/**
+ * Why the store gave us no prices, for the `store_prices_unavailable`
+ * event (lib/native/store-prices.ts). Added Nov 2, 2026 when Android 1.0.3
+ * showed "Purchases aren't available" with no way to see the cause from
+ * the webview: every stage reports itself instead of collapsing to null.
+ */
+export interface StoreDiagnostics {
+  stage:
+    | "ok"
+    | "not_native"
+    | "no_key"
+    | "configure_failed"
+    | "offerings_failed"
+    | "no_current_offering"
+    | "missing_packages";
+  platform: string;
+  app_version?: string;
+  app_build?: string;
+  error_code?: string;
+  error_message?: string;
+  offering_ids?: string[];
+  current_offering?: string | null;
+  packages?: string[];
+  missing_plans?: string[];
+}
+
+async function appInfo(): Promise<{ app_version?: string; app_build?: string }> {
+  try {
+    const { App } = await import("@capacitor/app");
+    const { version, build } = await App.getInfo();
+    return { app_version: version, app_build: build };
+  } catch {
+    return {};
+  }
+}
+
+function errorParts(err: unknown): { error_code?: string; error_message?: string } {
+  const e = err as { code?: unknown; message?: unknown; underlyingErrorMessage?: unknown };
+  return {
+    error_code: e?.code != null ? String(e.code) : undefined,
+    error_message: [e?.message, e?.underlyingErrorMessage]
+      .filter((x) => typeof x === "string" && x)
+      .join(" | ")
+      .slice(0, 500) || String(err).slice(0, 500),
+  };
+}
+
+export async function loadNativePlans(): Promise<{
+  plans: Record<PurchasePlan, NativePlanInfo> | null;
+  diag: StoreDiagnostics;
+}> {
+  const platform = nativePlatform();
+  if (!isNativeApp()) return { plans: null, diag: { stage: "not_native", platform } };
+  const info = await appInfo();
+  const base = { platform, ...info };
+  if (!apiKey()) return { plans: null, diag: { stage: "no_key", ...base } };
+  try {
+    if (!(await ensureConfigured())) return { plans: null, diag: { stage: "no_key", ...base } };
+  } catch (err) {
+    return { plans: null, diag: { stage: "configure_failed", ...base, ...errorParts(err) } };
+  }
+  let offerings: PurchasesOfferings;
+  try {
+    const { Purchases } = await sdk();
+    const { current, all } = await Purchases.getOfferings();
+    offerings = { current, all } as PurchasesOfferings;
+  } catch (err) {
+    return { plans: null, diag: { stage: "offerings_failed", ...base, ...errorParts(err) } };
+  }
+  const offeringIds = Object.keys(offerings.all ?? {});
+  if (!offerings.current) {
+    return { plans: null, diag: { stage: "no_current_offering", ...base, offering_ids: offeringIds } };
+  }
+  const packages = offerings.current.availablePackages.map(
+    (p) => `${p.identifier}=${p.product.identifier}`,
+  );
   const plans = {} as Record<PurchasePlan, NativePlanInfo>;
+  const missing: string[] = [];
   for (const plan of ["monthly", "annual", "lifetime"] as PurchasePlan[]) {
     const pkg = findPackage(offerings, plan);
-    if (!pkg) return null;
+    if (!pkg) {
+      missing.push(plan);
+      continue;
+    }
     plans[plan] = {
       plan,
       priceString: pkg.product.priceString,
@@ -177,7 +256,15 @@ export async function getNativePlans(): Promise<Record<PurchasePlan, NativePlanI
       trial: describeTrial(pkg),
     };
   }
-  return plans;
+  const diag: StoreDiagnostics = {
+    stage: missing.length ? "missing_packages" : "ok",
+    ...base,
+    offering_ids: offeringIds,
+    current_offering: offerings.current.identifier,
+    packages,
+    missing_plans: missing,
+  };
+  return { plans: missing.length ? null : plans, diag };
 }
 
 export type PurchaseOutcome =

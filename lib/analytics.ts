@@ -27,6 +27,11 @@ export function track(event: AnalyticsEvent, props: Record<string, unknown> = {}
   ph()?.capture(event, props);
 }
 
+/** Operational diagnostics (not product analytics): e.g. why store prices failed to load. */
+export function trackDiagnostic(event: "store_prices_unavailable", props: Record<string, unknown> = {}) {
+  ph()?.capture(event, props);
+}
+
 // ---------- Paywall trigger ----------
 // A Pro-gate CTA remembers which feature it was for; /pricing reads it once
 // so `paywall_viewed.trigger` says what sent the person there.
