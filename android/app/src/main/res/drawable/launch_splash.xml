@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pre-Android-12 launch frame and the splash plugin's fallback view:
+     cream field with the "spritz" wordmark (200x100dp, 72dp Playfair)
+     centered, the same frame as iOS LaunchScreen.storyboard and the web
+     launch layer (components/launch-screen.tsx). A layer-list instead of
+     a full-screen PNG so the wordmark never stretches on tall screens. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <color android:color="#F4EFE6" />
+    </item>
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/splash_wordmark" />
+    </item>
+</layer-list>

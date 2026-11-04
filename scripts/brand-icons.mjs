@@ -13,7 +13,9 @@
 //   ios Splash         2732x2732 x3                -> bottle + wordmark on cream
 //   android mipmap-*   ic_launcher, _round (legacy, full square on sage),
 //                      ic_launcher_foreground (adaptive, 66% safe zone)
-//   android drawable-* splash.png (all buckets)    -> bottle on cream
+//   android drawable-* splash.png (all buckets)    -> bottle on cream (unused
+//                      since 1.0.4; the launch frame is the wordmark, see
+//                      scripts/android-splash-wordmark.mjs)
 //   android drawable-* ic_stat_spritz.png          -> white bottle silhouette
 //
 // Native files only reach users with a new build (iOS build 4+, Android

@@ -17,10 +17,16 @@
 
 
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
-        <!-- Android 12+ system splash: cream behind the launcher icon, matching
-             capacitor.config.ts backgroundColor (#F4EFE6) so launch -> first
-             page is one continuous colour. Pre-12 devices use @drawable/splash. -->
+        <!-- System splash (core-splashscreen, all API levels): cream with the
+             "spritz" wordmark instead of the launcher icon, matching iOS
+             LaunchScreen.storyboard so the web launch layer takes over in the
+             same pixels. splash_icon_wordmark is the 288dp icon canvas with the
+             200x100dp wordmark centered; its widest point sits 94.7dp from the
+             center, inside the 96dp radius Android 12+ masks to.
+             No windowSplashScreenIconBackgroundColor on purpose: a background
+             would shrink the icon area to 240dp and draw a circle behind it. -->
         <item name="windowSplashScreenBackground">#F4EFE6</item>
-        <item name="android:background">@drawable/splash</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon_wordmark</item>
+        <item name="android:background">@drawable/launch_splash</item>
     </style>
 </resources>

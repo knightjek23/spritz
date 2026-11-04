@@ -66,6 +66,11 @@ const config: CapacitorConfig = {
       launchFadeOutDuration: 0,
       backgroundColor: "#F4EFE6",
       showSpinner: false,
+      // Android fallback view if the core-splashscreen path ever fails:
+      // drawable/launch_splash.xml (cream + centered wordmark), not the old
+      // full-screen bottle PNG. Kept unstretched.
+      androidSplashResourceName: "launch_splash",
+      androidScaleType: "FIT_XY",
     },
     PushNotifications: {
       // Show the banner even when the app is in the foreground. Without
