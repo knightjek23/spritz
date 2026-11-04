@@ -9,7 +9,7 @@
 // are left so the tap is never a guess. Rows already on screen are kept on
 // failure; the button turns into a retry.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { BottleImage } from "@/components/bottle-image";
 import { SpritzLoader } from "@/components/spritz-loader";
@@ -36,6 +36,41 @@ export function BrowseList({
   const [rows, setRows] = useState(initialRows);
   const [state, setState] = useState<"idle" | "loading" | "error">("idle");
   const remaining = Math.max(0, total - rows.length);
+  const storeKey = `spritz.browse.${kind}.${slug}`;
+
+  // Keep the "See more" rows for this list for the session, so switching
+  // tabs and coming back (lib/tab-memory.ts) restores the list at the
+  // length you had loaded, and the saved scroll position still exists.
+  // Restored after mount, not in the initial state, so the server and
+  // client first render agree. Only reused when it still starts with the
+  // same bottles the server sent, i.e. the ordering has not changed.
+  useEffect(() => {
+    try {
+      const raw = window.sessionStorage.getItem(storeKey);
+      if (!raw) return;
+      const saved = JSON.parse(raw) as { rows: BrowseRow[] };
+      if (
+        Array.isArray(saved.rows) &&
+        saved.rows.length > initialRows.length &&
+        initialRows.every((r, i) => saved.rows[i]?.id === r.id)
+      ) {
+        setRows(saved.rows);
+      }
+    } catch {
+      // ignore
+    }
+    // initialRows is server data for this slug; storeKey covers changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeKey]);
+
+  useEffect(() => {
+    if (rows.length <= initialRows.length) return;
+    try {
+      window.sessionStorage.setItem(storeKey, JSON.stringify({ rows }));
+    } catch {
+      // Quota / private mode: the list just starts at 50 again.
+    }
+  }, [rows, storeKey, initialRows.length]);
 
   async function loadMore() {
     if (state === "loading") return;

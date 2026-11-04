@@ -20,10 +20,24 @@
 //
 // Visibility: hidden on /scan (the camera is a full-bleed surface and a
 // nav strip at the bottom would conflict with the shutter tray).
+//
+// Tabs keep their place (lib/tab-memory.ts, components/tab-memory.tsx):
+// tapping another tab returns to the last page you were on inside it, at
+// the same scroll. Tapping the tab you are already in pops it back to its
+// root, or scrolls to the top if you are already at the root.
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { LiquidGlass } from "./liquid-glass/LiquidGlass";
+import {
+  TAB_PREFIXES,
+  currentUrl,
+  forgetTab,
+  lastUrlForTab,
+  markTabNavigation,
+  rememberScroll,
+  rememberUrl,
+} from "@/lib/tab-memory";
 
 interface Tab {
   href: string;
@@ -39,47 +53,67 @@ const TABS: Tab[] = [
   {
     href: "/",
     label: "Home",
-    matchPrefixes: ["/"],
+    matchPrefixes: TAB_PREFIXES["/"],
     icon: (active) => <HomeIcon active={active} />,
   },
   {
     href: "/collection",
     label: "Shelf",
-    matchPrefixes: ["/collection"],
+    matchPrefixes: TAB_PREFIXES["/collection"],
     icon: (active) => <ShelfIcon active={active} />,
   },
   {
     href: "/scan",
     label: "Scan",
-    matchPrefixes: ["/scan"],
+    matchPrefixes: TAB_PREFIXES["/scan"],
     icon: (active) => <ScanIcon active={active} />,
   },
   {
     href: "/library",
     label: "Library",
-    matchPrefixes: [
-      "/library",
-      "/families",
-      "/family",
-      "/houses",
-      "/house",
-      "/notes",
-      "/note",
-      "/fragrance",
-      "/search",
-    ],
+    matchPrefixes: TAB_PREFIXES["/library"],
     icon: (active) => <LibraryIcon active={active} />,
   },
   {
     href: "/account",
     label: "Profile",
-    matchPrefixes: ["/account", "/welcome", "/pricing"],
+    matchPrefixes: TAB_PREFIXES["/account"],
     icon: (active) => <ProfileIcon active={active} />,
   },
 ];
 
 export function BottomNav() {
   const pathname = usePathname() ?? "/";
+  const router = useRouter();
+
+  function onTabClick(e: React.MouseEvent<HTMLAnchorElement>, tab: Tab, active: boolean) {
+    // Let cmd/ctrl/shift/middle clicks open a new browser tab as usual.
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+    const here = currentUrl();
+    // Pin the exact spot we are leaving, so coming back lands on it even
+    // if the last scroll frame had not been recorded yet.
+    rememberScroll(here, window.scrollY);
+    rememberUrl(here);
+
+    if (active) {
+      if (here === tab.href) {
+        // Already at this tab's root: scroll to the top.
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+      // Deeper inside this tab: pop back to its root, at the top.
+      forgetTab(tab.href);
+      markTabNavigation(tab.href, "top");
+      router.push(tab.href, { scroll: false });
+      return;
+    }
+
+    // Another tab: go back to wherever it was left, at the same scroll.
+    const target = lastUrlForTab(tab.href);
+    markTabNavigation(target, "restore");
+    router.push(target, { scroll: false });
+  }
 
   // Note: previously hidden on /scan because the camera takeover used
   // `inset-0` and covered the whole viewport. Camera now ends at
@@ -166,6 +200,8 @@ export function BottomNav() {
             <li key={tab.href} className="flex-1 min-w-0">
               <Link
                 href={tab.href}
+                scroll={false}
+                onClick={(e) => onTabClick(e, tab, active)}
                 aria-current={active ? "page" : undefined}
                 className="relative flex flex-col items-center justify-center gap-1 h-full"
               >

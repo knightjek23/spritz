@@ -16,6 +16,7 @@ import { NativeReturnGuard } from "@/components/native-return-guard";
 import { NativeTouchLinks } from "@/components/native-touch-links";
 import { NativeResumeReload } from "@/components/native-resume-reload";
 import { LaunchScreen, LAUNCH_SCREEN_BOOT } from "@/components/launch-screen";
+import { TabMemory } from "@/components/tab-memory";
 import "./globals.css";
 
 // Fonts are self-hosted (OFL variable fonts from Fontsource, in app/fonts).
@@ -147,6 +148,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* Reloads the page after a long background so a stalled router
               or expired session never leaves the shell tap-dead. */}
           <NativeResumeReload />
+          {/* Each bottom-nav tab keeps its place: last page and scroll
+              come back when you return to it. Renders nothing. */}
+          <TabMemory />
           {/* First Library/Shelf visit: the Pro trial pitch, once (twice at
               most). Portals to <body>; renders nothing otherwise. */}
           <ProIntroSheet />
