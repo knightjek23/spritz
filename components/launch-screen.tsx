@@ -24,9 +24,12 @@
 //     has not shown this session. No React, so no hydration flash either
 //     way. On the plain web it never shows: a visitor landing from Google
 //     should see the page, not a splash.
-//   - The same script hides the native splash two frames later, i.e. once
-//     the overlay is actually on screen. On native it always hides it, even
-//     when this load skips the overlay, so the splash can never hang.
+//   - The same script hides the native splash once the wordmark's font has
+//     loaded and two frames have painted (plus 150ms on Android), capped at
+//     1.2s. On native it always hides it, even when this load skips the
+//     overlay, so the splash can never hang. On Android it also shifts the
+//     lockup by half the navigation bar (--launch-shift), because the system
+//     splash centers on the full screen and the WebView ends above the bar.
 //   - Every motion is CSS scheduled from first paint (globals.css,
 //     launch-*), so it runs whether or not React has hydrated yet. The
 //     hold is measured from that first paint (window.__spritzLaunchT0), not
@@ -315,9 +318,34 @@ document.documentElement.classList.add('launching');
 window.__spritzLaunchT0=performance.now();
 }
 if(native){
-// Two frames: the first rAF runs before the overlay's first paint, the
-// second after it, so the web wordmark is on screen under the native one.
-requestAnimationFrame(function(){requestAnimationFrame(hideSplash);});
+var android=c.getPlatform&&c.getPlatform()==='android';
+var d=document,de=d.documentElement,done=false,tries=0;
+if(android&&show){
+// Android's system splash centers the wordmark on the whole screen, but the
+// WebView stops above the navigation bar, so the overlay's center sits half
+// the bar's height higher (about 24dp with 3-button nav). Shift the lockup
+// down by the difference so the two wordmarks share the same pixels.
+var sh=(window.screen.height-window.innerHeight)/2;
+if(sh>0&&sh<80){de.style.setProperty('--launch-shift',sh+'px');}
+}
+function finish(){if(done)return;done=true;
+// Two frames after paint, plus a beat on Android, where the WebView reaches
+// the screen a frame or two after rAF says it painted. The press starts at
+// 800ms, so a late hide never covers motion.
+requestAnimationFrame(function(){requestAnimationFrame(function(){
+setTimeout(hideSplash,android?150:0);});});}
+// Hide only once the wordmark can actually draw in Playfair. Hiding on the
+// overlay's first paint alone let the system splash fade to a blank cream
+// field on Android before the web wordmark appeared.
+function whenFont(){
+var el=d.querySelector('.launch-screen__word');
+if(!el){if(++tries<120){requestAnimationFrame(whenFont);}else{finish();}return;}
+var ff=window.getComputedStyle(el).fontFamily;
+if(!show||!ff||!d.fonts||!d.fonts.load){finish();return;}
+d.fonts.load('400 72px '+ff).then(finish,finish);
+}
+setTimeout(finish,1200);
+whenFont();
 }
 }catch(e){}})();`;
 
@@ -330,10 +358,17 @@ export function LaunchScreen() {
     // the real plugin module, so the splash cannot outlive the page even if
     // the bridge's plugin proxy was not ready that early. Hiding an
     // already-hidden splash is a no-op.
+    // Deferred to 1.3s after first paint, after the boot script's own
+    // font-aware hide (capped at 1.2s), so it is only ever the failsafe.
     if (isNativeApp()) {
-      import("@capacitor/splash-screen")
-        .then(({ SplashScreen }) => SplashScreen.hide({ fadeOutDuration: 0 }))
-        .catch(() => {});
+      const t0Splash =
+        (window as unknown as { __spritzLaunchT0?: number }).__spritzLaunchT0 ?? 0;
+      const wait = Math.max(0, 1300 - (performance.now() - t0Splash));
+      window.setTimeout(() => {
+        import("@capacitor/splash-screen")
+          .then(({ SplashScreen }) => SplashScreen.hide({ fadeOutDuration: 0 }))
+          .catch(() => {});
+      }, wait);
     }
 
     // The boot script decided. If it did not add the class, this load gets

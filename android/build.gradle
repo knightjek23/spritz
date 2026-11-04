@@ -22,6 +22,12 @@ allprojects {
         google()
         mavenCentral()
     }
+    // Build output lives outside OneDrive. OneDrive locks files it is
+    // syncing, and Gradle then fails to delete its own intermediates
+    // (AccessDeniedException / "Unable to delete directory"). The signed
+    // bundle wizard still copies app-release.aab to android/app/release.
+    def localRoot = System.getenv("LOCALAPPDATA") ?: System.getProperty("java.io.tmpdir")
+    layout.buildDirectory.set(new File(localRoot, "spritz-gradle-build/${project.path == ':' ? 'root' : project.name}"))
 }
 
 task clean(type: Delete) {

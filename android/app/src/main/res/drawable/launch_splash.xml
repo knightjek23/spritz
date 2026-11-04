@@ -8,9 +8,9 @@
     <item>
         <color android:color="#F4EFE6" />
     </item>
-    <item>
-        <bitmap
-            android:gravity="center"
-            android:src="@drawable/splash_wordmark" />
-    </item>
+    <item
+        android:width="200dp"
+        android:height="100dp"
+        android:drawable="@drawable/launch_wordmark"
+        android:gravity="center" />
 </layer-list>
