@@ -26,32 +26,40 @@ export type StorePrices =
   | { status: "web" }
   /** Native, offerings still loading: show no amount. */
   | { status: "loading"; platform: "ios" | "android" }
-  /** Native, the store answered with no products: purchases unavailable. */
-  | { status: "unavailable"; platform: "ios" | "android" }
+  /** Native, the store answered with no products: purchases unavailable.
+   *  reason "outdated": this installed shell predates the purchase plugin
+   *  (Android 1.0), so the fix is an app update, not a retry. */
+  | { status: "unavailable"; platform: "ios" | "android"; reason?: "outdated" }
   | { status: "ready"; platform: "ios" | "android"; plans: StorePlans };
 
-let cached: Promise<StorePlans | null> | null = null;
+type Loaded = { plans: StorePlans | null; outdated: boolean };
 
-function load(): Promise<StorePlans | null> {
+let cached: Promise<Loaded> | null = null;
+
+// Capacitor's own wording when the installed shell has no native side for a
+// plugin. Decided from a real failure, never a pre-check, so a working build
+// can't be misread as outdated.
+const PLUGIN_MISSING = /not implemented on (android|ios)/i;
+
+function load(): Promise<Loaded> {
   if (!cached) {
     cached = loadNativePlans()
-      .then(({ plans, diag }) => {
+      .then(({ plans, diag }): Loaded => {
         // Every failure reports its stage and the store's own error, so a
         // "Purchases aren't available" on a device is diagnosable in PostHog.
         if (!plans) trackDiagnostic("store_prices_unavailable", { ...diag });
-        return plans;
+        const outdated = diag.stage === "configure_failed" && PLUGIN_MISSING.test(diag.error_message ?? "");
+        return { plans, outdated };
       })
-      .catch((err: unknown) => {
-        trackDiagnostic("store_prices_unavailable", {
-          stage: "unexpected",
-          error_message: String((err as { message?: unknown })?.message ?? err).slice(0, 500),
-        });
-        return null;
+      .catch((err: unknown): Loaded => {
+        const message = String((err as { message?: unknown })?.message ?? err).slice(0, 500);
+        trackDiagnostic("store_prices_unavailable", { stage: "unexpected", error_message: message });
+        return { plans: null, outdated: PLUGIN_MISSING.test(message) };
       })
-      .then((plans) => {
+      .then((loaded) => {
         // Don't pin a failure: the next page that asks tries again.
-        if (!plans) cached = null;
-        return plans;
+        if (!loaded.plans) cached = null;
+        return loaded;
       });
   }
   return cached;
@@ -69,9 +77,13 @@ export function useStorePrices(): StorePrices {
     const platform = nativePlatform() === "android" ? "android" : "ios";
     setState({ status: "loading", platform });
     let live = true;
-    load().then((plans) => {
+    load().then(({ plans, outdated }) => {
       if (!live) return;
-      setState(plans ? { status: "ready", platform, plans } : { status: "unavailable", platform });
+      setState(
+        plans
+          ? { status: "ready", platform, plans }
+          : { status: "unavailable", platform, ...(outdated ? { reason: "outdated" as const } : {}) },
+      );
     });
     return () => {
       live = false;

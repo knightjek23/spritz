@@ -119,7 +119,7 @@ export default async function WearHistoryPage() {
             <section className="mb-10">
               <ProGateTracker feature="wear_insights" state="locked" />
               <h2 className="font-display text-2xl mb-1">Insights</h2>
-              <ProLocked body="Pro turns this log into cost per wear, your most complimented bottles, what you reach for each season, and which bottles are gathering dust." />
+              <ProLocked feature="wear_insights" body="Pro turns this log into cost per wear, your most complimented bottles, what you reach for each season, and which bottles are gathering dust." />
             </section>
           )}
 

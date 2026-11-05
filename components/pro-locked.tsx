@@ -6,13 +6,14 @@
 import Link from "next/link";
 import { TrialCta } from "@/components/trial-cta";
 import { SignedOut } from "@clerk/nextjs";
+import type { ProFeature } from "@/lib/pro-events";
 
-export function ProLocked({ body }: { body: string }) {
+export function ProLocked({ body, feature }: { body: string; feature?: ProFeature }) {
   return (
     <section className="mb-10">
       <p className="text-sm text-slate mb-4 leading-relaxed">{body}</p>
       <div className="flex flex-col items-start gap-3">
-        <TrialCta />
+        <TrialCta feature={feature} />
         <SignedOut>
           <Link
             href="/sign-in"

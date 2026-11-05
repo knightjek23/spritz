@@ -18,6 +18,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { MONTHLY_PRICE, trialCta } from "@/lib/trial";
+import { trackProGateCta, type ProFeature } from "@/lib/pro-events";
 import { monthlyPriceFor, useStorePrices } from "@/lib/native/store-prices";
 import { recordProGateHit } from "@/components/pro-intro-sheet";
 
@@ -32,7 +33,15 @@ function trialAvailable(): Promise<boolean> {
   return eligibility;
 }
 
-export function TrialCta({ className = "" }: { className?: string }) {
+export function TrialCta({
+  className = "",
+  feature,
+}: {
+  className?: string;
+  /** Gate this CTA belongs to. Set it only where the gate doesn't already
+   *  record its own tap (match and layering wrap theirs), or taps double. */
+  feature?: ProFeature;
+}) {
   // Optimistic: most people arriving at a gate have never trialed.
   const [available, setAvailable] = useState(true);
   useEffect(() => {
@@ -55,6 +64,7 @@ export function TrialCta({ className = "" }: { className?: string }) {
     <div className={`flex flex-col items-start gap-2 ${className}`}>
       <Link
         href="/pricing"
+        onClick={feature ? () => trackProGateCta(feature) : undefined}
         className="inline-flex items-center gap-2 px-4 py-3 bg-brass text-ink font-medium hover:bg-brass/80 transition"
       >
         {offer ? offer.label : "Unlock with Pro"}

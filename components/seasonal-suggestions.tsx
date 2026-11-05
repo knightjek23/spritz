@@ -24,7 +24,7 @@ export async function SeasonalSuggestions() {
       <section className="w-full mt-10">
         <h2 className="font-display text-2xl px-1 mb-2">{headingFor(season)}</h2>
         <div className="px-1">
-          <ProLocked body="Ten in-season picks for men and women, refreshed every few days and switched over each season. Pro feature." />
+          <ProLocked feature="seasonal" body="Ten in-season picks for men and women, refreshed every few days and switched over each season. Pro feature." />
         </div>
         <ProGateTracker feature="seasonal" state="locked" />
       </section>

@@ -18,6 +18,7 @@
 
 import { currentUser } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { captureServer } from "@/lib/posthog-server";
 import type { Plan } from "@/lib/types";
 
 export interface AppUser {
@@ -91,6 +92,14 @@ export async function ensureAppUser(clerkUserId: string): Promise<AppUser | null
     console.error("[users] ensureAppUser failed to insert:", error.message);
     return null;
   }
+
+  // This request created the account row, so it owns the signup event.
+  // The Clerk webhook only fires it when it creates the row itself, so the
+  // event lands exactly once whichever path gets there first.
+  await captureServer(clerkUserId, "user_signed_up", {
+    created_by: "backfill",
+    $set_once: { signup_date: new Date().toISOString().slice(0, 10) },
+  });
 
   return {
     id: inserted.id,

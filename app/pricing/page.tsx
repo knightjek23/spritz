@@ -190,8 +190,14 @@ function PricingContent() {
   const nativePlans = prices.status === "ready" ? prices.plans : null;
   const storePending = prices.status === "loading";
   const storeUnavailable = prices.status === "unavailable";
+  // Installed shell is too old to take payments (Android 1.0): send them to
+  // the store to update instead of a dead "Unavailable" button.
+  const storeOutdated = prices.status === "unavailable" && prices.reason === "outdated";
   const android = prices.status !== "web" && prices.platform === "android";
   const store = android ? "Google Play" : "the App Store";
+  const storeUrl = android
+    ? "https://play.google.com/store/apps/details?id=app.spritzofficial"
+    : "https://apps.apple.com/app/id6807149616";
 
   // Optimistic check — server is authoritative, but no point showing
   // "Upgrade" to someone who's already Pro.
@@ -277,6 +283,9 @@ function PricingContent() {
           setNotice(outcome.message);
         }
         // cancelled: the user closed the sheet, nothing to say.
+      } catch {
+        // Never fail silently: a reset button with no message reads as broken.
+        setNotice(`Couldn't reach ${store}. Try again in a moment.`);
       } finally {
         setBusy(false);
       }
@@ -335,7 +344,9 @@ function PricingContent() {
         ...web,
         price: "",
         unit: "",
-        sub: storeUnavailable
+        sub: storeOutdated
+          ? `This version of Spritz can't take payments. Update it from ${store} to subscribe.`
+          : storeUnavailable
           ? "Purchases aren't available on this device right now."
           : native
             ? `Loading prices from ${store}…`
@@ -464,7 +475,9 @@ function PricingContent() {
           >
             {busy || storePending || !mounted
               ? "Loading…"
-              : storeUnavailable
+              : storeOutdated
+                ? "Update the app to subscribe"
+                : storeUnavailable
                 ? "Unavailable right now"
                 : selected === "lifetime"
                 ? "Get Lifetime"
@@ -507,6 +520,16 @@ function PricingContent() {
               ? `Billed through ${store}`
               : "Secure checkout via Stripe"}
         </p>
+        {storeOutdated && (
+          <a
+            href={storeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 block w-full text-center bg-ink text-cream py-3 rounded-xl font-medium"
+          >
+            Update on {store}
+          </a>
+        )}
         {notice && (
           <p className="mt-3 text-center text-sm text-burgundy">{notice}</p>
         )}
@@ -634,7 +657,9 @@ function PricingContent() {
           >
             {busy || storePending || !mounted
               ? "Loading…"
-              : storeUnavailable
+              : storeOutdated
+                ? "Update the app to subscribe"
+                : storeUnavailable
                 ? "Unavailable right now"
                 : selected === "lifetime"
                   ? `Get Lifetime · ${plan.price}`

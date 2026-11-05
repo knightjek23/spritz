@@ -65,17 +65,17 @@ export async function POST(req: Request) {
     if (existing) {
       await supabase.from("users").update({ email }).eq("id", existing.id);
     } else {
-      await supabase
+      const { error: insertError } = await supabase
         .from("users")
         .insert({ id: crypto.randomUUID(), clerk_user_id: clerkId, email, plan: "free" });
-    }
-    if (event.type === "user.created") {
-      // Server-side so every signup counts, ad blocker or not. distinct_id is
-      // the Clerk id, the same id the client identifies with.
-      const today = new Date().toISOString().slice(0, 10);
-      await captureServer(clerkId, "user_signed_up", {
-        $set_once: { signup_date: today },
-      });
+      // Signup event only when this webhook created the row. If the app's
+      // ensureAppUser backfill got there first, it already sent the event.
+      if (!insertError) {
+        await captureServer(clerkId, "user_signed_up", {
+          created_by: "webhook",
+          $set_once: { signup_date: new Date().toISOString().slice(0, 10) },
+        });
+      }
     }
   } else if (event.type === "user.deleted") {
     // The purge lives in lib/account-deletion.ts so this webhook and the

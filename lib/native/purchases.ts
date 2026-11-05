@@ -284,8 +284,22 @@ function hasPro(info: CustomerInfo): boolean {
 export async function purchasePro(plan: PurchasePlan): Promise<PurchaseOutcome> {
   if (!isNativeApp() || configuredFor === null) return { status: "unavailable" };
   const { Purchases, PURCHASES_ERROR_CODE } = await sdk();
-  const { current, all } = await Purchases.getOfferings();
-  const pkg = findPackage({ current, all } as PurchasesOfferings, plan);
+  // Inside the try: on a shell without the plugin, or with store billing
+  // off, this throws. Uncaught, the button silently reset and one Android
+  // user tapped it 331 times on Nov 1, 2026.
+  let pkg: ReturnType<typeof findPackage>;
+  try {
+    const { current, all } = await Purchases.getOfferings();
+    pkg = findPackage({ current, all } as PurchasesOfferings, plan);
+  } catch (err: unknown) {
+    const message = (err as { message?: string })?.message ?? "";
+    return {
+      status: "error",
+      message: /not implemented/i.test(message)
+        ? `This version of Spritz can't take payments. Update it from ${storeName()} to subscribe.`
+        : `Couldn't reach ${storeName()}. Check you're signed in to it, then try again.`,
+    };
+  }
   if (!pkg) return { status: "unavailable" };
   try {
     const result = await Purchases.purchasePackage({ aPackage: pkg });

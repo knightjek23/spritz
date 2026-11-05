@@ -95,6 +95,7 @@ export default async function ComparePage({ searchParams }: { searchParams: { a?
             {fa.name} <span className="text-slate">vs</span> {fb.name}
           </h1>
           <ProLocked
+            feature="compare"
             body={`You've used your ${use.cap} free comparisons this week. Pro compares any two fragrances, as often as you like, with your match score on both.`}
           />
           <Link href={`/fragrance/${a}`} className="text-sm text-emerald underline underline-offset-4">
