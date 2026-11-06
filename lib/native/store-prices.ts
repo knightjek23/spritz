@@ -48,6 +48,15 @@ function load(): Promise<Loaded> {
         // Every failure reports its stage and the store's own error, so a
         // "Purchases aren't available" on a device is diagnosable in PostHog.
         if (!plans) trackDiagnostic("store_prices_unavailable", { ...diag });
+        // The success side of the same check, so health is visible per app
+        // version ("1.0.6: 40 loads, 0 failures"), not only the failures.
+        else
+          trackDiagnostic("store_prices_loaded", {
+            platform: diag.platform,
+            app_version: diag.app_version,
+            app_build: diag.app_build,
+            current_offering: diag.current_offering,
+          });
         const outdated = diag.stage === "configure_failed" && PLUGIN_MISSING.test(diag.error_message ?? "");
         return { plans, outdated };
       })
