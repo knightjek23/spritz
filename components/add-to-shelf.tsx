@@ -88,7 +88,10 @@ export function AddToShelf({
       <div className="flex flex-wrap items-center justify-between mb-6">
         {/* flex-wrap so the notice (basis-full) drops to its own line under
             the title + button rather than squeezing between them. */}
-        <h1 className="font-display text-3xl">My collection</h1>
+        {/* leading-none so the title's line box is exactly the 30px type,
+            and its top sits on the page's 16px top gap like every other
+            tab's first line. */}
+        <h1 className="font-display text-3xl leading-none">My collection</h1>
         <button
           type="button"
           onClick={() => {
@@ -98,7 +101,10 @@ export function AddToShelf({
           aria-label={`Add a fragrance to ${TAB_LABEL[status]}`}
           // 44px target, nudged right so the glyph's visual edge lines up
           // with the row's right padding rather than the button's box.
-          className="w-11 h-11 -mr-2.5 flex items-center justify-center text-ink hover:bg-ink/5 rounded-full transition"
+          // -my-[7px] lets the 44px target overhang the 30px title row
+          // instead of making the row 44px tall: a taller row centered the
+          // title ~8px lower than the first line on every other tab.
+          className="w-11 h-11 -mr-2.5 -my-[7px] flex items-center justify-center text-ink hover:bg-ink/5 rounded-full transition"
           data-no-longpress
         >
           <svg width="28" height="28" viewBox="0 0 64 64" fill="none" aria-hidden>
