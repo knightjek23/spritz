@@ -109,7 +109,7 @@ export default async function HousePage({ params }: { params: { slug: string } }
       </p>
 
       {/* Header */}
-      <header className="mb-8">
+      <header className="mb-6">
         <p className="font-mono text-xs uppercase tracking-widest text-slate">
           House
           {fragrances.length > 0 && (
@@ -132,7 +132,7 @@ export default async function HousePage({ params }: { params: { slug: string } }
 
       {/* Editorial body — when we have one */}
       {house?.body && (
-        <section className="mb-10">
+        <section className="mb-6">
           <p className="text-ink leading-relaxed whitespace-pre-line">
             {house.body}
           </p>
@@ -152,7 +152,7 @@ export default async function HousePage({ params }: { params: { slug: string } }
       )}
 
       {!house && (
-        <section className="mb-10 border-l-2 border-brass pl-4">
+        <section className="mb-6 border-l-2 border-brass pl-4">
           <p className="text-slate text-sm leading-relaxed italic">
             We haven&apos;t written about {displayName} yet. Below is every
             fragrance from them in our catalog.
@@ -176,7 +176,7 @@ export default async function HousePage({ params }: { params: { slug: string } }
 
       {/* Catalog */}
       {fragrances.length > 0 && (
-        <section className="mb-10">
+        <section className="mb-6">
           <h2 className="font-display text-2xl mb-4">
             {house ? "Fragrances from the house" : "In our catalog"}
           </h2>

@@ -7,7 +7,7 @@ import Link from "next/link";
 export default function NotFound() {
   return (
     <div className="mx-auto max-w-md px-6 pt-4 pb-16">
-      <header className="mb-8">
+      <header className="mb-6">
         <p className="font-mono text-xs uppercase tracking-widest text-slate">
           404 · Page not found
         </p>
@@ -15,7 +15,7 @@ export default function NotFound() {
           Nothing here.
         </h1>
       </header>
-      <section className="mb-10 rounded-xl border border-dashed border-ink/15 p-6">
+      <section className="mb-6 rounded-xl border border-dashed border-ink/15 p-6">
         <p className="text-sm text-slate leading-relaxed mb-4">
           This page doesn&apos;t exist — the link may be old, or the fragrance
           may have moved. The catalog is still all here.

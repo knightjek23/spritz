@@ -23,7 +23,7 @@ export function WearInsights({ cost, complimented, seasons, neglected, pricedCou
   const nothing = worn.length === 0 && complimented.length === 0 && seasonsWithData.length === 0 && neglected.length === 0;
 
   return (
-    <section className="mb-10">
+    <section className="mb-6">
       <h2 className="font-display text-2xl mb-1">Insights</h2>
       <p className="text-sm text-slate mb-5">What your log says about how you actually wear your shelf.</p>
 

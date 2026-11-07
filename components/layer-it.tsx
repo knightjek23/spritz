@@ -60,7 +60,7 @@ export function LayerIt({ fragranceId, name }: { fragranceId: string; name: stri
   if (!isLoaded || !isSignedIn || !data || data === "error" || data.state === "none") return null;
 
   return (
-    <section className="mb-10">
+    <section className="mb-6">
       <h2 className="font-display text-2xl mb-1">Layer it</h2>
       <p className="text-sm text-slate mb-4">Bottles you already own that pair with {name}.</p>
 

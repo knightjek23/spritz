@@ -62,7 +62,7 @@ export default async function NotePage({ params }: { params: { slug: string } })
         </Link>
       </p>
 
-      <header className="mb-8">
+      <header className="mb-6">
         <p className="font-mono text-xs uppercase tracking-widest text-slate">
           {note?.family ?? "note"}
           {total > 0 && (
@@ -75,7 +75,7 @@ export default async function NotePage({ params }: { params: { slug: string } })
       </header>
 
       {note ? (
-        <section className="mb-10">
+        <section className="mb-6">
           <p className="text-ink leading-relaxed whitespace-pre-line">
             {note.body}
           </p>
@@ -89,7 +89,7 @@ export default async function NotePage({ params }: { params: { slug: string } })
           )}
         </section>
       ) : (
-        <section className="mb-10 border-l-2 border-brass pl-4">
+        <section className="mb-6 border-l-2 border-brass pl-4">
           <p className="text-slate text-sm leading-relaxed italic">
             We don&apos;t have a flavor profile written for this note yet. Below
             are the fragrances in our catalog that feature it.
@@ -98,7 +98,7 @@ export default async function NotePage({ params }: { params: { slug: string } })
       )}
 
       {fragrances.length > 0 && (
-        <section className="mb-10">
+        <section className="mb-6">
           <h2 className="font-display text-2xl mb-4">Fragrances featuring it</h2>
           <BrowseList kind="note" slug={params.slug} initialRows={fragrances} total={total} />
         </section>
@@ -122,7 +122,7 @@ function NoteNotFound({ slug }: { slug: string }) {
           ← All notes
         </Link>
       </p>
-      <header className="mb-8">
+      <header className="mb-6">
         <p className="font-mono text-xs uppercase tracking-widest text-slate">
           Note not found
         </p>
@@ -130,7 +130,7 @@ function NoteNotFound({ slug }: { slug: string }) {
           {displayName}
         </h1>
       </header>
-      <section className="mb-10 rounded-xl border border-dashed border-ink/15 p-6">
+      <section className="mb-6 rounded-xl border border-dashed border-ink/15 p-6">
         <p className="text-sm text-slate leading-relaxed mb-4">
           We don&apos;t have a page for <span className="italic">{displayName}</span> yet
           — either the spelling is uncommon or no fragrance in our catalog uses

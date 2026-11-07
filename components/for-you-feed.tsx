@@ -50,7 +50,7 @@ export function ForYouFeed({
             the top of the page. Each entry carries a spritz-rise-N
             stagger so the page settles in from below on first paint
             (same animation as the marketing home, kept consistent). */}
-      <div className="flex flex-col items-stretch mb-10">
+      <div className="flex flex-col items-stretch mb-6">
         <Link
           href="/scan"
           className="spritz-rise spritz-rise-1 w-full text-center bg-emerald text-cream py-4 rounded-2xl font-medium tracking-wide mb-3 hover:bg-emerald/90 transition"
@@ -105,7 +105,7 @@ export function ForYouFeed({
             the cause-and-effect ("based on your shelf" → "here's what
             we found") is one read. */}
       {data.similar.length > 0 ? (
-        <section className="mb-12">
+        <section className="mb-6">
           <h2 className="font-display text-2xl mb-1">Try next</h2>
           <p className="text-sm text-slate mb-4">
             Bottles that share notes and family with today&apos;s three. A new set every day.
@@ -160,7 +160,7 @@ export function ForYouFeed({
           </ul>
         </section>
       ) : (
-        <section className="mb-12 rounded-xl border border-dashed border-ink/15 p-6 text-center">
+        <section className="mb-6 rounded-xl border border-dashed border-ink/15 p-6 text-center">
           <p className="text-sm text-slate mb-3 leading-relaxed">
             We need a bit more catalog coverage to surface strong matches for
             your shelf yet.
@@ -192,7 +192,7 @@ export function ForYouFeed({
 
       {/* 5. Save you money — curated/AI dupes for the user's collection. */}
       {data.cheaperDupes.length > 0 && (
-        <section className="mb-12">
+        <section className="mb-6">
           <h2 className="font-display text-2xl mb-1">Save you money</h2>
           <p className="text-sm text-slate mb-4">
             Community-known dupes for the bottles you already wear.

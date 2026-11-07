@@ -82,7 +82,7 @@ export function CostEffectiveOptions({
 
   if (state.kind === "loading") {
     return (
-      <section className="mb-10" aria-busy>
+      <section className="mb-6" aria-busy>
         {heading}
         <div className="h-4 w-64 rounded bg-ink/5 animate-pulse mb-4" />
         <div className="space-y-2">
@@ -95,7 +95,7 @@ export function CostEffectiveOptions({
 
   if (state.kind === "signed-out") {
     return (
-      <section className="mb-10">
+      <section className="mb-6">
         {heading}
         <p className="text-sm text-slate mb-4">
           Bottles with the same scent profile as {fragranceName} for less, with live prices.
@@ -108,7 +108,7 @@ export function CostEffectiveOptions({
 
   if (state.kind === "error") {
     return (
-      <section className="mb-10">
+      <section className="mb-6">
         {heading}
         <p className="text-sm text-slate">Couldn&apos;t load options. Refresh to try again.</p>
       </section>
@@ -121,7 +121,7 @@ export function CostEffectiveOptions({
   // upsell either; a paywall in front of "we don't know" would read badly.
   if (data.reason === "no_source_price") {
     return (
-      <section className="mb-10">
+      <section className="mb-6">
         {heading}
         <p className="text-sm text-slate">
           We don&apos;t have a price for {fragranceName} yet, so we can&apos;t work out what
@@ -133,7 +133,7 @@ export function CostEffectiveOptions({
 
   if (data.reason === "no_matches") {
     return (
-      <section className="mb-10">
+      <section className="mb-6">
         {heading}
         <p className="text-sm text-slate">
           Nothing with the same scent profile as {fragranceName} is selling for meaningfully
@@ -148,7 +148,7 @@ export function CostEffectiveOptions({
   if (!data.pro && data.teaser) {
     const { count, bestSaving, currency } = data.teaser;
     return (
-      <section className="mb-10">
+      <section className="mb-6">
         {heading}
         <p className="text-sm text-slate mb-1">
           We found{" "}
@@ -166,7 +166,7 @@ export function CostEffectiveOptions({
 
   const src = data.sourcePrice;
   return (
-    <section className="mb-10">
+    <section className="mb-6">
       {heading}
       <p className="text-sm text-slate mb-4">
         Bottles with the same scent profile as {fragranceName}

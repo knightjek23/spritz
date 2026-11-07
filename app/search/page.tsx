@@ -138,7 +138,7 @@ function SearchPageInner() {
       {/* Keyword results: most popular fragrances carrying the typed
           notes / families. Sits above the name matches. */}
       {submittedQ && !busy && terms && byTerms.length > 0 && (
-        <section className="mb-8">
+        <section className="mb-6">
           <p className="font-mono text-xs uppercase tracking-widest text-slate mb-3">
             Most popular with {terms.map((t) => t.label).join(" · ")}
           </p>

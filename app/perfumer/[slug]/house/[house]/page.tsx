@@ -48,7 +48,7 @@ export default async function PerfumerHousePage({ params }: { params: Params }) 
             ← {p.name}
           </Link>
         </p>
-        <header className="mb-8">
+        <header className="mb-6">
           <p className="font-mono text-xs uppercase tracking-widest text-slate">Perfumer</p>
           <h1 className="font-display text-5xl mt-2 leading-[0.95]">{p.name}</h1>
         </header>
@@ -81,7 +81,7 @@ export default async function PerfumerHousePage({ params }: { params: Params }) 
         </Link>
       </p>
 
-      <header className="mb-8">
+      <header className="mb-6">
         <p className="font-mono text-xs uppercase tracking-widest text-slate">
           Perfumer · {fragrances.length} fragrance{fragrances.length === 1 ? "" : "s"}
         </p>
@@ -89,7 +89,7 @@ export default async function PerfumerHousePage({ params }: { params: Params }) 
         <p className="mt-3 text-sm text-slate">By {p.name}</p>
       </header>
 
-      <section className="mb-8">
+      <section className="mb-6">
         <ul className="space-y-2">
           {fragrances.map((f) => (
             <li key={f.id}>

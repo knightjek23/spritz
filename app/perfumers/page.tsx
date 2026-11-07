@@ -51,7 +51,7 @@ export default async function PerfumersIndexPage() {
   if (!pro) {
     return (
       <article className="mx-auto max-w-md px-6 pt-4 pb-10">
-        <header className="mb-8">
+        <header className="mb-6">
           <p className="font-mono text-xs uppercase tracking-widest text-slate">
             Library · {all.length} perfumers
           </p>
@@ -85,7 +85,7 @@ export default async function PerfumersIndexPage() {
 
   return (
     <article className="mx-auto max-w-md px-6 pt-4 pb-10">
-      <header className="mb-8">
+      <header className="mb-6">
         <p className="font-mono text-xs uppercase tracking-widest text-slate">
           Library · {all.length} perfumers
         </p>
@@ -96,7 +96,7 @@ export default async function PerfumersIndexPage() {
       </header>
 
       {featured.length > 0 && (
-        <section className="mb-10">
+        <section className="mb-6">
           <h2 className="font-display text-2xl mb-1">The names you know</h2>
           <p className="text-sm text-slate mb-4">
             Behind the most popular fragrances in the library.
@@ -117,7 +117,7 @@ export default async function PerfumersIndexPage() {
         </section>
       )}
 
-      <section className="mb-10">
+      <section className="mb-6">
         <h2 className="font-display text-2xl mb-4">A to Z</h2>
 
         {/* Jump row. Native anchors, so it works with JS off. */}

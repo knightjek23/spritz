@@ -61,7 +61,7 @@ async function AreaRow({
   if (rows.length === 0) return null;
 
   return (
-    <section className={variant === "compact" ? "mb-8" : "w-full mt-10 mb-6"}>
+    <section className={variant === "compact" ? "mb-6" : "w-full mt-6"}>
       <div className="flex items-baseline justify-between mb-3 px-1">
         <h2 className="font-display text-2xl">{title}</h2>
         <span className="font-mono text-[10px] uppercase tracking-widest text-slate">

@@ -37,7 +37,7 @@ export function FragranceScroller({
   return (
     // Untitled = embedded under a caller's own header (GenderToggle), which
     // owns the section spacing; adding ours too doubled the bottom gap.
-    <section className={!title ? undefined : variant === "compact" ? "mb-8" : "w-full mt-10 mb-6"}>
+    <section className={!title ? undefined : variant === "compact" ? "mb-6" : "w-full mt-6"}>
       {title && (
         <div className="flex items-baseline justify-between mb-3 px-1">
           <h2 className="font-display text-2xl">{title}</h2>

@@ -78,7 +78,7 @@ export default async function FamilyPage({
         </Link>
       </p>
 
-      <header className="mb-8">
+      <header className="mb-6">
         <p className="font-mono text-xs uppercase tracking-widest text-slate">
           Family
           {total > 0 && (
@@ -107,14 +107,14 @@ export default async function FamilyPage({
       )}
 
       {fragrances.length > 0 ? (
-        <section className="mb-10">
+        <section className="mb-6">
           <h2 className="font-display text-2xl mb-4">
             In this family
           </h2>
           <BrowseList kind="family" slug={slug} initialRows={fragrances} total={total} />
         </section>
       ) : (
-        <section className="mb-10 rounded-xl border border-dashed border-ink/15 p-6 text-center">
+        <section className="mb-6 rounded-xl border border-dashed border-ink/15 p-6 text-center">
           <p className="text-sm text-slate leading-relaxed">
             Nothing tagged with this family in our catalog yet. Try{" "}
             <Link href="/families" className="text-emerald underline underline-offset-2">

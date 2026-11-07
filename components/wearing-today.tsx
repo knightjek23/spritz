@@ -155,7 +155,7 @@ export function WearingToday({
   const showPicker = today !== null && (entries.length === 0 || picking);
 
   return (
-    <section className="spritz-rise spritz-rise-1 mb-10">
+    <section className="spritz-rise spritz-rise-1 mb-6">
       <p className="font-mono text-xs uppercase tracking-widest text-slate mb-1">
         Today{dateLabel ? ` · ${dateLabel}` : ""}
         {streak > 0 && <span className="text-emerald"> · Day {streak}</span>}

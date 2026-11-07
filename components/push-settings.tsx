@@ -66,7 +66,7 @@ export function PushSettings() {
   }
 
   return (
-    <section className="mb-8">
+    <section className="mb-6">
       <p className="font-mono text-xs uppercase tracking-widest text-slate mb-3">
         Notifications
       </p>

@@ -21,7 +21,7 @@ export async function SeasonalSuggestions() {
   if (!(await isProUser())) {
     const season = seasonFor(new Date());
     return (
-      <section className="w-full mt-10">
+      <section className="w-full mt-6">
         <h2 className="font-display text-2xl px-1 mb-2">{headingFor(season)}</h2>
         <div className="px-1">
           <ProLocked feature="seasonal" body="Ten in-season picks for men and women, refreshed every few days and switched over each season. Pro feature." />

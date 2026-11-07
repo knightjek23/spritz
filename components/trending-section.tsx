@@ -121,8 +121,8 @@ export async function TrendingSection({
     <section
       className={
         variant === "compact"
-          ? "mb-8"
-          : "w-full mt-12 mb-6"
+          ? "mb-6"
+          : "w-full mt-6"
       }
     >
       <div className="flex items-baseline justify-between mb-3 px-1">

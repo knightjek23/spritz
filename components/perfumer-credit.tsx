@@ -87,7 +87,7 @@ export function PerfumerCredit({
   if (state.kind === "none") return null;
 
   return (
-    <section className="mb-10 min-h-[3.5rem]">
+    <section className="mb-6 min-h-[3.5rem]">
       <p className="font-mono text-xs uppercase tracking-widest text-slate mb-1">Perfumer</p>
 
       {state.kind === "loading" && (

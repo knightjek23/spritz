@@ -214,7 +214,7 @@ export default async function FragrancePage({ params }: { params: { id: string }
       {/* Hero always renders. When there's no licensed image the outlined
           "photo coming soon" bottle stands in, so the page keeps its shape
           instead of collapsing (most of the catalog has no image yet). */}
-      <section className="mb-8 relative">
+      <section className="mb-6 relative">
         {/* Backdrop wash — subtle color halo behind the card. */}
         <div
           aria-hidden
@@ -257,7 +257,7 @@ export default async function FragrancePage({ params }: { params: { id: string }
           full plain-English description gets its own section below
           Notes so people who want the "what does that mean?" answer
           get it without cluttering the header. */}
-      <header className="mb-8">
+      <header className="mb-6">
         <p className="font-mono text-xs uppercase tracking-widest text-slate">
           <Link
             href={`/house/${houseSlug(f.house)}`}
@@ -277,7 +277,7 @@ export default async function FragrancePage({ params }: { params: { id: string }
       {/* Action row — Save + Buy (single Buy CTA, this fragrance only).
           SaveButtonsRow hydrates the user's existing collection state
           client-side so this page can stay ISR-cached. */}
-      <section className="grid grid-cols-2 gap-3 mb-10">
+      <section className="grid grid-cols-2 gap-3 mb-6">
         <SaveButtonsRow fragranceId={f.id} />
         <div className="col-span-2">
           <CompareButton fragranceId={f.id} name={f.name} house={f.house} />
@@ -303,14 +303,14 @@ export default async function FragrancePage({ params }: { params: { id: string }
           Defensive `?? []` because the DB column can be null on rows
           where the scraper didn't extract accords. */}
       {(f.family ?? []).length > 0 && (
-        <section className="mb-10">
+        <section className="mb-6">
           <h2 className="font-display text-2xl mb-4">Family</h2>
           <FamilyPills families={f.family ?? []} />
         </section>
       )}
 
       {/* Notes pyramid — each note is tappable to expand the flavor description */}
-      <section className="mb-10">
+      <section className="mb-6">
         <h2 className="font-display text-2xl mb-4">Notes</h2>
         <NotesPyramid fragrance={f} />
       </section>
@@ -321,7 +321,7 @@ export default async function FragrancePage({ params }: { params: { id: string }
           before Known Dupes so users grasp the strength context before
           diving into performance and alternatives. */}
       {strengths.length > 0 && (
-        <section className="mb-10">
+        <section className="mb-6">
           <h2 className="font-display text-2xl mb-3">Concentration</h2>
           <p className="text-ink font-medium mb-2">
             {concentrationSetLabel(strengths)}
@@ -375,7 +375,7 @@ export default async function FragrancePage({ params }: { params: { id: string }
           a description is. Sillage column renamed to Projection in the
           UI per Session 01 — sillage is industry jargon. */}
       {(hasPerformanceData || f.longevity_description || f.projection_description) && (
-        <section className="grid grid-cols-1 gap-6 mb-10">
+        <section className="grid grid-cols-1 gap-6 mb-6">
           <div className="grid grid-cols-2 gap-6">
             <ScoreBar
               label="Longevity"
@@ -420,7 +420,7 @@ export default async function FragrancePage({ params }: { params: { id: string }
 
       {/* Season + occasion guidance — only when populated */}
       {(f.season_tags?.length > 0 || f.time_tags?.length > 0) && (
-        <section className="mb-10">
+        <section className="mb-6">
           <h2 className="font-display text-2xl mb-4">When to wear it</h2>
           <div className="flex flex-wrap gap-2">
             {f.season_tags?.map((s) => (
@@ -445,7 +445,7 @@ export default async function FragrancePage({ params }: { params: { id: string }
 
       {/* House history (perfumer moved up, under performance) */}
       {f.house_history && (
-        <section className="mb-10">
+        <section className="mb-6">
           <p className="font-mono text-xs uppercase tracking-widest text-slate mb-2">
             The house
           </p>
@@ -455,7 +455,7 @@ export default async function FragrancePage({ params }: { params: { id: string }
 
       {/* How to wear it — only when an editorial entry exists for this fragrance */}
       {hasWearGuidance && (
-        <section className="mb-10">
+        <section className="mb-6">
           <h2 className="font-display text-2xl mb-4">How to wear it</h2>
           {wear.how_to_wear && (
             <p className="text-ink leading-relaxed mb-3">{wear.how_to_wear}</p>
@@ -483,13 +483,13 @@ export default async function FragrancePage({ params }: { params: { id: string }
 
       {/* Editorial commentary — the hand-written take on this specific fragrance */}
       {f.editorial_notes && (
-        <section className="mb-10 border-l-2 border-emerald pl-4">
+        <section className="mb-6 border-l-2 border-emerald pl-4">
           <p className="text-ink leading-relaxed italic">{f.editorial_notes}</p>
         </section>
       )}
 
       {/* Similar fragrances — collapsed, opt-in, algorithmic note-vector similarity */}
-      <section className="mt-12 pt-8 border-t border-ink/10">
+      <section className="mt-6 pt-8 border-t border-ink/10">
         <SimilarSection fragranceId={f.id} />
       </section>
     </article>

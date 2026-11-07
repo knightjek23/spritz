@@ -394,7 +394,7 @@ function PricingContent() {
   return (
     <div className="mx-auto max-w-md px-6 pt-4 pb-12">
       {/* Header */}
-      <header className="mb-8">
+      <header className="mb-6">
         <p className="font-mono text-xs uppercase tracking-widest text-slate mb-2">
           Spritz Pro
         </p>
@@ -582,7 +582,7 @@ function PricingContent() {
           keeps. Billed amount appears in the same weight as the free days,
           per App Store guideline 3.1.2(c). */}
       {selected === "monthly" && !isAlreadyPro && monthlyPrice !== null && (
-        <section className="mb-10 rounded-2xl border border-ink/10 bg-paper px-5 py-5">
+        <section className="mb-6 rounded-2xl border border-ink/10 bg-paper px-5 py-5">
           <h2 className="font-display text-xl mb-3">How your free trial works</h2>
           <ol className="space-y-3">
             {trialTimeline(monthlyPrice).map((step) => (
@@ -598,7 +598,7 @@ function PricingContent() {
       )}
 
       {/* Comparison table */}
-      <section className="mb-10">
+      <section className="mb-6">
         <h2 className="font-display text-2xl mb-4">What&apos;s included</h2>
         <div className="rounded-2xl border border-ink/10 overflow-hidden">
           {/* Header row */}
@@ -627,7 +627,7 @@ function PricingContent() {
       </section>
 
       {/* FAQ */}
-      <section className="mb-10">
+      <section className="mb-6">
         <h2 className="font-display text-2xl mb-4">Common questions</h2>
         <div className="space-y-2">
           {faq.map((item) => (
@@ -638,7 +638,7 @@ function PricingContent() {
 
       {/* Social proof slot — kept structural so we can drop in real
           testimonials once we have them. For now a quiet credibility line. */}
-      <section className="mb-10 text-center py-6 border-t border-b border-ink/10">
+      <section className="mb-6 text-center py-6 border-t border-b border-ink/10">
         <p className="font-display text-lg text-ink mb-1 italic">
           &ldquo;Finally a fragrance app that respects my intelligence.&rdquo;
         </p>

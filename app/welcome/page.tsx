@@ -149,7 +149,7 @@ function WelcomeInner() {
 
   return (
     <div className="mx-auto max-w-md px-6 pt-4 pb-10">
-      <header className="mb-8">
+      <header className="mb-6">
         <p className="font-mono text-xs uppercase tracking-widest text-slate mb-2">
           Welcome to Spritz
         </p>

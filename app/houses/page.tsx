@@ -99,7 +99,7 @@ export default async function HousesIndexPage() {
 
   return (
     <article className="mx-auto max-w-md px-6 pt-4 pb-10">
-      <header className="mb-8">
+      <header className="mb-6">
         <p className="font-mono text-xs uppercase tracking-widest text-slate">
           Library · {houses.length} houses
         </p>
@@ -113,7 +113,7 @@ export default async function HousesIndexPage() {
 
       {/* Editorial houses — the ones with a written story */}
       {editorialCount > 0 && (
-        <section className="mb-10">
+        <section className="mb-6">
           <h2 className="font-display text-2xl mb-1">With a story</h2>
           <p className="text-sm text-slate mb-4">
             Houses we&apos;ve written history, style, and signature notes for.
@@ -147,7 +147,7 @@ export default async function HousesIndexPage() {
 
       {/* Catalog-only houses — present in the catalog but no editorial yet */}
       {catalogOnly.length > 0 && (
-        <section className="mb-10">
+        <section className="mb-6">
           <h2 className="font-display text-2xl mb-1">Also in the catalog</h2>
           <p className="text-sm text-slate mb-4">
             Houses with fragrances in our database. Editorial coming.

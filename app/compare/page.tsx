@@ -171,7 +171,7 @@ export default async function ComparePage({ searchParams }: { searchParams: { a?
       </CompareRow>
 
       {/* Notes */}
-      <section className="mb-8">
+      <section className="mb-6">
         <div className="flex items-baseline justify-between mb-3">
           <h2 className="font-display text-2xl">Notes</h2>
           <p className="text-xs text-slate">

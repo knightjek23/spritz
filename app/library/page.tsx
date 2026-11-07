@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 export default function LibraryHubPage() {
   return (
     <div className="mx-auto max-w-md px-6 pt-4 pb-10">
-      <header className="mb-8">
+      <header className="mb-6">
         <p className="font-mono text-xs uppercase tracking-widest text-slate mb-2">
           The library
         </p>
@@ -54,7 +54,7 @@ export default function LibraryHubPage() {
           library, and the first thing under the header so the way in is
           visible without scrolling. Big tap targets so it's clear these
           are the main entries, not buried links. */}
-      <section className="mb-10">
+      <section className="mb-6">
         <h2 className="font-display text-2xl mb-4">Browse</h2>
         <div className="grid grid-cols-1 gap-3">
           <Link

@@ -82,7 +82,7 @@ export function KnownDupes({
   // State: dupes present
   if (dupes.length > 0) {
     return (
-      <section className="mb-10">
+      <section className="mb-6">
         <h2 className="font-display text-2xl mb-2">Known dupes</h2>
         <p className="text-sm text-slate mb-4">
           Fragrances the community references as similar, usually at a lower price point.
@@ -171,7 +171,7 @@ export function KnownDupes({
     ];
 
     return (
-      <section className="mb-10">
+      <section className="mb-6">
         <h2 className="font-display text-2xl mb-2">Known dupes</h2>
         <p className="text-sm text-slate mb-4">
           We don&apos;t have curated dupes for this fragrance yet. Generate them with AI?
@@ -191,7 +191,7 @@ export function KnownDupes({
 
   // State: no dupes, free or signed-out user → Pro upsell
   return (
-    <section className="mb-10">
+    <section className="mb-6">
       <h2 className="font-display text-2xl mb-2">Known dupes</h2>
       <p className="text-sm text-slate mb-4">
         AI-generated dupes are a Pro feature. Get community-recognized dupes for any

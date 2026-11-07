@@ -56,7 +56,7 @@ export default async function WearHistoryPage() {
         </Link>
       </p>
 
-      <header className="mb-8">
+      <header className="mb-6">
         <p className="font-mono text-xs uppercase tracking-widest text-slate">
           {dayCount === 0 ? "Nothing logged yet" : `${dayCount} day${dayCount === 1 ? "" : "s"} logged`}
         </p>
@@ -64,7 +64,7 @@ export default async function WearHistoryPage() {
       </header>
 
       {entries.length === 0 ? (
-        <section className="mb-10">
+        <section className="mb-6">
           <p className="text-sm text-slate leading-relaxed mb-4">
             Each day, pick what you&apos;re wearing from the top of the home screen. It
             lands here, so you can look back at what you reached for and when.
@@ -79,7 +79,7 @@ export default async function WearHistoryPage() {
       ) : (
         <>
           {top.length > 0 && (
-            <section className="mb-10">
+            <section className="mb-6">
               <h2 className="font-display text-2xl mb-1">Most worn</h2>
               <p className="text-sm text-slate mb-4">Last 90 days, by days worn.</p>
               <ul className="grid grid-cols-3 gap-3">
@@ -116,7 +116,7 @@ export default async function WearHistoryPage() {
               ownedCount={owned.length}
             />
           ) : (
-            <section className="mb-10">
+            <section className="mb-6">
               <ProGateTracker feature="wear_insights" state="locked" />
               <h2 className="font-display text-2xl mb-1">Insights</h2>
               <ProLocked feature="wear_insights" body="Pro turns this log into cost per wear, your most complimented bottles, what you reach for each season, and which bottles are gathering dust." />

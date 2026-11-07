@@ -91,7 +91,7 @@ export function KnownConsensus({ fragrance }: Props) {
   if (consensus && isLoaded && isSignedIn && isPro) {
     const isThinSignal = consensus.confidence < 0.5;
     return (
-      <section className="mb-10">
+      <section className="mb-6">
         <h2 className="font-display text-2xl mb-2">Community take</h2>
 
         {/* Thin-signal caveat (Partial Success pattern). Shown only when
@@ -200,7 +200,7 @@ export function KnownConsensus({ fragrance }: Props) {
     ];
 
     return (
-      <section className="mb-10">
+      <section className="mb-6">
         <h2 className="font-display text-2xl mb-2">Community take</h2>
         <p className="text-sm text-slate mb-4">
           See what users actually say about this fragrance and whether it&apos;s
@@ -224,7 +224,7 @@ export function KnownConsensus({ fragrance }: Props) {
 
   // ----- State: no consensus, free or signed-out → Pro upsell -----
   return (
-    <section className="mb-10">
+    <section className="mb-6">
       <h2 className="font-display text-2xl mb-2">Community take</h2>
       <p className="text-sm text-slate mb-4">
         AI-synthesized consensus from community reviews and forum discussion.

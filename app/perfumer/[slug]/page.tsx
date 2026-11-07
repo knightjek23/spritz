@@ -55,7 +55,7 @@ export default async function PerfumerPage({ params }: { params: { slug: string 
             ← Library
           </Link>
         </p>
-        <header className="mb-8">
+        <header className="mb-6">
           <p className="font-mono text-xs uppercase tracking-widest text-slate">
             Perfumer · {p.count} fragrance{p.count === 1 ? "" : "s"}
           </p>
@@ -101,7 +101,7 @@ export default async function PerfumerPage({ params }: { params: { slug: string 
         </Link>
       </p>
 
-      <header className="mb-8">
+      <header className="mb-6">
         <p className="font-mono text-xs uppercase tracking-widest text-slate">
           Perfumer · {fragrances.length} fragrance{fragrances.length === 1 ? "" : "s"}
         </p>
@@ -114,7 +114,7 @@ export default async function PerfumerPage({ params }: { params: { slug: string 
       </header>
 
       {houses.length > 1 && (
-        <section className="mb-10">
+        <section className="mb-6">
           <h2 className="font-display text-2xl mb-4">Houses</h2>
           <ul className="flex flex-wrap gap-2">
             {houses.map(([house, n]) => (
@@ -141,7 +141,7 @@ export default async function PerfumerPage({ params }: { params: { slug: string 
         />
       )}
 
-      <section className="mb-10">
+      <section className="mb-6">
         <h2 className="font-display text-2xl mb-4">Their work</h2>
         <ul className="space-y-2">
           {fragrances.map((f) => (

@@ -83,7 +83,7 @@ export default async function AccountPage() {
 
   return (
     <div className="mx-auto max-w-md px-6 pt-4 pb-10">
-      <header className="mb-8">
+      <header className="mb-6">
         <p className="font-mono text-xs uppercase tracking-widest text-slate">
           Account
         </p>
@@ -91,7 +91,7 @@ export default async function AccountPage() {
       </header>
 
       {/* Plan card */}
-      <section className="mb-8">
+      <section className="mb-6">
         <div
           className={`rounded-2xl p-6 ${
             plan === "pro"
@@ -151,7 +151,7 @@ export default async function AccountPage() {
       </section>
 
       {/* Usage */}
-      <section className="mb-8">
+      <section className="mb-6">
         <p className="font-mono text-xs uppercase tracking-widest text-slate mb-3">
           Usage
         </p>
@@ -180,7 +180,7 @@ export default async function AccountPage() {
       </section>
 
       {/* Fragrance history — what they logged from the home prompt */}
-      <section className="mb-8">
+      <section className="mb-6">
         <p className="font-mono text-xs uppercase tracking-widest text-slate mb-3">
           Fragrance history
         </p>
@@ -203,7 +203,7 @@ export default async function AccountPage() {
       </section>
 
       {/* Account info */}
-      <section className="mb-8">
+      <section className="mb-6">
         <p className="font-mono text-xs uppercase tracking-widest text-slate mb-3">
           Account
         </p>

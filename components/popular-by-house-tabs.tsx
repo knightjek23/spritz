@@ -31,7 +31,7 @@ export function PopularByHouseTabs({ groups }: { groups: HouseGroup[] }) {
   const active = groups[Math.min(activeIndex, groups.length - 1)];
 
   return (
-    <section className="mt-12 mb-6">
+    <section className="mt-6 mb-6">
       <p className="font-mono text-xs uppercase tracking-widest text-slate mb-3">
         Most popular
       </p>
