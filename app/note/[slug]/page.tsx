@@ -51,7 +51,7 @@ export default async function NotePage({ params }: { params: { slug: string } })
   }
 
   return (
-    <article className="mx-auto max-w-md px-6 py-10">
+    <article className="mx-auto max-w-md px-6 pt-4 pb-10">
       {/* Crumb back to the index */}
       <p className="mb-4">
         <Link
@@ -113,7 +113,7 @@ export default async function NotePage({ params }: { params: { slug: string } })
 function NoteNotFound({ slug }: { slug: string }) {
   const displayName = slug.replace(/-/g, " ");
   return (
-    <article className="mx-auto max-w-md px-6 py-10">
+    <article className="mx-auto max-w-md px-6 pt-4 pb-10">
       <p className="mb-4">
         <Link
           href="/notes"

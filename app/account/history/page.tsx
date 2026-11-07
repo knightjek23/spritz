@@ -46,7 +46,7 @@ export default async function WearHistoryPage() {
   const dayCount = new Set(entries.map((e) => e.wornOn)).size;
 
   return (
-    <article className="mx-auto max-w-md px-6 py-10">
+    <article className="mx-auto max-w-md px-6 pt-4 pb-10">
       <p className="mb-4">
         <Link
           href="/account"

@@ -39,7 +39,7 @@ export function ForYouFeed({
   wearing?: React.ReactNode;
 }) {
   return (
-    <div className="mx-auto max-w-md px-6 py-10">
+    <div className="mx-auto max-w-md px-6 pt-4 pb-10">
       {/* 0. Today's wear prompt — above everything, since it is the one
             thing the user does on the home screen rather than reads. */}
       {wearing}

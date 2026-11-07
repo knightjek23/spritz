@@ -14,7 +14,7 @@ import { SpritzLoader } from "@/components/spritz-loader";
 
 export default function FragranceLoading() {
   return (
-    <article className="mx-auto max-w-md px-6 py-10" aria-busy>
+    <article className="mx-auto max-w-md px-6 pt-4 pb-10" aria-busy>
       {/* Bottle hero */}
       <div className="mb-8 rounded-3xl bg-cream border border-ink/5 py-8 px-6 flex items-center justify-center">
         <div className="h-[267px] flex items-center justify-center">

@@ -28,7 +28,7 @@ export default function SearchPage() {
 
 function SearchSkeleton() {
   return (
-    <div className="mx-auto max-w-md px-6 py-12">
+    <div className="mx-auto max-w-md px-6 pt-4 pb-12">
       <h1 className="font-display text-3xl mb-6">Search</h1>
       <div className="h-12 rounded-xl bg-paper animate-pulse" />
     </div>
@@ -82,7 +82,7 @@ function SearchPageInner() {
   }, [submittedQ]);
 
   return (
-    <div className="mx-auto max-w-md px-6 py-12">
+    <div className="mx-auto max-w-md px-6 pt-4 pb-12">
       <h1 className="font-display text-3xl mb-6">Search</h1>
 
       <div className="mb-8">

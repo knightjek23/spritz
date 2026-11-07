@@ -67,7 +67,7 @@ export default async function FamilyPage({
       : [];
 
   return (
-    <article className="mx-auto max-w-md px-6 py-10">
+    <article className="mx-auto max-w-md px-6 pt-4 pb-10">
       {/* Crumb */}
       <p className="mb-4">
         <Link

@@ -21,7 +21,7 @@ import { SeasonalSuggestions } from "./seasonal-suggestions";
 
 export function MarketingHome() {
   return (
-    <div className="mx-auto max-w-md px-6 pt-16 pb-12 flex flex-col items-center text-center">
+    <div className="mx-auto max-w-md px-6 pt-4 pb-12 flex flex-col items-center text-center">
       {/* Each block carries a spritz-rise-N stagger so the page settles
           in from below in one fluid motion on first paint (~80ms between
           starts, 600ms each, ease-out-expo). Honors prefers-reduced-

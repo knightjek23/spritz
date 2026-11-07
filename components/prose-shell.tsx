@@ -11,7 +11,7 @@
 
 export function ProseShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="px-6 py-10 max-w-2xl mx-auto">
+    <div className="px-6 pt-4 pb-10 max-w-2xl mx-auto">
       <article
         className="
           [&_h1]:font-display [&_h1]:text-3xl [&_h1]:leading-tight [&_h1]:mb-2

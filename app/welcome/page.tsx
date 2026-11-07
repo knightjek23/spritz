@@ -39,7 +39,7 @@ export default function WelcomePage() {
       <SignedOut>
         {/* Should be unreachable in practice — Clerk redirects unauthenticated
             users away. But if someone hits /welcome cold, send them to sign-up. */}
-        <div className="mx-auto max-w-md px-6 py-16 text-center">
+        <div className="mx-auto max-w-md px-6 pt-4 pb-16 text-center">
           <p className="text-slate mb-6">Sign up to get started.</p>
           <Link
             href="/sign-up"
@@ -141,14 +141,14 @@ function WelcomeInner() {
     // Brief skeleton while we check collection emptiness. Avoids flash of
     // onboarding UI for returning users.
     return (
-      <div className="mx-auto max-w-md px-6 py-24 flex justify-center">
+      <div className="mx-auto max-w-md px-6 pt-4 pb-24 flex justify-center">
         <SpritzLoader size={64} label="Getting things ready" showLabel />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-md px-6 py-10">
+    <div className="mx-auto max-w-md px-6 pt-4 pb-10">
       <header className="mb-8">
         <p className="font-mono text-xs uppercase tracking-widest text-slate mb-2">
           Welcome to Spritz

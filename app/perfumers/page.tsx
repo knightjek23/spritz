@@ -50,7 +50,7 @@ export default async function PerfumersIndexPage() {
   // names: the index is the browse path into every credit.
   if (!pro) {
     return (
-      <article className="mx-auto max-w-md px-6 py-10">
+      <article className="mx-auto max-w-md px-6 pt-4 pb-10">
         <header className="mb-8">
           <p className="font-mono text-xs uppercase tracking-widest text-slate">
             Library · {all.length} perfumers
@@ -84,7 +84,7 @@ export default async function PerfumersIndexPage() {
   }
 
   return (
-    <article className="mx-auto max-w-md px-6 py-10">
+    <article className="mx-auto max-w-md px-6 pt-4 pb-10">
       <header className="mb-8">
         <p className="font-mono text-xs uppercase tracking-widest text-slate">
           Library · {all.length} perfumers

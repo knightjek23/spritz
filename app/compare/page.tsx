@@ -53,7 +53,7 @@ export default async function ComparePage({ searchParams }: { searchParams: { a?
   if (!userId) redirect(`/sign-in?redirect_url=${encodeURIComponent(`/compare?a=${a}&b=${b}`)}`);
   if (!UUID.test(a) || !UUID.test(b) || a === b) {
     return (
-      <article className="mx-auto max-w-md px-6 py-10">
+      <article className="mx-auto max-w-md px-6 pt-4 pb-10">
         <h1 className="font-display text-3xl mb-3">Compare fragrances</h1>
         <p className="text-sm text-slate leading-relaxed">
           Open any fragrance and tap “Compare with another fragrance” to pick the second bottle.
@@ -75,7 +75,7 @@ export default async function ComparePage({ searchParams }: { searchParams: { a?
   const fb = (rows ?? []).find((r) => r.id === b) as unknown as Row | undefined;
   if (!fa || !fb) {
     return (
-      <article className="mx-auto max-w-md px-6 py-10">
+      <article className="mx-auto max-w-md px-6 pt-4 pb-10">
         <h1 className="font-display text-3xl mb-3">Compare fragrances</h1>
         <p className="text-sm text-slate">One of those fragrances isn’t in the library.</p>
       </article>
@@ -88,7 +88,7 @@ export default async function ComparePage({ searchParams }: { searchParams: { a?
     const use = await spendUse(user.id, "compare", key, today);
     if (!use.allowed) {
       return (
-        <article className="mx-auto max-w-md px-6 py-10">
+        <article className="mx-auto max-w-md px-6 pt-4 pb-10">
           <ProGateTracker feature="compare" state="locked" />
           <p className="font-mono text-xs uppercase tracking-widest text-slate mb-2">Compare</p>
           <h1 className="font-display text-3xl mb-6">
@@ -122,7 +122,7 @@ export default async function ComparePage({ searchParams }: { searchParams: { a?
   const shared = [...allA].filter((n) => allB.has(n));
 
   return (
-    <article className="mx-auto max-w-md px-6 py-10">
+    <article className="mx-auto max-w-md px-6 pt-4 pb-10">
       <p className="mb-4">
         <Link href={`/fragrance/${a}`} className="font-mono text-xs uppercase tracking-widest text-slate hover:text-ink">
           ← {fa.name}

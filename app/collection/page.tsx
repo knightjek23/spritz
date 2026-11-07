@@ -79,7 +79,7 @@ export default function CollectionPage() {
 
 function SignedOutState() {
   return (
-    <div className="mx-auto max-w-md px-6 py-16 text-center">
+    <div className="mx-auto max-w-md px-6 pt-4 pb-16 text-center">
       <span className="inline-block px-3 py-1 mb-6 bg-brass text-ink text-xs font-mono uppercase tracking-wider rounded-full">
         Sign in to save
       </span>
@@ -128,7 +128,7 @@ function SignedInCollection() {
   const empty = EMPTY_COPY[tab];
 
   return (
-    <div className="mx-auto max-w-md px-6 py-10">
+    <div className="mx-auto max-w-md px-6 pt-4 pb-10">
       {/* Title row with the "+" (components/add-to-shelf.tsx). The pick
           lands in whichever tab is open, and refetch() redraws the list. */}
       <AddToShelf status={tab} onAdded={refetch} />

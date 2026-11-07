@@ -267,7 +267,7 @@ function ScanPageInner() {
   const labelUnreadable = result.partial === "label_unreadable";
 
   return (
-    <div className="mx-auto max-w-md px-6 py-12">
+    <div className="mx-auto max-w-md px-6 pt-4 pb-12">
       <header className="mb-6">
         <p className="font-mono text-xs uppercase tracking-widest text-slate mb-2">
           Scan result

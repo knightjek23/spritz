@@ -19,7 +19,7 @@ export default function RootError({
   }, [error]);
 
   return (
-    <div className="mx-auto max-w-md px-6 py-16">
+    <div className="mx-auto max-w-md px-6 pt-4 pb-16">
       <header className="mb-8">
         <p className="font-mono text-xs uppercase tracking-widest text-slate">
           Something went wrong

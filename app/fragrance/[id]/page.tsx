@@ -197,7 +197,7 @@ export default async function FragrancePage({ params }: { params: { id: string }
   const hasWearGuidance = !!(wear.how_to_wear || wear.layering_notes || (wear.occasions && wear.occasions.length > 0));
 
   return (
-    <article className="mx-auto max-w-md px-6 py-10">
+    <article className="mx-auto max-w-md px-6 pt-4 pb-10">
       <script
         type="application/ld+json"
         // Escape "<" so no catalog string can break out of the script tag.
