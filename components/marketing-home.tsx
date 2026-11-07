@@ -42,26 +42,25 @@ export function MarketingHome() {
         have a bottle? Scan the label.
       </p>
 
-      {/* Primary: scan a bottle. Leads with the action that gets the
-          user from "curious about this bottle" to "here's what it is"
-          in one tap. The camera flow is the highest-signal entry point
-          and the one that makes Spritz feel distinct from other
-          fragrance sites. */}
+      {/* Primary: browse the library. Lands on the Library tab itself
+          (browse by family / note / house / perfumer, most popular,
+          trending), the widest way in for someone without a bottle in
+          hand, which is most first visits. */}
       <Link
-        href="/scan"
+        href="/library"
         className="spritz-rise spritz-rise-5 w-full bg-emerald text-cream py-4 rounded-2xl font-medium tracking-wide mb-3 hover:bg-emerald/90 transition"
       >
-        Scan a bottle
+        Browse the library
       </Link>
 
-      {/* Secondary: browse the library. Same affordance, quieter
-          visual weight. Still the discovery path for users without a
-          bottle in hand. */}
+      {/* Secondary: scan a bottle. Same affordance, quieter visual
+          weight: from "curious about this bottle" to "here's what it is"
+          in one tap when there is a bottle in hand. */}
       <Link
-        href="/families"
+        href="/scan"
         className="spritz-rise spritz-rise-6 w-full border border-ink/15 text-ink py-4 rounded-2xl font-medium tracking-wide hover:bg-ink/5 transition mb-3"
       >
-        Browse the library
+        Scan a bottle
       </Link>
 
       {/* Tertiary: search. Text-only so it sits visually beneath the two

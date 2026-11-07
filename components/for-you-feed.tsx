@@ -51,17 +51,18 @@ export function ForYouFeed({
             stagger so the page settles in from below on first paint
             (same animation as the marketing home, kept consistent). */}
       <div className="flex flex-col items-stretch mb-6">
+        {/* Primary: the Library tab. Secondary: scan. */}
         <Link
-          href="/scan"
+          href="/library"
           className="spritz-rise spritz-rise-1 w-full text-center bg-emerald text-cream py-4 rounded-2xl font-medium tracking-wide mb-3 hover:bg-emerald/90 transition"
         >
-          Scan a bottle
+          Browse the library
         </Link>
         <Link
-          href="/families"
+          href="/scan"
           className="spritz-rise spritz-rise-2 w-full text-center border border-ink/15 text-ink py-4 rounded-2xl font-medium tracking-wide mb-3 hover:bg-ink/5 transition"
         >
-          Browse the library
+          Scan a bottle
         </Link>
         <Link
           href="/search"
