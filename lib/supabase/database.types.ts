@@ -649,6 +649,21 @@ export type Database = {
         Args: { p_family: string; p_limit?: number };
         Returns: Array<Database["public"]["Tables"]["fragrances"]["Row"]>;
       };
+      list_trending_activity: {
+        Args: { p_limit?: number; p_days?: number };
+        Returns: Array<{
+          id: string;
+          name: string;
+          house: string;
+          year: number | null;
+          bottle_image_url: string | null;
+          score: number;
+          scanners: number;
+          wearers: number;
+          shelvers: number;
+          clickers: number;
+        }>;
+      };
       find_fragrances_by_notes_page: {
         Args: { p_notes: string[]; p_limit?: number; p_offset?: number };
         Returns: Array<{

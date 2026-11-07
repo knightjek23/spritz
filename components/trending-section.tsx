@@ -1,55 +1,91 @@
 // "Trending this week" surface.
 //
-// Server Component — fetches from the list_trending_fragrances RPC at
-// request time, falls back gracefully if the table is empty (early-stage
-// catalog) or the RPC fails.
+// Server Component. Ranks what Spritz people actually did with each bottle
+// over the last 7 days: scanned it, wore it, shelved it, clicked to buy
+// it, each counted once per person and weighted (list_trending_activity,
+// migration 0042). Until there is enough of that to fill a row, the gap
+// is topped up from the weekly search-demand feed (then retailer best
+// sellers), so the row never sits there with a single card. Activity
+// always ranks first; the top-up only fills what is left, skips anything
+// already shown, and only uses feed entries that matched a catalog
+// bottle (so every card links somewhere).
 //
 // Session 01 Finding 4: the tester anchored Pro value on what's
 // culturally hot ("Instagram/TikTok famous fragrances"). Trending is the
-// library-side answer to that — what people are actually scanning
-// this week — without diluting positioning by literally labeling things
-// "TikTok fragrances."
+// library-side answer to that, without diluting positioning by literally
+// labeling things "TikTok fragrances."
 //
 // Render: horizontal scroll row of fragrance cards with bottle thumbnail,
-// name, house, and scan count. Mobile-first; the row scrolls
-// horizontally on narrow screens and wraps on wider ones.
+// name and house. Mobile-first.
 
 import Link from "next/link";
 import { BottleImage } from "@/components/bottle-image";
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { loadAreaFeed, isFeedStale, type TrendingArea } from "@/lib/trending/feed";
+import { joinTrendingToCatalogCached } from "@/lib/trending/join";
 
 interface TrendingRow {
   id: string;
   name: string;
   house: string;
-  family: string[] | null;
-  gender: string | null;
-  year: number | null;
   bottle_image_url: string | null;
-  scan_count: number;
 }
 
-// Same rows for every visitor — cache across requests so the RPC runs
+/** Below this many activity-ranked bottles, top up from the feeds. */
+const MIN_ROW = 6;
+/** Feeds to top up from, in order. */
+const TOP_UP_AREAS: TrendingArea[] = ["google_trends", "retailer_bestsellers"];
+
+// Same rows for every visitor, so cache across requests: the RPC runs
 // once per 15 min instead of once per pageview.
-const fetchTrendingRows = unstable_cache(
+const fetchActivityRows = unstable_cache(
   async (limit: number, days: number): Promise<TrendingRow[] | null> => {
     const supabase = createAdminClient();
-    const { data: rows, error } = await supabase
-      .rpc("list_trending_fragrances", { p_limit: limit, p_days: days })
-      .returns<TrendingRow[]>();
+    const { data: rows, error } = await supabase.rpc("list_trending_activity", {
+      p_limit: limit,
+      p_days: days,
+    });
     if (error) {
       console.warn(
-        "[trending] RPC error (likely migration 0010 not deployed):",
+        "[trending] RPC error (likely migration 0042 not deployed):",
         error.message,
       );
       return null;
     }
-    return Array.isArray(rows) ? rows : [];
+    return (rows ?? []).map((r) => ({
+      id: r.id,
+      name: r.name,
+      house: r.house,
+      bottle_image_url: r.bottle_image_url,
+    }));
   },
-  ["trending-section-rpc"],
+  ["trending-activity-rpc"],
   { revalidate: 900 },
 );
+
+/** Catalog-matched entries from the weekly feeds, in feed order, for the
+ *  top-up. Never throws: a missing or stale feed just contributes nothing. */
+async function feedTopUp(exclude: Set<string>, want: number): Promise<TrendingRow[]> {
+  const out: TrendingRow[] = [];
+  for (const area of TOP_UP_AREAS) {
+    if (out.length >= want) break;
+    try {
+      const feed = await loadAreaFeed(area);
+      if (!feed || isFeedStale(feed) || feed.entries.length === 0) continue;
+      const joined = await joinTrendingToCatalogCached(area, feed.generated_at, feed.entries.slice(0, 20));
+      for (const e of joined) {
+        if (out.length >= want) break;
+        if (!e.fragranceId || exclude.has(e.fragranceId)) continue;
+        exclude.add(e.fragranceId);
+        out.push({ id: e.fragranceId, name: e.name, house: e.house, bottle_image_url: e.imageUrl });
+      }
+    } catch (err) {
+      console.warn(`[trending] top-up from ${area} failed:`, err instanceof Error ? err.message : String(err));
+    }
+  }
+  return out;
+}
 
 export async function TrendingSection({
   limit = 10,
@@ -68,12 +104,15 @@ export async function TrendingSection({
   // render without it, not 500.
   let data: TrendingRow[] = [];
   try {
-    const rows = await fetchTrendingRows(limit, days);
-    if (rows === null) return null;
-    data = rows;
+    // A failed RPC (e.g. migration not applied yet) is treated as "no
+    // activity", so the feeds can still fill the row.
+    data = (await fetchActivityRows(limit, days)) ?? [];
   } catch (err) {
     console.warn("[trending] threw:", err instanceof Error ? err.message : String(err));
-    return null;
+  }
+  if (data.length < Math.min(MIN_ROW, limit)) {
+    const seen = new Set(data.map((r) => r.id));
+    data = [...data, ...(await feedTopUp(seen, limit - data.length))];
   }
 
   if (data.length === 0) return null;
