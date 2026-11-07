@@ -37,7 +37,7 @@ export function GenderToggle({
   const rows = active === "men" ? men : women;
 
   return (
-    <section className={compact ? "mb-6" : "w-full mt-6"}>
+    <section className={compact ? "mt-6 mb-6" : "w-full mt-6"}>
       <div className="px-1 mb-4">
         <h2 className="font-display text-2xl">{heading}</h2>
         {subline && <p className="text-sm text-slate mt-1">{subline}</p>}

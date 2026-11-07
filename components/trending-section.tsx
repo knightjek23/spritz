@@ -121,7 +121,7 @@ export async function TrendingSection({
     <section
       className={
         variant === "compact"
-          ? "mb-6"
+          ? "mt-6 mb-6"
           : "w-full mt-6"
       }
     >

@@ -75,7 +75,7 @@ export function MatchScore({ fragranceId, compact = false }: { fragranceId: stri
 
   if (!data) {
     return (
-      <section aria-busy className={`${compact ? "mb-6" : "mb-10"} border border-ink/10 p-4`}>
+      <section aria-busy className={`${compact ? "mt-6 mb-6" : "mb-6"} border border-ink/10 p-4`}>
         <p className="font-mono text-xs uppercase tracking-widest text-slate">Your match</p>
         <div className="mt-3 h-8 w-28 bg-paper" />
       </section>
@@ -85,7 +85,7 @@ export function MatchScore({ fragranceId, compact = false }: { fragranceId: stri
   if (data.state === "needs_shelf") {
     const left = Math.max(1, data.min - data.contributing);
     return (
-      <section className={`${compact ? "mb-6" : "mb-10"} border border-ink/10 p-4`}>
+      <section className={`${compact ? "mt-6 mb-6" : "mb-6"} border border-ink/10 p-4`}>
         <p className="font-mono text-xs uppercase tracking-widest text-slate">Your match</p>
         <p className="mt-2 text-sm text-ink leading-relaxed">
           Add {left} more {left === 1 ? "bottle" : "bottles"} you own or have tried and Spritz will tell you how
@@ -100,7 +100,7 @@ export function MatchScore({ fragranceId, compact = false }: { fragranceId: stri
 
   if (data.state === "locked") {
     return (
-      <section className={`${compact ? "mb-6" : "mb-10"} border border-ink/10 p-4`}>
+      <section className={`${compact ? "mt-6 mb-6" : "mb-6"} border border-ink/10 p-4`}>
         <p className="font-mono text-xs uppercase tracking-widest text-slate">Your match</p>
         <p className="mt-2 text-sm text-ink leading-relaxed">
           You've used your {data.cap} free match scores this week. Pro scores every fragrance you open and tells
@@ -117,7 +117,7 @@ export function MatchScore({ fragranceId, compact = false }: { fragranceId: stri
     data.score >= 75 ? "text-emerald" : data.score >= 55 ? "text-ink" : data.score >= 35 ? "text-slate" : "text-burgundy";
 
   return (
-    <section className={`${compact ? "mb-6" : "mb-10"} border border-ink/10 p-4`}>
+    <section className={`${compact ? "mt-6 mb-6" : "mb-6"} border border-ink/10 p-4`}>
       <div className="flex items-baseline justify-between gap-4">
         <p className="font-mono text-xs uppercase tracking-widest text-slate">Your match</p>
         {!data.pro && data.remaining !== null && (
