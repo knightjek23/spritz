@@ -1,7 +1,10 @@
 // /library — the hub page for the Library bottom-nav tab.
 //
-// Consolidates three browse-by-X entries (notes, houses, families) and
-// surfaces both trending feeds (scrape-based + scan-based) at the top.
+// Order, top to bottom: the Browse entries (family / note / house /
+// perfumer) right under the header so the way in is the first thing on
+// screen, then Most popular by house, then the trending feeds, Trending
+// this week, seasonal picks, the men's and women's top scents, and the
+// search link.
 // The intent is that tapping Library in the nav lands a user on a
 // single page that answers "what's in here and where do I start?" —
 // rather than dumping them into a single index that only covers one
@@ -47,35 +50,11 @@ export default function LibraryHubPage() {
         </p>
       </header>
 
-      {/* Trending feeds — external scrape source(s). Self-hides if the
-          JSON feed isn't populated yet. */}
-      <TrendingFeeds variant="default" />
-
-      {/* Trending scans — internal scan-event aggregation. Self-hides
-          when there isn't enough scan volume. The two trending blocks
-          read as complementary: "what TikTok is wearing" + "what
-          Spritz users are scanning." */}
-      <TrendingSection />
-
-      {/* Most popular by house — the top 5 houses (by depth of their
-          10 best fragrances' popularity scores), each with a ranked
-          top-10 scroller behind a pill tab. All-time cultural-presence
-          complement to the two week-scoped trending blocks above.
-          Self-hides until migration 0016 is applied. */}
-      <PopularByHouse />
-
-      {/* Seasonal picks and the men's / women's top scents. Scored from
-          the monthly research file plus popularity, trends and in-app
-          activity; rotate every 3 days (lib/discovery). Self-hide when
-          empty. */}
-      <SeasonalSuggestions />
-      <TopScentsForMen />
-      <TopScentsForWomen />
-
       {/* Four browse-by-X entries — primary navigation into the
-          library. Big tap targets so it's clear these are the
-          main entries, not buried links. */}
-      <section className="mt-12 mb-10">
+          library, and the first thing under the header so the way in is
+          visible without scrolling. Big tap targets so it's clear these
+          are the main entries, not buried links. */}
+      <section className="mb-10">
         <h2 className="font-display text-2xl mb-4">Browse</h2>
         <div className="grid grid-cols-1 gap-3">
           <Link
@@ -152,6 +131,32 @@ export default function LibraryHubPage() {
           </Link>
         </div>
       </section>
+
+      {/* Most popular by house — the top 5 houses (by depth of their
+          10 best fragrances' popularity scores), each with a ranked
+          top-10 scroller behind a pill tab. All-time cultural-presence
+          complement to the week-scoped trending blocks below. Sits right
+          under Browse.
+          Self-hides until migration 0016 is applied. */}
+      <PopularByHouse />
+
+      {/* Trending feeds — external scrape source(s). Self-hides if the
+          JSON feed isn't populated yet. */}
+      <TrendingFeeds variant="default" />
+
+      {/* Trending scans — internal scan-event aggregation. Self-hides
+          when there isn't enough scan volume. The two trending blocks
+          read as complementary: "what TikTok is wearing" + "what
+          Spritz users are scanning." */}
+      <TrendingSection />
+
+      {/* Seasonal picks and the men's / women's top scents. Scored from
+          the monthly research file plus popularity, trends and in-app
+          activity; rotate every 3 days (lib/discovery). Self-hide when
+          empty. */}
+      <SeasonalSuggestions />
+      <TopScentsForMen />
+      <TopScentsForWomen />
 
       {/* Quiet search affordance — for users who already know what
           they're looking for and want the catalog directly. */}
