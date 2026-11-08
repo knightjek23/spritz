@@ -27,6 +27,7 @@
 // root, or scrolls to the top if you are already at the root.
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { LiquidGlass } from "./liquid-glass/LiquidGlass";
 import {
@@ -82,9 +83,51 @@ const TABS: Tab[] = [
   },
 ];
 
+/** Fields that raise the on-screen keyboard. Checkboxes, radios, buttons,
+ *  ranges and file pickers do not. */
+function isTextField(el: Element | null): boolean {
+  if (!el) return false;
+  if (el instanceof HTMLTextAreaElement) return !el.readOnly && !el.disabled;
+  if (el instanceof HTMLInputElement) {
+    const nonText = ["checkbox", "radio", "button", "submit", "reset", "range", "color", "file", "image", "hidden"];
+    return !nonText.includes(el.type) && !el.readOnly && !el.disabled;
+  }
+  return (el as HTMLElement).isContentEditable === true;
+}
+
+/**
+ * True while a text field has focus, i.e. while the on-screen keyboard is
+ * up. The nav is position: fixed to the bottom of the visual viewport, so
+ * on iOS it rides up and sits on top of the keyboard (the Compare search
+ * on a fragrance page, the Shelf "+" search, sign-in fields). Every native
+ * app hides its tab bar while typing; this does the same, app-wide.
+ * focusout is checked a frame later so tabbing between two fields does
+ * not flash the nav back in.
+ */
+function useKeyboardOpen(): boolean {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    let frame = 0;
+    const sync = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => setOpen(isTextField(document.activeElement)));
+    };
+    sync();
+    document.addEventListener("focusin", sync);
+    document.addEventListener("focusout", sync);
+    return () => {
+      cancelAnimationFrame(frame);
+      document.removeEventListener("focusin", sync);
+      document.removeEventListener("focusout", sync);
+    };
+  }, []);
+  return open;
+}
+
 export function BottomNav() {
   const pathname = usePathname() ?? "/";
   const router = useRouter();
+  const keyboardOpen = useKeyboardOpen();
 
   function onTabClick(e: React.MouseEvent<HTMLAnchorElement>, tab: Tab, active: boolean) {
     // Let cmd/ctrl/shift/middle clicks open a new browser tab as usual.
@@ -154,6 +197,15 @@ export function BottomNav() {
         bottom: "var(--nav-pill-offset)",
         left: "calc(16px + var(--safe-left))",
         right: "calc(16px + var(--safe-right))",
+        // Out of the way while typing (see useKeyboardOpen). visibility
+        // as well as opacity, so it cannot be tapped and drops out of the
+        // accessibility tree while hidden; the delay on visibility lets
+        // the fade play.
+        opacity: keyboardOpen ? 0 : 1,
+        visibility: keyboardOpen ? "hidden" : "visible",
+        transition: keyboardOpen
+          ? "opacity 120ms ease-out, visibility 0s linear 120ms"
+          : "opacity 180ms ease-out, visibility 0s",
       }}
       className="z-40"
     >
