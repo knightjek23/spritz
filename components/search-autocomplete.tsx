@@ -28,6 +28,7 @@ import { BottleImage } from "@/components/bottle-image";
 import type { Fragrance } from "@/lib/types";
 import type { SearchResponse, SearchTerm } from "@/lib/search-terms";
 import type { HouseHit } from "@/lib/search-houses";
+import type { PerfumerHit } from "@/lib/search-perfumers";
 import type { FamilyHit, NoteHit } from "@/lib/search-notes";
 import { familySwatch, noteSwatch } from "@/lib/swatches";
 import {
@@ -45,9 +46,10 @@ const MAX_BY_TERMS = 5;
 const MAX_NAMES_WITH_TERMS = 3;
 const MIN_QUERY_LEN = 2;
 
-// A lead row above the fragrance matches: a house, a note or a family.
+// A lead row above the fragrance matches: a house, a perfumer (Pro only,
+// from /api/search/perfumers), a note or a family.
 interface Lead {
-  kind: "house" | "note" | "family";
+  kind: "house" | "perfumer" | "note" | "family";
   id: string;
   href: string;
   label: string;
@@ -143,6 +145,7 @@ export function SearchAutocomplete({
   const [q, setQ] = useState(initialQuery);
   const [suggestions, setSuggestions] = useState<Row[]>([]);
   const [houses, setHouses] = useState<HouseHit[]>([]);
+  const [perfumers, setPerfumers] = useState<PerfumerHit[]>([]);
   const [notes, setNotes] = useState<NoteHit[]>([]);
   const [families, setFamilies] = useState<FamilyHit[]>([]);
   const [terms, setTerms] = useState<SearchTerm[] | null>(null);
@@ -167,6 +170,7 @@ export function SearchAutocomplete({
     setQ("");
     setSuggestions([]);
     setHouses([]);
+    setPerfumers([]);
     setOpen(false);
     setHighlight(0);
     setFocused(false);
@@ -185,6 +189,7 @@ export function SearchAutocomplete({
     if (trimmed.length < MIN_QUERY_LEN) {
       setSuggestions([]);
       setHouses([]);
+    setPerfumers([]);
       setTerms(null);
       setLoading(false);
       // Cancel anything in flight from a prior longer query.
@@ -200,6 +205,17 @@ export function SearchAutocomplete({
       abortRef.current = ctrl;
 
       try {
+        // Perfumers come from a separate, private endpoint (Pro only, never
+        // CDN-cached); it answers with an empty list for everyone else.
+        // Fired alongside the main search and never allowed to fail it.
+        const perfumersPromise: Promise<PerfumerHit[]> = onPick
+          ? Promise.resolve([])
+          : fetch(`/api/search/perfumers?q=${encodeURIComponent(trimmed)}`, {
+              signal: ctrl.signal,
+            })
+              .then((r) => (r.ok ? r.json() : { perfumers: [] }))
+              .then((d: { perfumers?: PerfumerHit[] }) => d.perfumers ?? [])
+              .catch(() => []);
         const res = await fetch(
           `/api/search?q=${encodeURIComponent(trimmed)}`,
           { signal: ctrl.signal },
@@ -221,6 +237,7 @@ export function SearchAutocomplete({
         setTerms(keyword ? data.terms : null);
         setSuggestions(hits);
         setHouses(onPick ? [] : (data.houses ?? []));
+        setPerfumers(await perfumersPromise);
         setNotes(onPick ? [] : (data.notes ?? []));
         setFamilies(onPick ? [] : (data.families ?? []));
         setHighlight(0);
@@ -230,6 +247,7 @@ export function SearchAutocomplete({
         if (err?.name !== "AbortError") {
           setSuggestions([]);
           setHouses([]);
+    setPerfumers([]);
           setNotes([]);
           setFamilies([]);
         }
@@ -309,7 +327,7 @@ export function SearchAutocomplete({
     setOpen(false);
   }
 
-  // Lead rows (houses, then notes, then families) come first in the
+  // Lead rows (houses, perfumers, notes, then families) come first in the
   // highlight order, then fragrance rows. One flat list keeps the
   // keyboard math simple; the render groups them under section labels.
   const leads: Lead[] = [
@@ -320,6 +338,21 @@ export function SearchAutocomplete({
       label: h.name,
       sub: `${h.count} fragrance${h.count === 1 ? "" : "s"}`,
       monogram: h.name.trim().charAt(0).toUpperCase(),
+    })),
+    ...perfumers.map((p) => ({
+      kind: "perfumer" as const,
+      id: `search-perfumer-${p.slug}`,
+      href: `/perfumer/${p.slug}`,
+      label: p.name,
+      sub: `Perfumer · ${p.count} fragrance${p.count === 1 ? "" : "s"}`,
+      // Initials ("FK" for Francis Kurkdjian) so a perfumer reads apart
+      // from a one-letter house monogram.
+      monogram: p.name
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((w) => w.charAt(0).toUpperCase())
+        .slice(0, 2)
+        .join(""),
     })),
     ...notes.map((n) => ({
       kind: "note" as const,
@@ -397,6 +430,7 @@ export function SearchAutocomplete({
     setQ("");
     setSuggestions([]);
     setHouses([]);
+    setPerfumers([]);
     setOpen(false);
     setHighlight(0);
     // Cancel any pending debounce or in-flight request so a stale
@@ -647,6 +681,7 @@ export function SearchAutocomplete({
             const count = leads.filter((x) => x.kind === l.kind).length;
             const heading =
               l.kind === "house" ? (count === 1 ? "House" : "Houses")
+              : l.kind === "perfumer" ? (count === 1 ? "Perfumer" : "Perfumers")
               : l.kind === "note" ? (count === 1 ? "Note" : "Notes")
               : (count === 1 ? "Family" : "Families");
             return (
@@ -675,8 +710,12 @@ export function SearchAutocomplete({
                         column lines up: a monogram for houses, the note or
                         family swatch for the others. */}
                     <div className="shrink-0 w-10 h-14 flex items-center justify-center">
-                      {l.kind === "house" ? (
-                        <span className="w-9 h-9 flex items-center justify-center border border-ink/15 font-serif text-lg text-ink">
+                      {l.kind === "house" || l.kind === "perfumer" ? (
+                        <span
+                          className={`w-9 h-9 flex items-center justify-center border border-ink/15 font-serif text-ink ${
+                            l.kind === "perfumer" ? "rounded-full text-sm" : "text-lg"
+                          }`}
+                        >
                           {l.monogram}
                         </span>
                       ) : (
