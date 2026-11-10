@@ -42,13 +42,22 @@ const TABS: Array<{ key: CollectionStatus; label: string }> = [
 // scanning what's on your shelf.
 const EMPTY_COPY: Record<
   CollectionStatus,
-  { heading: string; body: string; ctaHref: string; ctaLabel: string }
+  {
+    heading: string;
+    body: string;
+    ctaLabel: string;
+    /** Where the button goes. Omitted when it opens the "+" search in
+     *  place instead (addInPlace). */
+    ctaHref?: string;
+    /** Open the header's "+" search with the field focused, right here. */
+    addInPlace?: boolean;
+  }
 > = {
   own: {
     heading: "Build your shelf",
-    body: "Scan the bottles you already own and we'll save them here, with notes, longevity, and the editorial story for each.",
-    ctaHref: "/scan",
-    ctaLabel: "Scan a bottle",
+    body: "Add the bottles you already own and we'll save them here, with notes, longevity, and the editorial story for each.",
+    ctaLabel: "Add a bottle",
+    addInPlace: true,
   },
   tried: {
     heading: "Track what you've sampled",
@@ -126,12 +135,14 @@ function SignedInCollection() {
   }, [refetch]);
 
   const empty = EMPTY_COPY[tab];
+  // Bumped by the empty state's "Add a bottle": opens the "+" search above.
+  const [addKey, setAddKey] = useState(0);
 
   return (
     <div className="mx-auto max-w-md px-6 pt-4 pb-10">
       {/* Title row with the "+" (components/add-to-shelf.tsx). The pick
           lands in whichever tab is open, and refetch() redraws the list. */}
-      <AddToShelf status={tab} onAdded={refetch} />
+      <AddToShelf status={tab} onAdded={refetch} openKey={addKey} />
 
       <div className="flex gap-1 p-1 bg-ink/5 rounded-xl mb-6">
         {TABS.map((t) => (
@@ -159,12 +170,26 @@ function SignedInCollection() {
           <p className="text-slate text-sm mb-6 leading-relaxed max-w-xs mx-auto">
             {empty.body}
           </p>
-          <Link
-            href={empty.ctaHref}
-            className="inline-block px-6 py-3 rounded-xl bg-emerald text-cream font-medium hover:bg-emerald/90 transition"
-          >
-            {empty.ctaLabel}
-          </Link>
+          {empty.addInPlace ? (
+            <button
+              type="button"
+              onClick={() => {
+                // The search opens in the header row; bring it into view.
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                setAddKey((k) => k + 1);
+              }}
+              className="inline-block px-6 py-3 rounded-xl bg-emerald text-cream font-medium hover:bg-emerald/90 transition"
+            >
+              {empty.ctaLabel}
+            </button>
+          ) : (
+            <Link
+              href={empty.ctaHref ?? "/search"}
+              className="inline-block px-6 py-3 rounded-xl bg-emerald text-cream font-medium hover:bg-emerald/90 transition"
+            >
+              {empty.ctaLabel}
+            </Link>
+          )}
         </div>
       )}
 

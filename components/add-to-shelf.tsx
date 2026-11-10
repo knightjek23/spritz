@@ -18,7 +18,7 @@
 // The icon is public/icons/add.svg inlined so it takes the text colour,
 // scaled from its 64px artboard to a 44px tap target.
 
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { SearchAutocomplete } from "@/components/search-autocomplete";
 import { TrialCta } from "@/components/trial-cta";
 import { track } from "@/lib/analytics";
@@ -39,15 +39,33 @@ type Notice =
 export function AddToShelf({
   status,
   onAdded,
+  openKey = 0,
 }: {
   /** The tab currently open; the pick is saved there. */
   status: CollectionStatus;
   /** Called after a successful add so the shelf can refetch. */
   onAdded: () => void;
+  /** Bump to open the search from outside, exactly as tapping "+" does
+   *  (the empty shelf's "Add a bottle" button uses this). */
+  openKey?: number;
 }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
+
+  // Layout effect, not a plain effect: the tap that bumps openKey is a
+  // discrete event, so React flushes this open + the search field's
+  // autoFocus synchronously inside that same tap. iOS only raises the
+  // keyboard for a focus that happens within the user's gesture; a
+  // regular effect runs after paint, outside it, and the field would get
+  // focus with no keyboard.
+  const lastOpenKey = useRef(openKey);
+  useLayoutEffect(() => {
+    if (openKey === lastOpenKey.current) return;
+    lastOpenKey.current = openKey;
+    setNotice(null);
+    setOpen(true);
+  }, [openKey]);
 
   async function pick(f: Fragrance) {
     if (busy) return;
