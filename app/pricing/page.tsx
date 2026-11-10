@@ -636,17 +636,6 @@ function PricingContent() {
         </div>
       </section>
 
-      {/* Social proof slot — kept structural so we can drop in real
-          testimonials once we have them. For now a quiet credibility line. */}
-      <section className="mb-6 text-center py-6 border-t border-b border-ink/10">
-        <p className="font-display text-lg text-ink mb-1 italic">
-          &ldquo;Finally a fragrance app that respects my intelligence.&rdquo;
-        </p>
-        <p className="font-mono text-xs uppercase tracking-widest text-slate">
-          Early user · TF Black Orchid · 6 months Pro
-        </p>
-      </section>
-
       {/* Final CTA */}
       {!isAlreadyPro && (
         <div className="text-center">
