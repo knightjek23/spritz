@@ -377,3 +377,12 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
 ## Search: Note and Family rows (2026-10-26)
 
 - Same pattern as the House row. `lib/search-notes.ts` builds an in-memory index from `list_canonical_notes` (with counts) plus the editorial notes and their aliases ("olibanum" → Frankincense), and matches the fixed family list; every typed word must be a prefix of a word in the name, exact match first, then by catalog count. When prefix matching finds nothing and the query is ≥ 5 letters, a Levenshtein ≤ 2 fallback catches misspellings ("frankencense", "gormand"). Up to 2 notes + 1 family. `/api/search` returns `notes` and `families`; the dropdown renders houses → notes → families → fragrances as one `leads` list (one keyboard index), notes/families showing their swatch in the thumbnail slot and linking to `/note/[slug]` / `/family/[slug]`. Hidden in picker mode like houses. The existing "Most popular with …" keyword section is unchanged.
+
+## Paywall triggers, slice 1 of 4 (2026-11-09, D39)
+
+- **Shipped:** `lib/paywall-triggers.ts` (pure rules: `observe`, `decide`, `markShown`, the 50/50 draw, migration from `spritz:pro-intro:v1`), `lib/paywall-client.ts` (localStorage `spritz:paywall:v1`, the `NEXT_PUBLIC_PAYWALL_TEST` switch, the `paywall_variant` PostHog super property), `scripts/test-paywall-triggers.ts` (`npm run test:paywall`, 12 checks). `ProIntroSheet` now opens from the three D39 triggers and fires `paywall_viewed` (`surface: intro_sheet`, `trigger`) on open and the new `paywall_dismissed` on close without the CTA. `/pricing` adds `surface: pricing` to `paywall_viewed` and `purchase_started`.
+- **Removed:** the "two shows ever" rule and the Pro-gate hit counter behind it (`recordProGateHit`, `spritz:pro-gate-hits`). `TrialCta` no longer counts gate hits.
+- **Unchanged on purpose:** everyone still sees the intro sheet; the arm is drawn and stored but `paywall_variant` reports `intro_sheet` until slice 2 sets `NEXT_PUBLIC_PAYWALL_TEST=on`. The sheet is still skipped for anyone who already used a trial, since it only pitches the trial; the one-screen paywall (slice 2) covers them.
+- **Analytics note:** `paywall_viewed` now also counts intro-sheet opens, so its total rises from this deploy. Filter `surface = pricing` to compare with earlier weeks.
+- **Checked:** `npm run test:paywall` 12 passed, `tsc --noEmit` clean, `check:server-onclick` clean. Not run: `next lint` (no ESLint config in the clone), and no device check yet.
+- **Next:** slice 2, the one-screen paywall for arm B.

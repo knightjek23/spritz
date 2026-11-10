@@ -9,16 +9,14 @@
 // directly above the CTA (California ARL + App Store 3.1.2(c): billed
 // amount in the same weight as the trial), and offers "Not now".
 //
-// Show rules (localStorage, per device):
-//   - first show: first visit to /library or /collection, whichever comes
-//     first; the flag is written the moment it opens so the other tab
-//     never shows it again
-//   - second and final show: only after the user has hit RESHOW_GATE_HITS
-//     Pro gates (TrialCta mounts count them) AND RESHOW_AFTER_DAYS have
-//     passed since the first dismissal. Never a third. Research: scheduled
-//     re-shows raise complaints faster than conversions; behaviour-
-//     triggered ones land when the pitch is relevant again.
-//   - never for Pro users or anyone who already used a trial (/api/trial)
+// When it shows (D39, 2026-11-09; rules and tests in lib/paywall-triggers.ts):
+//   - on the navigation after someone's first fragrance page, once
+//   - on the first visit to /library or /collection, once
+//   - weekly on app open in the native apps, 7+ days after the last paywall
+//   - one paywall per session; never for Pro users or anyone who already
+//     used a trial (/api/trial), since this sheet only pitches the trial
+// It fires `paywall_viewed` (surface intro_sheet, with the trigger) when it
+// opens and `paywall_dismissed` when it is closed without the CTA.
 //
 // Rendered through a portal on <body>: PageTransition's transform would
 // otherwise hijack position:fixed (see FamilyPills). Mounted once from
@@ -30,63 +28,25 @@ import { usePathname, useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { MONTHLY_PRICE, TRIAL_DAYS } from "@/lib/trial";
 import { monthlyPriceFor, useStorePrices } from "@/lib/native/store-prices";
+import { isNativeApp } from "@/lib/native";
+import { track } from "@/lib/analytics";
+import { decide, markShown, observe, type PaywallTrigger } from "@/lib/paywall-triggers";
+import { loadPaywallState, registerPaywallVariant, savePaywallState } from "@/lib/paywall-client";
 
-const KEY = "spritz:pro-intro:v1";
-const GATE_HITS_KEY = "spritz:pro-gate-hits";
-const TRIGGER_PATHS = new Set(["/library", "/collection"]);
-const RESHOW_GATE_HITS = 3;
-const RESHOW_AFTER_DAYS = 7;
 const SETTLE_MS = 400;
 const OUT_MS = 380;
 
-interface IntroState {
-  shows: number;
-  /** Epoch ms of the most recent dismissal. */
-  dismissedAt: number | null;
-}
-
-function readState(): IntroState {
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) return { shows: 0, dismissedAt: null, ...(JSON.parse(raw) as Partial<IntroState>) };
-  } catch {
-    /* fall through */
+// One /api/trial lookup per page load, shared by every trigger check.
+let trialUsed: Promise<boolean> | null = null;
+function trialAlreadyUsed(): Promise<boolean> {
+  if (!trialUsed) {
+    trialUsed = fetch("/api/trial")
+      .then((r) => (r.ok ? r.json() : { used: false }))
+      .then((j: { used?: boolean }) => Boolean(j.used))
+      // Offline: still show; the store enforces eligibility anyway.
+      .catch(() => false);
   }
-  return { shows: 0, dismissedAt: null };
-}
-
-function writeState(s: IntroState) {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(s));
-  } catch {
-    /* private mode: the sheet may show again next launch, acceptable */
-  }
-}
-
-/** Called by TrialCta on mount: one more Pro gate seen. */
-export function recordProGateHit(): void {
-  try {
-    const n = Number(localStorage.getItem(GATE_HITS_KEY) ?? "0") || 0;
-    localStorage.setItem(GATE_HITS_KEY, String(n + 1));
-  } catch {
-    /* ignore */
-  }
-}
-
-function gateHits(): number {
-  try {
-    return Number(localStorage.getItem(GATE_HITS_KEY) ?? "0") || 0;
-  } catch {
-    return 0;
-  }
-}
-
-function shouldShow(): boolean {
-  const s = readState();
-  if (s.shows === 0) return true;
-  if (s.shows >= 2) return false;
-  const since = s.dismissedAt ? Date.now() - s.dismissedAt : 0;
-  return gateHits() >= RESHOW_GATE_HITS && since >= RESHOW_AFTER_DAYS * 24 * 3600 * 1000;
+  return trialUsed;
 }
 
 // Six rows, ordered by what sells: the personal features first (they only
@@ -175,7 +135,12 @@ export function ProIntroSheet() {
   const [open, setOpen] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const armed = useRef(false);
+  // A trigger check is in flight (trial lookup + settle delay).
+  const busy = useRef(false);
+  // Where the person is now, so a check that finishes late can tell they moved on.
+  const here = useRef<string | null>(null);
+  // Which trigger opened the sheet, for paywall_dismissed.
+  const shownBy = useRef<PaywallTrigger | null>(null);
   // Native: the pitch quotes the store's own price, so it waits for it and
   // is skipped when the store has no price or no free intro offer.
   const prices = useStorePrices();
@@ -186,39 +151,58 @@ export function ProIntroSheet() {
 
   useEffect(() => setMounted(true), []);
 
+  // Tag every event with the A/B arm (re-registered after sign-out by
+  // <PostHogIdentify>, since posthog.reset() clears it).
   useEffect(() => {
-    if (!mounted || !isLoaded || open || armed.current) return;
+    registerPaywallVariant();
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || !pathname) return;
+    here.current = pathname;
+    // Record the visit first: sessions and the first fragrance page are
+    // tracked even when no paywall can show right now.
+    const now = Date.now();
+    const state = observe(loadPaywallState(now), { pathname, now, native: isNativeApp() });
+    savePaywallState(state);
+
+    if (!isLoaded || open || busy.current) return;
+    // No store price yet: skip without using the trigger up.
     if (!storeReady) return;
-    if (!pathname || !TRIGGER_PATHS.has(pathname)) return;
     if (user?.publicMetadata?.plan === "pro") return;
-    if (!shouldShow()) return;
-    armed.current = true;
-    let cancelled = false;
+    const due = decide(state, pathname);
+    if (!due) return;
+
+    busy.current = true;
     (async () => {
-      // Someone who already had a trial gets the gates, not the pitch.
       try {
-        const r = await fetch("/api/trial");
-        const j = (await r.json()) as { used?: boolean };
-        if (j.used) return;
-      } catch {
-        /* offline: still show; the store enforces eligibility anyway */
+        // Someone who already had a trial gets the gates, not the pitch.
+        if (await trialAlreadyUsed()) return;
+        await new Promise((res) => setTimeout(res, SETTLE_MS));
+        if (here.current !== pathname) return; // moved on; the next page decides
+        // Re-read: a reload or another tab may have shown one meanwhile.
+        const latest = loadPaywallState();
+        if (decide(latest, pathname) !== due) return;
+        savePaywallState(markShown(latest, due, Date.now()));
+        shownBy.current = due;
+        track("paywall_viewed", {
+          surface: "intro_sheet",
+          trigger: due,
+          already_pro: false,
+          signed_in: Boolean(user),
+        });
+        setOpen(true);
+      } finally {
+        busy.current = false;
       }
-      await new Promise((res) => setTimeout(res, SETTLE_MS));
-      if (cancelled) return;
-      const s = readState();
-      writeState({ ...s, shows: s.shows + 1 });
-      setOpen(true);
     })();
-    return () => {
-      cancelled = true;
-    };
   }, [mounted, isLoaded, pathname, user, open, storeReady]);
 
   function close(then?: () => void) {
     if (leaving) return;
     setLeaving(true);
-    const s = readState();
-    writeState({ ...s, dismissedAt: Date.now() });
+    // `then` is only passed by the CTA; everything else is a dismissal.
+    if (!then) track("paywall_dismissed", { surface: "intro_sheet", trigger: shownBy.current });
     window.setTimeout(() => {
       setOpen(false);
       setLeaving(false);

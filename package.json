@@ -21,6 +21,7 @@
     "test:fcm": "tsx scripts/test-fcm.ts",
     "diag:infra": "tsx scripts/diag-storage-tables.ts",
     "test:discovery": "tsx scripts/test-discovery.ts",
+    "test:paywall": "tsx scripts/test-paywall-triggers.ts",
     "research:match": "tsx scripts/research-match.ts",
     "audit:discovery": "tsx scripts/audit-discovery-coverage.ts"
   },

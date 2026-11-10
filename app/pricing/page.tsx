@@ -209,6 +209,7 @@ function PricingContent() {
     if (!isLoaded || paywallTracked.current) return;
     paywallTracked.current = true;
     track("paywall_viewed", {
+      surface: "pricing",
       trigger:
         consumePaywallTrigger() ?? (search.get("plan") === "monthly" ? "intro_sheet" : "direct"),
       already_pro: isAlreadyPro,
@@ -265,6 +266,7 @@ function PricingContent() {
     }
     const platform = nativePlatform();
     track("purchase_started", {
+      surface: "pricing",
       plan,
       rail: !native ? "stripe" : platform === "android" ? "play_store" : "app_store",
     });

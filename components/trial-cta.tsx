@@ -20,7 +20,6 @@ import Link from "next/link";
 import { MONTHLY_PRICE, trialCta } from "@/lib/trial";
 import { trackProGateCta, type ProFeature } from "@/lib/pro-events";
 import { monthlyPriceFor, useStorePrices } from "@/lib/native/store-prices";
-import { recordProGateHit } from "@/components/pro-intro-sheet";
 
 let eligibility: Promise<boolean> | null = null;
 function trialAvailable(): Promise<boolean> {
@@ -46,8 +45,6 @@ export function TrialCta({
   const [available, setAvailable] = useState(true);
   useEffect(() => {
     let live = true;
-    // Counts toward the intro sheet's one behaviour-triggered re-show.
-    recordProGateHit();
     trialAvailable().then((v) => live && setAvailable(v));
     return () => {
       live = false;

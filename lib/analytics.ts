@@ -21,6 +21,7 @@ export type AnalyticsEvent =
   | "fragrance_viewed"
   | "shelf_item_added"
   | "paywall_viewed"
+  | "paywall_dismissed"
   | "purchase_started";
 
 export function track(event: AnalyticsEvent, props: Record<string, unknown> = {}) {

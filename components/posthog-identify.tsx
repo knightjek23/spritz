@@ -10,6 +10,7 @@ import { usePathname } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { notePath } from "@/lib/analytics";
 import { nativePlatform } from "@/lib/native";
+import { registerPaywallVariant } from "@/lib/paywall-client";
 
 type PostHogLike = {
   identify: (
@@ -62,6 +63,7 @@ export function PostHogIdentify() {
       posthog.reset();
       // reset() clears super properties; put the platform tag back.
       posthog.register({ platform: nativePlatform() });
+      registerPaywallVariant();
       identified.current = null;
     }
   }, [isLoaded, isSignedIn, user]);
