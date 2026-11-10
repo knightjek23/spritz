@@ -29,24 +29,38 @@ import { useUser } from "@clerk/nextjs";
 import { MONTHLY_PRICE, TRIAL_DAYS } from "@/lib/trial";
 import { monthlyPriceFor, useStorePrices } from "@/lib/native/store-prices";
 import { isNativeApp } from "@/lib/native";
-import { track } from "@/lib/analytics";
+import { track, trackDiagnostic } from "@/lib/analytics";
 import { decide, markShown, observe, type PaywallTrigger } from "@/lib/paywall-triggers";
 import { loadPaywallState, registerPaywallVariant, savePaywallState } from "@/lib/paywall-client";
 
 const SETTLE_MS = 400;
 const OUT_MS = 380;
 
-// One /api/trial lookup per page load, shared by every trigger check.
-let trialUsed: Promise<boolean> | null = null;
-function trialAlreadyUsed(): Promise<boolean> {
-  if (!trialUsed) {
-    trialUsed = fetch("/api/trial")
+// One /api/trial lookup per signed-in user per page load. Keyed by user:
+// signing out and into another account does not reload the page, and the
+// answer belongs to the account, not the device.
+const trialUsed = new Map<string, Promise<boolean>>();
+function trialAlreadyUsed(userId: string | null): Promise<boolean> {
+  const key = userId ?? "signed-out";
+  let lookup = trialUsed.get(key);
+  if (!lookup) {
+    lookup = fetch("/api/trial")
       .then((r) => (r.ok ? r.json() : { used: false }))
       .then((j: { used?: boolean }) => Boolean(j.used))
       // Offline: still show; the store enforces eligibility anyway.
       .catch(() => false);
+    trialUsed.set(key, lookup);
   }
-  return trialUsed;
+  return lookup;
+}
+
+// Why a due paywall did not open, once per reason per page load, so "it
+// didn't show on my phone" is answerable from PostHog.
+const skipLogged = new Set<string>();
+function logSkip(trigger: PaywallTrigger, reason: "no_store_trial_offer" | "store_unavailable" | "trial_used") {
+  if (skipLogged.has(reason)) return;
+  skipLogged.add(reason);
+  trackDiagnostic("paywall_skipped", { surface: "intro_sheet", trigger, reason });
 }
 
 // Six rows, ordered by what sells: the personal features first (they only
@@ -167,17 +181,25 @@ export function ProIntroSheet() {
     savePaywallState(state);
 
     if (!isLoaded || open || busy.current) return;
-    // No store price yet: skip without using the trigger up.
-    if (!storeReady) return;
     if (user?.publicMetadata?.plan === "pro") return;
     const due = decide(state, pathname);
     if (!due) return;
+    // No store price, or the store has no free trial for this store account
+    // (it already had one): skip without using the trigger up.
+    if (!storeReady) {
+      if (prices.status === "ready") logSkip(due, "no_store_trial_offer");
+      else if (prices.status === "unavailable") logSkip(due, "store_unavailable");
+      return;
+    }
 
     busy.current = true;
     (async () => {
       try {
         // Someone who already had a trial gets the gates, not the pitch.
-        if (await trialAlreadyUsed()) return;
+        if (await trialAlreadyUsed(user?.id ?? null)) {
+          logSkip(due, "trial_used");
+          return;
+        }
         await new Promise((res) => setTimeout(res, SETTLE_MS));
         if (here.current !== pathname) return; // moved on; the next page decides
         // Re-read: a reload or another tab may have shown one meanwhile.
@@ -196,7 +218,7 @@ export function ProIntroSheet() {
         busy.current = false;
       }
     })();
-  }, [mounted, isLoaded, pathname, user, open, storeReady]);
+  }, [mounted, isLoaded, pathname, user, open, storeReady, prices.status]);
 
   function close(then?: () => void) {
     if (leaving) return;

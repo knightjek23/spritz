@@ -30,7 +30,7 @@ export function track(event: AnalyticsEvent, props: Record<string, unknown> = {}
 
 /** Operational diagnostics (not product analytics): e.g. why store prices failed to load. */
 export function trackDiagnostic(
-  event: "store_prices_unavailable" | "store_prices_loaded",
+  event: "store_prices_unavailable" | "store_prices_loaded" | "paywall_skipped",
   props: Record<string, unknown> = {},
 ) {
   ph()?.capture(event, props);

@@ -56,6 +56,9 @@ function load(): Promise<Loaded> {
             app_version: diag.app_version,
             app_build: diag.app_build,
             current_offering: diag.current_offering,
+            // Whether the store offered this store account the free trial.
+            // Null means no offer: the intro sheet and trial CTAs stay hidden.
+            monthly_trial: plans.monthly?.trial ?? null,
           });
         const outdated = diag.stage === "configure_failed" && PLUGIN_MISSING.test(diag.error_message ?? "");
         return { plans, outdated };

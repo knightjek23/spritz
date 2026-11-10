@@ -386,3 +386,13 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
 - **Analytics note:** `paywall_viewed` now also counts intro-sheet opens, so its total rises from this deploy. Filter `surface = pricing` to compare with earlier weeks.
 - **Checked:** `npm run test:paywall` 12 passed, `tsc --noEmit` clean, `check:server-onclick` clean. Not run: `next lint` (no ESLint config in the clone), and no device check yet.
 - **Next:** slice 2, the one-screen paywall for arm B.
+
+## Paywall triggers: first device check, one fix (2026-11-09, D39)
+
+- **Report:** Josh saw no sheet on iPhone or Android after opening a fragrance and going back.
+- **iPhone, working as specified:** PostHog shows the sheet opened on Shelf at 21:45:36 (`paywall_viewed`, trigger `shelf_library`) and was dismissed. The first-fragrance show was then held back by the one-paywall-per-session rule. State is per device, so signing up a second account on the same phone does not reset it.
+- **Android, no sheet at all:** no `paywall_viewed` from that device. The data could not say why. Most likely the existing rule that the sheet is skipped when the store returns no free-trial offer: that phone's Google account took the test trial on Nov 2 to 3.
+- **Bug found and fixed:** the `/api/trial` lookup was cached once per page load, not per account. After signing out of an account that had used its trial and into a new one, the new account inherited "trial used" and was skipped. Now keyed by Clerk user id.
+- **Added:** `paywall_skipped` (diagnostic) with `reason`: `no_store_trial_offer`, `store_unavailable` or `trial_used`, once per reason per page load.
+- **Also added:** `store_prices_loaded` now carries `monthly_trial` (the trial length the store offered, or null), so the share of Android and iOS users who are never offered the trial is visible. Josh confirmed the sheet also stays closed on Library and Shelf on his Android phone; PostHog shows it did open on Android for two people on Nov 1 to 3.
+- **To retest a device from scratch:** delete and reinstall the app (clears the per-device state), sign in with a free account that has never had a trial, open a fragrance, go back.
