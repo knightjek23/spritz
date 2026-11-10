@@ -39,8 +39,14 @@ export const TAB_PREFIXES: Record<string, string[]> = {
     "/fragrance",
     "/search",
   ],
-  "/account": ["/account", "/welcome", "/pricing"],
+  "/account": ["/account", "/pricing"],
 };
+// /welcome is deliberately in no tab. It is the one-time "pick 3" step
+// after sign-up, not a page inside Profile: when it was listed here, the
+// sign-up landing got remembered as "where you were in Profile", so every
+// Profile tap afterwards reopened the picker (or, once the shelf had a
+// bottle, bounced to Shelf). A path in no tab is never remembered, and
+// lastUrlForTab drops any old /welcome entry already in storage.
 
 /** Which tab a pathname belongs to, or null (sign-in, legal, …). */
 export function tabForPath(pathname: string): string | null {

@@ -32,6 +32,28 @@ import { AcquisitionQuestion } from "@/components/acquisition-question";
 
 const TARGET_PICKS = 3;
 
+// Set once the person skips or finishes onboarding on this device, so
+// /welcome never reappears on its own (a stale link, a native re-auth that
+// thinks the account is new, a remembered tab). localStorage, so it
+// survives app restarts.
+const ONBOARDING_DONE_KEY = "spritz.onboarding.done";
+
+function onboardingDone(): boolean {
+  try {
+    return window.localStorage.getItem(ONBOARDING_DONE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markOnboardingDone() {
+  try {
+    window.localStorage.setItem(ONBOARDING_DONE_KEY, "1");
+  } catch {
+    // Private mode: the collection check below still covers most cases.
+  }
+}
+
 export default function WelcomePage() {
   return (
     <>
@@ -65,10 +87,16 @@ function WelcomeInner() {
   const [error, setError] = useState<string | null>(null);
   const [checkedExisting, setCheckedExisting] = useState(false);
 
-  // Skip onboarding if the user already has a populated collection.
-  // Avoids the "I came back to /welcome later by mistake" loop where we'd
-  // re-add items they already saved.
+  // Skip onboarding if the user already has a populated collection, or has
+  // already skipped or finished it on this device. "Skip for now" means the
+  // picker never comes back on its own: they can add bottles any time from
+  // the Shelf "+". Avoids the "I came back to /welcome later by mistake"
+  // loop where we'd re-add items they already saved.
   useEffect(() => {
+    if (onboardingDone()) {
+      router.replace("/");
+      return;
+    }
     let cancelled = false;
     fetch("/api/collection")
       .then((r) => r.json())
@@ -134,6 +162,7 @@ function WelcomeInner() {
         setError("Couldn't save your selections. Try again in a moment.");
         return;
       }
+      markOnboardingDone();
       if (acquisitionAsked(user)) router.push("/collection");
       else setAsking(true);
     } catch (e) {
@@ -269,6 +298,7 @@ function WelcomeInner() {
         </button>
         <Link
           href="/"
+          onClick={markOnboardingDone}
           className="block text-center text-sm text-slate hover:text-ink py-2 transition"
         >
           Skip for now
