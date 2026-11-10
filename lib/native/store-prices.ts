@@ -59,6 +59,8 @@ function load(): Promise<Loaded> {
             // Whether the store offered this store account the free trial.
             // Null means no offer: the intro sheet and trial CTAs stay hidden.
             monthly_trial: plans.monthly?.trial ?? null,
+            // Google Play: which options Play returned (offer ids included).
+            monthly_options: plans.monthly?.storeOptions ?? null,
           });
         const outdated = diag.stage === "configure_failed" && PLUGIN_MISSING.test(diag.error_message ?? "");
         return { plans, outdated };

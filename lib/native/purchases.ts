@@ -47,6 +47,8 @@ export interface NativePlanInfo {
   introPriceString: string | null;
   /** Human trial length when the intro offer is free: "7 days". */
   trial: string | null;
+  /** Google Play: option ids Play returned for this account. Null on iOS. */
+  storeOptions: string[] | null;
 }
 
 let sdkPromise: Promise<typeof import("@revenuecat/purchases-capacitor")> | null = null;
@@ -149,10 +151,31 @@ function findPackage(offerings: PurchasesOfferings, plan: PurchasePlan): Purchas
 
 function describeTrial(pkg: PurchasesPackage): string | null {
   const intro = pkg.product.introPrice;
-  if (!intro || intro.price !== 0) return null;
-  const n = intro.periodNumberOfUnits;
-  const unit = intro.periodUnit.toLowerCase();
-  return `${n} ${unit}${n === 1 ? "" : "s"}`;
+  if (intro && intro.price === 0) {
+    const n = intro.periodNumberOfUnits;
+    const unit = intro.periodUnit.toLowerCase();
+    return `${n} ${unit}${n === 1 ? "" : "s"}`;
+  }
+  // Google Play: a free trial is a pricing phase on the subscription option
+  // the purchase will use. Read it directly in case introPrice is not filled.
+  const period = pkg.product.defaultOption?.freePhase?.billingPeriod ?? null;
+  if (period) {
+    const n = period.value;
+    const unit = String(period.unit).toLowerCase();
+    return `${n} ${unit}${n === 1 ? "" : "s"}`;
+  }
+  return null;
+}
+
+/**
+ * Google Play only: the ids of the options Play returned for this account,
+ * e.g. ["monthly", "monthly:free-trial-7d"]. An offer missing from the list
+ * means Play is not offering it to this Google account (already used, or the
+ * offer is inactive). Null on iOS.
+ */
+function storeOptionIds(pkg: PurchasesPackage): string[] | null {
+  const options = pkg.product.subscriptionOptions;
+  return options ? options.map((o) => o.id) : null;
 }
 
 /**
@@ -254,6 +277,7 @@ export async function loadNativePlans(): Promise<{
       priceString: pkg.product.priceString,
       introPriceString: pkg.product.introPrice?.priceString ?? null,
       trial: describeTrial(pkg),
+      storeOptions: storeOptionIds(pkg),
     };
   }
   const diag: StoreDiagnostics = {
