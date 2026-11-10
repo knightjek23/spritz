@@ -22,11 +22,13 @@ import Link from "next/link";
 import { cleanBottleImageUrl } from "@/lib/bottle-image";
 import { BottleImage } from "@/components/bottle-image";
 import { useRouter } from "next/navigation";
-import { SignedIn, SignedOut } from "@clerk/nextjs";
+import { SignedIn, SignedOut, useUser } from "@clerk/nextjs";
 import { SearchAutocomplete } from "@/components/search-autocomplete";
 import type { Fragrance } from "@/lib/types";
 import { SpritzLoader } from "@/components/spritz-loader";
 import { track } from "@/lib/analytics";
+import { acquisitionAsked } from "@/lib/acquisition";
+import { AcquisitionQuestion } from "@/components/acquisition-question";
 
 const TARGET_PICKS = 3;
 
@@ -55,6 +57,9 @@ export default function WelcomePage() {
 
 function WelcomeInner() {
   const router = useRouter();
+  const { user } = useUser();
+  // After the picks are saved: "How did you hear about Spritz?", once.
+  const [asking, setAsking] = useState(false);
   const [picks, setPicks] = useState<Fragrance[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -129,12 +134,24 @@ function WelcomeInner() {
         setError("Couldn't save your selections. Try again in a moment.");
         return;
       }
-      router.push("/collection");
+      if (acquisitionAsked(user)) router.push("/collection");
+      else setAsking(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (asking) {
+    return (
+      <div className="mx-auto max-w-md px-6 pt-4 pb-10">
+        <p className="font-mono text-xs uppercase tracking-widest text-slate mb-6">
+          Saved to your shelf
+        </p>
+        <AcquisitionQuestion where="welcome" onDone={() => router.push("/collection")} />
+      </div>
+    );
   }
 
   if (!checkedExisting) {

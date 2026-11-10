@@ -412,3 +412,12 @@ The first purge run failed to seed a photo. `listBuckets()` returned only `bottl
 - **Not on yet:** the split only runs when `NEXT_PUBLIC_PAYWALL_TEST=on` is set in Vercel. Until then everyone except testers sees the intro sheet.
 - **Checked:** `npm run test:paywall` 14 passed, `tsc --noEmit` clean, `check:server-onclick` clean. Not checked: how it looks on a device, a real purchase on either store, the sign-up round trip.
 - **Next:** Josh checks arm B with a `+paywallb` account on both phones and makes one test purchase per store, then sets the env var. The 30-day clock starts that day. Then slice 3, the "How did you hear about Spritz?" question.
+
+## Paywall triggers, slice 3 of 4: "How did you hear about Spritz?" (2026-11-09, D39)
+
+- **Shipped:** `lib/acquisition.ts`, `components/acquisition-question.tsx`, `components/acquisition-prompt.tsx`. On `/welcome` the question appears after the picks are saved and before the move to Shelf. For anyone who skipped `/welcome`, a bottom sheet asks it 0.9 s after their first shelf add (`SaveButton` and `AddToShelf` announce the add). Five answers: TikTok, Instagram, App Store or Google Play search, A friend, Something else (opens an 80-character text field). Skip is always there.
+- **Asked once per person:** answering or skipping sets `spritz:acquisition:asked` on the device and `unsafeMetadata.acquisition_asked` on the Clerk user.
+- **Data:** PostHog survey `01a1c426-3f8b-0000-a36d-825f43cc2f1b` (type `api`, created as a draft). The app sends `survey shown`, `survey sent` and `survey dismissed` itself, each with `where` (`welcome` or `shelf_add`). The answer is also set once on the person as `acquisition_source` (`tiktok`, `instagram`, `store_search`, `friend`, `other`), with `acquisition_source_detail` for typed text.
+- **Checked:** `tsc --noEmit` clean, `check:server-onclick` clean. Not checked: on a device, and that a response shows up in PostHog's survey view.
+- **Josh:** launch the survey in PostHog so its responses view counts answers.
+- **Next:** slice 4, the saved PostHog insight for reading the A/B test.

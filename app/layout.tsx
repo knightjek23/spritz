@@ -11,6 +11,7 @@ import { PostHogIdentify } from "@/components/posthog-identify";
 import { LiquidGlassDefs } from "@/components/liquid-glass/LiquidGlass";
 import { PageTransition } from "@/components/page-transition";
 import { ProIntroSheet } from "@/components/pro-intro-sheet";
+import { AcquisitionPrompt } from "@/components/acquisition-prompt";
 import { NativeAuthBridge } from "@/components/native-auth-bridge";
 import { NativeReturnGuard } from "@/components/native-return-guard";
 import { NativeTouchLinks } from "@/components/native-touch-links";
@@ -154,6 +155,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* First Library/Shelf visit: the Pro trial pitch, once (twice at
               most). Portals to <body>; renders nothing otherwise. */}
           <ProIntroSheet />
+          {/* "How did you hear about Spritz?" after a first shelf add, for
+              anyone who skipped /welcome. Asked once per person. */}
+          <AcquisitionPrompt />
           <Nav />
           {/* --nav-clearance reserves space for the floating-pill bottom
               nav: 72px pill + 24px bottom offset + 16px breathing room,
