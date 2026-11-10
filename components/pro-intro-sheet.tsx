@@ -15,8 +15,19 @@
 //   - weekly on app open in the native apps, 7+ days after the last paywall
 //   - one paywall per session; never for Pro users or anyone who already
 //     used a trial (/api/trial), since this sheet only pitches the trial
-// It fires `paywall_viewed` (surface intro_sheet, with the trigger) when it
-// opens and `paywall_dismissed` when it is closed without the CTA.
+// It fires `paywall_viewed` (with the surface and trigger) when it opens and
+// `paywall_dismissed` when it is closed without the CTA.
+//
+// This component is also the host for the D39 A/B test: it runs the trigger
+// rules for both arms and renders <OneScreenPaywall> in place of the sheet
+// for arm B (`one_screen`). Differences for arm B: it does not need a
+// free-trial offer from the store, and it still shows to someone who has
+// already used their trial (the trial is simply left out).
+//
+// Testers: an account whose email name ends in "+paywalla" or "+paywallb"
+// is forced into that arm and gets fresh triggers on every app launch
+// (state kept in memory, never saved), so either arm can be checked on a
+// phone without reinstalling. See testerArm in lib/paywall-triggers.ts.
 //
 // Rendered through a portal on <body>: PageTransition's transform would
 // otherwise hijack position:fixed (see FamilyPills). Mounted once from
@@ -30,8 +41,28 @@ import { MONTHLY_PRICE, TRIAL_DAYS } from "@/lib/trial";
 import { monthlyPriceFor, useStorePrices } from "@/lib/native/store-prices";
 import { isNativeApp } from "@/lib/native";
 import { track, trackDiagnostic } from "@/lib/analytics";
-import { decide, markShown, observe, type PaywallTrigger } from "@/lib/paywall-triggers";
-import { loadPaywallState, registerPaywallVariant, savePaywallState } from "@/lib/paywall-client";
+import {
+  decide,
+  isBlockedPath,
+  markSessionShown,
+  markShown,
+  newState,
+  observe,
+  testerArm,
+  type PaywallState,
+  type PaywallTrigger,
+  type PaywallVariant,
+} from "@/lib/paywall-triggers";
+import {
+  clearPaywallResume,
+  loadPaywallState,
+  paywallVariant,
+  peekPaywallResume,
+  registerPaywallVariant,
+  savePaywallState,
+} from "@/lib/paywall-client";
+import { OneScreenPaywall } from "@/components/one-screen-paywall";
+import type { PurchasePlan } from "@/lib/native/purchases";
 
 const SETTLE_MS = 400;
 const OUT_MS = 380;
@@ -57,10 +88,27 @@ function trialAlreadyUsed(userId: string | null): Promise<boolean> {
 // Why a due paywall did not open, once per reason per page load, so "it
 // didn't show on my phone" is answerable from PostHog.
 const skipLogged = new Set<string>();
-function logSkip(trigger: PaywallTrigger, reason: "no_store_trial_offer" | "store_unavailable" | "trial_used") {
+function logSkip(
+  surface: PaywallVariant,
+  trigger: PaywallTrigger,
+  reason: "no_store_trial_offer" | "store_unavailable" | "trial_used",
+) {
   if (skipLogged.has(reason)) return;
   skipLogged.add(reason);
-  trackDiagnostic("paywall_skipped", { surface: "intro_sheet", trigger, reason });
+  trackDiagnostic("paywall_skipped", { surface, trigger, reason });
+}
+
+// A tester's trigger state for this page load only (never saved).
+let testerState: PaywallState | null = null;
+
+/** What is open right now. */
+interface PaywallView {
+  surface: PaywallVariant;
+  trigger: PaywallTrigger;
+  /** One-screen only: this person can still get the free week. */
+  trialOffered: boolean;
+  /** One-screen only: the plan selected when it opens. */
+  plan: PurchasePlan;
 }
 
 // Six rows, ordered by what sells: the personal features first (they only
@@ -153,81 +201,114 @@ export function ProIntroSheet() {
   const busy = useRef(false);
   // Where the person is now, so a check that finishes late can tell they moved on.
   const here = useRef<string | null>(null);
-  // Which trigger opened the sheet, for paywall_dismissed.
-  const shownBy = useRef<PaywallTrigger | null>(null);
+  // What is open (which arm, which trigger), for rendering and paywall_dismissed.
+  const [view, setView] = useState<PaywallView | null>(null);
   // Native: the pitch quotes the store's own price, so it waits for it and
   // is skipped when the store has no price or no free intro offer.
   const prices = useStorePrices();
   const price = monthlyPriceFor(prices, MONTHLY_PRICE);
-  const storeReady =
-    prices.status === "web" || (prices.status === "ready" && prices.plans.monthly.trial !== null);
   const storeName = prices.status !== "web" && prices.platform === "android" ? "Google Play" : "the App Store";
 
   useEffect(() => setMounted(true), []);
 
+  const email = user?.primaryEmailAddress?.emailAddress ?? null;
+
   // Tag every event with the A/B arm (re-registered after sign-out by
   // <PostHogIdentify>, since posthog.reset() clears it).
   useEffect(() => {
-    registerPaywallVariant();
-  }, []);
+    if (isLoaded) registerPaywallVariant(email);
+  }, [isLoaded, email]);
 
   useEffect(() => {
     if (!mounted || !pathname) return;
     here.current = pathname;
+    const tester = testerArm(email);
+    const read = (now: number): PaywallState =>
+      tester ? (testerState ??= newState(now, tester)) : loadPaywallState(now);
+    const write = (next: PaywallState) => {
+      if (tester) testerState = next;
+      else savePaywallState(next);
+    };
+
     // Record the visit first: sessions and the first fragrance page are
     // tracked even when no paywall can show right now.
     const now = Date.now();
-    const state = observe(loadPaywallState(now), { pathname, now, native: isNativeApp() });
-    savePaywallState(state);
+    const state = observe(read(now), { pathname, now, native: isNativeApp() });
+    write(state);
 
     if (!isLoaded || open || busy.current) return;
     if (user?.publicMetadata?.plan === "pro") return;
-    const due = decide(state, pathname);
+    const surface: PaywallVariant = tester ?? paywallVariant(email);
+
+    // Back from the sign-up the one-screen paywall sent them to: reopen it,
+    // same plan. Not a new show, so no trigger is used and nothing is logged.
+    const resume = user && !isBlockedPath(pathname) ? peekPaywallResume(now) : null;
+    const due = resume ? resume.trigger : decide(state, pathname);
     if (!due) return;
-    // No store price, or the store has no free trial for this store account
-    // (it already had one): skip without using the trigger up.
-    if (!storeReady) {
-      if (prices.status === "ready") logSkip(due, "no_store_trial_offer");
-      else if (prices.status === "unavailable") logSkip(due, "store_unavailable");
+
+    // The store's price, and for the intro sheet its free trial, must be
+    // known. Otherwise skip without using the trigger up.
+    const pricesKnown = prices.status === "web" || prices.status === "ready";
+    const storeTrial =
+      prices.status === "web" || (prices.status === "ready" && prices.plans.monthly.trial !== null);
+    if (!pricesKnown || (surface === "intro_sheet" && !resume && !storeTrial)) {
+      if (prices.status === "unavailable") logSkip(surface, due, "store_unavailable");
+      else if (prices.status === "ready") logSkip(surface, due, "no_store_trial_offer");
       return;
     }
 
     busy.current = true;
     (async () => {
       try {
-        // Someone who already had a trial gets the gates, not the pitch.
-        if (await trialAlreadyUsed(user?.id ?? null)) {
-          logSkip(due, "trial_used");
+        const used = await trialAlreadyUsed(user?.id ?? null);
+        if (resume) {
+          clearPaywallResume();
+          // Counts as this session's paywall, so closing it can't be
+          // followed straight away by a triggered one.
+          write(markSessionShown(read(Date.now()), Date.now()));
+          setView({ surface: "one_screen", trigger: due, trialOffered: !used && storeTrial, plan: resume.plan });
+          setOpen(true);
+          return;
+        }
+        // The intro sheet only pitches the trial: someone who already had
+        // one gets the gates instead. The one-screen paywall still shows.
+        if (surface === "intro_sheet" && used) {
+          logSkip(surface, due, "trial_used");
           return;
         }
         await new Promise((res) => setTimeout(res, SETTLE_MS));
         if (here.current !== pathname) return; // moved on; the next page decides
         // Re-read: a reload or another tab may have shown one meanwhile.
-        const latest = loadPaywallState();
+        const latest = read(Date.now());
         if (decide(latest, pathname) !== due) return;
-        savePaywallState(markShown(latest, due, Date.now()));
-        shownBy.current = due;
+        write(markShown(latest, due, Date.now()));
+        const trialOffered = !used && storeTrial;
+        setView({ surface, trigger: due, trialOffered, plan: "monthly" });
         track("paywall_viewed", {
-          surface: "intro_sheet",
+          surface,
           trigger: due,
           already_pro: false,
           signed_in: Boolean(user),
+          trial_offered: trialOffered,
         });
         setOpen(true);
       } finally {
         busy.current = false;
       }
     })();
-  }, [mounted, isLoaded, pathname, user, open, storeReady, prices.status]);
+    // `prices` is read through its status; the plans only matter once ready.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mounted, isLoaded, pathname, user, email, open, prices.status]);
 
   function close(then?: () => void) {
     if (leaving) return;
     setLeaving(true);
     // `then` is only passed by the CTA; everything else is a dismissal.
-    if (!then) track("paywall_dismissed", { surface: "intro_sheet", trigger: shownBy.current });
+    if (!then) track("paywall_dismissed", { surface: view?.surface, trigger: view?.trigger });
     window.setTimeout(() => {
       setOpen(false);
       setLeaving(false);
+      setView(null);
       then?.();
     }, OUT_MS);
   }
@@ -242,7 +323,23 @@ export function ProIntroSheet() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  if (!mounted || !open || price === null) return null;
+  if (!mounted || !open || !view) return null;
+
+  if (view.surface === "one_screen") {
+    return createPortal(
+      <OneScreenPaywall
+        trigger={view.trigger}
+        trialOffered={view.trialOffered}
+        initialPlan={view.plan}
+        leaving={leaving}
+        onDismiss={() => close()}
+        onLeave={(then) => close(then)}
+      />,
+      document.body,
+    );
+  }
+
+  if (price === null) return null;
 
   return createPortal(
     <div

@@ -136,6 +136,15 @@ export function decide(state: PaywallState, pathname: string): PaywallTrigger | 
   return null;
 }
 
+/**
+ * Record a paywall that no trigger opened (the one-screen paywall coming
+ * back after sign-up): it takes this session's slot and restarts the weekly
+ * clock, but uses no trigger up.
+ */
+export function markSessionShown(state: PaywallState, now: number): PaywallState {
+  return { ...state, lastShownAt: now, lastShownSession: state.sessions, weeklyDueSession: null };
+}
+
 /** Record that `trigger` opened a paywall. */
 export function markShown(state: PaywallState, trigger: PaywallTrigger, now: number): PaywallState {
   return {
@@ -146,4 +155,18 @@ export function markShown(state: PaywallState, trigger: PaywallTrigger, now: num
     firstFragranceDone: state.firstFragranceDone || trigger === "first_fragrance",
     shelfLibraryDone: state.shelfLibraryDone || trigger === "shelf_library",
   };
+}
+
+/**
+ * Tester override, so either arm can be checked on a real device without
+ * exposing anyone else: sign up with an address whose name part ends in
+ * "+paywalla" (intro sheet) or "+paywallb" (one-screen paywall), optionally
+ * followed by digits, e.g. josh+paywallb2@example.com. Testers also get a
+ * fresh set of triggers on every app launch (see ProIntroSheet).
+ */
+export function testerArm(email: string | null | undefined): PaywallVariant | null {
+  const local = (email ?? "").split("@")[0].toLowerCase();
+  const m = /\+paywall([ab])\d*$/.exec(local);
+  if (!m) return null;
+  return m[1] === "b" ? "one_screen" : "intro_sheet";
 }

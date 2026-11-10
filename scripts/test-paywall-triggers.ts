@@ -10,9 +10,11 @@ import {
   effectiveVariant,
   isBlockedPath,
   isFragrancePath,
+  markSessionShown,
   markShown,
   newState,
   observe,
+  testerArm,
   type PaywallState,
 } from "../lib/paywall-triggers";
 
@@ -178,6 +180,31 @@ function go(s: PaywallState, pathname: string, now: number, native = true): Payw
   assert.equal(fresh.shelfLibraryDone, false);
   assert.equal(fresh.lastShownAt, null);
   ok("old intro-sheet state migrates");
+}
+
+// ---- Paywall reopened after sign-up takes the session's slot, no trigger ----
+{
+  let s = newState(T0, "one_screen");
+  s = go(s, "/fragrance/42", T0);
+  s = go(s, "/collection", T0 + MIN);
+  s = markSessionShown(s, T0 + MIN);
+  assert.equal(decide(s, "/collection"), null, "nothing right after it closes");
+  assert.equal(s.firstFragranceDone, false);
+  assert.equal(s.shelfLibraryDone, false);
+  s = go(s, "/collection", T0 + MIN + SESSION_GAP_MS);
+  assert.equal(decide(s, "/collection"), "first_fragrance", "triggers are still there next session");
+  ok("resumed paywall uses the session slot only");
+}
+
+// ---- Tester override ----
+{
+  assert.equal(testerArm("josh+paywallb@example.com"), "one_screen");
+  assert.equal(testerArm("Josh+PaywallA3@example.com"), "intro_sheet");
+  assert.equal(testerArm("josh@example.com"), null);
+  assert.equal(testerArm("josh+paywall@example.com"), null);
+  assert.equal(testerArm("paywallb@example.com"), null);
+  assert.equal(testerArm(null), null);
+  ok("tester addresses pick an arm");
 }
 
 console.log(`\n${pass} passed`);

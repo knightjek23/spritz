@@ -63,7 +63,7 @@ export function PostHogIdentify() {
       posthog.reset();
       // reset() clears super properties; put the platform tag back.
       posthog.register({ platform: nativePlatform() });
-      registerPaywallVariant();
+      registerPaywallVariant(null);
       identified.current = null;
     }
   }, [isLoaded, isSignedIn, user]);

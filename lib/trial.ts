@@ -19,6 +19,8 @@ export const TRIAL_DAYS = 7;
  * purchase sheet (Subscriptions policy, Nov 2, 2026).
  */
 export const MONTHLY_PRICE = "$4.99";
+/** Web (Stripe, USD) prices for every plan. Same rule: never inside the apps. */
+export const WEB_PRICES = { monthly: MONTHLY_PRICE, annual: "$29.99", lifetime: "$89" } as const;
 
 /**
  * Button + sub-line for a Pro gate. The billed amount always travels with
