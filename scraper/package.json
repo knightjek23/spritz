@@ -37,7 +37,10 @@
     "embed:images": "tsx src/embed-bottle-images.ts",
     "review:scans": "tsx src/review-scan-images.ts",
     "repair:concentration": "tsx src/repair-concentration.ts",
-    "prices:estimate": "tsx src/estimate-prices.ts"
+    "prices:estimate": "tsx src/estimate-prices.ts",
+    "verify:notes": "tsx src/verify-notes.ts",
+    "test:notes-compare": "node src/notes-compare.test.mjs && node src/notes-source.test.mjs && node src/scento-match.test.mjs",
+    "import:scento": "tsx src/import-scento-notes.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
