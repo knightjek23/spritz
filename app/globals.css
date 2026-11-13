@@ -948,3 +948,13 @@ button .cl-spinner {
   .pro-intro--out .pro-intro__panel { animation-direction: reverse; }
   .pro-intro__row { animation-duration: 1ms; animation-delay: 0ms !important; }
 }
+
+/* Landing pages (/download) carry data-landing-page and show no site
+   chrome: no top nav, bottom nav or site footer, and no bottom-nav
+   clearance. Server-rendered, so nothing flashes before hydration. */
+html:has([data-landing-page]) [data-site-chrome] {
+  display: none;
+}
+html:has([data-landing-page]) body > main {
+  padding-bottom: 0 !important;
+}

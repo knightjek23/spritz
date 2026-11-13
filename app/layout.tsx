@@ -158,7 +158,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* "How did you hear about Spritz?" after a first shelf add, for
               anyone who skipped /welcome. Asked once per person. */}
           <AcquisitionPrompt />
-          <Nav />
+          {/* data-site-chrome: hidden on landing pages (see globals.css).
+              display: contents keeps the nav's sticky positioning intact. */}
+          <div data-site-chrome className="contents">
+            <Nav />
+          </div>
           {/* --nav-clearance reserves space for the floating-pill bottom
               nav: 72px pill + 24px bottom offset + 16px breathing room,
               plus the home-indicator inset on notched devices. Was a flat
@@ -175,9 +179,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 applies below it. Makes /legal/* reachable from every route,
                 which is what affiliate reviewers and App Store review check
                 for, and carries the one-line FTC disclosure. */}
-            <Footer />
+            <div data-site-chrome className="contents">
+              <Footer />
+            </div>
           </main>
-          <BottomNav />
+          <div data-site-chrome className="contents">
+            <BottomNav />
+          </div>
           {/* PostHog — renders nothing unless NEXT_PUBLIC_POSTHOG_KEY is set. */}
           <Analytics />
           {/* Attaches the Clerk user to PostHog events. Renders nothing. */}

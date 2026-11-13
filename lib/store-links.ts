@@ -7,7 +7,8 @@
  * downloads from each ?src= show up as their own campaign in App Store Connect.
  */
 export const APPLE_APP_ID = process.env.NEXT_PUBLIC_APPLE_APP_ID || "6807149616";
-export const APPLE_PROVIDER_TOKEN = process.env.APPLE_PROVIDER_TOKEN ?? "";
+// pt=129384522 is Spritz's App Store Connect provider token; the env var only overrides it.
+export const APPLE_PROVIDER_TOKEN = process.env.APPLE_PROVIDER_TOKEN || "129384522";
 export const ANDROID_PACKAGE = "app.spritzofficial";
 
 export type Platform = "ios" | "android" | "desktop";
@@ -36,13 +37,16 @@ export function appStoreUrl(src: string): string {
   return url.toString();
 }
 
-export function playStoreUrl(src: string): string {
+export function playStoreUrl(
+  src: string,
+  { medium = "social", campaign = "get_link" }: { medium?: string; campaign?: string } = {},
+): string {
   const url = new URL("https://play.google.com/store/apps/details");
   url.searchParams.set("id", ANDROID_PACKAGE);
   // Play reads this as the install referrer (Play Console > Acquisition).
   url.searchParams.set(
     "referrer",
-    `utm_source=${src}&utm_medium=social&utm_campaign=get_link`,
+    `utm_source=${src}&utm_medium=${medium}&utm_campaign=${campaign}`,
   );
   return url.toString();
 }

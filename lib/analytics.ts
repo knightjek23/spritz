@@ -22,7 +22,8 @@ export type AnalyticsEvent =
   | "shelf_item_added"
   | "paywall_viewed"
   | "paywall_dismissed"
-  | "purchase_started";
+  | "purchase_started"
+  | "store_button_clicked";
 
 export function track(event: AnalyticsEvent, props: Record<string, unknown> = {}) {
   ph()?.capture(event, props);
