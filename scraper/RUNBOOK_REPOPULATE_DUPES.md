@@ -1,5 +1,35 @@
 # Runbook: Re-vectorize + repopulate `dupe_pairs`
 
+> **READ FIRST (updated 12 Nov 2026). Steps 1 and 2 below are no longer safe on the live catalog.**
+>
+> `npm run vectorize` then `npm run upload` rebuilds vectors from the scraped files in
+> `data/parsed` and upserts those files over the database rows. Since the notes
+> provenance work, some rows hold notes from other sources (354 from the Scento
+> dataset so far). `upload` would write the old scraped notes back over them, and
+> it also overwrites popularity ranks and licensed images.
+>
+> **Use this sequence instead.** It reads notes from the database and writes only
+> the vector column:
+>
+> ```bash
+> cd scraper
+> pnpm revectorize:replaced            # rows whose notes were replaced (dry run)
+> pnpm revectorize:replaced --write
+> pnpm revectorize:missing             # rows with no vector at all (dry run)
+> pnpm revectorize:missing --write
+> pnpm compute-dupes --dry             # scores everything, touches nothing
+> pnpm compute-dupes                   # replaces pairs 100 fragrances at a time
+> ```
+>
+> `compute-dupes` was also fixed on 12 Nov 2026: it used to read every vector as
+> missing (Postgres returns pgvector as text) and then empty the table, and its
+> one-statement wipe timed out once the table was full. It now refuses to run on
+> an input with too few usable vectors, and replaces pairs in slices. Expected
+> result on the current catalog: 12,916 of 13,020 usable vectors, 645,789 pairs,
+> about 4 to 5 minutes of scoring.
+>
+> The original steps are kept below for reference only.
+
 Run this when:
 - The parser has improved (Vue rendering, three-strategy extractor, etc.) and existing rows have stale/empty note vectors
 - New fragrances were scraped after the last `compute-dupes` run

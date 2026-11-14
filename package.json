@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "test:sources": "node scripts/test-notes-source-label.mjs",
     "check:server-onclick": "node scripts/check-server-onclick.mjs",
     "prebuild": "npm run check:server-onclick",
     "db:migrate": "npx supabase db push",

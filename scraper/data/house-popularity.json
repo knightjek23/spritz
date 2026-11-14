@@ -1,0 +1,2457 @@
+{
+ "source": "reports/Spritz fragrance house popularity.md (deep research, 2026-11-14)",
+ "scale": "0-100, US lens",
+ "houses": [
+  {
+   "house": "Chanel",
+   "aliases": [],
+   "score": 98,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Dior",
+   "aliases": [],
+   "score": 98,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Yves Saint Laurent",
+   "aliases": [],
+   "score": 95,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Giorgio Armani",
+   "aliases": [],
+   "score": 92,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Valentino",
+   "aliases": [],
+   "score": 92,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Carolina Herrera",
+   "aliases": [],
+   "score": 91,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Sol de Janeiro",
+   "aliases": [],
+   "score": 91,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Jean Paul Gaultier",
+   "aliases": [],
+   "score": 90,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Rabanne",
+   "aliases": [
+    "Paco Rabanne"
+   ],
+   "score": 90,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Bath & Body Works",
+   "aliases": [],
+   "score": 89,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Prada",
+   "aliases": [],
+   "score": 89,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Lancôme",
+   "aliases": [],
+   "score": 88,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Tom Ford",
+   "aliases": [],
+   "score": 88,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Calvin Klein",
+   "aliases": [],
+   "score": 86,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Gucci",
+   "aliases": [],
+   "score": 86,
+   "confidence": "high",
+   "sourced": false
+  },
+  {
+   "house": "Ralph Lauren",
+   "aliases": [],
+   "score": 86,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Versace",
+   "aliases": [],
+   "score": 85,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Dolce&Gabbana",
+   "aliases": [],
+   "score": 84,
+   "confidence": "high",
+   "sourced": false
+  },
+  {
+   "house": "Givenchy",
+   "aliases": [],
+   "score": 84,
+   "confidence": "high",
+   "sourced": false
+  },
+  {
+   "house": "Jo Malone London",
+   "aliases": [],
+   "score": 84,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Victoria's Secret",
+   "aliases": [
+    "Victoria S Secret"
+   ],
+   "score": 84,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Mugler",
+   "aliases": [],
+   "score": 83,
+   "confidence": "high",
+   "sourced": false
+  },
+  {
+   "house": "Ariana Grande",
+   "aliases": [],
+   "score": 82,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Guerlain",
+   "aliases": [],
+   "score": 82,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Hugo Boss",
+   "aliases": [],
+   "score": 82,
+   "confidence": "high",
+   "sourced": false
+  },
+  {
+   "house": "Maison Martin Margiela",
+   "aliases": [
+    "Maison Margiela"
+   ],
+   "score": 82,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Marc Jacobs",
+   "aliases": [],
+   "score": 82,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Azzaro",
+   "aliases": [],
+   "score": 80,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Burberry",
+   "aliases": [],
+   "score": 80,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Bvlgari",
+   "aliases": [],
+   "score": 80,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Hermès",
+   "aliases": [],
+   "score": 80,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Kayali Fragrances",
+   "aliases": [],
+   "score": 80,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Viktor&Rolf",
+   "aliases": [],
+   "score": 80,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Parfums de Marly",
+   "aliases": [],
+   "score": 78,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Billie Eilish",
+   "aliases": [],
+   "score": 77,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Issey Miyake",
+   "aliases": [],
+   "score": 77,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Chloé",
+   "aliases": [],
+   "score": 76,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Jimmy Choo",
+   "aliases": [],
+   "score": 76,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Lattafa Perfumes",
+   "aliases": [],
+   "score": 76,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Montblanc",
+   "aliases": [],
+   "score": 76,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Creed",
+   "aliases": [],
+   "score": 75,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Davidoff",
+   "aliases": [],
+   "score": 74,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Le Labo",
+   "aliases": [],
+   "score": 74,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Maison Francis Kurkdjian",
+   "aliases": [],
+   "score": 74,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Narciso Rodriguez",
+   "aliases": [],
+   "score": 74,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "By Kilian",
+   "aliases": [],
+   "score": 72,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Elizabeth Arden",
+   "aliases": [],
+   "score": 72,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Byredo",
+   "aliases": [],
+   "score": 70,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Coach",
+   "aliases": [],
+   "score": 70,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Estée Lauder",
+   "aliases": [],
+   "score": 70,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Zara",
+   "aliases": [],
+   "score": 70,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Diptyque",
+   "aliases": [],
+   "score": 69,
+   "confidence": "high",
+   "sourced": false
+  },
+  {
+   "house": "Phlur",
+   "aliases": [],
+   "score": 68,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Acqua di Parma",
+   "aliases": [],
+   "score": 66,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Amouage",
+   "aliases": [],
+   "score": 66,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Cartier",
+   "aliases": [],
+   "score": 66,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Glossier",
+   "aliases": [],
+   "score": 66,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Moschino",
+   "aliases": [],
+   "score": 66,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Initio Parfums Prives",
+   "aliases": [],
+   "score": 65,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Louis Vuitton",
+   "aliases": [],
+   "score": 65,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Donna Karan",
+   "aliases": [],
+   "score": 64,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Frederic Malle",
+   "aliases": [
+    "Frederic Malle Editions de Parfums",
+    "Editions de Parfums Frederic Malle"
+   ],
+   "score": 64,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Lacoste Fragrances",
+   "aliases": [],
+   "score": 64,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Xerjoff",
+   "aliases": [],
+   "score": 64,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Penhaligon's",
+   "aliases": [],
+   "score": 63,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Sabrina Carpenter",
+   "aliases": [],
+   "score": 63,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Kenzo",
+   "aliases": [],
+   "score": 62,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Kylie Cosmetics",
+   "aliases": [],
+   "score": 62,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Loewe",
+   "aliases": [],
+   "score": 62,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Michael Kors",
+   "aliases": [],
+   "score": 62,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Salvatore Ferragamo",
+   "aliases": [],
+   "score": 62,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Tommy Hilfiger",
+   "aliases": [],
+   "score": 62,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Armaf",
+   "aliases": [],
+   "score": 60,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Bond No 9",
+   "aliases": [],
+   "score": 60,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Zadig & Voltaire",
+   "aliases": [],
+   "score": 60,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Comme Des Garcons",
+   "aliases": [],
+   "score": 58,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Serge Lutens",
+   "aliases": [],
+   "score": 58,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Van Cleef & Arpels",
+   "aliases": [],
+   "score": 58,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Miu Miu",
+   "aliases": [],
+   "score": 57,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Afnan",
+   "aliases": [],
+   "score": 56,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Abercrombie & Fitch",
+   "aliases": [],
+   "score": 55,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Aesop",
+   "aliases": [],
+   "score": 55,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Celine",
+   "aliases": [],
+   "score": 55,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Fendi",
+   "aliases": [],
+   "score": 55,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Nest",
+   "aliases": [
+    "NEST New York"
+   ],
+   "score": 55,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Rihanna",
+   "aliases": [],
+   "score": 55,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Roja Dove",
+   "aliases": [
+    "Roja Parfums"
+   ],
+   "score": 55,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Lanvin",
+   "aliases": [],
+   "score": 54,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Rare Beauty",
+   "aliases": [],
+   "score": 54,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Britney Spears",
+   "aliases": [],
+   "score": 52,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Clean",
+   "aliases": [],
+   "score": 52,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Ellis Brooklyn",
+   "aliases": [],
+   "score": 52,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "L'Occitane en Provence",
+   "aliases": [],
+   "score": 52,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Montale",
+   "aliases": [],
+   "score": 52,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Rochas",
+   "aliases": [],
+   "score": 52,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Adidas",
+   "aliases": [],
+   "score": 50,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Ajmal",
+   "aliases": [],
+   "score": 50,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Al Haramain Perfumes",
+   "aliases": [],
+   "score": 50,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Aquolina",
+   "aliases": [],
+   "score": 50,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Arabian Oud",
+   "aliases": [],
+   "score": 50,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Bottega Veneta",
+   "aliases": [],
+   "score": 50,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Fine Ry",
+   "aliases": [],
+   "score": 50,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Juicy Couture",
+   "aliases": [],
+   "score": 50,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Juliette Has A Gun",
+   "aliases": [],
+   "score": 50,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Mancera",
+   "aliases": [],
+   "score": 50,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Nautica",
+   "aliases": [],
+   "score": 50,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Nina Ricci",
+   "aliases": [],
+   "score": 50,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Nishane",
+   "aliases": [],
+   "score": 50,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Clive Christian",
+   "aliases": [],
+   "score": 48,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Elie Saab",
+   "aliases": [],
+   "score": 48,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Fragrance World",
+   "aliases": [],
+   "score": 48,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Jennifer Lopez",
+   "aliases": [],
+   "score": 48,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Lush",
+   "aliases": [],
+   "score": 48,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Marc-Antoine Barrois",
+   "aliases": [],
+   "score": 48,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Memo Paris",
+   "aliases": [],
+   "score": 48,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Paris Hilton",
+   "aliases": [],
+   "score": 48,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Roberto Cavalli",
+   "aliases": [],
+   "score": 48,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Ex Nihilo",
+   "aliases": [],
+   "score": 46,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Rasasi",
+   "aliases": [],
+   "score": 46,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Snif",
+   "aliases": [],
+   "score": 46,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Aramis",
+   "aliases": [],
+   "score": 45,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Beyoncé",
+   "aliases": [],
+   "score": 45,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Bon Parfumeur",
+   "aliases": [],
+   "score": 45,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "David Beckham",
+   "aliases": [],
+   "score": 45,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Dedcool",
+   "aliases": [],
+   "score": 45,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Escentric Molecules",
+   "aliases": [],
+   "score": 45,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Guy Laroche",
+   "aliases": [],
+   "score": 45,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Hollister",
+   "aliases": [],
+   "score": 45,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "L'Artisan Parfumeur",
+   "aliases": [],
+   "score": 45,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Maison Alhambra",
+   "aliases": [],
+   "score": 45,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Oakcha",
+   "aliases": [],
+   "score": 45,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Pacifica",
+   "aliases": [],
+   "score": 45,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Swiss Arabian",
+   "aliases": [],
+   "score": 45,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "BDK Parfums",
+   "aliases": [],
+   "score": 44,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Cacharel",
+   "aliases": [],
+   "score": 44,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Chopard",
+   "aliases": [],
+   "score": 44,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Dries Van Noten",
+   "aliases": [],
+   "score": 44,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "French Avenue",
+   "aliases": [],
+   "score": 44,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Kate Spade",
+   "aliases": [],
+   "score": 44,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Tory Burch",
+   "aliases": [],
+   "score": 44,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Antonio Banderas",
+   "aliases": [],
+   "score": 42,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Boadicea the Victorious",
+   "aliases": [],
+   "score": 42,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "BORNTOSTANDOUT®",
+   "aliases": [],
+   "score": 42,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Floral Street",
+   "aliases": [],
+   "score": 42,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Lalique",
+   "aliases": [],
+   "score": 42,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Natura",
+   "aliases": [],
+   "score": 42,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "O Boticario",
+   "aliases": [],
+   "score": 42,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Origins",
+   "aliases": [],
+   "score": 42,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Rituals",
+   "aliases": [],
+   "score": 42,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Vilhelm Parfumerie",
+   "aliases": [],
+   "score": 42,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Arabiyat Prestige",
+   "aliases": [],
+   "score": 40,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Boy Smells",
+   "aliases": [],
+   "score": 40,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Caron",
+   "aliases": [],
+   "score": 40,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "DS&Durga",
+   "aliases": [],
+   "score": 40,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Etat Libre d'Orange",
+   "aliases": [],
+   "score": 40,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Goldfield & Banks Australia",
+   "aliases": [],
+   "score": 40,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "My Perfumes",
+   "aliases": [
+    "Mpf"
+   ],
+   "score": 40,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Oscar de la Renta",
+   "aliases": [],
+   "score": 40,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Perry Ellis",
+   "aliases": [],
+   "score": 40,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Skylar",
+   "aliases": [],
+   "score": 40,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "The Body Shop",
+   "aliases": [],
+   "score": 40,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Bentley",
+   "aliases": [],
+   "score": 38,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Emper",
+   "aliases": [],
+   "score": 38,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Histoires de Parfums",
+   "aliases": [],
+   "score": 38,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Jil Sander",
+   "aliases": [],
+   "score": 38,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Joop!",
+   "aliases": [],
+   "score": 38,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Lolita Lempicka",
+   "aliases": [],
+   "score": 38,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Maison Louis Marie",
+   "aliases": [],
+   "score": 38,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Missoni",
+   "aliases": [],
+   "score": 38,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Nasomatto",
+   "aliases": [],
+   "score": 38,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Revlon",
+   "aliases": [],
+   "score": 38,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Stéphane Humbert Lucas 777",
+   "aliases": [],
+   "score": 38,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "The 7 Virtues",
+   "aliases": [],
+   "score": 38,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Vera Wang",
+   "aliases": [],
+   "score": 38,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Yves Rocher",
+   "aliases": [],
+   "score": 38,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Jaguar",
+   "aliases": [],
+   "score": 36,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Paris Corner",
+   "aliases": [],
+   "score": 36,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Tiziana Terenzi",
+   "aliases": [],
+   "score": 36,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Ahmed Al Maghribi",
+   "aliases": [],
+   "score": 35,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Henry Rose",
+   "aliases": [],
+   "score": 35,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "RAVE",
+   "aliases": [],
+   "score": 35,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Rayhaan",
+   "aliases": [],
+   "score": 35,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "4711",
+   "aliases": [],
+   "score": 34,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Abdul Samad Al Qurashi",
+   "aliases": [],
+   "score": 34,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Carner Barcelona",
+   "aliases": [],
+   "score": 34,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Imaginary Authors",
+   "aliases": [],
+   "score": 34,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Khadlaj Perfumes",
+   "aliases": [],
+   "score": 34,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Maison Crivelli",
+   "aliases": [],
+   "score": 34,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Ormonde Jayne",
+   "aliases": [],
+   "score": 34,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Shakira",
+   "aliases": [],
+   "score": 34,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Floraïku",
+   "aliases": [],
+   "score": 33,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Papillon Artisan Perfumes",
+   "aliases": [],
+   "score": 33,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Profumum Roma",
+   "aliases": [],
+   "score": 33,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Valmont",
+   "aliases": [],
+   "score": 33,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Ard Al Zaafaran",
+   "aliases": [],
+   "score": 32,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "By Rosie Jane",
+   "aliases": [],
+   "score": 32,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Demeter Fragrance",
+   "aliases": [],
+   "score": 32,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Essential Parfums",
+   "aliases": [],
+   "score": 32,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Gissah",
+   "aliases": [],
+   "score": 32,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Korres",
+   "aliases": [],
+   "score": 32,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Mercedes-Benz",
+   "aliases": [],
+   "score": 32,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Oribe",
+   "aliases": [],
+   "score": 32,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Orto Parisi",
+   "aliases": [],
+   "score": 32,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Reef Perfumes",
+   "aliases": [],
+   "score": 32,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Thomas Kosmala",
+   "aliases": [],
+   "score": 32,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "ZARKOPERFUME",
+   "aliases": [],
+   "score": 32,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Zimaya",
+   "aliases": [],
+   "score": 32,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Alfred Dunhill",
+   "aliases": [],
+   "score": 30,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "ALREHAB PERFUMES",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Asgharali",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Astier De Villatte",
+   "aliases": [],
+   "score": 30,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Atelier des Ors",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Avon",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Bharara",
+   "aliases": [],
+   "score": 30,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Casamorati 1888",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Commodity",
+   "aliases": [],
+   "score": 30,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Ella K Parfums",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Ferrari",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Fragancias Cannon",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Granado",
+   "aliases": [],
+   "score": 30,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Halloween",
+   "aliases": [],
+   "score": 30,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Hamidi",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Haute Fragrance Company HFC",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Jeanne Arthes",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Jovoy Paris",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Lorenzo Pazzaglia",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "M. Micallef",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Maison Asrar",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Matiere Premiere",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Mind Games",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Oriflame",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Paloma Picasso",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Parfum d'Empire",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Pierre Guillaume Paris",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Puma",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Sospiro Perfumes",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Tauer Perfumes",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "The Dua Brand",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "The Merchant of Venice",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Tru Western",
+   "aliases": [],
+   "score": 30,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Trussardi",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Yardley",
+   "aliases": [],
+   "score": 30,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Aromatix X French Avenue",
+   "aliases": [],
+   "score": 28,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Benetton",
+   "aliases": [],
+   "score": 28,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Coty",
+   "aliases": [],
+   "score": 28,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Etro",
+   "aliases": [],
+   "score": 28,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Fragonard",
+   "aliases": [],
+   "score": 28,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Gisada",
+   "aliases": [],
+   "score": 28,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Gulf Orchid",
+   "aliases": [],
+   "score": 28,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Halston",
+   "aliases": [],
+   "score": 28,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Heretic Parfum",
+   "aliases": [],
+   "score": 28,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Katy Perry",
+   "aliases": [],
+   "score": 28,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "La Rive",
+   "aliases": [],
+   "score": 28,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Les Liquides Imaginaires",
+   "aliases": [],
+   "score": 28,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Lore",
+   "aliases": [],
+   "score": 28,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Nabeel",
+   "aliases": [],
+   "score": 28,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Playboy",
+   "aliases": [],
+   "score": 28,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Room 1015",
+   "aliases": [],
+   "score": 28,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Rosendo Mateu Olfactive Expressions",
+   "aliases": [],
+   "score": 28,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "The Different Company",
+   "aliases": [],
+   "score": 28,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Ulric de Varens",
+   "aliases": [],
+   "score": 28,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Police",
+   "aliases": [],
+   "score": 26,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Akro",
+   "aliases": [],
+   "score": 25,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Al Wataniah",
+   "aliases": [],
+   "score": 25,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Dumont",
+   "aliases": [],
+   "score": 25,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Fragrance Du Bois",
+   "aliases": [],
+   "score": 25,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Gloria Vanderbilt",
+   "aliases": [],
+   "score": 25,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Henry Jacques",
+   "aliases": [],
+   "score": 25,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Houbigant",
+   "aliases": [],
+   "score": 25,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Jean Patou",
+   "aliases": [],
+   "score": 25,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Jequiti",
+   "aliases": [],
+   "score": 25,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Les Indémodables",
+   "aliases": [],
+   "score": 25,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Louis Cardin",
+   "aliases": [],
+   "score": 25,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Masque Milano",
+   "aliases": [],
+   "score": 25,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Milton Lloyd",
+   "aliases": [],
+   "score": 25,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Molinard",
+   "aliases": [],
+   "score": 25,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Nike",
+   "aliases": [],
+   "score": 25,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Nobile 1942",
+   "aliases": [],
+   "score": 25,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Otoori",
+   "aliases": [],
+   "score": 25,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Parfums Berdoues",
+   "aliases": [],
+   "score": 25,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Riiffs Perfumes",
+   "aliases": [],
+   "score": 25,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Régime des Fleurs",
+   "aliases": [],
+   "score": 25,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Str8",
+   "aliases": [],
+   "score": 25,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "WIDIAN",
+   "aliases": [],
+   "score": 25,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Amouroud",
+   "aliases": [],
+   "score": 24,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Emanuel Ungaro",
+   "aliases": [],
+   "score": 24,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "L Erbolario",
+   "aliases": [],
+   "score": 24,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Mexx",
+   "aliases": [],
+   "score": 24,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Zoologist Perfumes",
+   "aliases": [],
+   "score": 24,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Adopt Parfums",
+   "aliases": [],
+   "score": 22,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Alexandria Fragrances",
+   "aliases": [],
+   "score": 22,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Animale",
+   "aliases": [],
+   "score": 22,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Bruno Banani",
+   "aliases": [],
+   "score": 22,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Fugazzi",
+   "aliases": [],
+   "score": 22,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Giardini di Toscana",
+   "aliases": [],
+   "score": 22,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Hiram Green",
+   "aliases": [],
+   "score": 22,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Jo Milano Paris",
+   "aliases": [],
+   "score": 22,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Kerosene",
+   "aliases": [],
+   "score": 22,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Maison Mataha",
+   "aliases": [],
+   "score": 22,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Nikos",
+   "aliases": [],
+   "score": 22,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Omanluxury",
+   "aliases": [],
+   "score": 22,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Slumberhouse",
+   "aliases": [],
+   "score": 22,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "So...?",
+   "aliases": [],
+   "score": 22,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Solinotes",
+   "aliases": [],
+   "score": 22,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Superz",
+   "aliases": [],
+   "score": 22,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Ted Lapidus",
+   "aliases": [],
+   "score": 22,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Al Jazeera Perfumes",
+   "aliases": [],
+   "score": 20,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Areej Le Dore",
+   "aliases": [],
+   "score": 20,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Atralia",
+   "aliases": [],
+   "score": 20,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Hormone Paris",
+   "aliases": [],
+   "score": 20,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Naomi Campbell",
+   "aliases": [],
+   "score": 20,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Sultan Pasha Perfumes",
+   "aliases": [],
+   "score": 20,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Worth",
+   "aliases": [],
+   "score": 20,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "4160 Tuesdays",
+   "aliases": [],
+   "score": 18,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Andrea Maack",
+   "aliases": [],
+   "score": 18,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Borsari",
+   "aliases": [],
+   "score": 18,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Ensar Oud",
+   "aliases": [],
+   "score": 18,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Filippo Sorcinelli",
+   "aliases": [],
+   "score": 18,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Hilde Soliani",
+   "aliases": [],
+   "score": 18,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Michael Malul London",
+   "aliases": [],
+   "score": 18,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Naseem",
+   "aliases": [],
+   "score": 18,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Risala",
+   "aliases": [],
+   "score": 18,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Sora Dora",
+   "aliases": [],
+   "score": 18,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Toskovat",
+   "aliases": [],
+   "score": 18,
+   "confidence": "med",
+   "sourced": true
+  },
+  {
+   "house": "Argos",
+   "aliases": [],
+   "score": 17,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Anfar London",
+   "aliases": [],
+   "score": 15,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Black Phoenix Alchemy Lab",
+   "aliases": [],
+   "score": 15,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Bortnikoff",
+   "aliases": [],
+   "score": 15,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Mith",
+   "aliases": [],
+   "score": 15,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Odette Parfum Co",
+   "aliases": [],
+   "score": 15,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Oethers",
+   "aliases": [],
+   "score": 15,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Pearfat Parfum",
+   "aliases": [],
+   "score": 15,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Poesie",
+   "aliases": [],
+   "score": 15,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Spongebob Squarepants",
+   "aliases": [],
+   "score": 15,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Dsh Perfumes",
+   "aliases": [],
+   "score": 14,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "Ainash Parfums",
+   "aliases": [],
+   "score": 12,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Bujairami",
+   "aliases": [],
+   "score": 12,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Cirque Du Soleil",
+   "aliases": [],
+   "score": 12,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Indult",
+   "aliases": [],
+   "score": 12,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Jaddid",
+   "aliases": [],
+   "score": 12,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Pineward Perfumes",
+   "aliases": [],
+   "score": 12,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Solstice Scents",
+   "aliases": [],
+   "score": 12,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Sorce",
+   "aliases": [],
+   "score": 12,
+   "confidence": "high",
+   "sourced": true
+  },
+  {
+   "house": "Alkemia Perfumes",
+   "aliases": [],
+   "score": 10,
+   "confidence": "med",
+   "sourced": false
+  },
+  {
+   "house": "D Annam",
+   "aliases": [],
+   "score": 10,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "RDZ Parfums",
+   "aliases": [],
+   "score": 10,
+   "confidence": "low",
+   "sourced": true
+  },
+  {
+   "house": "Sucreabeille",
+   "aliases": [],
+   "score": 10,
+   "confidence": "low",
+   "sourced": false
+  },
+  {
+   "house": "Marchesa",
+   "aliases": [],
+   "score": 8,
+   "confidence": "low",
+   "sourced": true
+  }
+ ]
+}

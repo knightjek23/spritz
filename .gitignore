@@ -94,3 +94,12 @@ spritz movs/
 Claude outputs/
 
 .env*
+
+# FragranceNet page cache: holds SkinMatch pyramids (third-party, internal
+# comparison only). Never commit.
+scraper/data/fragrancenet/
+
+# Scraper run reports and backups (generated on every run; keep local)
+scraper/data/*-dry-*.json
+scraper/data/*-write-*.json
+scraper/data/*.backup-*.json

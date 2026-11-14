@@ -25,6 +25,7 @@ import { FamilyPills } from "@/components/family-pills";
 import { houseSlug } from "@/lib/houses";
 import { stripProFields } from "@/lib/entitlement";
 import { PerfumerCredit } from "@/components/perfumer-credit";
+import { FragranceSources } from "@/components/fragrance-sources";
 import {
   CONCENTRATION_LABEL,
   CONCENTRATION_SHORT,
@@ -487,6 +488,17 @@ export default async function FragrancePage({ params }: { params: { id: string }
           <p className="text-ink leading-relaxed italic">{f.editorial_notes}</p>
         </section>
       )}
+
+      {/* Sources — where the notes came from and which figures are our own
+          estimates. Required for rows using the Scento dataset (CC BY 4.0
+          attribution); see components/fragrance-sources.tsx. */}
+      <FragranceSources
+        notesStatus={f.notes_status}
+        notesSourceUrl={f.notes_source_url}
+        showsPerformance={
+          hasPerformanceData || !!f.longevity_description || !!f.projection_description
+        }
+      />
 
       {/* Similar fragrances — collapsed, opt-in, algorithmic note-vector similarity */}
       <section className="mt-6 pt-8 border-t border-ink/10">

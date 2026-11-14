@@ -39,8 +39,15 @@
     "repair:concentration": "tsx src/repair-concentration.ts",
     "prices:estimate": "tsx src/estimate-prices.ts",
     "verify:notes": "tsx src/verify-notes.ts",
-    "test:notes-compare": "node src/notes-compare.test.mjs && node src/notes-source.test.mjs && node src/scento-match.test.mjs",
-    "import:scento": "tsx src/import-scento-notes.ts"
+    "test:notes-compare": "node src/notes-compare.test.mjs && node src/notes-source.test.mjs && node src/scento-match.test.mjs && node src/dupe-scoring.test.mjs && node src/popularity-v2.test.mjs",
+    "import:scento": "tsx src/import-scento-notes.ts",
+    "revectorize:replaced": "tsx src/revectorize-replaced.ts",
+    "revectorize:missing": "tsx src/revectorize-replaced.ts --missing",
+    "scrape:fragrancenet": "tsx src/scrape-fragrancenet.ts",
+    "scrape:fragrancenet-bestsellers": "tsx src/scrape-fragrancenet-bestsellers.ts",
+    "import:sales-claims": "tsx src/import-sales-claims.ts",
+    "rank:popularity-v2": "tsx src/rank-popularity-v2.ts",
+    "fix:fragrancenet-offers": "tsx src/fix-fragrancenet-offers.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",

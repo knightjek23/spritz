@@ -105,6 +105,15 @@ export interface Fragrance {
   consensus_cons: string[] | null;
   consensus_confidence: number | null;
   consensus_generated_at: string | null;
+  // Notes provenance (migration 0043). Optional so rows built by older
+  // code paths still satisfy this type. The "Sources" block on the detail
+  // page reads these; lib/notes-source-label.ts decides what may be shown.
+  notes_status?: "unverified" | "match" | "replaced" | "not_found" | "needs_review";
+  notes_source_url?: string | null;
+  notes_verified_at?: string | null;
+  notes_tiers_verified?: boolean;
+  family_computed?: boolean;
+  perfumer_source_url?: string | null;
   // Internal use only — never rendered directly
   avg_retail_price: number | null;
   price_tier: PriceTier | null;
