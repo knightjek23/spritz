@@ -1,8 +1,12 @@
 # Popularity v2 runbook
 
-Approved 2026-11-12. Builds `fragrances.popularity_rank_v2` alongside the
-existing AI `popularity_rank`. The app keeps reading `popularity_rank` until
-the switch is approved separately.
+Approved 2026-11-12. Builds `fragrances.popularity_rank_v2`.
+
+LIVE since 2026-11-14 (migration 0046): v2 is copied into `popularity_rank`,
+the column the app reads; the old AI ranking is kept in `popularity_rank_v1`.
+Re-rank and promote in one step: `pnpm rank:popularity-v2 --write --promote`.
+`scripts/rank-popularity.sql` is retired and refuses to run. Undo: see the
+header of 0046.
 
 Score (original, superseded below): 50% FragranceNet position, 25% reviews, 25% AI. No
 FragranceNet signal -> AI percentile alone. Tier A sales-verified -> top.
@@ -35,7 +39,7 @@ before ranking.
 5. Sales claims (edit `data/sales-claims.json` fragrance_id to pin ambiguous rows):
    `pnpm import:sales-claims` then `pnpm import:sales-claims --write`
 6. Rank: `pnpm rank:popularity-v2` (dry, top 100 old vs new + movers), then
-   `pnpm rank:popularity-v2 --write`.
+   `pnpm rank:popularity-v2 --write --promote`.
 
 Re-run steps 3, 4 and 6 to refresh (the listing reshuffles daily; each crawl
 is a dated snapshot). Re-check sales tiers each Jan-Feb after annual results.

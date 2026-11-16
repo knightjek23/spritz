@@ -24,6 +24,9 @@
 // Usage (run from scraper/):
 //   pnpm rank:popularity-v2            # dry run: report + top 100 old vs new
 //   pnpm rank:popularity-v2 --write    # write popularity_rank_v2 / score / inputs
+//   pnpm rank:popularity-v2 --write --promote
+//                                      # ...then copy v2 into popularity_rank, the
+//                                      # column the app reads (migration 0046)
 
 import "dotenv/config";
 import fs from "node:fs/promises";
@@ -32,6 +35,8 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { HOUSE_WEIGHT, MIN_TIER_GROUP, houseKey, rankRows, tierFromPricePerMl, WEIGHTS, type Row } from "./popularity-v2-core";
 
 const WRITE = process.argv.includes("--write");
+// Copy v2 into popularity_rank (what the app reads) after writing. 0046.
+const PROMOTE = process.argv.includes("--promote");
 const SOURCE = "fragrancenet";
 const MIN_COVERAGE = 0.98;
 
@@ -61,6 +66,10 @@ async function main() {
       console.error(`[rank:v2] missing ${k} in scraper/.env`);
       process.exit(1);
     }
+  }
+  if (PROMOTE && !WRITE) {
+    console.error("[rank:v2] --promote needs --write (it promotes the ranking this run writes).");
+    process.exit(1);
   }
   supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
     auth: { persistSession: false },
@@ -244,6 +253,19 @@ async function main() {
       written += Number(data ?? 0);
     }
     console.log(`\n  written: ${written}/${ranked.length} rows`);
+    if (PROMOTE) {
+      if (written !== ranked.length) {
+        console.error(`  ⚠ NOT PROMOTING: only ${written}/${ranked.length} rows written. Re-run with --write --promote.`);
+      } else {
+        const { data: switched, error: pErr } = await supabase.rpc("promote_popularity_v2");
+        if (pErr) {
+          console.error(`  ⚠ promote failed: ${pErr.message}`);
+          console.error("    If it says the function does not exist, run migration 0046 first.");
+        } else {
+          console.log(`  promoted: popularity_rank now = v2 (${switched} rows changed)`);
+        }
+      }
+    }
   }
 
   const outFile = path.resolve(`data/rank-v2-${WRITE ? "write" : "dry"}-${new Date().toISOString().replace(/[:.]/g, "-")}.json`);
@@ -265,7 +287,8 @@ async function main() {
     ),
   );
   console.log(`\n  report: ${path.relative(process.cwd(), outFile)}`);
-  if (!WRITE) console.log("  Nothing written. Apply with --write (popularity_rank stays untouched).");
+  if (!WRITE) console.log("  Nothing written. Apply with --write, or --write --promote to make it the app's ranking.");
+  else if (!PROMOTE) console.log("  popularity_rank (the app's ranking) unchanged. Add --promote to switch it to this run.");
 }
 
 if (process.argv[1] && /rank-popularity-v2\.(ts|js|mjs)$/.test(process.argv[1])) {

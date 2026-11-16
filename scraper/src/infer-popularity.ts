@@ -288,7 +288,7 @@ async function main() {
   }
   console.log("");
   console.log(
-    "Next: run scripts/rank-popularity.sql in Supabase SQL editor to convert scores into popularity_rank.",
+    "Next: cd scraper && pnpm rank:popularity-v2 --write --promote (uses these scores as v2's AI input; scripts/rank-popularity.sql is retired).",
   );
 }
 
