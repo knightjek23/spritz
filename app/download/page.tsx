@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { headers } from "next/headers";
 import {
   APPLE_APP_ID,
   APPLE_PROVIDER_TOKEN,
   appStoreUrl,
   cleanSource,
+  detectPlatform,
   playStoreUrl,
 } from "@/lib/store-links";
 import { StoreButton } from "./store-button";
@@ -66,12 +68,23 @@ export default function DownloadPage({ searchParams }: { searchParams: SearchPar
   const ios = appStoreUrl(ct);
   const android = playStoreUrl(ct, { medium: "paid", campaign: "download_page" });
 
+  // Lead with the store for the visitor's phone. Meta delivers this ad to
+  // Android too, and Android visitors who only saw App Store buttons left
+  // without tapping (Nov 16-17). Desktop and unknown devices get iPhone first.
+  const onAndroid = detectPlatform(headers().get("user-agent") ?? "") === "android";
+  const primary = onAndroid
+    ? { href: android, store: "android" as const, label: "Get it on Google Play" }
+    : { href: ios, store: "ios" as const, label: "Download on the App Store" };
+  const secondary = onAndroid
+    ? { href: ios, store: "ios" as const, label: "On iPhone? Download on the App Store" }
+    : { href: android, store: "android" as const, label: "On Android? Get it on Google Play" };
+
   return (
     <div data-landing-page className="mx-auto w-full max-w-md bg-cream text-ink">
       <header className="flex h-14 items-center justify-between px-6">
         <span className="font-display text-2xl tracking-[-0.01em]">spritz</span>
         <span className="font-mono text-[10px] uppercase tracking-widest text-slate">
-          Free on iPhone
+          {onAndroid ? "Free on Android" : "Free on iPhone"}
         </span>
       </header>
 
@@ -86,13 +99,13 @@ export default function DownloadPage({ searchParams }: { searchParams: SearchPar
         </p>
         <div className="mt-8">
           <StoreButton
-            href={ios}
-            store="ios"
+            href={primary.href}
+            store={primary.store}
             position="hero"
             ct={ct}
             className="flex h-[52px] w-full items-center justify-center bg-emerald font-medium tracking-wide text-cream transition hover:bg-emerald/90"
           >
-            Download on the App Store
+            {primary.label}
           </StoreButton>
           <p className="mt-2 text-center text-small text-slate">
             Free to scan and save. No card needed.
@@ -132,22 +145,22 @@ export default function DownloadPage({ searchParams }: { searchParams: SearchPar
           Your next bottle, without the guesswork.
         </h2>
         <StoreButton
-          href={ios}
-          store="ios"
+          href={primary.href}
+          store={primary.store}
           position="footer"
           ct={ct}
           className="flex h-[52px] w-full items-center justify-center bg-cream font-medium tracking-wide text-emerald transition hover:bg-cream/90"
         >
-          Download on the App Store
+          {primary.label}
         </StoreButton>
         <StoreButton
-          href={android}
-          store="android"
+          href={secondary.href}
+          store={secondary.store}
           position="footer"
           ct={ct}
           className="flex min-h-[44px] items-center self-center text-sm text-cream underline underline-offset-4"
         >
-          On Android? Get it on Google Play
+          {secondary.label}
         </StoreButton>
       </section>
 
