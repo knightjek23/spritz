@@ -20,6 +20,7 @@ import { useAuth } from "@clerk/nextjs";
 import { BottleImage } from "@/components/bottle-image";
 import { TrialCta } from "@/components/trial-cta";
 import type { CostEffectiveResponse } from "@/app/api/cost-effective/[id]/route";
+import { logBuyTap } from "@/lib/buy-tap";
 
 type State =
   | { kind: "loading" }
@@ -209,6 +210,7 @@ export function CostEffectiveOptions({
             {o.product_url && !o.estimated ? (
               <a
                 href={`/api/buy/${o.id}${o.retailer ? `?retailer=${encodeURIComponent(o.retailer)}` : ""}`}
+                onClick={(e) => logBuyTap(e.currentTarget.getAttribute("href") ?? "", "cost_effective")}
                 target="_blank"
                 rel="noopener noreferrer sponsored"
                 className="shrink-0 text-right min-h-[44px] flex flex-col justify-center px-2 rounded-lg hover:bg-ink/5 transition"

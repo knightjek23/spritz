@@ -23,6 +23,7 @@ import { useRouter } from "next/navigation";
 import { cleanBottleImageUrl } from "@/lib/bottle-image";
 import { BottleImage } from "@/components/bottle-image";
 import type { Reaction } from "@/lib/types";
+import { logBuyTap } from "@/lib/buy-tap";
 
 interface CardMenuProps {
   fragrance: {
@@ -220,6 +221,7 @@ export function CardMenu({
 
   const onBuy = () => {
     close();
+    logBuyTap(`/api/buy/${fragrance.id}`, "shelf_menu");
     router.push(`/api/buy/${fragrance.id}`);
   };
 

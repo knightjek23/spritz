@@ -16,6 +16,7 @@
 // indicative and the retailer's own page stays authoritative.
 
 import { useState } from "react";
+import { logBuyTap } from "@/lib/buy-tap";
 
 export interface BuyOffer {
   retailer: string;
@@ -61,6 +62,7 @@ export function BuyOptions({
     return (
       <a
         href={href}
+        onClick={() => logBuyTap(href, "buy_button")}
         target="_blank"
         rel="noopener noreferrer sponsored"
         // Opt out of NativeTouchLinks. It strips href on touchstart to stop
@@ -96,6 +98,7 @@ export function BuyOptions({
           <li key={o.retailer}>
             <a
               href={o.productUrl}
+              onClick={() => logBuyTap(o.productUrl, "buy_options")}
               target="_blank"
               rel="noopener noreferrer sponsored"
               data-no-longpress

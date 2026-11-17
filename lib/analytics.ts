@@ -23,7 +23,10 @@ export type AnalyticsEvent =
   | "paywall_viewed"
   | "paywall_dismissed"
   | "purchase_started"
-  | "store_button_clicked";
+  | "store_button_clicked"
+  // A Buy tap on a retailer link (lib/buy-tap.ts). Not the Pro checkout,
+  // which is purchase_started.
+  | "buy_clicked";
 
 export function track(event: AnalyticsEvent, props: Record<string, unknown> = {}) {
   ph()?.capture(event, props);
