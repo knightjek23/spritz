@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-17T16:53:53.323603+00:00",
+  "generated_at": "2026-11-18T16:28:07.623392+00:00",
   "period": {
     "start": "2026-11-16",
     "end": "2026-11-22"
@@ -14,13 +14,13 @@
     },
     {
       "rank": 2,
-      "name": "Bleu de Chanel",
-      "house": "Chanel"
+      "name": "Libre",
+      "house": "YSL"
     },
     {
       "rank": 3,
-      "name": "Libre",
-      "house": "YSL"
+      "name": "Bleu de Chanel",
+      "house": "Chanel"
     },
     {
       "rank": 4,
