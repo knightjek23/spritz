@@ -112,8 +112,10 @@ export const viewport: Viewport = {
   // insets become our problem: every fixed element uses the --safe-* and
   // --nav-clearance tokens in globals.css. Never hardcode a bottom offset.
   viewportFit: "cover",
-  // No maximumScale / userScalable lock: blocking pinch-zoom fails
-  // WCAG 1.4.4 (Android respects the lock; low-vision users can't zoom).
+  // No maximumScale / userScalable lock here, so the website keeps
+  // pinch-zoom (WCAG 1.4.4). The native shell adds the lock at runtime
+  // (LAUNCH_SCREEN_BOOT in components/launch-screen.tsx): inside the app
+  // nothing zooms, like any native app.
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

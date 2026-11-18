@@ -312,6 +312,13 @@ var o={fadeOutDuration:0};
 if(c.Plugins&&c.Plugins.SplashScreen){c.Plugins.SplashScreen.hide(o);return;}
 if(c.nativePromise){c.nativePromise('SplashScreen','hide',o);}
 }catch(e){}}
+if(native){
+// No zoom inside the app: no pinch, and no iOS auto-zoom when a field gets
+// focus (which had no way back out). The website keeps pinch-zoom (WCAG
+// 1.4.4); only the native shell is locked, like any native app.
+var vp=document.querySelector('meta[name=viewport]');
+if(vp&&!/maximum-scale/.test(vp.content))vp.setAttribute('content',vp.content+', maximum-scale=1, user-scalable=no');
+}
 var show=(native||pwa)&&!window.sessionStorage.getItem('${SESSION_KEY}');
 if(show){
 document.documentElement.classList.add('launching');

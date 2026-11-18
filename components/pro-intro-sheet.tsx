@@ -40,6 +40,7 @@ import { useUser } from "@clerk/nextjs";
 import { MONTHLY_PRICE, TRIAL_DAYS } from "@/lib/trial";
 import { monthlyPriceFor, useStorePrices } from "@/lib/native/store-prices";
 import { isNativeApp } from "@/lib/native";
+import { rememberProDevice, wasProOnDevice } from "@/lib/pro-device";
 import { track, trackDiagnostic } from "@/lib/analytics";
 import {
   decide,
@@ -69,18 +70,25 @@ const OUT_MS = 380;
 
 // One /api/trial lookup per signed-in user per page load. Keyed by user:
 // signing out and into another account does not reload the page, and the
-// answer belongs to the account, not the device.
-const trialUsed = new Map<string, Promise<boolean>>();
-function trialAlreadyUsed(userId: string | null): Promise<boolean> {
+// answer belongs to the account, not the device. Also carries whether the
+// account is Pro (Supabase, the source of truth), which is recorded on the
+// device so a member who is signed out later is not pitched a trial.
+type AccountState = { used: boolean; pro: boolean };
+const accountLookups = new Map<string, Promise<AccountState>>();
+function accountState(userId: string | null): Promise<AccountState> {
   const key = userId ?? "signed-out";
-  let lookup = trialUsed.get(key);
+  let lookup = accountLookups.get(key);
   if (!lookup) {
     lookup = fetch("/api/trial")
-      .then((r) => (r.ok ? r.json() : { used: false }))
-      .then((j: { used?: boolean }) => Boolean(j.used))
+      .then((r) => (r.ok ? r.json() : {}))
+      .then((j: { used?: boolean; pro?: boolean }) => {
+        const state = { used: Boolean(j.used), pro: Boolean(j.pro) };
+        if (userId) rememberProDevice(state.pro);
+        return state;
+      })
       // Offline: still show; the store enforces eligibility anyway.
-      .catch(() => false);
-    trialUsed.set(key, lookup);
+      .catch(() => ({ used: false, pro: false }));
+    accountLookups.set(key, lookup);
   }
   return lookup;
 }
@@ -91,7 +99,7 @@ const skipLogged = new Set<string>();
 function logSkip(
   surface: PaywallVariant,
   trigger: PaywallTrigger,
-  reason: "no_store_trial_offer" | "store_unavailable" | "trial_used",
+  reason: "no_store_trial_offer" | "store_unavailable" | "trial_used" | "already_pro",
 ) {
   if (skipLogged.has(reason)) return;
   skipLogged.add(reason);
@@ -237,7 +245,14 @@ export function ProIntroSheet() {
     write(state);
 
     if (!isLoaded || open || busy.current) return;
-    if (user?.publicMetadata?.plan === "pro") return;
+    // Members never see the pitch: Clerk metadata when it is there, and,
+    // signed out, the device's memory of a Pro account (lib/pro-device.ts),
+    // so a lapsed session doesn't ask a paying member to start a trial.
+    if (user?.publicMetadata?.plan === "pro") {
+      rememberProDevice(true);
+      return;
+    }
+    if (!user && wasProOnDevice()) return;
     const surface: PaywallVariant = tester ?? paywallVariant(email);
 
     // Back from the sign-up the one-screen paywall sent them to: reopen it,
@@ -260,7 +275,11 @@ export function ProIntroSheet() {
     busy.current = true;
     (async () => {
       try {
-        const used = await trialAlreadyUsed(user?.id ?? null);
+        const { used, pro } = await accountState(user?.id ?? null);
+        if (pro) {
+          logSkip(surface, due, "already_pro");
+          return;
+        }
         if (resume) {
           clearPaywallResume();
           // Counts as this session's paywall, so closing it can't be

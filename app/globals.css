@@ -958,3 +958,18 @@ html:has([data-landing-page]) [data-site-chrome] {
 html:has([data-landing-page]) body > main {
   padding-bottom: 0 !important;
 }
+
+/* ---------------------------------------------------------------------
+   iOS zooms the whole page when a text field under 16px gets focus, and
+   inside the app there is no gesture to get back out (the "How did you
+   hear about us" Other box was 15px). On touch screens no field may be
+   smaller than 16px. The native shell also locks zoom outright
+   (components/launch-screen.tsx); this covers the mobile website too.
+   --------------------------------------------------------------------- */
+@media (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  textarea,
+  select {
+    font-size: max(16px, 1em) !important;
+  }
+}

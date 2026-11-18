@@ -76,7 +76,7 @@ export function AcquisitionQuestion({
                 maxLength={80}
                 autoFocus
                 placeholder="A podcast, a store, a group chat…"
-                className="flex-1 min-w-0 min-h-12 px-4 bg-cream border border-ink/25 text-[15px] text-ink placeholder:text-slate focus:outline-none focus:border-emerald"
+                className="flex-1 min-w-0 min-h-12 px-4 bg-cream border border-ink/25 text-base text-ink placeholder:text-slate focus:outline-none focus:border-emerald"
               />
               <button
                 type="submit"
