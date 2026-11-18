@@ -6,11 +6,13 @@
 // here touches the clock: every "day" is a YYYY-MM-DD string the caller
 // chose, so a late-night log in California never counts toward tomorrow.
 //
-// Grace: one skipped day does not break the streak (Duolingo's Streak
-// Freeze finding: a little slack raises daily actives rather than
-// encouraging days off). Two skipped days in a row reset it.
+// No grace: a streak is consecutive days, so missing a single day resets
+// it and the next log is Day 1 again (with the "Welcome back" line).
+// It used to allow one skipped day (Duolingo's Streak Freeze idea), which
+// meant a missed day never actually broke anything. Raise GRACE_DAYS to
+// bring that back, e.g. as a Pro perk.
 
-export const GRACE_DAYS = 1;
+export const GRACE_DAYS = 0;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
