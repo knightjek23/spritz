@@ -4,7 +4,7 @@
 // name each surface for what it actually measures.
 //
 // Each row reads its own per-source feed (data/trending-<area>.json), joins to
-// the catalog (fragrantica_url exact -> search_fragrances fuzzy >= 0.85), and
+// the catalog (exact name + house -> search_fragrances fuzzy >= 0.85), and
 // self-hides if its feed is missing, stale, or empty. So Fragrantica simply
 // won't render while that source is disabled.
 //

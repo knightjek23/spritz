@@ -27,7 +27,6 @@ export interface TrendingEntry {
   rank: number;
   name: string;
   house: string;
-  fragrantica_url?: string;
   external_id?: string;
   mentions?: number;
   thumbnail_url?: string;
@@ -42,7 +41,7 @@ export interface TrendingFeed {
   entries: TrendingEntry[];
 }
 
-export type MatchMethod = "fragrantica_url" | "exact" | "fuzzy" | "unmatched";
+export type MatchMethod = "exact" | "fuzzy" | "unmatched";
 
 export interface JoinedTrendingEntry extends TrendingEntry {
   fragranceId: string | null;

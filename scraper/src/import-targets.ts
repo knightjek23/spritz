@@ -9,10 +9,16 @@
 //   1. Parse it (applies name-overrides from name-overrides.ts, so the
 //      catalog stores the real on-bottle name — e.g. "Vanilla Sex", not
 //      Fragrantica's censored "Vanilla").
-//   2. If a row with the same fragrantica_url already exists, UPDATE it in
-//      place (fixes a mis-named row, keeps its existing popularity_rank).
-//   3. Otherwise INSERT a new row (popularity_rank left null — run
-//      `pnpm popularity` afterward to rank just the new rows).
+//   2. If the source URL is already on record in fragrance_provenance,
+//      UPDATE that fragrance in place (fixes a mis-named row, keeps its
+//      existing popularity_rank). A row whose notes have since been verified
+//      or replaced from another source is SKIPPED, so this script can never
+//      write scraped notes back over them.
+//   3. Otherwise INSERT a new row plus its provenance row (popularity_rank
+//      left null — run `pnpm popularity` afterward to rank the new rows).
+//
+// The source URL is kept only in the server-only fragrance_provenance table
+// (migration 0047); it is no longer a column on public.fragrances.
 //
 // Run:  cd scraper && pnpm import:targets
 // Needs NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY in scraper/.env.
@@ -61,7 +67,6 @@ function contentRow(f: ReturnType<typeof parseHtml> & object) {
     time_tags: f.time_tags,
     bottle_image_url: f.bottle_image_url,
     editorial_notes: f.editorial_notes,
-    fragrantica_url: f.fragrantica_url,
   };
 }
 
@@ -98,16 +103,36 @@ async function main() {
     }
     const row = contentRow(parsed as never);
 
-    // Does a row already exist for this Fragrantica URL? If so, update in
+    // Is this source URL already on record? If so, update that fragrance in
     // place (preserves popularity_rank); else insert fresh.
-    const { data: existing, error: selErr } = await supabase
-      .from("fragrances")
-      .select("id, name")
+    const { data: prov, error: selErr } = await supabase
+      .from("fragrance_provenance")
+      .select("fragrance_id")
       .eq("fragrantica_url", t.url)
-      .maybeSingle();
+      .limit(1);
     if (selErr) {
       console.warn(`  ! lookup failed for ${parsed.house} — ${parsed.name}: ${selErr.message}`);
       failed++;
+      continue;
+    }
+    type ExistingRow = { id: string; name: string; notes_status: string | null };
+    let existing: ExistingRow | null = null;
+    const existingId = prov?.[0]?.fragrance_id as string | undefined;
+    if (existingId) {
+      const { data: row, error: rowErr } = await supabase
+        .from("fragrances")
+        .select("id, name, notes_status")
+        .eq("id", existingId)
+        .maybeSingle();
+      if (rowErr) {
+        console.warn(`  ! lookup failed for ${parsed.house} — ${parsed.name}: ${rowErr.message}`);
+        failed++;
+        continue;
+      }
+      existing = (row as ExistingRow | null) ?? null;
+    }
+    if (existing && (existing.notes_status === "match" || existing.notes_status === "replaced")) {
+      console.log(`  = skipped  ${parsed.house} — ${parsed.name} (notes already verified or replaced from another source)`);
       continue;
     }
 
@@ -122,13 +147,36 @@ async function main() {
         console.log(`  ~ updated  ${parsed.house} — ${parsed.name}${renamed}`);
       }
     } else {
-      const { error } = await supabase.from("fragrances").insert(row);
-      if (error) {
-        console.warn(`  ! insert failed: ${parsed.house} — ${parsed.name}: ${error.message}`);
+      const { data: created, error } = await supabase
+        .from("fragrances")
+        .insert(row)
+        .select("id")
+        .single();
+      if (error || !created) {
+        console.warn(`  ! insert failed: ${parsed.house} — ${parsed.name}: ${error?.message ?? "no row returned"}`);
         failed++;
       } else {
-        inserted++;
-        console.log(`  + inserted ${parsed.house} — ${parsed.name}`);
+        // Record where the new row came from, with a snapshot of its notes.
+        const { error: provErr } = await supabase.from("fragrance_provenance").insert({
+          fragrance_id: created.id,
+          fragrantica_url: t.url,
+          notes_origin: "fragrantica",
+          family_origin: "fragrantica",
+          perfumer_origin: parsed.perfumer ? "fragrantica" : "unknown",
+          legacy_family: parsed.family,
+          legacy_top_notes: parsed.top_notes,
+          legacy_mid_notes: parsed.mid_notes,
+          legacy_base_notes: parsed.base_notes,
+          legacy_perfumer: parsed.perfumer,
+          legacy_saved_at: new Date().toISOString(),
+        });
+        if (provErr) {
+          console.warn(`  ! inserted ${parsed.house} — ${parsed.name} but its provenance row failed: ${provErr.message}`);
+          failed++;
+        } else {
+          inserted++;
+          console.log(`  + inserted ${parsed.house} — ${parsed.name}`);
+        }
       }
     }
   }

@@ -146,7 +146,7 @@ async function main() {
   const PAGE = 500;
   for (let off = 0; off < all.length; off += PAGE) {
     const batch = all.slice(off, off + PAGE);
-    const { error } = await supabase.from("fragrances").upsert(
+    const { data: written, error } = await supabase.from("fragrances").upsert(
       batch.map((f) => ({
         name: f.name,
         house: f.house,
@@ -169,14 +169,47 @@ async function main() {
         notes_descriptions: f.notes_descriptions,
         bottle_image_url: f.bottle_image_url,
         editorial_notes: f.editorial_notes,
-        fragrantica_url: f.fragrantica_url,
         popularity_rank: f.popularity_rank,
       })),
       { onConflict: "name,house" },
-    );
+    ).select("id, name, house");
     if (error) {
       console.error("[upload] batch error", error);
       process.exit(1);
+    }
+
+    // The source URL is kept only in the server-only fragrance_provenance
+    // table (migration 0047). Add a provenance row for any fragrance that
+    // does not have one yet. ignoreDuplicates means an existing provenance
+    // row, and the origin recorded on it, is never overwritten here.
+    const byKey = new Map(
+      batch.map((f) => [`${(f.name || "").toLowerCase().trim()}|${(f.house || "").toLowerCase().trim()}`, f]),
+    );
+    const provRows = ((written ?? []) as Array<{ id: string; name: string; house: string }>).flatMap((r) => {
+      const f = byKey.get(`${(r.name ?? "").toLowerCase().trim()}|${(r.house ?? "").toLowerCase().trim()}`);
+      if (!f) return [];
+      return [{
+        fragrance_id: r.id,
+        fragrantica_url: f.fragrantica_url,
+        notes_origin: "fragrantica",
+        family_origin: "fragrantica",
+        perfumer_origin: f.perfumer ? "fragrantica" : "unknown",
+        legacy_family: f.family,
+        legacy_top_notes: f.top_notes,
+        legacy_mid_notes: f.mid_notes,
+        legacy_base_notes: f.base_notes,
+        legacy_perfumer: f.perfumer,
+        legacy_saved_at: new Date().toISOString(),
+      }];
+    });
+    if (provRows.length > 0) {
+      const { error: provErr } = await supabase
+        .from("fragrance_provenance")
+        .upsert(provRows, { onConflict: "fragrance_id", ignoreDuplicates: true });
+      if (provErr) {
+        console.error("[upload] provenance batch error", provErr);
+        process.exit(1);
+      }
     }
     total += batch.length;
     console.log(`[upload] uploaded ${total}/${all.length}`);

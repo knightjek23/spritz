@@ -76,13 +76,29 @@ async function main() {
     if (e.fragrance_id) continue;
     const r = resolveResearchEntry(e, lists);
     if (!r) continue;
-    const { data, error } = await supabase
-      .from("fragrances")
-      .select("id, name, house")
+    // The source URL lives in the server-only provenance table since
+    // migration 0047, so look the id up there, then fetch the fragrance.
+    const { data: prov, error } = await supabase
+      .from("fragrance_provenance")
+      .select("fragrance_id")
       .like("fragrantica_url", `%-${r.fragranticaId}.html`)
       .limit(1);
     if (error) {
       console.warn(`  pass 2 query failed for ${e.name}: ${error.message}`);
+      continue;
+    }
+    const fragranceId = prov?.[0]?.fragrance_id;
+    if (!fragranceId) {
+      notInCatalog++;
+      continue;
+    }
+    const { data, error: rowErr } = await supabase
+      .from("fragrances")
+      .select("id, name, house")
+      .eq("id", fragranceId)
+      .limit(1);
+    if (rowErr) {
+      console.warn(`  pass 2 query failed for ${e.name}: ${rowErr.message}`);
       continue;
     }
     const row = data?.[0];

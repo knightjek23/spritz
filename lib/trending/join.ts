@@ -31,7 +31,6 @@ type CatalogLite = {
   name: string;
   house: string | null;
   bottle_image_url: string | null;
-  fragrantica_url: string | null;
 };
 
 export async function joinTrendingToCatalog(
@@ -39,32 +38,11 @@ export async function joinTrendingToCatalog(
 ): Promise<JoinedTrendingEntry[]> {
   const supabase = createAdminClient();
 
-  const urls = Array.from(
-    new Set(entries.map((e) => e.fragrantica_url).filter(Boolean) as string[]),
-  );
-
-  const byUrl = new Map<string, CatalogLite>();
-  if (urls.length > 0) {
-    const { data, error } = await supabase
-      .from("fragrances")
-      .select("id, name, house, bottle_image_url, fragrantica_url")
-      .in("fragrantica_url", urls);
-    if (error) {
-      console.warn("[trending] url match query failed:", error.message);
-    } else {
-      for (const row of data ?? []) {
-        if (row.fragrantica_url) byUrl.set(row.fragrantica_url, row as CatalogLite);
-      }
-    }
-  }
-
+  // Matching is by name and house only. An earlier version tried a source
+  // URL first; no feed carried one, and the column it matched on left the
+  // public table in migration 0047.
   return Promise.all(
     entries.map(async (entry) => {
-      const urlHit = entry.fragrantica_url ? byUrl.get(entry.fragrantica_url) : undefined;
-      if (urlHit) {
-        return finalize(entry, urlHit, "fragrantica_url", null);
-      }
-
       // Normalize the house before matching. Feeds carry abbreviations
       // ("MFK", "YSL") that score ~0 on house similarity and, because the
       // RPC weights house at 0.35, drag an otherwise-perfect name match

@@ -63,8 +63,8 @@ export type Database = {
           consensus_cons: string[] | null;
           consensus_confidence: number | null;
           consensus_generated_at: string | null;
-          // Internal
-          fragrantica_url: string | null;
+          // The source match key that used to sit here moved to the
+          // server-only fragrance_provenance table (migration 0047).
           // GTIN-14 normalized barcode learned from affiliate product feeds by
           // scraper/src/backfill-affiliate-images.ts. Used to match feed rows whose
           // titles are in a language the name matcher can't parse.
@@ -119,7 +119,6 @@ export type Database = {
           consensus_cons?: string[] | null;
           consensus_confidence?: number | null;
           consensus_generated_at?: string | null;
-          fragrantica_url?: string | null;
           ean?: string | null;
           avg_retail_price?: number | null;
           price_tier?: "budget" | "mid" | "designer" | "niche" | null;
@@ -305,6 +304,42 @@ export type Database = {
           fetched_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["fragrance_prices"]["Insert"]>;
+        Relationships: [];
+      };
+      // Server only: RLS is on with no policy, so anon and authenticated
+      // clients see nothing. Read it through the admin client (migration 0043).
+      fragrance_provenance: {
+        Row: {
+          fragrance_id: string;
+          fragrantica_url: string | null;
+          notes_origin: "fragrantica" | "brand" | "retailer" | "scento" | "unknown";
+          family_origin: "fragrantica" | "computed" | "unknown";
+          perfumer_origin: "fragrantica" | "brand" | "retailer" | "unknown";
+          legacy_family: string[] | null;
+          legacy_top_notes: Note[] | null;
+          legacy_mid_notes: Note[] | null;
+          legacy_base_notes: Note[] | null;
+          legacy_perfumer: string | null;
+          legacy_saved_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          fragrance_id: string;
+          fragrantica_url?: string | null;
+          notes_origin?: "fragrantica" | "brand" | "retailer" | "scento" | "unknown";
+          family_origin?: "fragrantica" | "computed" | "unknown";
+          perfumer_origin?: "fragrantica" | "brand" | "retailer" | "unknown";
+          legacy_family?: string[] | null;
+          legacy_top_notes?: Note[] | null;
+          legacy_mid_notes?: Note[] | null;
+          legacy_base_notes?: Note[] | null;
+          legacy_perfumer?: string | null;
+          legacy_saved_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["fragrance_provenance"]["Insert"]>;
         Relationships: [];
       };
       fragrance_offers: {

@@ -489,15 +489,11 @@ export default async function FragrancePage({ params }: { params: { id: string }
         </section>
       )}
 
-      {/* Sources — where the notes came from and which figures are our own
-          estimates. Required for rows using the Scento dataset (CC BY 4.0
+      {/* Sources — where the notes came from. Required for rows using the Scento dataset (CC BY 4.0
           attribution); see components/fragrance-sources.tsx. */}
       <FragranceSources
         notesStatus={f.notes_status}
         notesSourceUrl={f.notes_source_url}
-        showsPerformance={
-          hasPerformanceData || !!f.longevity_description || !!f.projection_description
-        }
       />
 
       {/* Similar fragrances — collapsed, opt-in, algorithmic note-vector similarity */}

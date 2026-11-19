@@ -1,5 +1,4 @@
-// "Sources" block on the fragrance page: where the notes came from, and
-// which numbers are Spritz's own estimates.
+// "Sources" block on the fragrance page: where the notes came from.
 //
 // Server component, no client JS. It only states what is recorded for this
 // row (see lib/notes-source-label.ts): a fragrance whose notes have not been
@@ -21,15 +20,12 @@ const LINK =
 export function FragranceSources({
   notesStatus,
   notesSourceUrl,
-  showsPerformance,
 }: {
   notesStatus: string | null | undefined;
   notesSourceUrl: string | null | undefined;
-  /** True when the page shows longevity or projection for this fragrance. */
-  showsPerformance: boolean;
 }) {
   const notes = notesSourceLabel(notesStatus, notesSourceUrl);
-  if (!notes && !showsPerformance) return null;
+  if (!notes) return null;
 
   return (
     <section className="mb-6" aria-labelledby="fragrance-sources-heading">
@@ -40,31 +36,26 @@ export function FragranceSources({
         Sources
       </h2>
       <ul className="space-y-1 text-xs text-slate leading-relaxed">
-        {notes && (
-          <li>
-            Notes from{" "}
-            <a href={notes.href} target="_blank" rel="noopener noreferrer" className={LINK}>
-              {notes.name}
-            </a>
-            {notes.licence && (
-              <>
-                , licensed{" "}
-                <a
-                  href={notes.licence.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={LINK}
-                >
-                  {notes.licence.name}
-                </a>
-              </>
-            )}
-            .
-          </li>
-        )}
-        {showsPerformance && (
-          <li>Longevity and projection are Spritz estimates, not measurements.</li>
-        )}
+        <li>
+          Notes from{" "}
+          <a href={notes.href} target="_blank" rel="noopener noreferrer" className={LINK}>
+            {notes.name}
+          </a>
+          {notes.licence && (
+            <>
+              , licensed{" "}
+              <a
+                href={notes.licence.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={LINK}
+              >
+                {notes.licence.name}
+              </a>
+            </>
+          )}
+          .
+        </li>
       </ul>
     </section>
   );
