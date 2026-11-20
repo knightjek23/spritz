@@ -44,10 +44,16 @@ export function NavScrollWrapper({ children }: { children: ReactNode }) {
         const y = window.scrollY;
         const delta = y - lastScrollY.current;
 
-        if (document.documentElement.dataset.navSearch === "open") {
+        if (
+          document.documentElement.dataset.navSearch === "open" ||
+          document.documentElement.dataset.tabRestore === "1"
+        ) {
           // Search field is expanded (NavRow sets the flag): the keyboard
           // sliding up fires scroll events, and hiding the nav would take
-          // the field with it. Stay put.
+          // the field with it. Stay put. Same while TabMemory is putting a
+          // page back at its old scroll after a tab switch: that jump is
+          // the app's, not the person scrolling down, and hiding the nav
+          // for it left page text showing under the status bar.
           setHidden(false);
         } else if (y < HIDE_THRESHOLD_PX) {
           // Near the top — always show, regardless of direction.

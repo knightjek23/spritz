@@ -25,6 +25,8 @@ import {
 
 const RESTORE_WINDOW_MS = 2500;
 const RETRY_MS = 60;
+/** Page height must hold still this long before the restore lets go. */
+const SETTLE_MS = 350;
 
 export function TabMemory() {
   const pathname = usePathname();
@@ -68,25 +70,54 @@ export function TabMemory() {
       return;
     }
 
+    // Restore and hold. The target position is re-applied every frame-ish
+    // while the page is still settling: pages like a fragrance detail
+    // fill in several sections after they appear (community take, layer
+    // it, cost-effective, perfumer), and each one moves everything below
+    // it. Stopping the moment the page was merely tall enough (the old
+    // behaviour) left you mid-page on half-loaded content that then
+    // jumped. Now it holds the position until the page height has been
+    // steady for SETTLE_MS, gives up after RESTORE_WINDOW_MS, and stops
+    // the instant you touch or scroll so it never fights you.
     restoring.current = true;
+    const html = document.documentElement;
+    html.dataset.tabRestore = "1";
     let cancelled = false;
     let timer = 0;
+    let lastHeight = -1;
+    let steadySince = performance.now();
     const stop = () => {
       cancelled = true;
     };
     window.addEventListener("touchstart", stop, { once: true, passive: true });
     window.addEventListener("wheel", stop, { once: true, passive: true });
     const started = performance.now();
+    let finished = false;
     const finish = () => {
+      if (finished) return;
+      finished = true;
       restoring.current = false;
       window.removeEventListener("touchstart", stop);
       window.removeEventListener("wheel", stop);
+      // Let the last programmatic scroll event pass before the nav goes
+      // back to reacting to scrolls.
+      window.setTimeout(() => {
+        delete html.dataset.tabRestore;
+      }, 120);
     };
     const tick = () => {
       if (cancelled) return finish();
-      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const now = performance.now();
+      const height = document.documentElement.scrollHeight;
+      if (height !== lastHeight) {
+        lastHeight = height;
+        steadySince = now;
+      }
+      const max = height - window.innerHeight;
       window.scrollTo(0, Math.min(target, Math.max(0, max)));
-      if (max >= target - 1 || performance.now() - started > RESTORE_WINDOW_MS) return finish();
+      const reached = max >= target - 1;
+      const steady = now - steadySince >= SETTLE_MS;
+      if ((reached && steady) || now - started > RESTORE_WINDOW_MS) return finish();
       timer = window.setTimeout(tick, RETRY_MS);
     };
     tick();
