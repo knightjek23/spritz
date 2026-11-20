@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "week": "2026-W47",
   "week_start": "2026-11-16",
-  "generated_at": "2026-11-18T16:28:07.623392+00:00",
+  "generated_at": "2026-11-20T16:09:49.036287+00:00",
   "collector_version": "1.0.0",
   "sources_used": [
     "google_trends"
@@ -16,7 +16,7 @@
       "fragrantica_url": null,
       "thumbnail_url": null,
       "signals": {
-        "google_trends": 45.9,
+        "google_trends": 47.5,
         "retailer_bestsellers": null,
         "reddit": null,
         "fragrantica": null
@@ -29,11 +29,11 @@
       "id": "ysl-libre",
       "name": "Libre",
       "brand": "YSL",
-      "score": 25.6,
+      "score": 35.7,
       "fragrantica_url": null,
       "thumbnail_url": null,
       "signals": {
-        "google_trends": 21.4,
+        "google_trends": 31.1,
         "retailer_bestsellers": null,
         "reddit": null,
         "fragrantica": null
@@ -46,11 +46,11 @@
       "id": "chanel-bleu-de-chanel",
       "name": "Bleu de Chanel",
       "brand": "Chanel",
-      "score": 24.0,
+      "score": 24.9,
       "fragrantica_url": null,
       "thumbnail_url": null,
       "signals": {
-        "google_trends": 20.1,
+        "google_trends": 21.7,
         "retailer_bestsellers": null,
         "reddit": null,
         "fragrantica": null
@@ -63,11 +63,11 @@
       "id": "valentino-born-in-roma-donna",
       "name": "Born In Roma Donna",
       "brand": "Valentino",
-      "score": 18.7,
+      "score": 23.6,
       "fragrantica_url": null,
       "thumbnail_url": null,
       "signals": {
-        "google_trends": 15.6,
+        "google_trends": 20.6,
         "retailer_bestsellers": null,
         "reddit": null,
         "fragrantica": null
@@ -80,11 +80,11 @@
       "id": "chanel-coco-mademoiselle",
       "name": "Coco Mademoiselle",
       "brand": "Chanel",
-      "score": 4.0,
+      "score": 6.4,
       "fragrantica_url": null,
       "thumbnail_url": null,
       "signals": {
-        "google_trends": 3.3,
+        "google_trends": 5.7,
         "retailer_bestsellers": null,
         "reddit": null,
         "fragrantica": null
@@ -97,11 +97,11 @@
       "id": "tom-ford-vanilla-sex",
       "name": "Vanilla Sex",
       "brand": "Tom Ford",
-      "score": 0.2,
+      "score": 0.8,
       "fragrantica_url": null,
       "thumbnail_url": null,
       "signals": {
-        "google_trends": 0.2,
+        "google_trends": 0.8,
         "retailer_bestsellers": null,
         "reddit": null,
         "fragrantica": null
@@ -118,7 +118,7 @@
       "fragrantica_url": null,
       "thumbnail_url": null,
       "signals": {
-        "google_trends": 0.0,
+        "google_trends": 0.2,
         "retailer_bestsellers": null,
         "reddit": null,
         "fragrantica": null
