@@ -18,6 +18,7 @@ import { NativeTouchLinks } from "@/components/native-touch-links";
 import { NativeResumeReload } from "@/components/native-resume-reload";
 import { LaunchScreen, LAUNCH_SCREEN_BOOT } from "@/components/launch-screen";
 import { TabMemory } from "@/components/tab-memory";
+import { SignInWall } from "@/components/sign-in-wall";
 import "./globals.css";
 
 // Fonts are self-hosted (OFL variable fonts from Fontsource, in app/fonts).
@@ -154,6 +155,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* Each bottom-nav tab keeps its place: last page and scroll
               come back when you return to it. Renders nothing. */}
           <TabMemory />
+          {/* In the app only: Apple / Google / email sign-in, with Skip,
+              shown to signed-out people until they sign in or skip.
+              Sits under the launch screen, so it is revealed as that
+              fades. Renders nothing on the website. */}
+          <SignInWall />
           {/* First Library/Shelf visit: the Pro trial pitch, once (twice at
               most). Portals to <body>; renders nothing otherwise. */}
           <ProIntroSheet />
