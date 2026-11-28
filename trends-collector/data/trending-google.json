@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-26T17:43:56.965915+00:00",
+  "generated_at": "2026-11-28T16:11:40.835968+00:00",
   "period": {
     "start": "2026-11-23",
     "end": "2026-11-29"
@@ -14,13 +14,13 @@
     },
     {
       "rank": 2,
-      "name": "Bleu de Chanel",
-      "house": "Chanel"
+      "name": "Libre",
+      "house": "YSL"
     },
     {
       "rank": 3,
-      "name": "Libre",
-      "house": "YSL"
+      "name": "Bleu de Chanel",
+      "house": "Chanel"
     },
     {
       "rank": 4,
@@ -34,13 +34,13 @@
     },
     {
       "rank": 6,
-      "name": "Vanilla Sex",
-      "house": "Tom Ford"
+      "name": "Molecule 01",
+      "house": "Escentric Molecules"
     },
     {
       "rank": 7,
-      "name": "Molecule 01",
-      "house": "Escentric Molecules"
+      "name": "Vanilla Sex",
+      "house": "Tom Ford"
     }
   ]
 }
